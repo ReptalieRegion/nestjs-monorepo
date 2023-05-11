@@ -2,11 +2,12 @@ import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import mongoose from 'mongoose';
 
 import { LoggerMiddleware } from './middlwares/logger.middleware';
+import { RedisModule } from './modules/redis/redis.module';
 import { CustomConfigModule } from './utils/customModules/config';
 import { CustomMongooseModule } from './utils/customModules/mongoose';
 
 @Module({
-    imports: [CustomConfigModule, CustomMongooseModule],
+    imports: [RedisModule, CustomConfigModule, CustomMongooseModule],
     controllers: [],
     providers: [],
 })

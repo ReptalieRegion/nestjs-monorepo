@@ -4,10 +4,11 @@ import mongoose from 'mongoose';
 import { LoggerMiddleware } from './middlwares/logger.middleware';
 import { RedisModule } from './modules/redis/redis.module';
 import { CustomConfigModule } from './utils/customModules/config';
+import { CustomJwtModule } from './utils/customModules/jwt';
 import { CustomMongooseModule } from './utils/customModules/mongoose';
 
 @Module({
-    imports: [RedisModule, CustomConfigModule, CustomMongooseModule],
+    imports: [RedisModule, CustomJwtModule, CustomConfigModule, CustomMongooseModule],
     controllers: [],
     providers: [],
 })

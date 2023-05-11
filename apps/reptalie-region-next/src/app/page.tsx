@@ -1,5 +1,6 @@
-import { sayHello } from '@reptalie-region-next/lib';
+import { sayHello } from '@reptalie-region/lib';
+import { Button } from '@reptalie-region/ui';
 
 export default function Home() {
-    return <div>{sayHello()}</div>;
+    return <Button>{sayHello()}</Button>;
 }

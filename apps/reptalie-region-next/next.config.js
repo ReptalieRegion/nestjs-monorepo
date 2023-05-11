@@ -1,5 +1,5 @@
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const withTM = require('next-transpile-modules')(['@reptalie-region-next/ui']);
+const withTM = require('next-transpile-modules')(['@reptalie-region/ui']);
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -7,4 +7,4 @@ const nextConfig = {
     swcMinify: true,
 };
 
-export default withTM(nextConfig);
+module.exports = withTM(nextConfig);

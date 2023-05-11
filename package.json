@@ -3,10 +3,10 @@
     "packageManager": "yarn@3.5.1",
     "private": true,
     "scripts": {
-        "dev:client": "yarn workspace @reptalie-region-next-web/web run dev",
-        "build:client": "yarn workspace @reptalie-region-next-web/web run build",
-        "start:client": "yarn workspace @reptalie-region-next-web/web run start",
-        "lint:client": "yarn workspace @reptalie-region-next-web/web run lint",
+        "dev:client": "yarn workspace @reptalie-region-next/web run dev",
+        "build:client": "yarn workspace @reptalie-region-next/web run build",
+        "start:client": "yarn workspace @reptalie-region-next/web run start",
+        "lint:client": "yarn workspace @reptalie-region-next/web run lint",
         "g:typecheck": "yarn workspaces foreach -pv run typecheck"
     },
     "workspaces": [

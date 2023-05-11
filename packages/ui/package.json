@@ -1,6 +1,7 @@
 {
-    "name": "@reptalie-region-next/ui",
+    "name": "@reptalie-region/ui",
     "packageManager": "yarn@3.5.1",
+    "main": "src/index.ts",
     "scripts": {
         "typecheck": "tsc --project ./tsconfig.json --noEmit"
     },

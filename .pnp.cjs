@@ -20,20 +20,20 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
         "reference": "workspace:apps/reptalie-region-next"\
       },\
       {\
-        "name": "@reptalie-region-next/lib",\
+        "name": "@reptalie-region/lib",\
         "reference": "workspace:packages/lib"\
       },\
       {\
-        "name": "@reptalie-region-next/ui",\
+        "name": "@reptalie-region/ui",\
         "reference": "workspace:packages/ui"\
       }\
     ],\
     "enableTopLevelFallback": true,\
     "ignorePatternData": "(^(?:\\\\.yarn\\\\/sdks(?:\\\\/(?!\\\\.{1,2}(?:\\\\/|$))(?:(?:(?!(?:^|\\\\/)\\\\.{1,2}(?:\\\\/|$)).)*?)|$))$)",\
     "fallbackExclusionList": [\
-      ["@reptalie-region-next/lib", ["workspace:packages/lib"]],\
-      ["@reptalie-region-next/ui", ["workspace:packages/ui"]],\
       ["@reptalie-region-next/web", ["workspace:apps/reptalie-region-next"]],\
+      ["@reptalie-region/lib", ["workspace:packages/lib"]],\
+      ["@reptalie-region/ui", ["workspace:packages/ui"]],\
       ["test", ["workspace:."]]\
     ],\
     "fallbackPool": [\
@@ -399,37 +399,13 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "linkType": "HARD"\
         }]\
       ]],\
-      ["@reptalie-region-next/lib", [\
-        ["workspace:packages/lib", {\
-          "packageLocation": "./packages/lib/",\
-          "packageDependencies": [\
-            ["@reptalie-region-next/lib", "workspace:packages/lib"],\
-            ["typescript", "patch:typescript@npm%3A5.0.4#~builtin<compat/typescript>::version=5.0.4&hash=b5f058"]\
-          ],\
-          "linkType": "SOFT"\
-        }]\
-      ]],\
-      ["@reptalie-region-next/ui", [\
-        ["workspace:packages/ui", {\
-          "packageLocation": "./packages/ui/",\
-          "packageDependencies": [\
-            ["@reptalie-region-next/ui", "workspace:packages/ui"],\
-            ["@types/node", "npm:20.1.2"],\
-            ["@types/react", "npm:18.2.6"],\
-            ["@types/react-dom", "npm:18.2.4"],\
-            ["react", "npm:18.2.0"],\
-            ["react-dom", "virtual:2797db5cbe4f814e6efc26bd0694b895d88e4850c36d629598e4d4cf8874f70f82387a6419ed5967753de3c8c8a10706da46dec9e5929e438e3f4d483ffac064#npm:18.2.0"],\
-            ["typescript", "patch:typescript@npm%3A5.0.4#~builtin<compat/typescript>::version=5.0.4&hash=b5f058"]\
-          ],\
-          "linkType": "SOFT"\
-        }]\
-      ]],\
       ["@reptalie-region-next/web", [\
         ["workspace:apps/reptalie-region-next", {\
           "packageLocation": "./apps/reptalie-region-next/",\
           "packageDependencies": [\
             ["@reptalie-region-next/web", "workspace:apps/reptalie-region-next"],\
-            ["@reptalie-region-next/lib", "workspace:packages/lib"],\
+            ["@reptalie-region/lib", "workspace:packages/lib"],\
+            ["@reptalie-region/ui", "workspace:packages/ui"],\
             ["@types/node", "npm:20.1.2"],\
             ["@types/react", "npm:18.2.6"],\
             ["@types/react-dom", "npm:18.2.4"],\
@@ -440,8 +416,33 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["next-transpile-modules", "npm:10.0.0"],\
             ["postcss", "npm:8.4.23"],\
             ["react", "npm:18.2.0"],\
-            ["react-dom", "virtual:2797db5cbe4f814e6efc26bd0694b895d88e4850c36d629598e4d4cf8874f70f82387a6419ed5967753de3c8c8a10706da46dec9e5929e438e3f4d483ffac064#npm:18.2.0"],\
+            ["react-dom", "virtual:727901be73596c476637c9eb069792dd981d2acb4614d66c21abeee0d840002f0e2ce1b83d088d72260540f33004207b3b445035f38844cabcffe6ce90224110#npm:18.2.0"],\
             ["tailwindcss", "npm:3.3.2"],\
+            ["typescript", "patch:typescript@npm%3A5.0.4#~builtin<compat/typescript>::version=5.0.4&hash=b5f058"]\
+          ],\
+          "linkType": "SOFT"\
+        }]\
+      ]],\
+      ["@reptalie-region/lib", [\
+        ["workspace:packages/lib", {\
+          "packageLocation": "./packages/lib/",\
+          "packageDependencies": [\
+            ["@reptalie-region/lib", "workspace:packages/lib"],\
+            ["typescript", "patch:typescript@npm%3A5.0.4#~builtin<compat/typescript>::version=5.0.4&hash=b5f058"]\
+          ],\
+          "linkType": "SOFT"\
+        }]\
+      ]],\
+      ["@reptalie-region/ui", [\
+        ["workspace:packages/ui", {\
+          "packageLocation": "./packages/ui/",\
+          "packageDependencies": [\
+            ["@reptalie-region/ui", "workspace:packages/ui"],\
+            ["@types/node", "npm:20.1.2"],\
+            ["@types/react", "npm:18.2.6"],\
+            ["@types/react-dom", "npm:18.2.4"],\
+            ["react", "npm:18.2.0"],\
+            ["react-dom", "virtual:727901be73596c476637c9eb069792dd981d2acb4614d66c21abeee0d840002f0e2ce1b83d088d72260540f33004207b3b445035f38844cabcffe6ce90224110#npm:18.2.0"],\
             ["typescript", "patch:typescript@npm%3A5.0.4#~builtin<compat/typescript>::version=5.0.4&hash=b5f058"]\
           ],\
           "linkType": "SOFT"\
@@ -3633,7 +3634,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["node-sass", null],\
             ["postcss", "npm:8.4.14"],\
             ["react", "npm:18.2.0"],\
-            ["react-dom", "virtual:2797db5cbe4f814e6efc26bd0694b895d88e4850c36d629598e4d4cf8874f70f82387a6419ed5967753de3c8c8a10706da46dec9e5929e438e3f4d483ffac064#npm:18.2.0"],\
+            ["react-dom", "virtual:727901be73596c476637c9eb069792dd981d2acb4614d66c21abeee0d840002f0e2ce1b83d088d72260540f33004207b3b445035f38844cabcffe6ce90224110#npm:18.2.0"],\
             ["sass", null],\
             ["styled-jsx", "virtual:e20a4ae9ee525d8f2c6c80f930dae2f6deb0dc9aa7335fa618e3f41b9d90fd8fb40d5d2b29d79988f50cbff724d7a34c1eccbaecd7a85fb8a8b5798ab2204a37#npm:5.1.1"],\
             ["zod", "npm:3.21.4"]\
@@ -4283,10 +4284,10 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           ],\
           "linkType": "SOFT"\
         }],\
-        ["virtual:2797db5cbe4f814e6efc26bd0694b895d88e4850c36d629598e4d4cf8874f70f82387a6419ed5967753de3c8c8a10706da46dec9e5929e438e3f4d483ffac064#npm:18.2.0", {\
-          "packageLocation": "./.yarn/__virtual__/react-dom-virtual-8227753e9f/0/cache/react-dom-npm-18.2.0-dd675bca1c-7d323310be.zip/node_modules/react-dom/",\
+        ["virtual:727901be73596c476637c9eb069792dd981d2acb4614d66c21abeee0d840002f0e2ce1b83d088d72260540f33004207b3b445035f38844cabcffe6ce90224110#npm:18.2.0", {\
+          "packageLocation": "./.yarn/__virtual__/react-dom-virtual-172e0f16fc/0/cache/react-dom-npm-18.2.0-dd675bca1c-7d323310be.zip/node_modules/react-dom/",\
           "packageDependencies": [\
-            ["react-dom", "virtual:2797db5cbe4f814e6efc26bd0694b895d88e4850c36d629598e4d4cf8874f70f82387a6419ed5967753de3c8c8a10706da46dec9e5929e438e3f4d483ffac064#npm:18.2.0"],\
+            ["react-dom", "virtual:727901be73596c476637c9eb069792dd981d2acb4614d66c21abeee0d840002f0e2ce1b83d088d72260540f33004207b3b445035f38844cabcffe6ce90224110#npm:18.2.0"],\
             ["@types/react", "npm:18.2.6"],\
             ["loose-envify", "npm:1.4.0"],\
             ["react", "npm:18.2.0"],\

@@ -4,6 +4,7 @@ module.exports = {
     env: {
         es6: true,
         node: true,
+        jest: true,
         browser: true,
     },
 
@@ -38,10 +39,12 @@ module.exports = {
         // 모델 정의 부분에서 class와 interface를 합치기 위해 사용하는 용법도 잡고 있어서
         '@typescript-eslint/no-empty-interface': 'off',
         // 모델 정의 부분에서 파라미터 프로퍼티를 잘 쓰고 있어서
+        '@typescript-eslint/interface-name-prefix': 'off',
         '@typescript-eslint/explicit-function-return-type': 'off',
         '@typescript-eslint/no-parameter-properties': 'off',
         '@typescript-eslint/no-var-requires': 'warn',
         '@typescript-eslint/no-non-null-asserted-optional-chain': 'warn',
+        '@typescript-eslint/no-explicit-any': 'warn',
         '@typescript-eslint/no-inferrable-types': 'warn',
         '@typescript-eslint/no-empty-function': 'off',
         '@typescript-eslint/naming-convention': [

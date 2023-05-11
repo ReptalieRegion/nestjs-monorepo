@@ -7,6 +7,17 @@
         "build:client": "yarn workspace @reptalie-region-next/web run build",
         "start:client": "yarn workspace @reptalie-region-next/web run start",
         "lint:client": "yarn workspace @reptalie-region-next/web run lint",
+        "dev:admin": "yarn workspace @reptalie-region-next-admin/web run dev",
+        "build:admin": "yarn workspace @reptalie-region-next-admin/web run build",
+        "start:admin": "yarn workspace @reptalie-region-next-admin/web run start",
+        "lint:admin": "yarn workspace @reptalie-region-next-admin/web run lint",
+        "dev:server": "yarn workspace @reptalie-region-nest/server run start:dev",
+        "build:server": "yarn workspace @reptalie-region-nest/server run build",
+        "start:server": "yarn workspace @reptalie-region-nest/server run start",
+        "lint:server": "yarn workspace @reptalie-region-nest/server run lint",
+        "prod:server": "yarn workspace @reptalie-region-nest/server run start:prod",
+        "debug:server": "yarn workspace @reptalie-region-nest/server run start:debug",
+        "test:server": "yarn workspace @reptalie-region-nest/server run test",
         "g:typecheck": "yarn workspaces foreach -pv run typecheck"
     },
     "workspaces": [

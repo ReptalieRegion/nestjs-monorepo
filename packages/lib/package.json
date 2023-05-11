@@ -1,0 +1,13 @@
+{
+    "name": "@reptalie-region-next/lib",
+    "version": "1.0.0",
+    "private": true,
+    "main": "./src/index.ts",
+    "packageManager": "yarn@3.5.1",
+    "scripts": {
+        "typecheck": "tsc --project ./tsconfig.json --noEmit"
+    },
+    "dependencies": {
+        "typescript": "^5.0.4"
+    }
+}

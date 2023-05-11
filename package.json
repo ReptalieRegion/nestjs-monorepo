@@ -24,7 +24,7 @@
         "lint:admin:server": "yarn workspace @reptalie-region-nest-admin/server run lint",
         "prod:admin:server": "yarn workspace @reptalie-region-nest-admin/server run start:prod",
         "debug:admin:server": "yarn workspace @reptalie-region-nest-admin/server run start:debug",
-        "tes:admint:server": "yarn workspace @reptalie-region-nest-admin/server run test",
+        "test:admint:server": "yarn workspace @reptalie-region-nest-admin/server run test",
         "g:typecheck": "yarn workspaces foreach -pv run typecheck",
         "lint-front": "lint-staged",
         "prepare": "husky install",

@@ -12,3 +12,7 @@
 
 # typescript
 *.tsbuildinfo
+
+# env
+.env
+.env.*

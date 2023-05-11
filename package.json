@@ -18,7 +18,9 @@
         "prod:server": "yarn workspace @reptalie-region-nest/server run start:prod",
         "debug:server": "yarn workspace @reptalie-region-nest/server run start:debug",
         "test:server": "yarn workspace @reptalie-region-nest/server run test",
-        "g:typecheck": "yarn workspaces foreach -pv run typecheck"
+        "g:typecheck": "yarn workspaces foreach -pv run typecheck",
+        "lint-front": "lint-staged",
+        "prepare": "husky install"
     },
     "workspaces": [
         "apps/*",
@@ -33,7 +35,15 @@
         "eslint-plugin-import": "^2.27.5",
         "eslint-plugin-react": "^7.32.2",
         "eslint-plugin-react-hooks": "^4.6.0",
+        "husky": "^8.0.0",
+        "lint-staged": "^13.2.2",
         "prettier": "^2.8.8",
         "typescript": "^5.0.4"
+    },
+    "lint-staged": {
+        "**/*.{js,jsx,ts,tsx}": [
+            "eslint --fix",
+            "prettier --config ./.prettierrc.json --write -u"
+        ]
     }
 }

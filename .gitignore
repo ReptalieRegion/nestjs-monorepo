@@ -10,6 +10,9 @@
 !.yarn/cache
 #.pnp.*
 
+#node_modules
+node_modules
+
 # typescript
 *.tsbuildinfo
 

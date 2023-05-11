@@ -1,5 +1,5 @@
-import { Inject, Injectable } from '@nestjs/common';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Inject, Injectable } from '@nestjs/common';
 import { RedisStore } from 'cache-manager-redis-yet';
 
 @Injectable()
@@ -19,7 +19,7 @@ export class RedisService {
         await this.redisStore.del(key);
     }
 
-    async mset(args: [string, unknown][], ttl?: number | undefined) {
+    async mset(args: Array<[string, unknown]>, ttl?: number | undefined) {
         await this.redisStore.mset(args, ttl);
     }
 

@@ -2,7 +2,6 @@
     "$schema": "https://json.schemastore.org/tsconfig",
     "extends": "../../configs/tsconfig.base.json",
     "compilerOptions": {
-        "noEmit": true,
         "baseUrl": "./src",
         "target": "esnext",
         "lib": ["dom", "dom.iterable", "esnext"],

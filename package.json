@@ -27,7 +27,8 @@
         "tes:admint:server": "yarn workspace @reptalie-region-nest-admin/server run test",
         "g:typecheck": "yarn workspaces foreach -pv run typecheck",
         "lint-front": "lint-staged",
-        "prepare": "husky install"
+        "prepare": "husky install",
+        "init:local:mongo": "cd ./dockers && docker-compose -f docker-compose-local.yml up -d"
     },
     "workspaces": [
         "apps/*",

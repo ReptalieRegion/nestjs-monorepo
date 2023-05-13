@@ -78,6 +78,14 @@ module.exports = {
             {
                 groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index', 'object'],
                 alphabetize: { order: 'asc', caseInsensitive: true },
+                pathGroups: [
+                    {
+                        pattern: 'react',
+                        group: 'builtin',
+                        position: 'before',
+                    },
+                ],
+                pathGroupsExcludedImportTypes: ['react'],
             },
         ],
 

@@ -20,10 +20,12 @@ module.exports = {
         'plugin:react-hooks/recommended',
         'next/core-web-vitals',
         'prettier',
+        'next',
     ],
     plugins: ['@typescript-eslint', 'import', 'react', 'react-hooks', '@next/eslint-plugin-next'],
     settings: { 'import/resolver': { typescript: {} }, react: { version: 'detect' } },
     rules: {
+        'jsx-a11y/anchor-is-valid': 'off',
         'no-implicit-coercion': 'error',
         'no-warning-comments': [
             'warn',
@@ -91,7 +93,6 @@ module.exports = {
                         position: 'before',
                     },
                 ],
-                pathGroupsExcludedImportTypes: ['react', 'next'],
             },
         ],
 
@@ -100,6 +101,6 @@ module.exports = {
         'react/display-name': 'off',
         'react-hooks/exhaustive-deps': 'error',
         'react/react-in-jsx-scope': 'off',
-        'react/no-unknown-property': ['error', { ignore: ['css'] }],
+        'react/no-unknown-property': ['error', { ignore: ['css', 'jsx'] }],
     },
 };

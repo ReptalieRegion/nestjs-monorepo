@@ -3,7 +3,7 @@ name: CI-reptalie-region-next
 on:
     push:
         branches:
-            - '*/test'
+            - 'feature/test'
         paths:
             - 'apps/reptalie-region-next/**'
 

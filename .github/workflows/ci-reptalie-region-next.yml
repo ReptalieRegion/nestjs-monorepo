@@ -1,4 +1,4 @@
-name: CI-wanted-app
+name: CI-reptalie-region-next
 
 on:
     push:

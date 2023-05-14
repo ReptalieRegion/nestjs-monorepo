@@ -5,7 +5,7 @@ on:
         branches:
             - '*/test'
         paths:
-            - 'apps/wanted/**'
+            - 'apps/reptalie-region-next/**'
 
 jobs:
     test:

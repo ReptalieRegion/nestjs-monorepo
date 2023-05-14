@@ -1,5 +1,5 @@
-import ReactQueryProviders from 'contexts/react-query/providers';
 import { Inter } from 'next/font/google';
+import ReactQueryProviders from '../contexts/react-query/providers';
 import { IReactNode } from '<React>';
 import './globals.css';
 

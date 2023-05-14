@@ -18,9 +18,10 @@ module.exports = {
         'plugin:@typescript-eslint/recommended',
         'plugin:react/recommended',
         'plugin:react-hooks/recommended',
+        'next/core-web-vitals',
         'prettier',
     ],
-    plugins: ['@typescript-eslint', 'import', 'react', 'react-hooks'],
+    plugins: ['@typescript-eslint', 'import', 'react', 'react-hooks', '@next/eslint-plugin-next'],
     settings: { 'import/resolver': { typescript: {} }, react: { version: 'detect' } },
     rules: {
         'no-implicit-coercion': 'error',
@@ -84,8 +85,13 @@ module.exports = {
                         group: 'builtin',
                         position: 'before',
                     },
+                    {
+                        pattern: 'next',
+                        group: 'builtin',
+                        position: 'before',
+                    },
                 ],
-                pathGroupsExcludedImportTypes: ['react'],
+                pathGroupsExcludedImportTypes: ['react', 'next'],
             },
         ],
 

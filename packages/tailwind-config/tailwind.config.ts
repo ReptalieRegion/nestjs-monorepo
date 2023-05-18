@@ -1,7 +1,16 @@
-import { PXR1_100, colors, maxHeights } from './utils';
+import { PXR1_100, colors, maxHeights, keyframes, animations, fontSize } from './utils';
 
 export const theme = {
     extend: {
+        fontSize: {
+            ...fontSize,
+        },
+        keyframes: {
+            ...keyframes,
+        },
+        animation: {
+            ...animations,
+        },
         colors: {
             ...colors,
         },

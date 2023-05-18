@@ -1,80 +1,56 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
-
+import { usePathname, useRouter } from 'next/navigation';
+import { useRef, useState } from 'react';
 import Cart from '@/assets/icons/cart.svg';
 import Community from '@/assets/icons/community.svg';
 import Home from '@/assets/icons/home.svg';
 import My from '@/assets/icons/my.svg';
 import Share from '@/assets/icons/share.svg';
 
-const routePrefix = '/home';
-const icons = [
-    { page: '', Component: Home },
-    { page: '/cart', Component: Cart },
-    { page: '/share', Component: Share },
-    { page: '/community', Component: Community },
-    { page: '/my', Component: My },
-];
-
 const Bottombar = () => {
     const router = useRouter();
-    const [selected, setSelected] = useState<string>();
-    const [isAnimation, setIsAnimation] = useState<string>('/');
+    const path = usePathname();
+    const menus = [
+        { ref: useRef<HTMLDivElement>(null), pageURL: '/home', Icon: Home, name: '홈' },
+        { ref: useRef<HTMLDivElement>(null), pageURL: '/home/cart', Icon: Cart, name: '쇼핑' },
+        { ref: useRef<HTMLDivElement>(null), pageURL: '/home/share', Icon: Share, name: '일상공유' },
+        { ref: useRef<HTMLDivElement>(null), pageURL: '/home/community', Icon: Community, name: '정보공유' },
+        { ref: useRef<HTMLDivElement>(null), pageURL: '/home/my', Icon: My, name: '내 정보' },
+    ];
+    const [clickMenu, setClickMenu] = useState<string>('');
 
-    useEffect(() => setSelected(window.location.pathname), []);
-
-    const handleIconClick = (page: string) => {
-        setSelected(routePrefix + page);
-        setIsAnimation(page);
-        router.replace(routePrefix + page);
+    const handleIconClick = (currentPath: string) => {
+        setClickMenu(currentPath);
+        router.replace(currentPath);
     };
 
     return (
-        <>
-            <div className="fixed bottom-0pxr h-80pxr flex flex-row justify-between w-full items-center">
-                {icons.map(({ Component, page }) => (
+        <div className="fixed bottom-0pxr h-80pxr flex flex-row justify-between w-full items-center">
+            {menus.map(({ Icon, pageURL, name, ref }) => {
+                const currenPage = pageURL === path;
+                const startAnimation = pageURL === clickMenu;
+
+                return (
                     <div
-                        key={page}
-                        onClick={() => handleIconClick(page)}
-                        className="w-full h-full flex justify-center icon-click items-center"
+                        ref={ref}
+                        key={pageURL}
+                        onClick={() => handleIconClick(pageURL)}
+                        className="w-full h-full flex justify-center ease-in-out duration-200 items-center active:scale-[0.9]"
                     >
-                        <Component
-                            className={`icon-size-down ${selected === routePrefix + page ? 'fill-teal-250' : 'fill-gray-500'} ${
-                                isAnimation === page ? 'animation' : ''
-                            }`}
-                            onAnimationEnd={() => setIsAnimation('/')}
-                        />
+                        <div className="flex flex-col items-center justify-center">
+                            <Icon
+                                className={`${currenPage ? 'fill-teal-250' : 'fill-gray-500'} ${
+                                    startAnimation ? 'animate-scale-up-down' : ''
+                                }`}
+                                onAnimationEnd={() => setClickMenu('')}
+                            />
+                            <span className="text-xxs mt-6pxr">{name}</span>
+                        </div>
                     </div>
-                ))}
-            </div>
-            <style jsx>{`
-                .icon-click {
-                    transition: all 0.3s ease-in-out;
-                }
-
-                .icon-click:active .icon-size-down {
-                    transform: scale(0.85);
-                }
-
-                .animation {
-                    animation: scaleAnimation 0.3s ease-in-out;
-                }
-
-                @keyframes scaleAnimation {
-                    0% {
-                        transform: scale(1);
-                    }
-                    50% {
-                        transform: scale(1.15);
-                    }
-                    100% {
-                        transform: scale(1);
-                    }
-                }
-            `}</style>
-        </>
+                );
+            })}
+        </div>
     );
 };
 

@@ -40,7 +40,7 @@ const Bottombar = () => {
                     >
                         <div className="flex flex-col items-center justify-center">
                             <Icon
-                                className={`${currenPage ? 'fill-teal-250' : 'fill-gray-500'} ${
+                                className={`${currenPage ? 'fill-teal-250' : 'fill-gray-550'} ${
                                     startAnimation ? 'animate-scale-up-down' : ''
                                 }`}
                                 onAnimationEnd={() => setClickMenu('')}

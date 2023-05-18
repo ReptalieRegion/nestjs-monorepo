@@ -1,5 +1,5 @@
-const Share = async () => {
+const SharePage = async () => {
     return <div>share</div>;
 };
 
-export default Share;
+export default SharePage;

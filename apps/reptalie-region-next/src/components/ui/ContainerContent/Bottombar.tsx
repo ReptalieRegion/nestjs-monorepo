@@ -26,7 +26,7 @@ const Bottombar = () => {
     };
 
     return (
-        <div className="fixed bottom-0pxr h-80pxr flex flex-row justify-between w-full items-center border-t-[1px] rounded-3xl shadow-inner">
+        <div className="bg-white h-80pxr flex flex-row justify-between w-full items-center border-t-[1px] rounded-3xl shadow-inner">
             {menus.map(({ Icon, pageURL, name, ref }) => {
                 const currenPage = pageURL === path;
                 const startAnimation = pageURL === clickMenu;

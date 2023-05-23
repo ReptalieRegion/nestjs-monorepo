@@ -4,7 +4,7 @@ import { ForwardedRef, forwardRef } from 'react';
 import { UseFormRegisterReturn } from 'react-hook-form/dist/types';
 import SignUpErrorMessage from '../atoms/ErrorMessage';
 import SignUpLabel from '../atoms/Label';
-import InputText from '@/components/Input';
+import InputText from '@/components/ui/Input';
 import { IInputInfoArray } from '@/types/signUp';
 
 interface ISignUpInputItemProps {

@@ -76,25 +76,25 @@ module.exports = {
             },
         ],
 
-        'import/order': [
-            'error',
-            {
-                groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index', 'object'],
-                alphabetize: { order: 'asc', caseInsensitive: true },
-                pathGroups: [
-                    {
-                        pattern: 'react',
-                        group: 'builtin',
-                        position: 'before',
-                    },
-                    {
-                        pattern: 'next',
-                        group: 'builtin',
-                        position: 'before',
-                    },
-                ],
-            },
-        ],
+        // 'import/order': [
+        //     'error',
+        //     {
+        //         groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index', 'object'],
+        //         alphabetize: { order: 'asc', caseInsensitive: true },
+        //         pathGroups: [
+        //             {
+        //                 pattern: 'react',
+        //                 group: 'builtin',
+        //                 position: 'before',
+        //             },
+        //             {
+        //                 pattern: 'next',
+        //                 group: 'builtin',
+        //                 position: 'before',
+        //             },
+        //         ],
+        //     },
+        // ],
 
         'react/prop-types': 'off',
         // React.memo, React.forwardRef에서 사용하는 경우도 막고 있어서

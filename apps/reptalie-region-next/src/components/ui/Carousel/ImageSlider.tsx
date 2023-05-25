@@ -110,7 +110,7 @@ const ImageSlider = () => {
                 onTouchStart={handleTouchStart}
                 onTouchEnd={handleTouchEnd}
             >
-                <div className={`w-[calc(${100 * images.length}vw-120px)]`}>
+                <div className={`w-[calc(300vw-120px)]`}>
                     {images.map(({ src, alt }, index) => {
                         return (
                             <div

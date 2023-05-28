@@ -8,6 +8,10 @@ class LongTouch implements IGestures {
     ) {}
 
     onStart() {
+        if (this.startEvent) {
+            return;
+        }
+
         this.longTabTimer();
         this.startEvent = true;
     }
@@ -32,10 +36,6 @@ class LongTouch implements IGestures {
     }
 
     private longTabTimer() {
-        if (this.startEvent) {
-            return;
-        }
-
         this.isLongTab = false;
         this.nLongTabTimer = setTimeout(() => {
             this.isLongTab = true;
@@ -44,7 +44,7 @@ class LongTouch implements IGestures {
     }
 
     private deleteLongTabTimer() {
-        if (typeof this.nLongTabTimer !== 'undefined') {
+        if (this.nLongTabTimer === undefined) {
             clearTimeout(this.nLongTabTimer);
             this.nLongTabTimer = undefined;
         }

@@ -20,7 +20,7 @@ const ImageSlider = () => {
 
     const handleTouchStart: TouchEventHandler<HTMLDivElement> = (event) => {
         newLongTouch.onStart();
-        const touchDown = event.touches[0].clientX;
+        const touchDown = event.touches[event.touches.length - 1].clientX;
         setTouchPosition(touchDown);
     };
 
@@ -33,6 +33,7 @@ const ImageSlider = () => {
         const currentTouch = event.changedTouches[0].clientX;
         const currentIndex = currentIndexRef.current;
         const isMoveRight = touchPosition - currentTouch > 0 && currentIndex < images.length - 1;
+
         const isMoveLeft = touchPosition - currentTouch < 0 && currentIndex > 0;
         const scrollViewElement = scrollViewRef.current;
         const contentWidth = scrollViewElement.clientWidth;
@@ -103,10 +104,10 @@ const ImageSlider = () => {
     };
 
     return (
-        <div className="relative flex flex-row justify-center mb-20pxr">
+        <div className="relative flex flex-row justify-center mb-10pxr">
             <div
                 ref={scrollViewRef}
-                className="h-[188px] overflow-y-hidden overflow-x-scroll rounded-md"
+                className="h-[250px] overflow-y-hidden overflow-x-scroll rounded-md"
                 onTouchStart={handleTouchStart}
                 onTouchEnd={handleTouchEnd}
             >
@@ -118,13 +119,12 @@ const ImageSlider = () => {
                                 key={alt}
                                 className="float-left w-[calc(100vw-40px)]"
                             >
-                                <Image priority src={src} alt={alt} className="w-full" />
+                                <Image priority src={src} alt={alt} style={{ objectFit: 'cover', height: '250px' }} />
                             </div>
                         );
                     })}
                 </div>
             </div>
-            <div className="absolute bottom-5pxr z-10 text-white">ººº</div>
         </div>
     );
 };

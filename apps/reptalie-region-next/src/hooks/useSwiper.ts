@@ -17,14 +17,18 @@ export const useSwiper = () => {
 
     useEffect(() => {
         const swiperNode = swiperRef.current;
-        swiperNode?.addEventListener('touchstart', onTouchStart);
-        swiperNode?.addEventListener('touchmove', onTouchMove);
-        swiperNode?.addEventListener('touchend', onTouchEnd);
+        if (!swiperNode) {
+            return;
+        }
+
+        swiperNode.addEventListener('touchstart', onTouchStart);
+        swiperNode.addEventListener('touchmove', onTouchMove);
+        swiperNode.addEventListener('touchend', onTouchEnd);
 
         return () => {
-            swiperNode?.removeEventListener('touchstart', onTouchStart);
-            swiperNode?.removeEventListener('touchmove', onTouchMove);
-            swiperNode?.removeEventListener('touchend', onTouchEnd);
+            swiperNode.removeEventListener('touchstart', onTouchStart);
+            swiperNode.removeEventListener('touchmove', onTouchMove);
+            swiperNode.removeEventListener('touchend', onTouchEnd);
         };
     }, []);
 

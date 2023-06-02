@@ -1,55 +1,54 @@
-import { IGestures } from '<Gestures>';
-
-class LongTouch implements IGestures {
-    constructor(
-        private isLongTab: boolean = false,
-        private startEvent: boolean = false,
-        private nLongTabTimer?: NodeJS.Timeout,
-    ) {}
-
-    onStart() {
-        if (this.startEvent) {
-            return;
-        }
-
-        this.longTabTimer();
-        this.startEvent = true;
-    }
-
-    onMove() {
-        if (!this.startEvent) {
-            return;
-        }
-    }
-
-    onEnd() {
-        if (!this.startEvent) {
-            return;
-        }
-
-        this.deleteLongTabTimer();
-        this.startEvent = false;
-    }
-
-    getIsLongTab() {
-        return this.isLongTab;
-    }
-
-    private longTabTimer() {
-        this.isLongTab = false;
-        this.nLongTabTimer = setTimeout(() => {
-            this.isLongTab = true;
-            this.nLongTabTimer = undefined;
-        }, 200);
-    }
-
-    private deleteLongTabTimer() {
-        if (this.nLongTabTimer === undefined) {
-            clearTimeout(this.nLongTabTimer);
-            this.nLongTabTimer = undefined;
-        }
-    }
+export interface ILongTouchInfo {
+    isLongTouch: boolean;
+    startEvent: boolean;
+    longTouchTimer?: NodeJS.Timeout;
 }
 
-export const newLongTouch = new LongTouch();
-export default LongTouch;
+const touchInfo: ILongTouchInfo = {
+    isLongTouch: false,
+    startEvent: false,
+    longTouchTimer: undefined,
+};
+
+const customlongTouch = (delay = 300) => {
+    const start = () => {
+        if (touchInfo.startEvent) {
+            return;
+        }
+
+        startLongTouchTimer();
+        touchInfo.startEvent = true;
+    };
+
+    const end = () => {
+        const { startEvent, longTouchTimer } = touchInfo;
+        const isStartTouch = startEvent && longTouchTimer !== undefined;
+        if (!isStartTouch) {
+            return;
+        }
+
+        clearTimeout(longTouchTimer);
+        touchInfo.longTouchTimer = undefined;
+        touchInfo.startEvent = false;
+    };
+
+    const getIsLongTouch = () => {
+        return touchInfo.isLongTouch;
+    };
+
+    const startLongTouchTimer = () => {
+        touchInfo.isLongTouch = false;
+        touchInfo.longTouchTimer = setTimeout(() => {
+            touchInfo.isLongTouch = true;
+            touchInfo.longTouchTimer = undefined;
+            touchInfo.startEvent = false;
+        }, delay);
+    };
+    return {
+        start,
+        end,
+        getIsLongTouch,
+    };
+};
+
+export default customlongTouch;

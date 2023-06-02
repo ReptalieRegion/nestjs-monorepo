@@ -1,35 +1,49 @@
-import { IGestures } from '<Gestures>';
+interface ITabInfo {
+    isTab: boolean;
+    moveEvent: boolean;
+    startEvent: boolean;
+}
 
-class Tab implements IGestures {
-    constructor(private startEvent: boolean = false, private moveEvent: boolean = false, private isTab: boolean = false) {}
+const defaultTabInfo: ITabInfo = {
+    isTab: false,
+    moveEvent: false,
+    startEvent: false,
+};
 
-    onStart() {
-        this.isTab = false;
-        this.startEvent = true;
-    }
+const customTab = () => {
+    const tabInfo: ITabInfo = { ...defaultTabInfo };
+    const start = () => {
+        tabInfo.isTab = false;
+        tabInfo.startEvent = true;
+    };
 
-    onMove() {
-        if (!this.startEvent) {
+    const move = () => {
+        if (!tabInfo.startEvent) {
+            return;
+        }
+        tabInfo.moveEvent = true;
+    };
+
+    const end = () => {
+        const { startEvent, moveEvent } = tabInfo;
+        if (!startEvent || moveEvent) {
             return;
         }
 
-        setTimeout;
+        tabInfo.isTab = true;
+        tabInfo.startEvent = false;
+    };
 
-        this.moveEvent = true;
-    }
+    const getIsTab = () => {
+        return tabInfo.isTab;
+    };
 
-    onEnd() {
-        if (this.startEvent && !this.moveEvent) {
-            this.isTab = true;
-        }
+    return {
+        start,
+        move,
+        end,
+        getIsTab,
+    };
+};
 
-        this.startEvent = false;
-        this.moveEvent = false;
-    }
-
-    getIsTab() {
-        return this.isTab;
-    }
-}
-
-export default Tab;
+export default customTab;

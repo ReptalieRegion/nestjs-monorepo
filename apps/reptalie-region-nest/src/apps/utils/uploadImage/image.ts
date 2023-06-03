@@ -25,6 +25,7 @@ export class ImageService {
         this.s3 = new S3Client(awsConfig);
     }
 
+    // 이미지 업로드
     async uploadToS3(file: Express.Multer.File): Promise<IResponseImageDTO> {
         const key = `${uuidv4()}.${mime.extension(file.mimetype)}`;
 
@@ -52,6 +53,7 @@ export class ImageService {
         }
     }
 
+    // 이미지 삭제
     async deleteFromS3(key: string): Promise<IResponseImageDTO> {
         const Params: IParams = {
             Bucket: process.env.AWS_BUCKET ?? '',

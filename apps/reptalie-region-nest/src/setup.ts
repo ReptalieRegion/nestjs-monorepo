@@ -19,7 +19,7 @@ export const setup = (app: NestExpressApplication) => {
 
     // cors 설정
     app.enableCors({
-        origin: ['http://localhost:4200'],
+        origin: ['http://localhost:3000'],
         credentials: true,
     });
 

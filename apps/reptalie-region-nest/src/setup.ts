@@ -18,8 +18,9 @@ export const setup = (app: NestExpressApplication) => {
     );
 
     // cors 설정
+    const whitelist = ['http://localhost:3000'];
     app.enableCors({
-        origin: ['http://localhost:4200'],
+        origin: whitelist,
         credentials: true,
     });
 

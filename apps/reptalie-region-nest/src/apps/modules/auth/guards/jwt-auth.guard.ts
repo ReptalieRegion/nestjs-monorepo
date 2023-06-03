@@ -21,13 +21,11 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     async canActivate(context: ExecutionContext) {
         const request = context.switchToHttp().getRequest<Request>();
         const response = context.switchToHttp().getResponse<Response>();
-        const { authorization } = request.headers;
+        const token = request.signedCookies['access_token'];
 
-        if (!authorization) {
+        if (!token) {
             throw new UnauthorizedException();
         }
-
-        const token = authorization.replace('Bearer ', '');
 
         try {
             const result = this.authService.verifyToken(token);
@@ -50,7 +48,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
                 const user = await this.authService.verifyRefreshToken(legacyRefreshToken, userId);
 
                 if (user) {
-                    const { accessToken, refreshToken } = this.authService.makeAccessAndRefreshToken(user.id);
+                    const { accessToken, refreshToken } = this.authService.makeAccessAndRefreshToken({ id: user.id });
                     this.authService.setResponseToken(response, { accessToken, refreshToken });
                     await this.redisService.set(user.id, refreshToken);
                     request.user = user;

@@ -98,7 +98,7 @@ export class AuthService {
     }
 
     private signToken(id: Pick<IResponseUserDTO, 'id'>, options?: JwtSignOptions): string {
-        const payload = { sub: id };
+        const payload = { sub: { id: id.id } };
         return this.jwtService.sign(payload, options);
     }
 }

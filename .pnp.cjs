@@ -5450,7 +5450,8 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["tailwind-config", "workspace:packages/tailwind-config"],\
             ["tailwindcss", "npm:3.3.2"],\
             ["typescript", "patch:typescript@npm%3A5.0.4#~builtin<compat/typescript>::version=5.0.4&hash=b5f058"],\
-            ["yup", "npm:1.1.1"]\
+            ["yup", "npm:1.1.1"],\
+            ["zustand", "virtual:2797db5cbe4f814e6efc26bd0694b895d88e4850c36d629598e4d4cf8874f70f82387a6419ed5967753de3c8c8a10706da46dec9e5929e438e3f4d483ffac064#npm:4.3.8"]\
           ],\
           "linkType": "SOFT"\
         }]\
@@ -16872,6 +16873,33 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./.yarn/cache/zod-npm-3.21.4-9f570b215c-f185ba8734.zip/node_modules/zod/",\
           "packageDependencies": [\
             ["zod", "npm:3.21.4"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["zustand", [\
+        ["npm:4.3.8", {\
+          "packageLocation": "./.yarn/cache/zustand-npm-4.3.8-31b8907f5b-24db6bf063.zip/node_modules/zustand/",\
+          "packageDependencies": [\
+            ["zustand", "npm:4.3.8"]\
+          ],\
+          "linkType": "SOFT"\
+        }],\
+        ["virtual:2797db5cbe4f814e6efc26bd0694b895d88e4850c36d629598e4d4cf8874f70f82387a6419ed5967753de3c8c8a10706da46dec9e5929e438e3f4d483ffac064#npm:4.3.8", {\
+          "packageLocation": "./.yarn/__virtual__/zustand-virtual-3ac780800f/0/cache/zustand-npm-4.3.8-31b8907f5b-24db6bf063.zip/node_modules/zustand/",\
+          "packageDependencies": [\
+            ["zustand", "virtual:2797db5cbe4f814e6efc26bd0694b895d88e4850c36d629598e4d4cf8874f70f82387a6419ed5967753de3c8c8a10706da46dec9e5929e438e3f4d483ffac064#npm:4.3.8"],\
+            ["@types/immer", null],\
+            ["@types/react", "npm:18.2.6"],\
+            ["immer", null],\
+            ["react", "npm:18.2.0"],\
+            ["use-sync-external-store", "virtual:77eb72eb1a4f53cb40e3eeea936032d51c4acf7fe27a44197a96394daa27d33a34e949293b5c6add6d4960107f89128962b0382fbcae54b12695dded6b52deb2#npm:1.2.0"]\
+          ],\
+          "packagePeers": [\
+            "@types/immer",\
+            "@types/react",\
+            "immer",\
+            "react"\
           ],\
           "linkType": "HARD"\
         }]\

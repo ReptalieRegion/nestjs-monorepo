@@ -5,9 +5,10 @@ const nextConfig = {
     transpilePackages: ['@reptalie-region/ui'],
     experimental: {
         appDir: true,
+        serverActions: true,
     },
     images: {
-        domains: ['localhost'],
+        domains: ['localhost', 'search.naver.com', 'search.pstatic.net'],
     },
     webpack(config) {
         config.module.rules.push({

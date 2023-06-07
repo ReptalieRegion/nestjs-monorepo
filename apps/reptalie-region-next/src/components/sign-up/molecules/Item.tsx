@@ -5,7 +5,7 @@ import { UseFormRegisterReturn } from 'react-hook-form/dist/types';
 import SignUpErrorMessage from '../atoms/ErrorMessage';
 import SignUpLabel from '../atoms/Label';
 import InputText from '@/components/ui/Input';
-import { IInputInfoArray } from '@/types/signUp';
+import { IInputInfoArray } from '<SignUp>';
 
 interface ISignUpInputItemProps {
     itemInfo: IInputInfoArray;

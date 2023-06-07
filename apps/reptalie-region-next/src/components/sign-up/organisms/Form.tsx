@@ -3,7 +3,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { FieldValues, useForm } from 'react-hook-form';
 
 import InputItem from '../molecules/Item';
-import { IInputInfoArray, ISignUpFormValue } from '@/types/signUp';
+import { IInputInfoArray, ISignUpFormValue } from '<SignUp>';
 import { createUserSchema } from '@/validations/signUp';
 
 const inputInfoArray: IInputInfoArray[] = [

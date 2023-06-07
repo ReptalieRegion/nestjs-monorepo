@@ -3,9 +3,9 @@ import Follow from '../atoms/Follow';
 import More from '../atoms/More';
 import Image from 'next/image';
 
-type TPostHeaderProps = Pick<IPostsData, 'name' | 'profile'>;
+type TPostHeaderProps = Pick<IPostsData, 'name' | 'profile' | 'isFollow'>;
 
-const PostHeader = ({ profile, name }: TPostHeaderProps) => {
+const PostHeader = ({ profile, name, isFollow }: TPostHeaderProps) => {
     return (
         <div className="flex flex-row items-center justify-between mb-10pxr">
             <div className="flex flex-row items-center space-x-5pxr">
@@ -19,7 +19,7 @@ const PostHeader = ({ profile, name }: TPostHeaderProps) => {
                 <div>{name}</div>
             </div>
             <div className="flex flex-row items-center">
-                <Follow />
+                <Follow isFollow={isFollow} />
                 <More />
             </div>
         </div>

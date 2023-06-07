@@ -1,9 +1,12 @@
 'use client';
 
+import { IPostsData } from '<API>';
 import { useState } from 'react';
 
-const Follow = () => {
-    const [isFollowing, setIsFollowing] = useState<boolean>(false);
+type TPostHeaderProps = Pick<IPostsData, 'isFollow'>;
+
+const Follow = ({ isFollow }: TPostHeaderProps) => {
+    const [isFollowing, setIsFollowing] = useState<boolean>(isFollow);
 
     const handleClickFollow = () => {
         setIsFollowing((state) => !state);

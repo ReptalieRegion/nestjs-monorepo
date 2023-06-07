@@ -4,7 +4,7 @@ import * as mime from 'mime-types';
 import { v4 as uuidv4 } from 'uuid';
 import { IResponseImageDTO } from '../../dto/image/response-image.dto';
 
-interface IParams {
+interface IS3ObjectParams {
     Key: string;
     Bucket: string;
 }
@@ -55,7 +55,7 @@ export class ImageService {
 
     // 이미지 삭제
     async deleteFromS3(key: string): Promise<IResponseImageDTO> {
-        const Params: IParams = {
+        const Params: IS3ObjectParams = {
             Bucket: process.env.AWS_BUCKET ?? '',
             Key: key,
         };
@@ -75,7 +75,7 @@ export class ImageService {
         }
     }
 
-    private async checkS3ObjectExists(params: IParams): Promise<boolean> {
+    private async checkS3ObjectExists(params: IS3ObjectParams): Promise<boolean> {
         try {
             await this.s3.send(new HeadObjectCommand(params));
             return true;

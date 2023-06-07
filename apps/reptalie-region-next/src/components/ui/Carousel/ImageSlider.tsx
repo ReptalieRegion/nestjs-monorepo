@@ -1,32 +1,40 @@
 'use client';
 
 import Image from 'next/image';
-import { useRef } from 'react';
-import test from '@/assets/images/contemplative-reptile.jpg';
 import useSwiper from '@/hooks/useSwiper';
+import { useEffect } from 'react';
+import { IPostsData } from '<API>';
+import sharePostsStore from '@/stores/share-post';
 
-const images = [
-    { src: test, alt: '1' },
-    { src: test, alt: '2' },
-    { src: test, alt: '3' },
-];
+type TImagesSliderProps = Pick<IPostsData, 'images' | 'postId'>;
 
-const ImageSlider = () => {
-    const imagesRef = useRef<null[] | HTMLDivElement[]>([]);
-    const swiperRef = useSwiper<HTMLDivElement>(images.length);
+const ImageSlider = ({ postId, images }: TImagesSliderProps) => {
+    const { swiperRef, sliderCount } = useSwiper<HTMLDivElement>(images.length);
+    const { setCurrentImageIndex } = sharePostsStore();
+
+    useEffect(() => {
+        setCurrentImageIndex(postId, sliderCount);
+    }, [sliderCount, postId, setCurrentImageIndex]);
 
     return (
-        <div className="relative flex flex-row justify-center mb-10pxr">
+        <div className="relative flex flex-row justify-center mb-5pxr">
             <div ref={swiperRef} className="h-[250px] overflow-y-hidden overflow-x-hidden rounded-md scrollbar-hide">
-                <div className={`w-[calc(300vw-120px)] h-[calc(300vw-120px)]`}>
-                    {images.map(({ src, alt }, index) => {
+                <div
+                    style={{
+                        width: `calc(${images.length * 100}vw - ${images.length * 40}px)`,
+                    }}
+                >
+                    {images.map(({ src, alt }) => {
                         return (
-                            <div
-                                ref={(element) => (imagesRef.current[index] = element)}
-                                key={alt}
-                                className="float-left w-[calc(100vw-40px)]"
-                            >
-                                <Image priority src={src} alt={alt} style={{ objectFit: 'cover', height: '250px' }} />
+                            <div key={alt} className="float-left w-[calc(100vw-40px)]">
+                                <Image
+                                    priority
+                                    src={src}
+                                    alt={alt}
+                                    width={100}
+                                    height={100}
+                                    style={{ objectFit: 'cover', width: '100%', height: '250px' }}
+                                />
                             </div>
                         );
                     })}

@@ -1,11 +1,12 @@
+import { useEffect, useRef, useState } from 'react';
 import customDirection, { TMoveType } from '@/utils/gestures/Direction';
 import customlongTouch from '@/utils/gestures/LongTouch';
 import customScroll from '@/utils/gestures/Scroll';
-import { useEffect, useRef } from 'react';
 
 const useSwiper = <T extends HTMLElement>(maxSlideCount = 0) => {
     const swiperRef = useRef<T>(null);
     const slideCountRef = useRef(0);
+    const [sliderCount, setSliderCount] = useState<number>(0);
 
     useEffect(() => {
         const swiperElement = swiperRef.current;
@@ -92,27 +93,29 @@ const useSwiper = <T extends HTMLElement>(maxSlideCount = 0) => {
         };
 
         const movePrev = () => {
-            const slideCount = slideCountRef.current;
-            if (slideCount > 0) {
-                const movePosition = (slideCount - 1) * swiperElement.clientWidth;
+            const slideCount = slideCountRef.current - 1;
+            if (slideCount >= 0) {
+                const movePosition = slideCount * swiperElement.clientWidth;
                 scroll.scrollToLeftSmooth(movePosition);
-                slideCountRef.current -= 1;
+                slideCountRef.current = slideCount;
+                setSliderCount(slideCount);
             }
         };
 
         const moveNext = () => {
-            const slideCount = slideCountRef.current;
-            if (slideCount < maxSlideCount - 1) {
-                const movePosition = (slideCount + 1) * swiperElement.clientWidth;
+            const slideCount = slideCountRef.current + 1;
+            if (slideCount < maxSlideCount) {
+                const movePosition = slideCount * swiperElement.clientWidth;
                 scroll.scrollToLeftSmooth(movePosition);
-                slideCountRef.current += 1;
+                slideCountRef.current = slideCount;
+                setSliderCount(slideCount);
             }
         };
 
-        swiperElement.addEventListener('touchstart', touchStart);
-        swiperElement.addEventListener('touchmove', touchMove);
-        swiperElement.addEventListener('touchend', touchEnd);
-        swiperElement.addEventListener('touchcancel', touchEnd);
+        swiperElement.addEventListener('touchstart', touchStart, { passive: true });
+        swiperElement.addEventListener('touchmove', touchMove, { passive: false });
+        swiperElement.addEventListener('touchend', touchEnd, { passive: true });
+        swiperElement.addEventListener('touchcancel', touchEnd, { passive: true });
 
         return () => {
             swiperElement.removeEventListener('touchstart', touchStart);
@@ -122,7 +125,7 @@ const useSwiper = <T extends HTMLElement>(maxSlideCount = 0) => {
         };
     }, [maxSlideCount]);
 
-    return swiperRef;
+    return { swiperRef, sliderCount };
 };
 
 export default useSwiper;

@@ -16,6 +16,7 @@
         "source.fixAll.eslint": true
     },
     "material-icon-theme.folders.associations": {
-        "dockers": "Docker"
+        "dockers": "Docker",
+        "stores": "Global"
     }
 }

@@ -1,4 +1,4 @@
-export interface ILongTouchInfo {
+interface ILongTouchInfo {
     isLongTouch: boolean;
     startEvent: boolean;
     longTouchTimer?: NodeJS.Timeout;

@@ -15,9 +15,9 @@ const InteractivePost = ({ postId, isFollow, images }: IInteractivePost) => {
                 <Like postId={postId} isFollow={isFollow} />
                 <Comment postId={postId} />
             </div>
-            <div className="flex flex-row pt-5pxr">
+            <div className="flex flex-row items-center space-x-2pxr">
                 {images.map((_, index) => (
-                    <div key={index} className={`${index === currentImageIndex ? 'text-blue-400' : 'text-gray-400'}`}>
+                    <div key={index} className={`${index === currentImageIndex ? 'text-teal-150 scale-110' : 'text-gray-400'}`}>
                         ●
                     </div>
                 ))}

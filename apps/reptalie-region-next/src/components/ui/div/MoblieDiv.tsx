@@ -42,13 +42,13 @@ const MoblieDiv = ({ onDoubleTab, onTab, children, ...props }: IMoblieDivProps) 
             }
         };
 
-        element.addEventListener('touchstart', doubleTabHandler.start);
-        element.addEventListener('touchmove', doubleTabHandler.move);
-        element.addEventListener('touchend', doubleTabEndEvent);
+        element.addEventListener('touchstart', doubleTabHandler.start, { passive: true });
+        element.addEventListener('touchmove', doubleTabHandler.move, { passive: true });
+        element.addEventListener('touchend', doubleTabEndEvent, { passive: true });
 
-        element.addEventListener('touchstart', tabHandler.start);
-        element.addEventListener('touchmove', tabHandler.move);
-        element.addEventListener('touchend', tabEndEvent);
+        element.addEventListener('touchstart', tabHandler.start, { passive: true });
+        element.addEventListener('touchmove', tabHandler.move, { passive: true });
+        element.addEventListener('touchend', tabEndEvent, { passive: true });
 
         return () => {
             element.removeEventListener('touchstart', doubleTabHandler.start);

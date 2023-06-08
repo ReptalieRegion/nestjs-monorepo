@@ -47,7 +47,6 @@ const customDoubleTab = (duration = 400, tapThreshold = 5) => {
         const currentTime = event.timeStamp;
         if (tabCount === 1) {
             const isWithinTimeThreshold = currentTime - time <= duration;
-            console.log(time, currentTime, currentTime - time);
             if (isWithinTimeThreshold) {
                 const distanceX = Math.abs(x - newX);
                 const distanceY = Math.abs(y - newY);

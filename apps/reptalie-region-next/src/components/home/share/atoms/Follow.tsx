@@ -13,7 +13,7 @@ const Follow = ({ isFollow }: TPostHeaderProps) => {
     };
 
     return (
-        <span className={`${isFollowing ? 'text-gray-500' : 'text-teal-150'} font-semibold`} onClick={handleClickFollow}>
+        <span className={`${isFollowing ? 'text-gray-500' : 'text-green-750'} font-semibold`} onClick={handleClickFollow}>
             {isFollowing ? '✓ 팔로잉' : '팔로우'}
         </span>
     );

@@ -5,3 +5,13 @@ declare module '*.svg' {
     export const ReactComponent: FC<SVGProps<SVGAElement>>;
     export default content;
 }
+
+declare global {
+    interface Window {
+        ReactNativeWebView: {
+            postMessage: (data: string) => void;
+        };
+    }
+}
+
+export {};

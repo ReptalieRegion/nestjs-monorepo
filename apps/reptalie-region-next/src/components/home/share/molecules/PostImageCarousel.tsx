@@ -22,8 +22,8 @@ const PostImageCarousel = ({ postId, images }: TImagesSliderProps) => {
     const handleDoubleTabHeartAnimation = () => {
         setStartLike(true);
 
-        if (window !== undefined && window.navigator) {
-            navigator.vibrate(500);
+        if (!startLike && window !== undefined && window.ReactNativeWebView) {
+            window.ReactNativeWebView.postMessage('vibrate');
         }
     };
 

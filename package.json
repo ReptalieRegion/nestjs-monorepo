@@ -1,6 +1,6 @@
 {
     "name": "test",
-    "packageManager": "yarn@3.5.1",
+    "packageManager": "yarn@3.6.0",
     "private": true,
     "scripts": {
         "dev:client": "yarn workspace @reptalie-region-next/web run dev",

@@ -1,26 +1,26 @@
 import { useEffect, useRef, useState } from 'react';
 import customDirection, { TMoveType } from '@/utils/gestures/Direction';
-import customlongTouch from '@/utils/gestures/LongTouch';
+import customLongTouch from '@/utils/gestures/LongTouch';
 import customScroll from '@/utils/gestures/Scroll';
 
-const useSwiper = <T extends HTMLElement>(maxSlideCount = 0) => {
-    const swiperRef = useRef<T>(null);
+const useSwipe = <T extends HTMLElement>(maxSlideCount = 0) => {
+    const swipeRef = useRef<T>(null);
     const slideCountRef = useRef(0);
     const [sliderCount, setSliderCount] = useState<number>(0);
 
     useEffect(() => {
-        const swiperElement = swiperRef.current;
+        const swiperElement = swipeRef.current;
         if (!swiperElement) {
             return;
         }
 
         const { clientWidth, clientHeight } = swiperElement;
-        const longTouch = customlongTouch();
+        const longTouch = customLongTouch();
         const direction = customDirection()({
             width: clientWidth,
             height: clientHeight,
         });
-        const scroll = customScroll({ element: swiperRef.current })();
+        const scroll = customScroll({ element: swipeRef.current })();
 
         const touchStart = (event: TouchEvent) => {
             longTouch.start();
@@ -125,7 +125,7 @@ const useSwiper = <T extends HTMLElement>(maxSlideCount = 0) => {
         };
     }, [maxSlideCount]);
 
-    return { swiperRef, sliderCount };
+    return { swipeRef, sliderCount };
 };
 
-export default useSwiper;
+export default useSwipe;

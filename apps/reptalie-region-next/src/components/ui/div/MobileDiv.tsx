@@ -2,12 +2,12 @@ import customDoubleTab from '@/utils/gestures/DoubleTab';
 import customTab from '@/utils/gestures/Tab';
 import { HTMLAttributes, useEffect, useRef } from 'react';
 
-interface IMoblieDivProps extends HTMLAttributes<HTMLDivElement> {
+interface IMobileDivProps extends HTMLAttributes<HTMLDivElement> {
     onDoubleTab?: (event: TouchEvent) => void;
     onTab?: (event: TouchEvent) => void;
 }
 
-const MoblieDiv = ({ onDoubleTab, onTab, children, ...props }: IMoblieDivProps) => {
+const MobileDiv = ({ onDoubleTab, onTab, children, ...props }: IMobileDivProps) => {
     const ref = useRef<HTMLDivElement>(null);
     const doubleTabHandler = customDoubleTab();
     const tabHandler = customTab();
@@ -68,4 +68,4 @@ const MoblieDiv = ({ onDoubleTab, onTab, children, ...props }: IMoblieDivProps) 
     );
 };
 
-export default MoblieDiv;
+export default MobileDiv;

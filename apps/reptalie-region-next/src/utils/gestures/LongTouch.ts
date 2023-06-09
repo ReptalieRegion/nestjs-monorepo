@@ -10,7 +10,7 @@ const touchInfo: ILongTouchInfo = {
     longTouchTimer: undefined,
 };
 
-const customlongTouch = (delay = 300) => {
+const customLongTouch = (delay = 300) => {
     const start = () => {
         if (touchInfo.startEvent) {
             return;
@@ -51,4 +51,4 @@ const customlongTouch = (delay = 300) => {
     };
 };
 
-export default customlongTouch;
+export default customLongTouch;

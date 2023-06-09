@@ -18,7 +18,7 @@ const defaultTabInfo: IDoubleTabInfo = {
     time: 0,
 };
 
-const customDoubleTab = (duration = 400, tapThreshold = 5) => {
+const customDoubleTab = (duration = 400, tapThreshold = 10) => {
     const tabInfo: IDoubleTabInfo = { ...defaultTabInfo };
     const start = () => {
         tabInfo.startEvent = true;
@@ -34,12 +34,13 @@ const customDoubleTab = (duration = 400, tapThreshold = 5) => {
 
     const end = (event: TouchEvent) => {
         const { startEvent, moveEvent, tabCount, time, x, y } = tabInfo;
-        if (!startEvent || moveEvent) {
-            return;
-        }
-
         tabInfo.startEvent = false;
         tabInfo.moveEvent = false;
+
+        if (!startEvent || moveEvent) {
+            initClearInfo();
+            return;
+        }
 
         const newX = event.changedTouches[0].pageX;
         const newY = event.changedTouches[0].pageY;
@@ -54,10 +55,7 @@ const customDoubleTab = (duration = 400, tapThreshold = 5) => {
                 tabInfo.isDoubleTab = isWithinTapRadius;
             }
 
-            tabInfo.tabCount = 0;
-            tabInfo.y = -1;
-            tabInfo.x = -1;
-            tabInfo.time = 0;
+            initClearInfo();
             return;
         }
 
@@ -70,6 +68,13 @@ const customDoubleTab = (duration = 400, tapThreshold = 5) => {
 
     const getIsDoubleTab = () => {
         return tabInfo.isDoubleTab;
+    };
+
+    const initClearInfo = () => {
+        tabInfo.tabCount = 0;
+        tabInfo.y = -1;
+        tabInfo.x = -1;
+        tabInfo.time = 0;
     };
 
     return {

@@ -45,19 +45,23 @@ const MobileDiv = ({ onDoubleTab, onTab, children, ...props }: IMobileDivProps) 
         element.addEventListener('touchstart', doubleTabHandler.start, { passive: true });
         element.addEventListener('touchmove', doubleTabHandler.move, { passive: true });
         element.addEventListener('touchend', doubleTabEndEvent, { passive: true });
+        element.addEventListener('touchcancel', doubleTabEndEvent, { passive: true });
 
         element.addEventListener('touchstart', tabHandler.start, { passive: true });
         element.addEventListener('touchmove', tabHandler.move, { passive: true });
         element.addEventListener('touchend', tabEndEvent, { passive: true });
+        element.addEventListener('touchcancel', tabEndEvent, { passive: true });
 
         return () => {
             element.removeEventListener('touchstart', doubleTabHandler.start);
             element.removeEventListener('touchmove', doubleTabHandler.move);
             element.removeEventListener('touchend', doubleTabEndEvent);
+            element.removeEventListener('touchcancel', doubleTabEndEvent);
 
             element.removeEventListener('touchstart', tabHandler.start);
             element.removeEventListener('touchmove', tabHandler.move);
             element.removeEventListener('touchend', tabEndEvent);
+            element.removeEventListener('touchcancel', tabEndEvent);
         };
     }, [doubleTabHandler, onDoubleTab, tabHandler, onTab]);
 

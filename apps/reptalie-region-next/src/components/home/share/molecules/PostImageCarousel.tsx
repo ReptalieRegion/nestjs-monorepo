@@ -4,7 +4,7 @@ import useSwipe from '@/hooks/useSwipe';
 import { useEffect, useState } from 'react';
 import { IPostsData } from '<API>';
 import sharePostsStore from '@/stores/share-post';
-import MobileDiv from '@/components/ui/div/MobileDiv';
+import MobileDiv from '@/components/ui/element/div/MobileDiv';
 import HeartAnimation from '../atoms/HeartAnimation';
 import ImagesContent from '../atoms/ImagesContent';
 

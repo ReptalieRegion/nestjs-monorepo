@@ -3,14 +3,13 @@ import mongoose from 'mongoose';
 
 import { LoggerMiddleware } from './middlwares/logger.middleware';
 import { AuthModule } from './modules/auth/auth.module';
-import { ImageModule } from './modules/image/image.module';
 import { RedisModule } from './modules/redis/redis.module';
 import { UserModule } from './modules/user/user.module';
 import { CustomConfigModule } from './utils/customModules/config';
 import { CustomMongooseModule } from './utils/customModules/mongoose';
 
 @Module({
-    imports: [ImageModule, AuthModule, UserModule, RedisModule, CustomConfigModule, CustomMongooseModule],
+    imports: [AuthModule, UserModule, RedisModule, CustomConfigModule, CustomMongooseModule],
     controllers: [],
     providers: [],
 })

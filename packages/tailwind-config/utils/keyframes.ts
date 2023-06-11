@@ -28,7 +28,6 @@ const scale3Keyframe = {
     },
 };
 
-// skewX(30deg)
 const leftTop = {
     '0%': {
         transform: 'translateX(-50%)',
@@ -51,7 +50,6 @@ const top = {
     },
 };
 
-// skewX(-30deg)
 const rightTop = {
     '0%': {
         transform: 'translateX(-50%)',
@@ -63,7 +61,6 @@ const rightTop = {
     },
 };
 
-// skewX(-65deg)
 const right = {
     '0%': {
         transform: 'translateX(-50%)',
@@ -75,7 +72,6 @@ const right = {
     },
 };
 
-//skewX(220deg)
 const rightDown = {
     '0%': {
         transform: 'translateX(-50%)',
@@ -98,7 +94,6 @@ const down = {
     },
 };
 
-// skewX(-220deg)
 const leftDown = {
     '0%': {
         transform: 'translateX(-50%)',
@@ -110,7 +105,6 @@ const leftDown = {
     },
 };
 
-// skewX(65deg)
 const left = {
     '0%': {
         transform: 'translateX(-50%)',
@@ -119,6 +113,15 @@ const left = {
         height: 0,
         width: 0,
         transform: 'translateX(-150%)',
+    },
+};
+
+const shimmer = {
+    '0%': {
+        backgroundPosition: '100%',
+    },
+    '100%': {
+        backgroundPosition: '-100%',
     },
 };
 
@@ -133,4 +136,5 @@ export const keyframes = {
     down,
     leftDown,
     left,
+    shimmer,
 } as const;

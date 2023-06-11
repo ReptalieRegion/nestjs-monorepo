@@ -1,7 +1,7 @@
 // -1: 판단 거리 미달, 0: 상, 1: 하, 2: 좌, 3: 우
 export type TMoveType = -1 | 0 | 1 | 2 | 3;
 
-type TDirecionInfo = Pick<IDirectionInfo, 'width' | 'height'> & Partial<Pick<IDirectionInfo, 'minDistance'>>;
+type TDirectionInfo = Pick<IDirectionInfo, 'width' | 'height'> & Partial<Pick<IDirectionInfo, 'minDistance'>>;
 
 interface IDirectionInfo {
     lock: boolean;
@@ -33,7 +33,7 @@ const defaultDirectionInfo: IDirectionInfo = {
 };
 
 const customDirection = () => {
-    return (directionInfo: TDirecionInfo) => {
+    return (directionInfo: TDirectionInfo) => {
         const mergeDirectionInfo = { ...defaultDirectionInfo, directionInfo };
         const { height, width } = mergeDirectionInfo;
         const baseSlope = parseFloat((height / 2 / width).toFixed(2));

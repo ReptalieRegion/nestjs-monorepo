@@ -10,7 +10,7 @@ interface IBottomSheetProps {
 const MIN_HEIGHT = 100;
 const MAX_HEIGHT = 500;
 
-const MoreBottomSheet = ({ type }: IBottomSheetProps) => {
+const PostOptionsBottomSheet = ({ type }: IBottomSheetProps) => {
     const { bottomSheetDragAreaRef, changeHeight, isTouchEnd } = useBottomSheetDrag({
         minHeight: MIN_HEIGHT,
         maxHeight: MAX_HEIGHT,
@@ -30,4 +30,4 @@ const MoreBottomSheet = ({ type }: IBottomSheetProps) => {
     );
 };
 
-export default MoreBottomSheet;
+export default PostOptionsBottomSheet;

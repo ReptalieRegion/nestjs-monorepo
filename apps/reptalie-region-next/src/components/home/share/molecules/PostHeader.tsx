@@ -1,6 +1,6 @@
 import { IPostsData } from '<API>';
 import Follow from '../atoms/Follow';
-import More from '../atoms/More';
+import PostKebabMenu from '../atoms/PostKebabMenu';
 import Image from 'next/image';
 
 type TPostHeaderProps = Pick<IPostsData, 'name' | 'profile' | 'isFollow'>;
@@ -20,7 +20,7 @@ const PostHeader = ({ profile, name, isFollow }: TPostHeaderProps) => {
             </div>
             <div className="flex flex-row items-center">
                 <Follow isFollow={isFollow} />
-                <More />
+                <PostKebabMenu />
             </div>
         </div>
     );

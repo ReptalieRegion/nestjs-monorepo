@@ -1,14 +1,15 @@
 'use client';
+
 import MoreIcon from '@/assets/icons/more.svg';
-import MoreBottomSheet from '@/components/home/share/bottomSheet/MoreBottomSheet';
+import PostOptionsBottomSheet from '@/components/home/share/open/bottomSheet/PostOptionsBottomSheet';
 import openStore, { TOpenType } from '@/stores/open';
 
-const More = () => {
+const PostKebabMenu = () => {
     const { open } = openStore();
 
     const handleOpenBottomSheet = () => {
         const type: TOpenType = 'bottomSheet';
-        open({ type, children: <MoreBottomSheet type={type} /> });
+        open({ type, children: <PostOptionsBottomSheet type={type} /> });
     };
 
     return (
@@ -18,4 +19,4 @@ const More = () => {
     );
 };
 
-export default More;
+export default PostKebabMenu;

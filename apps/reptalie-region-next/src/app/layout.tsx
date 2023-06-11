@@ -21,6 +21,10 @@ export default function RootLayout({ children }: IReactNode) {
             <body className={`${inter.className} overflow-hidden`}>
                 <main>
                     <ReactQueryProviders>{children}</ReactQueryProviders>
+                    <div id="modal" />
+                    <div id="bottomSheet" />
+                    <div id="toast" />
+                    <div id="alert" />
                 </main>
             </body>
         </html>

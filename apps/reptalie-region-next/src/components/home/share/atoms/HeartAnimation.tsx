@@ -1,5 +1,5 @@
-import LikeIcon from '@/assets/icons/like.svg';
 import { AnimationEvent } from 'react';
+import LikeIcon from '@/assets/icons/like_55*55.svg';
 
 interface IHeartAnimationProps {
     startLike: boolean;
@@ -27,7 +27,7 @@ const HeartAnimation = ({ startLike, onAnimationEnd }: IHeartAnimationProps) => 
             <Dot className="left-[50%] translate-x-[-50%] top-[70%] animate-down" />
             <div className="absolute left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%]">
                 <div
-                    className="scale-[3.5] fill-red-500 transform-gpu animate-scale-3-up-down"
+                    className="scale-[1.5] fill-red-500 transform-gpu animate-scale-3-up-down"
                     onAnimationEnd={(event) => onAnimationEnd(event)}
                 >
                     <LikeIcon />

@@ -30,19 +30,19 @@ const scaleKey2frame = {
 
 const scale3Keyframe = {
     '0%': {
-        transform: 'scale(3.2)',
+        transform: 'scale(1.5)',
     },
     '40%': {
-        transform: 'scale(3.8)',
+        transform: 'scale(2.1)',
     },
     '65%': {
-        transform: 'scale(3.5)',
+        transform: 'scale(1.8)',
     },
     '75%': {
-        transform: 'scale(3.5)',
+        transform: 'scale(1.8)',
     },
     '100%': {
-        transform: 'scale(3.5)',
+        transform: 'scale(1.8)',
     },
 };
 

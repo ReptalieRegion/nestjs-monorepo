@@ -116,15 +116,6 @@ const left = {
     },
 };
 
-const shimmer = {
-    '0%': {
-        backgroundPosition: '100%',
-    },
-    '100%': {
-        backgroundPosition: '-100%',
-    },
-};
-
 export const keyframes = {
     scaleKeyframe,
     scale3Keyframe,
@@ -136,5 +127,4 @@ export const keyframes = {
     down,
     leftDown,
     left,
-    shimmer,
 } as const;

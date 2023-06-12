@@ -11,18 +11,19 @@ import ImagesContent from '../atoms/ImagesContent';
 type TImagesSliderProps = Pick<IPostsData, 'images' | 'postId'>;
 
 const PostImageCarousel = ({ postId, images }: TImagesSliderProps) => {
-    const { swipeRef: swipeRef, sliderCount } = useSwipe<HTMLDivElement>(images.length);
-    const { setCurrentImageIndex } = sharePostsStore();
-    const [startLike, setStartLike] = useState<boolean>(false);
+    const { swipeRef, sliderCount } = useSwipe<HTMLDivElement>(images.length);
+    const setStartLikeAnimation = sharePostsStore((state) => state.setStartLikeAnimation);
+    const setCurrentImageIndex = sharePostsStore((state) => state.setCurrentImageIndex);
+    const startLikeAnimation = sharePostsStore((state) => state.postsOfInfo[postId]?.startLikeAnimation);
 
     useEffect(() => {
         setCurrentImageIndex(postId, sliderCount);
-    }, [sliderCount, postId, setCurrentImageIndex]);
+    }, [sliderCount, postId, setCurrentImageIndex, setStartLikeAnimation]);
 
     const handleDoubleTabHeartAnimation = () => {
-        setStartLike(true);
+        setStartLikeAnimation(postId, true);
 
-        if (!startLike && window !== undefined && window.ReactNativeWebView) {
+        if (!startLikeAnimation && window !== undefined && window.ReactNativeWebView) {
             window.ReactNativeWebView.postMessage('vibrate');
         }
     };
@@ -30,7 +31,7 @@ const PostImageCarousel = ({ postId, images }: TImagesSliderProps) => {
     return (
         <MobileDiv onDoubleTab={handleDoubleTabHeartAnimation} className="relative">
             <ImagesContent images={images} ref={swipeRef} />
-            <HeartAnimation startLike={startLike} onAnimationEnd={() => setStartLike(false)} />
+            <HeartAnimation startLike={startLikeAnimation} onAnimationEnd={() => setStartLikeAnimation(postId, false)} />
         </MobileDiv>
     );
 };

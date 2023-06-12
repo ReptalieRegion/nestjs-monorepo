@@ -1,30 +1,60 @@
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 
-type TImage = { [key: string]: number };
+export type TPostsInfo = {
+    [postId: string]: {
+        imageIndex: number;
+        startLikeAnimation: boolean;
+    };
+};
 
 type TSharePostsState = {
-    postsOfImages: TImage;
+    postsOfInfo: TPostsInfo;
 };
 
 interface IShareActions {
-    getCurrentImageIndex: (postId: string) => number;
     setCurrentImageIndex: (postId: string, index: number) => void;
+    setStartLikeAnimation: (postId: string, startLikeAnimation: boolean) => void;
 }
 
 const sharePostsStore = create<TSharePostsState & IShareActions>()(
     devtools(
         persist(
             (set, get) => ({
-                postsOfImages: {},
-                getCurrentImageIndex: (postId: string) => {
-                    const { postsOfImages } = get();
-                    const currentImageIndex = postsOfImages[postId];
-                    return currentImageIndex ?? 0;
+                postsOfInfo: {},
+                setCurrentImageIndex: (postId, index) => {
+                    const { postsOfInfo } = get();
+                    const postInfo = postsOfInfo[postId];
+                    const newPostInfo: TPostsInfo = {
+                        [postId]: {
+                            ...postInfo,
+                            imageIndex: index,
+                        },
+                    };
+                    set((state) => ({
+                        ...state,
+                        postsOfInfo: {
+                            ...postsOfInfo,
+                            ...newPostInfo,
+                        },
+                    }));
                 },
-                setCurrentImageIndex: (postId: string, index: number) => {
-                    const { postsOfImages } = get();
-                    set((state) => ({ ...state, postsOfImages: { ...postsOfImages, [postId]: index } }));
+                setStartLikeAnimation: (postId, startLikeAnimation) => {
+                    const { postsOfInfo } = get();
+                    const postInfo = postsOfInfo[postId];
+                    const newPostInfo: TPostsInfo = {
+                        [postId]: {
+                            ...postInfo,
+                            startLikeAnimation,
+                        },
+                    };
+                    set((state) => ({
+                        ...state,
+                        postsOfInfo: {
+                            ...postsOfInfo,
+                            ...newPostInfo,
+                        },
+                    }));
                 },
             }),
             {

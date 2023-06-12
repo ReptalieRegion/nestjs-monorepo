@@ -1,26 +1,19 @@
 import { IPostsData } from '<API>';
 import Like from '../atoms/Like';
 import Comment from '../atoms/Comment';
-import sharePostsStore from '@/stores/share-post';
+import ImagesIndicators from '../atoms/ImagesIndicators';
 
-type IInteractivePost = Pick<IPostsData, 'isFollow' | 'postId' | 'images'>;
+type IInteractivePost = Pick<IPostsData, 'isLike' | 'postId' | 'images'>;
 
-const InteractivePost = ({ postId, isFollow, images }: IInteractivePost) => {
-    const { getCurrentImageIndex } = sharePostsStore();
-    const currentImageIndex = getCurrentImageIndex(postId);
-
+const InteractivePost = ({ postId, isLike, images }: IInteractivePost) => {
     return (
         <div className="flex flex-row justify-between mb-5pxr">
             <div className="flex flex-row ml-[-5px]">
-                <Like postId={postId} isFollow={isFollow} />
+                <Like postId={postId} isLike={isLike} />
                 <Comment postId={postId} />
             </div>
             <div className="flex flex-row items-center space-x-2pxr">
-                {images.map((_, index) => (
-                    <div key={index} className={`${index === currentImageIndex ? 'text-teal-150 scale-110' : 'text-gray-400'}`}>
-                        ●
-                    </div>
-                ))}
+                <ImagesIndicators images={images} postId={postId} />
             </div>
             <div className="w-80pxr" />
         </div>

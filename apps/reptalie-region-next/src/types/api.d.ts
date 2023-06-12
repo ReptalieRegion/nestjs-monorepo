@@ -14,6 +14,7 @@ declare module '<API>' {
         postId: string;
         profile: TImage;
         name: string;
+        isLike: boolean;
         isFollow: boolean;
         content: string;
         images: TImage[];

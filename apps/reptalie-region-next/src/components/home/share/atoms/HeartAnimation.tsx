@@ -3,7 +3,7 @@ import { AnimationEvent } from 'react';
 
 interface IHeartAnimationProps {
     startLike: boolean;
-    onAnimationEnd?: (event: AnimationEvent) => void;
+    onAnimationEnd: (event: AnimationEvent) => void;
 }
 
 const Dot = ({ className }: { className: string }) => {
@@ -28,7 +28,7 @@ const HeartAnimation = ({ startLike, onAnimationEnd }: IHeartAnimationProps) => 
             <div className="absolute left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%]">
                 <div
                     className="scale-[3.5] fill-red-500 transform-gpu animate-scale-3-up-down"
-                    onAnimationEnd={(event) => onAnimationEnd?.(event)}
+                    onAnimationEnd={(event) => onAnimationEnd(event)}
                 >
                     <LikeIcon />
                 </div>

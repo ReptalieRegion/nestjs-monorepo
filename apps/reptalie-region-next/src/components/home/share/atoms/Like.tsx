@@ -2,22 +2,30 @@
 
 import { IPostsData } from '<API>';
 import LikeIcon from '@/assets/icons/like.svg';
-import { useState } from 'react';
+import sharePostsStore from '@/stores/share-post';
+import { useEffect, useState } from 'react';
 
-type ILikeProps = Pick<IPostsData, 'isFollow' | 'postId'>;
+type ILikeProps = Pick<IPostsData, 'isLike' | 'postId'>;
 
-const Like = ({ postId, isFollow }: ILikeProps) => {
-    const [ani, setAni] = useState<boolean>(false);
-    const handleClickLike = () => {
-        setAni((state) => !state);
-        console.log('좋아요 업데이트', postId, isFollow);
+const Like = ({ postId, isLike }: ILikeProps) => {
+    const startLikeAnimation = sharePostsStore((state) => state.postsOfInfo[postId]?.startLikeAnimation);
+    const [filledLikeColor, setFilledLikeColor] = useState<boolean>(isLike);
+
+    useEffect(() => {
+        if (startLikeAnimation) {
+            setFilledLikeColor(true);
+        }
+    }, [startLikeAnimation]);
+
+    const handleLikeClick = () => {
+        setFilledLikeColor((state) => !state);
     };
 
     return (
         <div
-            onClick={handleClickLike}
-            className={`w-40pxr h-40pxr ${isFollow ? 'fill-red-500 stroke-red-500' : 'fill-white stroke-black'} ${
-                ani ? 'transform scale-125' : 'scale-100'
+            onClick={handleLikeClick}
+            className={`w-40pxr h-40pxr ${filledLikeColor ? 'fill-red-500 stroke-red-500' : 'fill-white stroke-black'} ${
+                startLikeAnimation ? 'animate-scale-2-up-down' : 'scale-100'
             }`}
         >
             <LikeIcon />

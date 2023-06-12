@@ -13,6 +13,7 @@ export const handlers = [
                     },
                     name: '윤댕',
                     isFollow: true,
+                    isLike: false,
                     content: '재밌다크크크크ㅡ크크크킄크크ㅡ크크킄sadfsdafsadfdsafsafasdfsddsfafasdfadsafsdafdsaㅁㅁㄴ',
                     images: [
                         {
@@ -40,6 +41,7 @@ export const handlers = [
                     },
                     name: '승댕',
                     isFollow: false,
+                    isLike: true,
                     content: '안녕하세요 ㅎㅎㅎㅎ 제 도마뱀이예요',
                     images: [
                         {
@@ -67,6 +69,7 @@ export const handlers = [
                     },
                     name: '상댕',
                     isFollow: false,
+                    isLike: true,
                     content: '재밌다크크크크ㅡ크크크킄크크ㅡ크크킄sadfsdafsadfdsafsafasdfsddsfafasdfadsafsdafdsa',
                     images: [
                         {
@@ -90,6 +93,7 @@ export const handlers = [
                     },
                     name: '홍길동',
                     isFollow: true,
+                    isLike: true,
                     content: '나는 홍길동이다 크크크',
                     images: [
                         {
@@ -117,6 +121,7 @@ export const handlers = [
                     },
                     name: '도맹',
                     isFollow: true,
+                    isLike: true,
                     content: '바보바보',
                     images: [
                         {

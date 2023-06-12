@@ -10,6 +10,24 @@ const scaleKeyframe = {
     },
 };
 
+const scaleKey2frame = {
+    '0%': {
+        transform: 'scale(0.7)',
+    },
+    '40%': {
+        transform: 'scale(1.3)',
+    },
+    '65%': {
+        transform: 'scale(1)',
+    },
+    '75%': {
+        transform: 'scale(1)',
+    },
+    '100%': {
+        transform: 'scale(1)',
+    },
+};
+
 const scale3Keyframe = {
     '0%': {
         transform: 'scale(3.2)',
@@ -118,6 +136,7 @@ const left = {
 
 export const keyframes = {
     scaleKeyframe,
+    scaleKey2frame,
     scale3Keyframe,
     leftTop,
     top,

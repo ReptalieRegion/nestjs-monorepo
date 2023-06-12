@@ -1,15 +1,20 @@
 'use client';
 
+import PostOptionsBottomSheet, {
+    IPostOptionsBottomSheetProps,
+} from '@/components/home/share/ui-prompts/bottomSheet/PostOptionsBottomSheet';
 import MoreIcon from '@/assets/icons/more.svg';
-import PostOptionsBottomSheet from '@/components/home/share/open/bottomSheet/PostOptionsBottomSheet';
-import openStore, { TOpenType } from '@/stores/open';
+import useUIPromptManager from '@/hooks/useUIPromptManager';
 
 const PostKebabMenu = () => {
-    const { open } = openStore();
+    const { openPrompt } = useUIPromptManager();
 
     const handleOpenBottomSheet = () => {
-        const type: TOpenType = 'bottomSheet';
-        open({ type, children: <PostOptionsBottomSheet type={type} /> });
+        openPrompt<IPostOptionsBottomSheetProps>({
+            Component: PostOptionsBottomSheet,
+            promptType: 'bottomSheet',
+            props: {},
+        });
     };
 
     return (

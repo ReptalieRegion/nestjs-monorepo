@@ -1,27 +1,21 @@
-import openStore, { TOpenType } from '@/stores/open';
 import BackDrop from '@/components/ui/open/BackDrop';
 import { BottomSheetContainer, BottomSheetHeader } from '@/components/ui/open/bottomSheet/atoms';
 import useBottomSheetDrag from '@/hooks/useBottomSheetDrag';
+import { IPrompts } from '<UIPrompts>';
 
-interface IBottomSheetProps {
-    type: TOpenType;
-}
+export interface IPostOptionsBottomSheetProps {}
 
 const MIN_HEIGHT = 100;
 const MAX_HEIGHT = 500;
 
-const PostOptionsBottomSheet = ({ type }: IBottomSheetProps) => {
+const PostOptionsBottomSheet = ({ closePrompt }: IPostOptionsBottomSheetProps & IPrompts) => {
     const { bottomSheetDragAreaRef, changeHeight, isTouchEnd } = useBottomSheetDrag({
         minHeight: MIN_HEIGHT,
         maxHeight: MAX_HEIGHT,
     });
-    const { close } = openStore();
-    const handleClickClose = () => {
-        close(type);
-    };
 
     return (
-        <BackDrop close={handleClickClose}>
+        <BackDrop close={closePrompt}>
             <BottomSheetContainer height={changeHeight} enableHeightTransition={isTouchEnd}>
                 <BottomSheetHeader ref={bottomSheetDragAreaRef} />
                 신고하기

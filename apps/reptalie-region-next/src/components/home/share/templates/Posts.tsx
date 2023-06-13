@@ -1,5 +1,6 @@
 'use client';
 
+import PostWrite from '../atoms/PostWrite';
 import Skeleton from '../atoms/Skeleton';
 import PostCard from '../organisms/PostCard';
 import { useFetchPosts } from '@/react-query/home/share/client/hooks';
@@ -17,7 +18,12 @@ const Posts = () => {
         );
     }
 
-    return <div>{data?.length !== 0 && data?.map((post) => <PostCard key={post.postId} {...post} />)}</div>;
+    return (
+        <div>
+            {data?.length !== 0 && data?.map((post) => <PostCard key={post.postId} {...post} />)}
+            <PostWrite />
+        </div>
+    );
 };
 
 export default Posts;

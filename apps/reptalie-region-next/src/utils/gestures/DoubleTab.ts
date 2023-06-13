@@ -6,6 +6,7 @@ interface IDoubleTabInfo {
     x: number;
     y: number;
     time: number;
+    timeOut?: NodeJS.Timeout;
 }
 
 const defaultTabInfo: IDoubleTabInfo = {
@@ -16,6 +17,7 @@ const defaultTabInfo: IDoubleTabInfo = {
     x: -1,
     y: -1,
     time: 0,
+    timeOut: undefined,
 };
 
 const customDoubleTab = (duration = 400, tapThreshold = 10) => {
@@ -42,6 +44,7 @@ const customDoubleTab = (duration = 400, tapThreshold = 10) => {
             return;
         }
 
+        tabInfo.timeOut = setTimeout(() => initClearInfo(), duration);
         const newX = event.changedTouches[0].pageX;
         const newY = event.changedTouches[0].pageY;
 

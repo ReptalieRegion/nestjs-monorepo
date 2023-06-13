@@ -46,6 +46,28 @@ const scale3Keyframe = {
     },
 };
 
+const elementUpKeyframe = {
+    '0%': {
+        opacity: '0',
+        bottom: '0',
+    },
+    '100%': {
+        opacity: '1',
+        bottom: '3.75rem',
+    },
+};
+
+const elementDownKeyframe = {
+    '0%': {
+        opacity: '1',
+        bottom: '3.75rem',
+    },
+    '100%': {
+        opacity: '0',
+        bottom: '0rem',
+    },
+};
+
 const leftTop = {
     '0%': {
         transform: 'translateX(-50%)',
@@ -138,6 +160,8 @@ export const keyframes = {
     scaleKeyframe,
     scaleKey2frame,
     scale3Keyframe,
+    elementUpKeyframe,
+    elementDownKeyframe,
     leftTop,
     top,
     rightTop,

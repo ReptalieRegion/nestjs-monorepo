@@ -6,7 +6,7 @@ const Layout = ({ children }: { children: ReactNode }) => {
     return (
         <div className="h-[100vh] flex flex-col">
             <ShareHeader />
-            <section className="p-20pxr flex-1 overflow-y-scroll">{children}</section>
+            {children}
             <Bottombar />
         </div>
     );

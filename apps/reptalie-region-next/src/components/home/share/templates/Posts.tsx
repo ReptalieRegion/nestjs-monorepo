@@ -1,7 +1,7 @@
 'use client';
 
-import PostWrite from '../atoms/PostWrite';
 import Skeleton from '../atoms/Skeleton';
+import FloatingActionButtons from '../molecules/FloatingActionButtons';
 import PostCard from '../organisms/PostCard';
 import { useFetchPosts } from '@/react-query/home/share/client/hooks';
 
@@ -21,7 +21,7 @@ const Posts = () => {
     return (
         <div>
             {data?.length !== 0 && data?.map((post) => <PostCard key={post.postId} {...post} />)}
-            <PostWrite />
+            <FloatingActionButtons />
         </div>
     );
 };

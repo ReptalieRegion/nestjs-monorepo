@@ -1,10 +1,8 @@
 'use client';
 
-import { useEffect } from 'react';
 import Skeleton from '../atoms/Skeleton';
 import PostCard from '../organisms/PostCard';
 import { useFetchPosts } from '@/react-query/home/share/client/hooks';
-import sharePostsStore, { TPostsInfo } from '@/stores/share-post';
 
 const Posts = () => {
     const { data, isLoading } = useFetchPosts();

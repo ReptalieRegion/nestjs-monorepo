@@ -1,9 +1,8 @@
-import { ReactNode, UIEventHandler, createContext, useRef, useState } from 'react';
+import { ReactNode, createContext, useCallback, useRef, useState } from 'react';
 import { throttle } from 'lodash-es';
 
 interface IScrollComponentContextProps {
     children: ReactNode;
-    padding?: string;
 }
 
 type TScrollDirection = 'down' | 'up' | 'none';
@@ -23,16 +22,35 @@ const defaultValue: IScrollContextProps = {
 
 export const ScrollContext = createContext<IScrollContextProps>(defaultValue);
 
-const ScrollComponentContext = ({ children, padding }: IScrollComponentContextProps) => {
+const ScrollComponentContext = ({ children }: IScrollComponentContextProps) => {
     const scrollRef = useRef<HTMLElement | null>(null);
     const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-    const [prevScrollTop, setPrevScrollTop] = useState<number>(0);
+    const prevScrollTopRef = useRef<number>(0);
     const [isScrolling, setIsScrolling] = useState<boolean>(false);
     const [scrollDirection, setScrollDirection] = useState<TScrollDirection>('none');
     const [scrollTop, setScrollTop] = useState<number>(0);
+    const throttleHandleScroll = useRef(
+        throttle(() => {
+            setIsScrolling(true);
+            if (scrollTimeoutRef.current) {
+                clearTimeout(scrollTimeoutRef.current);
+            }
+            scrollTimeoutRef.current = setTimeout(() => {
+                setIsScrolling(false);
+            }, 100);
+
+            const currentScrollTop = scrollRef.current?.scrollTop ?? 0;
+            const newScrollDirection = calcScrollDirection();
+            prevScrollTopRef.current = currentScrollTop;
+            setScrollDirection(newScrollDirection);
+            setScrollTop(currentScrollTop);
+        }, 700),
+    ).current;
 
     const calcScrollDirection = (): TScrollDirection => {
         const currentScrollTop = scrollRef.current?.scrollTop ?? 0;
+        const prevScrollTop = prevScrollTopRef.current;
+
         if (currentScrollTop === 0) {
             return 'none';
         }
@@ -48,21 +66,9 @@ const ScrollComponentContext = ({ children, padding }: IScrollComponentContextPr
         return 'none';
     };
 
-    const handleScroll = () => {
-        setIsScrolling(true);
-        if (scrollTimeoutRef.current) {
-            clearTimeout(scrollTimeoutRef.current);
-        }
-        scrollTimeoutRef.current = setTimeout(() => {
-            setIsScrolling(false);
-        }, 100);
-
-        const currentScrollTop = scrollRef.current?.scrollTop ?? 0;
-        const newScrollDirection = calcScrollDirection();
-        setScrollDirection(newScrollDirection);
-        setPrevScrollTop(currentScrollTop);
-        setScrollTop(currentScrollTop);
-    };
+    const handleScroll = useCallback(() => {
+        throttleHandleScroll();
+    }, [throttleHandleScroll]);
 
     const handleScrollToTop = () => {
         scrollRef.current?.scrollTo({

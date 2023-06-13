@@ -20,6 +20,7 @@ const ImagesContent = ({ images }: IImagesContentProps, ref: ForwardedRef<HTMLDi
                                     alt={alt}
                                     width={360}
                                     height={250}
+                                    draggable={false}
                                     loading={index !== 0 ? 'lazy' : undefined}
                                     style={{
                                         objectFit: 'cover',

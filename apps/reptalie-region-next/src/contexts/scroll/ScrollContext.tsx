@@ -40,18 +40,17 @@ const ScrollComponentContext = ({ children }: IScrollComponentContextProps) => {
             }, 100);
 
             const currentScrollTop = scrollRef.current?.scrollTop ?? 0;
-            const newScrollDirection = calcScrollDirection();
+            const newScrollDirection = calcScrollDirection(currentScrollTop);
             prevScrollTopRef.current = currentScrollTop;
             setScrollDirection(newScrollDirection);
             setScrollTop(currentScrollTop);
         }, 500),
     ).current;
 
-    const calcScrollDirection = (): TScrollDirection => {
-        const currentScrollTop = scrollRef.current?.scrollTop ?? 0;
+    const calcScrollDirection = (currentScrollTop: number): TScrollDirection => {
         const prevScrollTop = prevScrollTopRef.current;
 
-        if (currentScrollTop === 0) {
+        if (currentScrollTop <= 0) {
             return 'none';
         }
 

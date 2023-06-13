@@ -17,7 +17,7 @@ const ScrollToTopButton = ({}: IScrollToTopButtonProps) => {
         if (isBlockShowButton) {
             return;
         }
-
+        console.log(scrollDirection, isShowButton);
         if (scrollDirection === 'up') {
             setIsShowButton('up');
             return;
@@ -40,16 +40,18 @@ const ScrollToTopButton = ({}: IScrollToTopButtonProps) => {
     }, [scrollTop]);
 
     const handleIconClick = () => {
-        handleScrollToTop();
-        setIsBlockShowButton(true);
-        setIsShowButton('down');
+        if (scrollDirection === 'up') {
+            handleScrollToTop();
+            setIsBlockShowButton(true);
+            setIsShowButton('down');
+        }
     };
 
     return (
         <div
             onClick={handleIconClick}
             className={`flex justify-center items-center w-50pxr h-50pxr absolute bottom-0pxr rounded-full bg-white active:scale-[0.85] transition-all border-[1px] border-gray-200 ${
-                isShowButton === 'up' ? 'animate-up-opacity' : isShowButton === 'down' ? 'animate-down-opacity' : ''
+                isShowButton === 'up' ? 'animate-up-opacity' : isShowButton === 'down' ? 'animate-down-opacity' : 'opacity-0'
             }`}
         >
             <UpArrowIcon />

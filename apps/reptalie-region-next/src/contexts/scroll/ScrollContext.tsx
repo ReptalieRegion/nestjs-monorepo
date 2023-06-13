@@ -44,7 +44,7 @@ const ScrollComponentContext = ({ children }: IScrollComponentContextProps) => {
             prevScrollTopRef.current = currentScrollTop;
             setScrollDirection(newScrollDirection);
             setScrollTop(currentScrollTop);
-        }, 700),
+        }, 500),
     ).current;
 
     const calcScrollDirection = (): TScrollDirection => {

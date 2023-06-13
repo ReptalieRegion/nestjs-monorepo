@@ -1,5 +1,5 @@
-import { PXR1_100, colors, maxHeights, keyframes, animations, fontSize } from './utils';
 import scrollbarHide from './plugins/scrollbar-hide';
+import { PXR1_100, colors, maxHeights, keyframes, animations, fontSize, PXR1_300 } from './utils';
 
 export const theme = {
     extend: {
@@ -17,6 +17,12 @@ export const theme = {
         },
         maxHeight: {
             ...maxHeights,
+        },
+        height: {
+            ...PXR1_300,
+        },
+        inset: {
+            ...PXR1_300,
         },
     },
     spacing: {

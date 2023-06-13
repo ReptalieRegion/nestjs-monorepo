@@ -5504,12 +5504,14 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@svgr/webpack", "npm:8.0.1"],\
             ["@tanstack/react-query", "virtual:2797db5cbe4f814e6efc26bd0694b895d88e4850c36d629598e4d4cf8874f70f82387a6419ed5967753de3c8c8a10706da46dec9e5929e438e3f4d483ffac064#npm:4.29.12"],\
             ["@tanstack/react-query-devtools", "virtual:2797db5cbe4f814e6efc26bd0694b895d88e4850c36d629598e4d4cf8874f70f82387a6419ed5967753de3c8c8a10706da46dec9e5929e438e3f4d483ffac064#npm:4.29.12"],\
+            ["@types/lodash-es", "npm:4.17.7"],\
             ["@types/node", "npm:20.1.2"],\
             ["@types/react", "npm:18.2.6"],\
             ["@types/react-dom", "npm:18.2.4"],\
             ["autoprefixer", "virtual:2797db5cbe4f814e6efc26bd0694b895d88e4850c36d629598e4d4cf8874f70f82387a6419ed5967753de3c8c8a10706da46dec9e5929e438e3f4d483ffac064#npm:10.4.14"],\
             ["eslint", "npm:8.40.0"],\
             ["eslint-config-next", "virtual:2797db5cbe4f814e6efc26bd0694b895d88e4850c36d629598e4d4cf8874f70f82387a6419ed5967753de3c8c8a10706da46dec9e5929e438e3f4d483ffac064#npm:13.4.5"],\
+            ["lodash-es", "npm:4.17.21"],\
             ["msw", "virtual:2797db5cbe4f814e6efc26bd0694b895d88e4850c36d629598e4d4cf8874f70f82387a6419ed5967753de3c8c8a10706da46dec9e5929e438e3f4d483ffac064#npm:1.2.2"],\
             ["next", "virtual:2797db5cbe4f814e6efc26bd0694b895d88e4850c36d629598e4d4cf8874f70f82387a6419ed5967753de3c8c8a10706da46dec9e5929e438e3f4d483ffac064#npm:13.4.5"],\
             ["next-transpile-modules", "npm:10.0.0"],\
@@ -6309,6 +6311,25 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageDependencies": [\
             ["@types/jsonwebtoken", "npm:9.0.2"],\
             ["@types/node", "npm:20.3.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@types/lodash", [\
+        ["npm:4.14.195", {\
+          "packageLocation": "./.yarn/cache/@types-lodash-npm-4.14.195-a2a8254638-39b75ca635.zip/node_modules/@types/lodash/",\
+          "packageDependencies": [\
+            ["@types/lodash", "npm:4.14.195"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@types/lodash-es", [\
+        ["npm:4.17.7", {\
+          "packageLocation": "./.yarn/cache/@types-lodash-es-npm-4.17.7-7322f70ff2-4b1f39fd1d.zip/node_modules/@types/lodash-es/",\
+          "packageDependencies": [\
+            ["@types/lodash-es", "npm:4.17.7"],\
+            ["@types/lodash", "npm:4.14.195"]\
           ],\
           "linkType": "HARD"\
         }]\
@@ -12836,6 +12857,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./.yarn/cache/lodash-npm-4.17.21-6382451519-eb835a2e51.zip/node_modules/lodash/",\
           "packageDependencies": [\
             ["lodash", "npm:4.17.21"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["lodash-es", [\
+        ["npm:4.17.21", {\
+          "packageLocation": "./.yarn/cache/lodash-es-npm-4.17.21-b45832dfce-05cbffad6e.zip/node_modules/lodash-es/",\
+          "packageDependencies": [\
+            ["lodash-es", "npm:4.17.21"]\
           ],\
           "linkType": "HARD"\
         }]\

@@ -2,7 +2,8 @@ import { PutObjectCommand, S3Client, DeleteObjectCommand, HeadObjectCommand, S3C
 import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
 import * as mime from 'mime-types';
 import { v4 as uuidv4 } from 'uuid';
-import { IResponseImageDTO } from '../../dto/image/response-image.dto';
+
+export const ImageToS3ServiceToken = 'ImageToS3ServiceToken'
 
 interface IS3ObjectParams {
     Key: string;
@@ -10,7 +11,7 @@ interface IS3ObjectParams {
 }
 
 @Injectable()
-export class ImageService {
+export class ImageToS3Service {
     private s3: S3Client;
 
     constructor() {
@@ -26,7 +27,7 @@ export class ImageService {
     }
 
     // 이미지 업로드
-    async uploadToS3(file: Express.Multer.File): Promise<IResponseImageDTO> {
+    async uploadToS3(file: Express.Multer.File) {
         const key = `${uuidv4()}.${mime.extension(file.mimetype)}`;
 
         const uploadParams = {
@@ -54,7 +55,7 @@ export class ImageService {
     }
 
     // 이미지 삭제
-    async deleteFromS3(key: string): Promise<IResponseImageDTO> {
+    async deleteFromS3(key: string) {
         const Params: IS3ObjectParams = {
             Bucket: process.env.AWS_BUCKET ?? '',
             Key: key,
@@ -75,7 +76,7 @@ export class ImageService {
         }
     }
 
-    private async checkS3ObjectExists(params: IS3ObjectParams): Promise<boolean> {
+    private async checkS3ObjectExists(params: IS3ObjectParams) {
         try {
             await this.s3.send(new HeadObjectCommand(params));
             return true;

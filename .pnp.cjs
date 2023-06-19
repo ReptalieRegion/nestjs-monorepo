@@ -34,6 +34,10 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
       {\
         "name": "@reptalie-region/ui",\
         "reference": "workspace:packages/ui"\
+      },\
+      {\
+        "name": "@reptalieregion/webview-bridge",\
+        "reference": "workspace:packages/webview-bridge"\
       }\
     ],\
     "enableTopLevelFallback": true,\
@@ -43,6 +47,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
       ["@reptalie-region-next/web", ["workspace:apps/reptalie-region-next"]],\
       ["@reptalie-region/lib", ["workspace:packages/lib"]],\
       ["@reptalie-region/ui", ["workspace:packages/ui"]],\
+      ["@reptalieregion/webview-bridge", ["workspace:packages/webview-bridge"]],\
       ["tailwind-config", ["workspace:packages/tailwind-config"]],\
       ["test", ["workspace:."]]\
     ],\
@@ -5502,6 +5507,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@hookform/resolvers", "virtual:2797db5cbe4f814e6efc26bd0694b895d88e4850c36d629598e4d4cf8874f70f82387a6419ed5967753de3c8c8a10706da46dec9e5929e438e3f4d483ffac064#npm:3.1.1"],\
             ["@reptalie-region/lib", "workspace:packages/lib"],\
             ["@reptalie-region/ui", "workspace:packages/ui"],\
+            ["@reptalieregion/webview-bridge", "workspace:packages/webview-bridge"],\
             ["@svgr/webpack", "npm:8.0.1"],\
             ["@tanstack/react-query", "virtual:2797db5cbe4f814e6efc26bd0694b895d88e4850c36d629598e4d4cf8874f70f82387a6419ed5967753de3c8c8a10706da46dec9e5929e438e3f4d483ffac064#npm:4.29.12"],\
             ["@tanstack/react-query-devtools", "virtual:2797db5cbe4f814e6efc26bd0694b895d88e4850c36d629598e4d4cf8874f70f82387a6419ed5967753de3c8c8a10706da46dec9e5929e438e3f4d483ffac064#npm:4.29.12"],\
@@ -5549,6 +5555,16 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@types/react-dom", "npm:18.2.5"],\
             ["react", "npm:18.2.0"],\
             ["react-dom", "virtual:727901be73596c476637c9eb069792dd981d2acb4614d66c21abeee0d840002f0e2ce1b83d088d72260540f33004207b3b445035f38844cabcffe6ce90224110#npm:18.2.0"],\
+            ["typescript", "patch:typescript@npm%3A5.1.3#~builtin<compat/typescript>::version=5.1.3&hash=5da071"]\
+          ],\
+          "linkType": "SOFT"\
+        }]\
+      ]],\
+      ["@reptalieregion/webview-bridge", [\
+        ["workspace:packages/webview-bridge", {\
+          "packageLocation": "./packages/webview-bridge/",\
+          "packageDependencies": [\
+            ["@reptalieregion/webview-bridge", "workspace:packages/webview-bridge"],\
             ["typescript", "patch:typescript@npm%3A5.1.3#~builtin<compat/typescript>::version=5.1.3&hash=5da071"]\
           ],\
           "linkType": "SOFT"\

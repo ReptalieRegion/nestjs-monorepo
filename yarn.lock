@@ -3603,6 +3603,7 @@ __metadata:
     "@hookform/resolvers": ^3.1.0
     "@reptalie-region/lib": "workspace:^"
     "@reptalie-region/ui": "workspace:^"
+    "@reptalieregion/webview-bridge": "workspace:^"
     "@svgr/webpack": ^8.0.1
     "@tanstack/react-query": ^4.29.5
     "@tanstack/react-query-devtools": ^4.29.6
@@ -3647,6 +3648,14 @@ __metadata:
     react: ^18.2.0
     react-dom: ^18.2.0
     typescript: ^5.0.4
+  languageName: unknown
+  linkType: soft
+
+"@reptalieregion/webview-bridge@workspace:^, @reptalieregion/webview-bridge@workspace:packages/webview-bridge":
+  version: 0.0.0-use.local
+  resolution: "@reptalieregion/webview-bridge@workspace:packages/webview-bridge"
+  dependencies:
+    typescript: ^5.1.3
   languageName: unknown
   linkType: soft
 

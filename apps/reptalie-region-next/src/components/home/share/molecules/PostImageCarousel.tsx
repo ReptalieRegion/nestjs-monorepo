@@ -7,6 +7,7 @@ import sharePostsStore from '@/stores/share-post';
 import MobileDiv from '@/components/ui/element/div/MobileDiv';
 import HeartAnimation from '../atoms/HeartAnimation';
 import ImagesContent from '../atoms/ImagesContent';
+import { Haptic } from '@/utils/webveiw-bridge/Haptic';
 
 type TImagesSliderProps = Pick<IPostsData, 'images' | 'postId'>;
 
@@ -23,8 +24,11 @@ const PostImageCarousel = ({ postId, images }: TImagesSliderProps) => {
     const handleDoubleTabHeartAnimation = () => {
         setStartLikeAnimation(postId, true);
 
-        if (!startLikeAnimation && window !== undefined && window.ReactNativeWebView) {
-            window.ReactNativeWebView.postMessage('vibrate');
+        if (!startLikeAnimation) {
+            Haptic.trigger({
+                type: 'impactLight',
+                options: { enableVibrateFallback: true, ignoreAndroidSystemSettings: false },
+            });
         }
     };
 

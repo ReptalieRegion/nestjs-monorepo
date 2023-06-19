@@ -22,3 +22,5 @@ node_modules
 
 # dockers
 dockers/data
+
+.DS_Store

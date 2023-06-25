@@ -4,5 +4,5 @@ export interface INavigate {
 
 export type TPushPayload = {
     route: string;
-    params: unknown;
+    params?: unknown;
 };

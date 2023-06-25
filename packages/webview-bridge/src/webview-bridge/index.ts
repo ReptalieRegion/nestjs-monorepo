@@ -1,7 +1,7 @@
 import { IHapticInterface } from '../react-native-haptic-feedback';
 import { INavigate } from '../react-navigation';
 
-type CommandPayloadType = {
+type TWebviewBridge = {
     Haptic: IHapticInterface;
     Navigation: INavigate;
 };
@@ -9,21 +9,18 @@ type CommandPayloadType = {
 type FunctionArguments<T> = T extends (...args: infer A) => unknown ? A : never;
 
 type PostMessageType<
-    ModuleType extends keyof CommandPayloadType = keyof CommandPayloadType,
-    CommandType extends keyof CommandPayloadType[ModuleType] = keyof CommandPayloadType[ModuleType],
+    ModuleType extends keyof TWebviewBridge = keyof TWebviewBridge,
+    CommandType extends keyof TWebviewBridge[ModuleType] = keyof TWebviewBridge[ModuleType],
 > = {
     module: ModuleType;
     command: CommandType;
-    data: FunctionArguments<CommandPayloadType[ModuleType][CommandType]>[0];
+    data: FunctionArguments<TWebviewBridge[ModuleType][CommandType]>[0];
 };
 
-export const serialize = <
-    ModuleType extends keyof CommandPayloadType,
-    CommandType extends keyof CommandPayloadType[ModuleType],
->(
+export const serialize = <ModuleType extends keyof TWebviewBridge, CommandType extends keyof TWebviewBridge[ModuleType]>(
     module: ModuleType,
     command: CommandType,
-    data: FunctionArguments<CommandPayloadType[ModuleType][CommandType]>[0],
+    data: FunctionArguments<TWebviewBridge[ModuleType][CommandType]>[0],
 ): string => {
     const message: PostMessageType<ModuleType, CommandType> = { module, command, data };
     return JSON.stringify(message);

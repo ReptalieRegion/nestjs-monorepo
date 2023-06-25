@@ -7,6 +7,7 @@ import { IPostsData } from '<API>';
 import PostImageCarousel from '../molecules/PostImageCarousel';
 
 const PostCard = ({ isFollow, postId, profile, images, name, commentCount, likeCount, content, isLike }: IPostsData) => {
+    console.log('hi--');
     return (
         <div className="mb-40pxr text-sm">
             <PostHeader isFollow={isFollow} profile={profile} name={name} />

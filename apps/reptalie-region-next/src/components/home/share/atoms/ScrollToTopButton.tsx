@@ -17,7 +17,7 @@ const ScrollToTopButton = ({}: IScrollToTopButtonProps) => {
         if (isBlockShowButton) {
             return;
         }
-        console.log(scrollDirection, isShowButton);
+
         if (scrollDirection === 'up') {
             setIsShowButton('up');
             return;

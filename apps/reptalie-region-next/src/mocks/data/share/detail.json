@@ -1,0 +1,49 @@
+{
+    "1": {
+        "nickname": "윤댕",
+        "name": "윤댕",
+        "profile": {
+            "src": "https://search.pstatic.net/common/?src=http%3A%2F%2Fimgnews.naver.net%2Fimage%2F009%2F2022%2F06%2F08%2F0004974574_002_20220608070201911.jpg&type=a340",
+            "alt": "윤댕"
+        },
+        "followerCount": 100,
+        "followingCount": 20,
+        "posts": [
+            {
+                "postId": 1,
+                "thumbnail": {
+                    "src": "https://search.pstatic.net/common/?src=http%3A%2F%2Fimgnews.naver.net%2Fimage%2F009%2F2022%2F06%2F08%2F0004974574_002_20220608070201911.jpg&type=a340",
+                    "alt": "윤댕"
+                }
+            },
+            {
+                "postId": 1,
+                "thumbnail": {
+                    "src": "https://search.pstatic.net/common/?src=http%3A%2F%2Fimgnews.naver.net%2Fimage%2F009%2F2022%2F06%2F08%2F0004974574_002_20220608070201911.jpg&type=a340",
+                    "alt": "윤댕"
+                }
+            },
+            {
+                "postId": 1,
+                "thumbnail": {
+                    "src": "https://search.pstatic.net/common/?src=http%3A%2F%2Fimgnews.naver.net%2Fimage%2F009%2F2022%2F06%2F08%2F0004974574_002_20220608070201911.jpg&type=a340",
+                    "alt": "윤댕"
+                }
+            },
+            {
+                "postId": 1,
+                "thumbnail": {
+                    "src": "https://search.pstatic.net/common/?src=http%3A%2F%2Fimgnews.naver.net%2Fimage%2F009%2F2022%2F06%2F08%2F0004974574_002_20220608070201911.jpg&type=a340",
+                    "alt": "윤댕"
+                }
+            },
+            {
+                "postId": 1,
+                "thumbnail": {
+                    "src": "https://search.pstatic.net/common/?src=http%3A%2F%2Fimgnews.naver.net%2Fimage%2F009%2F2022%2F06%2F08%2F0004974574_002_20220608070201911.jpg&type=a340",
+                    "alt": "윤댕"
+                }
+            }
+        ]
+    }
+}

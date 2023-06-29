@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { getPosts, updateFollow } from './api';
-import { IPostsData } from '<API>';
+import { getDetailPosts, getPosts, updateFollow } from './api';
+import { IDetailPostsData, IPostsData } from '<API>';
 
 export const useFetchPosts = () => {
     return useQuery<IPostsData[]>({ queryKey: ['fetchPosts'], queryFn: getPosts });
@@ -13,4 +13,8 @@ export const useUpdateFollow = () => {
             queryClient.invalidateQueries(['fetchPosts']);
         },
     });
+};
+
+export const useFetchDetailPosts = (userId: string) => {
+    return useQuery<IDetailPostsData>({ queryKey: ['fetchDetailPosts'], queryFn: () => getDetailPosts(userId) });
 };

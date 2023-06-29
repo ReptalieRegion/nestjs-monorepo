@@ -1,23 +1,14 @@
 import { IPostsData } from '<API>';
 import Follow from '../atoms/Follow';
 import PostKebabMenu from '../atoms/PostKebabMenu';
-import Image from 'next/image';
+import { Profile } from '../atoms/Profile';
 
-type TPostHeaderProps = Pick<IPostsData, 'name' | 'profile' | 'isFollow'>;
+type TPostHeaderProps = Pick<IPostsData, 'name' | 'profile' | 'isFollow' | 'userId'>;
 
-const PostHeader = ({ profile, name, isFollow }: TPostHeaderProps) => {
+const PostHeader = ({ profile, name, isFollow, userId }: TPostHeaderProps) => {
     return (
         <div className="flex flex-row items-center justify-between mb-10pxr">
-            <div className="flex flex-row items-center space-x-5pxr">
-                <Image
-                    width={30}
-                    height={30}
-                    src={profile.src}
-                    alt={profile.alt}
-                    className="rounded-full object-cover w-30pxr h-30pxr"
-                />
-                <div>{name}</div>
-            </div>
+            <Profile userId={userId} name={name} profile={profile} />
             <div className="flex flex-row items-center">
                 <Follow isFollow={isFollow} />
                 <PostKebabMenu />

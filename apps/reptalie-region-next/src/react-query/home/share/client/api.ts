@@ -13,3 +13,9 @@ export const updateFollow = async (data: TFollow) => {
     });
     return response.json;
 };
+
+export const getDetailPosts = async (userId: string) => {
+    const response = await clientFetch(`api/posts/${userId}`);
+
+    return response.json();
+};

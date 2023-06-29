@@ -21,4 +21,18 @@ declare module '<API>' {
         likeCount: number;
         commentCount: number;
     }
+
+    type TPostsInfo = {
+        postsId: string;
+        thumbnail: TImage;
+    };
+
+    interface IDetailPostsData {
+        nickname: string;
+        name: string;
+        followerCount: number;
+        followingCount: number;
+        profile: TImage;
+        posts: TPostsInfo[];
+    }
 }

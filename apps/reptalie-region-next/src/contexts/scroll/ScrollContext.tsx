@@ -78,7 +78,7 @@ const ScrollComponentContext = ({ children }: IScrollComponentContextProps) => {
 
     return (
         <ScrollContext.Provider value={{ isScrolling, scrollDirection, scrollTop, handleScrollToTop }}>
-            <section onScroll={handleScroll} ref={scrollRef} className="p-20pxr h-full flex-1 overflow-y-scroll">
+            <section onScroll={handleScroll} ref={scrollRef} className="p-20pxr h-full w-full flex-1 overflow-y-scroll">
                 {children}
             </section>
         </ScrollContext.Provider>

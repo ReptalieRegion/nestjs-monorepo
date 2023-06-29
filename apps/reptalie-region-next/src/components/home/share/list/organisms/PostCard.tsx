@@ -1,8 +1,8 @@
 'use client';
 
-import PostHeader from '../../share/molecules/PostHeader';
-import InteractivePost from '../../share/molecules/InteractivePost';
-import PostContent from '../../share/molecules/PostContent';
+import PostHeader from '../molecules/PostHeader';
+import InteractivePost from '../molecules/InteractivePost';
+import PostContent from '../molecules/PostContent';
 import { IPostsData } from '<API>';
 import PostImageCarousel from '../molecules/PostImageCarousel';
 

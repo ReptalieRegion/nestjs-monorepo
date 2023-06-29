@@ -1,13 +1,12 @@
 import { ReactNode } from 'react';
-import { ShareHeader } from '@/components/home/share';
-import Bottombar from '@/components/ui/layouts/Bottombar';
+import { HomeBottomBar, HomeHeader } from '@/components/home/common/layouts';
 
 const Layout = ({ children }: { children: ReactNode }) => {
     return (
         <div className="h-[100vh] flex flex-col">
-            <ShareHeader />
+            <HomeHeader />
             {children}
-            <Bottombar />
+            <HomeBottomBar />
         </div>
     );
 };

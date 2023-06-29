@@ -1,22 +1,22 @@
 'use client';
 
 import { usePathname, useRouter } from 'next/navigation';
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import Cart from '@/assets/icons/cart.svg';
 import Community from '@/assets/icons/community.svg';
 import Home from '@/assets/icons/home.svg';
 import My from '@/assets/icons/my.svg';
 import Share from '@/assets/icons/share.svg';
 
-const Bottombar = () => {
+export const HomeBottomBar = () => {
     const router = useRouter();
     const path = usePathname();
     const menus = [
-        { ref: useRef<HTMLDivElement>(null), pageURL: '/home', Icon: Home, name: '홈' },
-        { ref: useRef<HTMLDivElement>(null), pageURL: '/home/cart', Icon: Cart, name: '쇼핑' },
-        { ref: useRef<HTMLDivElement>(null), pageURL: '/home/share', Icon: Share, name: '일상공유' },
-        { ref: useRef<HTMLDivElement>(null), pageURL: '/home/community', Icon: Community, name: '정보공유' },
-        { ref: useRef<HTMLDivElement>(null), pageURL: '/home/my', Icon: My, name: '내 정보' },
+        { pageURL: '/home', Icon: Home, name: '홈' },
+        { pageURL: '/home/cart', Icon: Cart, name: '쇼핑' },
+        { pageURL: '/home/share/list', Icon: Share, name: '일상공유' },
+        { pageURL: '/home/community', Icon: Community, name: '정보공유' },
+        { pageURL: '/home/my', Icon: My, name: '내 정보' },
     ];
     const [clickMenu, setClickMenu] = useState<string>('');
 
@@ -27,20 +27,19 @@ const Bottombar = () => {
 
     return (
         <div className="bg-white flex flex-row justify-between w-full items-center border-t-[1px] rounded-3xl shadow-inner">
-            {menus.map(({ Icon, pageURL, name, ref }) => {
-                const currenPage = pageURL === path;
+            {menus.map(({ Icon, pageURL, name }) => {
+                const currentPage = pageURL === path;
                 const startAnimation = pageURL === clickMenu;
 
                 return (
                     <div
-                        ref={ref}
                         key={pageURL}
                         onClick={() => handleIconClick(pageURL)}
                         className="w-full flex justify-center ease-in-out duration-200 items-center active:scale-[0.9] pt-20pxr pb-10pxr"
                     >
                         <div className="flex flex-col items-center justify-center">
                             <Icon
-                                className={`${currenPage ? 'fill-teal-250' : 'fill-gray-550'} ${
+                                className={`${currentPage ? 'fill-teal-250' : 'fill-gray-550'} ${
                                     startAnimation ? 'animate-scale-up-down' : ''
                                 }`}
                                 onAnimationEnd={() => setClickMenu('')}
@@ -53,5 +52,3 @@ const Bottombar = () => {
         </div>
     );
 };
-
-export default Bottombar;

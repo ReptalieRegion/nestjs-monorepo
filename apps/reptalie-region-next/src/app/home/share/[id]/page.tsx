@@ -16,7 +16,7 @@ export default function ShareDetailPage({ params }: IShareDetailPageProps) {
     }
 
     return data !== undefined ? (
-        <ScrollComponentContext>
+        <ScrollComponentContext customStyle={{ padding: '10px 0' }}>
             <div className="p-20pxr flex flex-col items-center space-y-5pxr">
                 <div className="relative">
                     <Image

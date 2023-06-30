@@ -1,8 +1,9 @@
-import { ReactNode, createContext, useCallback, useRef, useState } from 'react';
+import { CSSProperties, ReactNode, createContext, useCallback, useRef, useState } from 'react';
 import { throttle } from 'lodash-es';
 
 interface IScrollComponentContextProps {
     children: ReactNode;
+    customStyle?: Pick<CSSProperties, 'padding'>;
 }
 
 type TScrollDirection = 'down' | 'up' | 'none';
@@ -22,7 +23,7 @@ const defaultValue: IScrollContextProps = {
 
 export const ScrollContext = createContext<IScrollContextProps>(defaultValue);
 
-const ScrollComponentContext = ({ children }: IScrollComponentContextProps) => {
+const ScrollComponentContext = ({ children, customStyle }: IScrollComponentContextProps) => {
     const scrollRef = useRef<HTMLElement | null>(null);
     const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
     const prevScrollTopRef = useRef<number>(0);
@@ -78,7 +79,12 @@ const ScrollComponentContext = ({ children }: IScrollComponentContextProps) => {
 
     return (
         <ScrollContext.Provider value={{ isScrolling, scrollDirection, scrollTop, handleScrollToTop }}>
-            <section onScroll={handleScroll} ref={scrollRef} className="p-20pxr h-full w-full flex-1 overflow-y-scroll">
+            <section
+                onScroll={handleScroll}
+                ref={scrollRef}
+                style={customStyle}
+                className="p-20pxr h-full w-full flex-1 overflow-y-scroll"
+            >
                 {children}
             </section>
         </ScrollContext.Provider>

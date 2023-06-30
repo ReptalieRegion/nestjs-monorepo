@@ -5,7 +5,7 @@ import ScrollComponentContext from '@/contexts/scroll/ScrollContext';
 
 export default function SharePage() {
     return (
-        <ScrollComponentContext>
+        <ScrollComponentContext customStyle={{ padding: 20 }}>
             <Posts />
         </ScrollComponentContext>
     );

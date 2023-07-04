@@ -3,7 +3,7 @@ import { getDetailPosts, getPosts, updateFollow } from './api';
 import { IDetailPostsData, IPostsData } from '<API>';
 
 export const useFetchPosts = () => {
-    return useQuery<IPostsData[]>({ queryKey: ['fetchPosts'], queryFn: getPosts });
+    return useQuery<IPostsData[]>({ queryKey: ['fetchPosts'], queryFn: getPosts, staleTime: Infinity });
 };
 
 export const useUpdateFollow = () => {

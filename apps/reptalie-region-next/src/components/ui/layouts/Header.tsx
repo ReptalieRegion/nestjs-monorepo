@@ -4,6 +4,8 @@ import Logo from '@/assets/icons/logo.svg';
 import BackButton from '@/assets/icons/back_button.svg';
 import { IHeaderProps, TLeftIcon } from '<Header>';
 import { useRouter } from 'next/navigation';
+import { useContext } from 'react';
+import { RouterContext } from '@/contexts/router/RouterContext';
 
 type TLeftIconMap = {
     [key in TLeftIcon]: {
@@ -13,7 +15,7 @@ type TLeftIconMap = {
 };
 
 const Header = ({ left, center, right }: IHeaderProps) => {
-    const router = useRouter();
+    const router = useContext(RouterContext);
     const leftIconMap: TLeftIconMap = {
         back: { Icon: BackButton, onClick: () => router.back() },
         cancel: { Icon: BackButton, onClick: () => router.back() },

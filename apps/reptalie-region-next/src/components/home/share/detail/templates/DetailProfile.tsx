@@ -1,4 +1,3 @@
-import ScrollComponentContext from '@/contexts/scroll/ScrollContext';
 import { useFetchDetailPosts } from '@/react-query/home/share/client/hooks';
 import UserDetailPanel from '../organisms/UserDetailPanel';
 import PostsList from '../organisms/PostsList';
@@ -10,12 +9,12 @@ interface IDetailProfileProps {
 const DetailProfile = ({ id }: IDetailProfileProps) => {
     const { data, isLoading } = useFetchDetailPosts(id);
 
-    if (isLoading) {
-        return <div />;
-    }
-
-    if (!data) {
-        return <div />;
+    if (isLoading || !data) {
+        return (
+            <div>
+                <div>loading</div>
+            </div>
+        );
     }
 
     return (

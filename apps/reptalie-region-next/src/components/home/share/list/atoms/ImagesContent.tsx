@@ -25,6 +25,7 @@ const ImagesContent = ({ images }: IImagesContentProps, ref: ForwardedRef<HTMLDi
                                     style={{
                                         objectFit: 'cover',
                                         width: '100%',
+                                        height: 'auto',
                                         minHeight: '250px',
                                     }}
                                 />

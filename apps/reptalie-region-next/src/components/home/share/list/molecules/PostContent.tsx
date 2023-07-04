@@ -1,3 +1,5 @@
+'use client';
+
 import { IPostsData } from '<API>';
 import { useEffect, useRef, useState } from 'react';
 

@@ -16,7 +16,7 @@ interface ISignUpInputItemProps {
 const InputItem = ({ itemInfo, errorMessage, register }: ISignUpInputItemProps, ref: ForwardedRef<HTMLInputElement>) => {
     const { id, placeholder, title } = itemInfo;
     const inputTestProps = { name: id, id, placeholder };
-    console.log(ref);
+
     return (
         <div key={id} className="mb-20pxr">
             <SignUpLabel htmlFor={id} title={title} required={register.required} />

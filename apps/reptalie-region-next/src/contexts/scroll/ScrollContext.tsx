@@ -1,8 +1,12 @@
-import { CSSProperties, ReactNode, createContext, useCallback, useRef, useState } from 'react';
+'use client';
+
+import { CSSProperties, ReactNode, createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { throttle } from 'lodash-es';
+import { RouterContext } from '../router/RouterContext';
 
 interface IScrollComponentContextProps {
     children: ReactNode;
+    uuid: string;
     customStyle?: Pick<CSSProperties, 'padding'>;
 }
 
@@ -11,6 +15,7 @@ interface IScrollContextProps {
     scrollTop: number;
     isScrolling: boolean;
     scrollDirection: TScrollDirection;
+    uuid: string;
     handleScrollToTop: () => void;
 }
 
@@ -18,18 +23,20 @@ const defaultValue: IScrollContextProps = {
     scrollTop: 0,
     isScrolling: false,
     scrollDirection: 'none',
+    uuid: '',
     handleScrollToTop: () => {},
 };
 
 export const ScrollContext = createContext<IScrollContextProps>(defaultValue);
 
-const ScrollComponentContext = ({ children, customStyle }: IScrollComponentContextProps) => {
-    const scrollRef = useRef<HTMLElement | null>(null);
+const ScrollComponentContext = ({ children, customStyle, uuid }: IScrollComponentContextProps) => {
+    const scrollRef = useRef<HTMLDivElement | null>(null);
     const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
     const prevScrollTopRef = useRef<number>(0);
     const [isScrolling, setIsScrolling] = useState<boolean>(false);
     const [scrollDirection, setScrollDirection] = useState<TScrollDirection>('none');
     const [scrollTop, setScrollTop] = useState<number>(0);
+    const { currentOptions, setScrollInfo } = useContext(RouterContext);
     const throttleHandleScroll = useRef(
         throttle(() => {
             setIsScrolling(true);
@@ -44,9 +51,19 @@ const ScrollComponentContext = ({ children, customStyle }: IScrollComponentConte
             const newScrollDirection = calcScrollDirection(currentScrollTop);
             prevScrollTopRef.current = currentScrollTop;
             setScrollDirection(newScrollDirection);
+            setScrollInfo({ uuid, scrollTop: currentScrollTop });
             setScrollTop(currentScrollTop);
         }, 500),
     ).current;
+
+    useEffect(() => {
+        const scrollInfo = currentOptions?.scrollInfo?.[uuid];
+        if (scrollInfo) {
+            scrollRef.current?.scrollTo({
+                top: scrollInfo.scrollTop,
+            });
+        }
+    }, [currentOptions, uuid]);
 
     const calcScrollDirection = (currentScrollTop: number): TScrollDirection => {
         const prevScrollTop = prevScrollTopRef.current;
@@ -78,15 +95,15 @@ const ScrollComponentContext = ({ children, customStyle }: IScrollComponentConte
     };
 
     return (
-        <ScrollContext.Provider value={{ isScrolling, scrollDirection, scrollTop, handleScrollToTop }}>
-            <section
+        <ScrollContext.Provider value={{ isScrolling, scrollDirection, scrollTop, uuid, handleScrollToTop }}>
+            <div
                 onScroll={handleScroll}
                 ref={scrollRef}
                 style={customStyle}
                 className="p-20pxr h-full w-full flex-1 overflow-y-scroll"
             >
                 {children}
-            </section>
+            </div>
         </ScrollContext.Provider>
     );
 };

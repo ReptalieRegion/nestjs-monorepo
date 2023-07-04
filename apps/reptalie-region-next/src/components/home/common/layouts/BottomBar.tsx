@@ -1,29 +1,37 @@
 'use client';
 
 import { usePathname, useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import Cart from '@/assets/icons/cart.svg';
 import Community from '@/assets/icons/community.svg';
 import Home from '@/assets/icons/home.svg';
 import My from '@/assets/icons/my.svg';
 import Share from '@/assets/icons/share.svg';
+import { RouterContext } from '@/contexts/router/RouterContext';
+
+const menus = [
+    { pageURL: '/home', Icon: Home, name: '홈' },
+    { pageURL: '/home/cart', Icon: Cart, name: '쇼핑' },
+    { pageURL: '/home/share/list', Icon: Share, name: '일상공유' },
+    { pageURL: '/home/community', Icon: Community, name: '정보공유' },
+    { pageURL: '/home/my', Icon: My, name: '내 정보' },
+];
 
 export const HomeBottomBar = () => {
-    const router = useRouter();
+    const router = useContext(RouterContext);
     const path = usePathname();
-    const menus = [
-        { pageURL: '/home', Icon: Home, name: '홈' },
-        { pageURL: '/home/cart', Icon: Cart, name: '쇼핑' },
-        { pageURL: '/home/share/list', Icon: Share, name: '일상공유' },
-        { pageURL: '/home/community', Icon: Community, name: '정보공유' },
-        { pageURL: '/home/my', Icon: My, name: '내 정보' },
-    ];
     const [clickMenu, setClickMenu] = useState<string>('');
 
     const handleIconClick = (currentPath: string) => {
         setClickMenu(currentPath);
         router.replace(currentPath);
     };
+
+    useEffect(() => {
+        menus.forEach(({ pageURL }) => {
+            router.prefetch(pageURL);
+        });
+    }, [router]);
 
     return (
         <div className="bg-white flex flex-row justify-between w-full items-center border-t-[1px] rounded-3xl shadow-inner">

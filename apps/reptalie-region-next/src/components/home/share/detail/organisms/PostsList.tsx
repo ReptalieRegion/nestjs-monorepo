@@ -12,6 +12,7 @@ const SquareImage = ({ item, index }: { item: TPostsInfo; index: number }) => {
             alt={item.thumbnail.alt}
             style={{
                 width: '100%',
+                height: 'auto',
                 objectFit: 'cover',
                 aspectRatio: '1/1',
             }}

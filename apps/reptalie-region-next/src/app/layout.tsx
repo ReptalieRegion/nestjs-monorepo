@@ -2,6 +2,7 @@ import { Inter } from 'next/font/google';
 import ReactQueryProviders from '../contexts/react-query/providers';
 import { IReactNode } from '<React>';
 import './globals.css';
+import RouterComponentContext from '@/contexts/router/RouterContext';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -19,13 +20,15 @@ export default function RootLayout({ children }: IReactNode) {
     return (
         <html lang="en">
             <body className={`${inter.className} overflow-hidden`}>
-                <main>
-                    <ReactQueryProviders>{children}</ReactQueryProviders>
-                    <div id="modal" />
-                    <div id="bottomSheet" />
-                    <div id="toast" />
-                    <div id="alert" />
-                </main>
+                <RouterComponentContext>
+                    <main className="absolute w-full h-full ">
+                        <ReactQueryProviders>{children}</ReactQueryProviders>
+                        <div id="modal" />
+                        <div id="bottomSheet" />
+                        <div id="toast" />
+                        <div id="alert" />
+                    </main>
+                </RouterComponentContext>
             </body>
         </html>
     );

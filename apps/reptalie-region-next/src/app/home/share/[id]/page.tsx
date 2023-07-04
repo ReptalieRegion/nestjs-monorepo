@@ -11,7 +11,7 @@ interface IShareDetailPageProps {
 
 export default function ShareDetailPage({ params }: IShareDetailPageProps) {
     return (
-        <ScrollComponentContext customStyle={{ padding: '10px 0' }} uuid="share">
+        <ScrollComponentContext customStyle={{ padding: '10px 0' }} uuid="share-detail" scrollRestoration="manual">
             <DetailProfile id={params.id} />
         </ScrollComponentContext>
     );

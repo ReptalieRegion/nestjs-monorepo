@@ -1,7 +1,7 @@
 'use client';
 
-import { usePathname, useRouter } from 'next/navigation';
-import { ReactNode, createContext, useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { MutableRefObject, ReactNode, createContext, useRef, useState } from 'react';
 
 interface IRouterComponentContextProps {
     children: ReactNode;
@@ -42,7 +42,7 @@ interface IRouterContextValue {
     replace: (href: string, options?: NavigateOptions) => void;
     prefetch: (url: string, options?: PrefetchOptions) => void;
     setScrollInfo: ({ uuid, scrollTop, scrollLeft }: any) => void;
-    currentOptions?: TCurrentOptions;
+    currentOptions?: MutableRefObject<TCurrentOptions | undefined>;
 }
 
 const defaultRouterContextValue: IRouterContextValue = {
@@ -51,7 +51,7 @@ const defaultRouterContextValue: IRouterContextValue = {
     replace: () => {},
     prefetch: () => {},
     setScrollInfo: () => {},
-    currentOptions: {},
+    currentOptions: undefined,
 };
 
 export const RouterContext = createContext<IRouterContextValue>(defaultRouterContextValue);
@@ -59,8 +59,7 @@ export const RouterContext = createContext<IRouterContextValue>(defaultRouterCon
 const RouterComponentContext = ({ children }: IRouterComponentContextProps) => {
     const stack = useRef<TStack[]>([{ href: '/' }]);
     const router = useRouter();
-    const path = usePathname();
-    const currentOptions = useRef<TCurrentOptions>();
+    const currentOptions = useRef<TCurrentOptions | undefined>();
 
     defaultRouterContextValue.push = (href: string, options?: NavigateOptions) => {
         if (stack.current.length === 0) {
@@ -85,6 +84,7 @@ const RouterComponentContext = ({ children }: IRouterComponentContextProps) => {
         stack.current.pop();
 
         const { href, options } = stack.current[stack.current.length - 1];
+        currentOptions.current = options;
         router.replace(href, options);
     };
 
@@ -115,7 +115,7 @@ const RouterComponentContext = ({ children }: IRouterComponentContextProps) => {
     };
 
     return (
-        <RouterContext.Provider value={{ ...defaultRouterContextValue, currentOptions: currentOptions.current }}>
+        <RouterContext.Provider value={{ ...defaultRouterContextValue, currentOptions: currentOptions }}>
             {children}
         </RouterContext.Provider>
     );

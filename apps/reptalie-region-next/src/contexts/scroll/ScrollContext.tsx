@@ -7,6 +7,7 @@ import { RouterContext } from '../router/RouterContext';
 interface IScrollComponentContextProps {
     children: ReactNode;
     uuid: string;
+    scrollRestoration?: 'auto' | 'manual';
     customStyle?: Pick<CSSProperties, 'padding'>;
 }
 
@@ -29,7 +30,7 @@ const defaultValue: IScrollContextProps = {
 
 export const ScrollContext = createContext<IScrollContextProps>(defaultValue);
 
-const ScrollComponentContext = ({ children, customStyle, uuid }: IScrollComponentContextProps) => {
+const ScrollComponentContext = ({ children, customStyle, uuid, scrollRestoration = 'auto' }: IScrollComponentContextProps) => {
     const scrollRef = useRef<HTMLDivElement | null>(null);
     const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
     const prevScrollTopRef = useRef<number>(0);
@@ -51,13 +52,16 @@ const ScrollComponentContext = ({ children, customStyle, uuid }: IScrollComponen
             const newScrollDirection = calcScrollDirection(currentScrollTop);
             prevScrollTopRef.current = currentScrollTop;
             setScrollDirection(newScrollDirection);
-            setScrollInfo({ uuid, scrollTop: currentScrollTop });
             setScrollTop(currentScrollTop);
+
+            if (scrollRestoration === 'auto') {
+                setScrollInfo({ uuid, scrollTop: currentScrollTop });
+            }
         }, 500),
     ).current;
 
     useEffect(() => {
-        const scrollInfo = currentOptions?.scrollInfo?.[uuid];
+        const scrollInfo = currentOptions?.current?.scrollInfo?.[uuid];
         if (scrollInfo) {
             scrollRef.current?.scrollTo({
                 top: scrollInfo.scrollTop,

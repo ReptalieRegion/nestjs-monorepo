@@ -8,7 +8,6 @@ type TProfileProps = Pick<IPostsData, 'profile' | 'name' | 'userId'>;
 
 export const Profile = ({ name, profile, userId }: TProfileProps) => {
     const router = useContext(RouterContext);
-    console.log('rerender');
 
     return (
         <div onClick={() => router.push(`/home/share/${userId}`)} className="flex flex-row items-center space-x-5pxr">

@@ -17,6 +17,8 @@
         "g:typecheck": "yarn workspaces foreach -pv run typecheck",
         "lint-front": "lint-staged",
         "prepare": "husky install",
+        "build:webview-bridge": "yarn workspace @reptalieregion/webview-bridge run build",
+        "publish:webview-bridge": "yarn workspace @reptalieregion/webview-bridge run publish",
         "init:local:mongo": "cd ./dockers && docker-compose -f docker-compose-local.yml up -d",
         "init:local:network": "cd ./dockers && docker network create reptalie-region"
 

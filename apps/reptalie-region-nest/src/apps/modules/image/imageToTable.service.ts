@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, BadRequestException } from '@nestjs/common';
 import { ClientSession } from 'mongoose';
 import { ImageType, InputImageDTO } from '../../dto/image/input-image.dto';
 import { ImageRepository } from './image.repository';
@@ -9,14 +9,21 @@ export const ImageToTableServiceToken = 'ImageToTableServiceToken';
 export class ImageToTableService {
     constructor(private readonly imageRepository: ImageRepository) {}
 
-    async createImage(postId: string, imageKey: string[], session: ClientSession) {
-        throw new Error('이미지 테이블 생성 에러')
+    async createImageFromShare(postId: string, imageKey: string[], session: ClientSession) {
         const inputImageDTO: InputImageDTO = {
             imageKey: imageKey,
             type: ImageType.Share,
             typeId: postId,
         };
 
-        return this.imageRepository.createImage(inputImageDTO, session);
+        try {
+            return await this.imageRepository.createImage(inputImageDTO, session);
+        } catch (error) {
+            if (error instanceof Error) {
+                throw new InternalServerErrorException(error.message);
+            }
+
+            throw new BadRequestException('Failed to create image');
+        }
     }
 }

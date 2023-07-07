@@ -1,5 +1,5 @@
 import { PutObjectCommand, S3Client, DeleteObjectCommand, HeadObjectCommand, S3ClientConfig } from '@aws-sdk/client-s3';
-import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import * as mime from 'mime-types';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -52,7 +52,7 @@ export class ImageToS3Service {
                 deleteResults.push({ key: key, message: 'Image deletion successful' });
             } catch (error) {
                 console.log('Error deleting image:', error);
-                throw new BadRequestException('Image deletion failed');
+                throw error;
             }
         }
 
@@ -78,14 +78,14 @@ export class ImageToS3Service {
                 if (uploadResult.$metadata.httpStatusCode !== 200) {
                     throw new Error('Image upload failed');
                 }
-                
+
                 imageKeys.push(key);
             } catch (error) {
                 if (imageKeys.length !== 0) {
                     await this.deleteImagesFromS3(imageKeys);
                 }
 
-                throw new BadRequestException('Image upload failed');
+                throw error;
             }
         }
 

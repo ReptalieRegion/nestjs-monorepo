@@ -1,79 +1,80 @@
-# version: '3.1'
-# services:
-#     mongodb:
-#         image: arm64v8/mongo:6.0
-#         platform: linux/arm64/v8
-#         container_name: reptalie-region-mongodb-6.0
-#         ports:
-#             - 27017:27017
-#         restart: always
-#         environment:
-#             - MONGO_INITDB_ROOT_USERNAME=admin
-#             - MONGO_INITDB_ROOT_PASSWORD=reptalieregionpassword1234
-#             - MONGO_INITDB_DATABASE=reptalie-region-local
-#         volumes:
-#             - type: bind
-#               source: ./data
-#               target: /data/db
-
-version: '3.1'
+version: '3.7'
 services:
-    mongodb-replica:
-        image: arm64v8/mongo:6.0
-        platform: linux/arm64/v8
-        container_name: reptalie-region-mongodb
-        hostname: mongodb-replica
+    key-gen:
+        build: ./mongodb-replica/key
+        volumes:
+            - keys:/keys
+        restart: 'no'
+
+    init-replica:
+        build: ./mongodb-replica/init
+        restart: 'no'
         networks:
             - reptalie-region
+
+    mongodb1:
+        image: arm64v8/mongo:6.0
+        platform: linux/arm64/v8
+        tty: true
+        container_name: mongodb1
+        command: --replSet myRepl --keyFile /keys/mongodb-keyfile
+        restart: always
         ports:
             - 27017:27017
-        restart: always
+        depends_on:
+            - key-gen
+        volumes:
+            - ./data/mongodb1:/data/db
+            - keys:/keys
         environment:
             - MONGO_INITDB_ROOT_USERNAME=admin
-            - MONGO_INITDB_ROOT_PASSWORD=reptalieregionpassword1234
+            - MONGO_INITDB_ROOT_PASSWORD=1234
             - MONGO_INITDB_DATABASE=reptalie-region-local
-        volumes:
-            - ./data/replica:/data/db
-            - ./mongodb.key:/etc/mongodb.key
-        command: mongod --replSet myReplicaSet --keyFile /etc/mongodb.key --bind_ip localhost,mongodb-replica
-
-    mongodb-replica2:
-        image: arm64v8/mongo:6.0
-        platform: linux/arm64/v8
-        container_name: reptalie-region-mongodb-2
-        hostname: mongodb-replica2
         networks:
             - reptalie-region
+
+    mongodb2:
+        image: arm64v8/mongo:6.0
+        platform: linux/arm64/v8
+        container_name: mongodb2
+        command: --replSet myRepl --keyFile /keys/mongodb-keyfile
+        restart: always
         ports:
             - 27018:27017
-        restart: always
+        depends_on:
+            - key-gen
+        volumes:
+            - ./data/mongodb2:/data/db
+            - keys:/keys
         environment:
             - MONGO_INITDB_ROOT_USERNAME=admin
-            - MONGO_INITDB_ROOT_PASSWORD=reptalieregionpassword1234
+            - MONGO_INITDB_ROOT_PASSWORD=1234
             - MONGO_INITDB_DATABASE=reptalie-region-local
-        volumes:
-            - ./data/replica2:/data/db
-            - ./mongodb.key:/etc/mongodb.key
-        command: mongod --replSet myReplicaSet --keyFile /etc/mongodb.key --bind_ip localhost,mongodb-replica2
-
-    mongodb-replica3:
-        image: arm64v8/mongo:6.0
-        platform: linux/arm64/v8
-        container_name: reptalie-region-mongodb-3
-        hostname: mongodb-replica3
         networks:
             - reptalie-region
+
+    mongodb3:
+        image: arm64v8/mongo:6.0
+        platform: linux/arm64/v8
+        container_name: mongodb3
+        command: --replSet myRepl --keyFile /keys/mongodb-keyfile
+        restart: always
         ports:
             - 27019:27017
-        restart: always
+        depends_on:
+            - key-gen
+        volumes:
+            - ./data/mongodb3:/data/db
+            - keys:/keys
         environment:
             - MONGO_INITDB_ROOT_USERNAME=admin
-            - MONGO_INITDB_ROOT_PASSWORD=reptalieregionpassword1234
+            - MONGO_INITDB_ROOT_PASSWORD=1234
             - MONGO_INITDB_DATABASE=reptalie-region-local
-        volumes:
-            - ./data/replica3:/data/db
-            - ./mongodb.key:/etc/mongodb.key
-        command: mongod --replSet myReplicaSet --keyFile /etc/mongodb.key --bind_ip localhost,mongodb-replica3
+        networks:
+            - reptalie-region
+
+volumes:
+    keys:
 
 networks:
     reptalie-region:

@@ -32,7 +32,7 @@ export class ShareWriterService {
             throw new BadRequestException('User ID does not exist');
         }
 
-        let imageKey: string[] | undefined;
+        let imageKeys: string[] = [];
 
         try {
             const sharePost = await this.sharePostRepository.createSharePost(inputSharePostDTO, session);
@@ -41,18 +41,19 @@ export class ShareWriterService {
                 throw new Error('Failed to create share post');
             }
 
-            imageKey = await this.imageToS3Service.uploadToS3(files);
+            imageKeys = await this.imageToS3Service.uploadToS3(files);
 
-            // throw new Error('테스트 에러');
+            await this.imageToTableService.createImageFromShare(sharePost.id, imageKeys, session);
 
             await session.commitTransaction();
         } catch (error) {
-            console.log(error);
-            console.log(imageKey);
-
+            if (imageKeys.length !== 0) {
+                await this.imageToS3Service.deleteImagesFromS3(imageKeys);
+            }
             await session.abortTransaction();
+            
+            throw error;
         } finally {
-            console.log('finally');
             await session.endSession();
         }
     }

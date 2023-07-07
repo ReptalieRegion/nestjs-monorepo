@@ -7,12 +7,14 @@ import {
 } from '../../utils/customModules';
 
 import { ImageModule } from '../image/image.module';
+import { UserModule } from '../user/user.module';
 import { SharePostRepository } from './repository/sharePost.repository';
-import { ShareService } from './service/share.service';
 import { ShareController } from './share.controller';
+import { ShareWriterServiceProvider } from './share.providers';
 
 @Module({
     imports: [
+        UserModule,
         ImageModule,
         MongooseModuleSharePost,
         MongooseModuleSharePostComment,
@@ -20,7 +22,7 @@ import { ShareController } from './share.controller';
         MongooseModuleSharePostReplie,
     ],
     controllers: [ShareController],
-    providers: [SharePostRepository, ShareService],
+    providers: [SharePostRepository, ShareWriterServiceProvider],
     exports: [],
 })
 export class ShareModule {}

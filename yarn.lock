@@ -3521,6 +3521,7 @@ __metadata:
     "@types/uuid": ^9.0.1
     "@typescript-eslint/eslint-plugin": ^5.0.0
     "@typescript-eslint/parser": ^5.0.0
+    bson: ^5.3.0
     cache-manager: ^5.2.1
     cache-manager-redis-yet: ^4.1.1
     class-transformer: ^0.5.1
@@ -5341,7 +5342,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"bson@npm:^5.2.0":
+"bson@npm:^5.2.0, bson@npm:^5.3.0":
   version: 5.3.0
   resolution: "bson@npm:5.3.0"
   checksum: c1e57630fea6b82ad8bc0fb83fd8f16a2620a836ab69f6b9433250cd19704c0c8995681a3bfab9f967eae30512f0c8ee921d42ace4c1781726600c4a367593cf

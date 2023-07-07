@@ -3,12 +3,13 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, SchemaTypes, Types } from 'mongoose';
 import { ImageType } from '../dto/image/input-image.dto';
 import { IResponseImageDTO } from '../dto/image/response-image.dto';
+import { getCurrentDate } from '../utils/time/time';
 
 export interface ImageDocument extends Image, Document {
     view(): Partial<IResponseImageDTO>;
 }
 
-@Schema({ versionKey: false })
+@Schema({ versionKey: false, timestamps: { currentTime: getCurrentDate } })
 export class Image {
     @Prop({ required: true, type: [SchemaTypes.String] })
     imageKey: string[];
@@ -24,7 +25,6 @@ export class Image {
 }
 
 const ImageSchema = SchemaFactory.createForClass(Image);
-ImageSchema.set('timestamps', true);
 ImageSchema.index({ type: 1, typeId: 1 });
 ImageSchema.methods = {
     view(): Partial<IResponseImageDTO> {

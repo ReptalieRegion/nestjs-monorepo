@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import { ObjectId } from 'bson';
 import { Model } from 'mongoose';
 
 import { CreateUserDTO } from '../../dto/user/create-user.dto';
@@ -23,5 +24,9 @@ export class UserRepository extends BaseRepository<UserDocument> {
 
     async findByNickname(nickname: string) {
         return await this.userModel.findOne({ nickname }).exec();
+    }
+
+    async findByUserId(id: string) {
+        return await this.userModel.findById(new ObjectId(id)).exec();
     }
 }

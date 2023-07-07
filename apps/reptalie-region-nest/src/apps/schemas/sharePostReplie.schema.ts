@@ -2,6 +2,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 
 import { Document, SchemaTypes } from 'mongoose';
 import { IResponseSharePostReplieDTO } from '../dto/sharePostReplie/response-sharePostReplie.dto';
+import { getCurrentDate } from '../utils/time/time';
 import { SharePostComment } from './sharePostComment.schema';
 import { User } from './user.schema';
 
@@ -9,7 +10,7 @@ export interface SharePostReplieDocument extends SharePostReplie, Document {
     view(): Partial<IResponseSharePostReplieDTO>;
 }
 
-@Schema({ versionKey: false })
+@Schema({ versionKey: false, timestamps: { currentTime: getCurrentDate } })
 export class SharePostReplie {
     @Prop({ ref: 'sharePostComment', type: SchemaTypes.ObjectId })
     sharePostCommentId: SharePostComment;
@@ -28,7 +29,6 @@ export class SharePostReplie {
 }
 
 const SharePostReplieSchema = SchemaFactory.createForClass(SharePostComment);
-SharePostReplieSchema.set('timestamps', true);
 SharePostReplieSchema.index({ sharePostCommentId: 1 });
 SharePostReplieSchema.methods = {
     view(): Partial<IResponseSharePostReplieDTO> {

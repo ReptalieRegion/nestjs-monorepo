@@ -1,5 +1,5 @@
-import ContainerWithAppbar from '@/components/ContainerContent/ContainerWithAppbar';
 import SignUpForm from '@/components/sign-up';
+import ContainerWithAppbar from '@/components/ui/layouts/ContainerWithAppbar';
 
 export default function SignUpPage() {
     return (

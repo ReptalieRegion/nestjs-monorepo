@@ -1,6 +1,6 @@
 {
     "name": "test",
-    "packageManager": "yarn@3.5.1",
+    "packageManager": "yarn@3.6.0",
     "private": true,
     "scripts": {
         "dev:client": "yarn workspace @reptalie-region-next/web run dev",
@@ -17,6 +17,8 @@
         "g:typecheck": "yarn workspaces foreach -pv run typecheck",
         "lint-front": "lint-staged",
         "prepare": "husky install",
+        "build:webview-bridge": "yarn workspace @reptalieregion/webview-bridge run build",
+        "publish:webview-bridge": "yarn workspace @reptalieregion/webview-bridge run publish",
         "init:local:mongo": "cd ./dockers && docker-compose -f docker-compose-local.yml up -d"
     },
     "workspaces": [

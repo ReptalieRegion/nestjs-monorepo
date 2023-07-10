@@ -5,6 +5,10 @@ const nextConfig = {
     transpilePackages: ['@reptalie-region/ui'],
     experimental: {
         appDir: true,
+        serverActions: true,
+    },
+    images: {
+        domains: ['localhost', 'search.naver.com', 'search.pstatic.net'],
     },
     webpack(config) {
         config.module.rules.push({
@@ -12,6 +16,8 @@ const nextConfig = {
             issuer: /\.[jt]sx?$/,
             use: ['@svgr/webpack'],
         });
+
+        config.experiments = { ...config.experiments, topLevelAwait: true };
 
         return config;
     },

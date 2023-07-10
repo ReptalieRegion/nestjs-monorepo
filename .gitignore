@@ -21,4 +21,6 @@ node_modules
 .env.*
 
 # dockers
-data
+dockers/data
+
+.DS_Store

@@ -21,5 +21,6 @@ node_modules
 .env.*
 
 # dockers
-data
-mongodb.key
+dockers/data
+
+.DS_Store

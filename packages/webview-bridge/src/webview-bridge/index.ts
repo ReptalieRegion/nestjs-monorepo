@@ -2,15 +2,15 @@ import { IAsyncStorage } from '../react-native-async-storage';
 import { IHapticInterface } from '../react-native-haptic-feedback';
 import { INavigate } from '../react-navigation';
 
-type TWebviewBridge = {
+export type TWebviewBridge = {
     Haptic: IHapticInterface;
     Navigation: INavigate;
     AsyncStorage: IAsyncStorage;
 };
 
-type FunctionArguments<T> = T extends (...args: infer A) => unknown ? A : never;
+export type FunctionArguments<T> = T extends (...args: infer A) => unknown ? A : never;
 
-type PostMessageType<
+export type PostMessageType<
     ModuleType extends keyof TWebviewBridge = keyof TWebviewBridge,
     CommandType extends keyof TWebviewBridge[ModuleType] = keyof TWebviewBridge[ModuleType],
 > = {

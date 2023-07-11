@@ -1,9 +1,11 @@
+import { IAsyncStorage } from '../react-native-async-storage';
 import { IHapticInterface } from '../react-native-haptic-feedback';
 import { INavigate } from '../react-navigation';
 
 type TWebviewBridge = {
     Haptic: IHapticInterface;
     Navigation: INavigate;
+    AsyncStorage: IAsyncStorage;
 };
 
 type FunctionArguments<T> = T extends (...args: infer A) => unknown ? A : never;

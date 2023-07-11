@@ -1,5 +1,6 @@
 import { Injectable, BadRequestException, Inject } from '@nestjs/common';
-import { ClientSession } from 'mongoose';
+import { InjectConnection } from '@nestjs/mongoose';
+import mongoose, { ClientSession } from 'mongoose';
 import { InputSharePostDTO } from '../../../dto/sharePost/input-sharePost.dto';
 import { ImageToS3ServiceToken, ImageToS3Service } from '../../image/imageToS3.service';
 import { ImageToTableServiceToken, ImageToTableService } from '../../image/imageToTable.service';
@@ -14,6 +15,9 @@ export class ShareWriterService {
     constructor(
         private readonly sharePostRepository: SharePostRepository,
 
+        @InjectConnection()
+        private readonly connection: mongoose.Connection,
+
         @Inject(UserSearcherServiceToken)
         private readonly userSearcherService: UserSearcherService,
         @Inject(ImageToS3ServiceToken)
@@ -23,7 +27,7 @@ export class ShareWriterService {
     ) {}
 
     async createSharePostWithImages(inputSharePostDTO: InputSharePostDTO, files: Express.Multer.File[]) {
-        const session: ClientSession = await this.sharePostRepository.startSession();
+        const session: ClientSession = await this.connection.startSession();
         session.startTransaction();
 
         const isIdExists = await this.userSearcherService.userIdExists(inputSharePostDTO.userId);
@@ -51,7 +55,7 @@ export class ShareWriterService {
                 await this.imageToS3Service.deleteImagesFromS3(imageKeys);
             }
             await session.abortTransaction();
-            
+
             throw error;
         } finally {
             await session.endSession();

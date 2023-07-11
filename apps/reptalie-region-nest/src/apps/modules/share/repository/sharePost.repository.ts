@@ -17,8 +17,4 @@ export class SharePostRepository extends BaseRepository<SharePostDocument> {
         const savedSharePost = await sharePost.save({ session });
         return savedSharePost.view();
     }
-
-    startSession() {
-        return this.sharePostModel.startSession();
-    }
 }

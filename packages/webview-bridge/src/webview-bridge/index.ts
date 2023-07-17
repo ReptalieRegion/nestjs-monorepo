@@ -3,66 +3,76 @@ import { IAsyncStorage } from '../react-native-async-storage';
 import { IHapticInterface } from '../react-native-haptic-feedback';
 import { INavigate } from '../react-navigation';
 
+const WEBVIEW_BRIDGES = ['Haptic', 'Navigation', 'AsyncStorage'];
+
 export type TWebviewBridge = {
     Haptic: IHapticInterface;
     Navigation: INavigate;
     AsyncStorage: IAsyncStorage;
 };
 
-export type PostMessageType<
-    ModuleType extends keyof TWebviewBridge = keyof TWebviewBridge,
-    CommandType extends keyof TWebviewBridge[ModuleType] = keyof TWebviewBridge[ModuleType],
-> = {
-    module: ModuleType;
-    command: CommandType;
-    data: FunctionArguments<TWebviewBridge[ModuleType][CommandType]>[0];
+type TWebviewBridgeCommandData = {
+    [Module in keyof TWebviewBridge]: {
+        [Command in keyof TWebviewBridge[Module]]: {
+            module: Module;
+            command: Command;
+            data: FunctionArguments<TWebviewBridge[Module][Command]>[0];
+        };
+    };
 };
 
-export const createMessageSerializer = <ModuleType extends keyof TWebviewBridge>(module: ModuleType) => {
-    return <CommandType extends keyof TWebviewBridge[ModuleType]>(
-        command: CommandType,
-        data: FunctionArguments<TWebviewBridge[ModuleType][CommandType]>[0],
-    ) => serialize(module, command, data);
+type TWebviewBridgeCommandReturn = {
+    [Module in keyof TWebviewBridge]: {
+        [Command in keyof TWebviewBridge[Module]]: {
+            module: Module;
+            command: Command;
+            data: PromiseType<ReturnType<TWebviewBridge[Module][Command]>>;
+        };
+    };
 };
 
-export const createMessageDeserialize = (message: string) => {
-    const { module, command, data } = JSON.parse(message) as
-        | PostMessageType<'AsyncStorage'>
-        | PostMessageType<'Haptic'>
-        | PostMessageType<'Navigation'>;
+type PromiseType<T> = T extends Promise<infer U> ? U : T;
 
-    return { module, command, data };
-};
+type Unbox<T> = T extends { [K in keyof T]: infer U } ? U : never;
 
-export const createReturnSerialize = <ModuleType extends keyof TWebviewBridge>(module: ModuleType) => {
-    return <CommandType extends keyof TWebviewBridge[ModuleType]>(
-        command: CommandType,
-        data: ReturnType<TWebviewBridge[ModuleType][CommandType]>,
-    ) => serialize(module, command, data);
-};
+type PostReturnType = Unbox<{
+    [K in keyof TWebviewBridgeCommandReturn]: TWebviewBridgeCommandReturn[K][keyof TWebviewBridgeCommandReturn[K]];
+}>;
 
-export const createReturnDeserialize = () => {
-    return;
-};
+type PostMessageType = Unbox<{
+    [K in keyof TWebviewBridgeCommandData]: TWebviewBridgeCommandData[K][keyof TWebviewBridgeCommandData[K]];
+}>;
 
-const serialize = <ModuleType extends keyof TWebviewBridge, CommandType extends keyof TWebviewBridge[ModuleType]>(
-    module: ModuleType,
-    command: CommandType,
-    data: FunctionArguments<TWebviewBridge[ModuleType][CommandType]>[0],
-): string => {
+export const serializeReturnMessage = ({ module, command, data }: PostReturnType) => {
     const message = { module, command, data };
 
     return JSON.stringify(message);
 };
 
-export const deserialize = (messageStr: string) => {
+export const serializeMessage = ({ module, command, data }: PostMessageType) => {
+    const message = { module, command, data };
+
+    return JSON.stringify(message);
+};
+
+const deserialize = <T>(messageStr: string): T | null => {
     try {
-        return JSON.parse(messageStr) as
-            | PostMessageType<'AsyncStorage'>
-            | PostMessageType<'Haptic'>
-            | PostMessageType<'Navigation'>;
+        const message = JSON.parse(messageStr);
+
+        if (message && message?.module && message.module in WEBVIEW_BRIDGES) {
+            return message as T;
+        }
     } catch {
         console.error('Error parsing message string:', messageStr);
-        return null;
     }
+
+    return null;
+};
+
+export const deserializeMessage = (messageStr: string): PostMessageType | null => {
+    return deserialize<PostMessageType>(messageStr);
+};
+
+export const deserializeReturnMessage = (messageStr: string): PostReturnType | null => {
+    return deserialize<PostReturnType>(messageStr);
 };

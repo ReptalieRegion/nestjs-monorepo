@@ -1,5 +1,7 @@
+import { BridgeFunction } from '../common/function';
+
 export interface INavigate {
-    push: (payload: TPushPayload) => void;
+    push: BridgeFunction<TPushPayload, void>;
 }
 
 export type TPushPayload = {

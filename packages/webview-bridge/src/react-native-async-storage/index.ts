@@ -1,3 +1,5 @@
+import { BridgeFunction } from '../common/function';
+
 type TKeyValuePair = [string, string | null];
 
 type TKeyValuePairs = {
@@ -17,19 +19,6 @@ type TKeyValuePayload = {
     value: string;
 };
 
-export interface IAsyncStorage {
-    setItem(payload: TSetItem): Promise<void>;
-    getItem(payload: TGetItem): Promise<string | null>;
-    mergeItem(payload: TMergeItem): Promise<void>;
-    removeItem(payload: TRemoveItem): Promise<void>;
-    getAllKeys(): Promise<readonly string[]>;
-    multiGet: (payload: TMultiGet) => Promise<readonly TKeyValuePair[]>;
-    multiSet: (payload: TMultiSet) => Promise<void>;
-    multiMerge: (payload: TMultiMerge) => Promise<void>;
-    multiRemove: (payload: TMultiRemove) => Promise<void>;
-    clear: () => Promise<void>;
-}
-
 export type TSetItem = TKeyValuePayload;
 export type TGetItem = TKeyPayload;
 export type TMergeItem = TKeyValuePayload;
@@ -38,3 +27,16 @@ export type TMultiGet = TKeysPayload;
 export type TMultiSet = TKeyValuePairs;
 export type TMultiMerge = TKeyValuePairs;
 export type TMultiRemove = TKeysPayload;
+
+export interface IAsyncStorage {
+    setItem: BridgeFunction<TSetItem, Promise<void>>;
+    getItem: BridgeFunction<TGetItem, Promise<string | null>>;
+    mergeItem: BridgeFunction<TMergeItem, Promise<void>>;
+    removeItem: BridgeFunction<TRemoveItem, Promise<void>>;
+    getAllKeys: BridgeFunction<undefined, Promise<readonly string[]>>;
+    multiGet: BridgeFunction<TMultiGet, Promise<readonly TKeyValuePair[]>>;
+    multiSet: BridgeFunction<TMultiSet, Promise<void>>;
+    multiMerge: BridgeFunction<TMultiMerge, Promise<void>>;
+    multiRemove: BridgeFunction<TMultiRemove, Promise<void>>;
+    clear: BridgeFunction<undefined, Promise<void>>;
+}

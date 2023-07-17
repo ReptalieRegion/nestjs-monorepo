@@ -1,3 +1,5 @@
+import { BridgeFunction } from '../common/function';
+
 type HapticFeedbackTypes =
     | 'selection'
     | 'impactLight'
@@ -22,20 +24,14 @@ type HapticFeedbackTypes =
     | 'effectHeavyClick'
     | 'effectTick';
 
-interface HapticOptions {
-    enableVibrateFallback?: boolean;
-    ignoreAndroidSystemSettings?: boolean;
-}
-
-export interface IHapticInterface {
-    trigger: IHapticTrigger;
-}
-
-export interface IHapticTrigger {
-    (payload: TTriggerPayload): void;
-}
-
 export type TTriggerPayload = {
     type: HapticFeedbackTypes;
-    options?: HapticOptions;
+    options?: {
+        enableVibrateFallback?: boolean;
+        ignoreAndroidSystemSettings?: boolean;
+    };
 };
+
+export interface IHapticInterface {
+    trigger: BridgeFunction<TTriggerPayload, void>;
+}

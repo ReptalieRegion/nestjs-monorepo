@@ -3,6 +3,7 @@ import ReactQueryProviders from '../contexts/react-query/providers';
 import { IReactNode } from '<React>';
 import './globals.css';
 import RouterComponentContext from '@/contexts/router/RouterContext';
+import WebviewBridgeComponent from '@/contexts/webview-bridge/WebviewBridgeContext';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -21,13 +22,15 @@ export default function RootLayout({ children }: IReactNode) {
         <html lang="en">
             <body className={`${inter.className} overflow-hidden`}>
                 <RouterComponentContext>
-                    <main className="absolute w-full h-full ">
-                        <ReactQueryProviders>{children}</ReactQueryProviders>
-                        <div id="modal" />
-                        <div id="bottomSheet" />
-                        <div id="toast" />
-                        <div id="alert" />
-                    </main>
+                    <WebviewBridgeComponent>
+                        <main className="absolute w-full h-full ">
+                            <ReactQueryProviders>{children}</ReactQueryProviders>
+                            <div id="modal" />
+                            <div id="bottomSheet" />
+                            <div id="toast" />
+                            <div id="alert" />
+                        </main>
+                    </WebviewBridgeComponent>
                 </RouterComponentContext>
             </body>
         </html>

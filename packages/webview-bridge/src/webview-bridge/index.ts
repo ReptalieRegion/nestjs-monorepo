@@ -21,6 +21,8 @@ type TWebviewBridgeCommandData = {
     };
 };
 
+type PromiseType<T> = T extends Promise<infer U> ? U : T;
+
 type TWebviewBridgeCommandReturn = {
     [Module in keyof TWebviewBridge]: {
         [Command in keyof TWebviewBridge[Module]]: {
@@ -31,8 +33,6 @@ type TWebviewBridgeCommandReturn = {
     };
 };
 
-type PromiseType<T> = T extends Promise<infer U> ? U : T;
-
 type Unbox<T> = T extends { [K in keyof T]: infer U } ? U : never;
 
 type PostReturnType = Unbox<{
@@ -42,6 +42,21 @@ type PostReturnType = Unbox<{
 type PostMessageType = Unbox<{
     [K in keyof TWebviewBridgeCommandData]: TWebviewBridgeCommandData[K][keyof TWebviewBridgeCommandData[K]];
 }>;
+
+type MessageType<T extends keyof TWebviewBridgeCommandData> = Unbox<{
+    [K in keyof TWebviewBridgeCommandData[T]]: TWebviewBridgeCommandData[T][keyof TWebviewBridgeCommandData[T]];
+}>;
+
+type ReturnMessageType<T extends keyof TWebviewBridgeCommandData> = Unbox<{
+    [K in keyof TWebviewBridgeCommandReturn[T]]: TWebviewBridgeCommandReturn[T][keyof TWebviewBridgeCommandReturn[T]];
+}>;
+
+export type AsyncStorageMessageType = MessageType<'AsyncStorage'>;
+export type AsyncStorageReturnType = ReturnMessageType<'AsyncStorage'>;
+
+export type NavigationMessageType = MessageType<'Navigation'>;
+
+export type HapticMessageType = MessageType<'Haptic'>;
 
 export const serializeReturnMessage = ({ module, command, data }: PostReturnType) => {
     const message = { module, command, data };

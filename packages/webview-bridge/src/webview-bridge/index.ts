@@ -55,9 +55,12 @@ const serialize = <ModuleType extends keyof TWebviewBridge, CommandType extends 
     return JSON.stringify(message);
 };
 
-export const deserialize = (messageStr: string): PostMessageType | null => {
+export const deserialize = (messageStr: string) => {
     try {
-        return JSON.parse(messageStr) as PostMessageType;
+        return JSON.parse(messageStr) as
+            | PostMessageType<'AsyncStorage'>
+            | PostMessageType<'Haptic'>
+            | PostMessageType<'Navigation'>;
     } catch {
         console.error('Error parsing message string:', messageStr);
         return null;

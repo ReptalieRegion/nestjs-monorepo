@@ -35,7 +35,7 @@ type TWebviewBridgeCommandReturn = {
 
 type Unbox<T> = T extends { [K in keyof T]: infer U } ? U : never;
 
-type PostReturnType = Unbox<{
+export type PostReturnType = Unbox<{
     [K in keyof TWebviewBridgeCommandReturn]: TWebviewBridgeCommandReturn[K][keyof TWebviewBridgeCommandReturn[K]];
 }>;
 
@@ -74,7 +74,7 @@ const deserialize = <T>(messageStr: string): T | null => {
     try {
         const message = JSON.parse(messageStr);
 
-        if (message && message?.module && message.module in WEBVIEW_BRIDGES) {
+        if (message && message?.module && message.module === WEBVIEW_BRIDGES) {
             return message as T;
         }
     } catch {

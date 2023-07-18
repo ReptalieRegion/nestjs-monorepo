@@ -5,7 +5,13 @@ import { AsyncStorage } from '@/utils/webveiw-bridge/AsyncStorage';
 import { Haptic } from '@/utils/webveiw-bridge/Haptic';
 import { Navigate } from '@/utils/webveiw-bridge/Navigate';
 
-import { IAsyncStorage, IHapticInterface, INavigate } from '@reptalieregion/webview-bridge';
+import {
+    IAsyncStorage,
+    IHapticInterface,
+    INavigate,
+    deserializeReturnMessage,
+    isWebviewBridgeModule,
+} from '@reptalieregion/webview-bridge';
 import { ReactNode, createContext, useEffect } from 'react';
 
 interface WebviewBridgeComponentProps {
@@ -30,14 +36,13 @@ const WebviewBridgeComponent = ({ children }: WebviewBridgeComponentProps) => {
                     return;
                 }
 
-                const message = JSON.parse(event.data);
+                const message = deserializeReturnMessage(event.data);
                 if (!message?.module) {
                     return;
                 }
 
-                const { module, command, data } = JSON.parse(event.data);
-                if (module === 'Haptic' || module === 'Navigation' || module === 'AsyncStorage') {
-                    subject.notifyObservers({ module, command, data });
+                if (isWebviewBridgeModule(message.module)) {
+                    subject.notifyObservers(message);
                 }
             } catch (error) {
                 console.error(error);

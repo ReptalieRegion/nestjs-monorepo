@@ -1,67 +1,48 @@
-import { IAsyncStorage, serializeMessage } from '@reptalieregion/webview-bridge';
+import { AsyncStorageMessageType, IAsyncStorage, TWebviewBridge } from '@reptalieregion/webview-bridge';
 import ConcreteSubject from '../observer/Observer';
 
 export const AsyncStorage = (observer: ConcreteSubject): IAsyncStorage => {
+    const postMessage = (command: keyof TWebviewBridge['AsyncStorage'], data?: any) => {
+        observer.postMessage({ module: 'AsyncStorage', command, data });
+    };
+
+    const registerObserver = ({ command }: Pick<AsyncStorageMessageType, 'command'>) => {
+        return observer.registerObserver({ module: 'AsyncStorage', command });
+    };
+
     return {
-        clear: async () => {
-            const message = serializeMessage({ module: 'AsyncStorage', command: 'clear', data: undefined });
-            window.ReactNativeWebView.postMessage(message);
-        },
-        getAllKeys: async () => {
-            const message = serializeMessage({ module: 'AsyncStorage', command: 'getAllKeys', data: undefined });
-
-            window.ReactNativeWebView.postMessage(message);
-
-            return new Promise((resolve, reject) => {
-                observer.registerObserver('AsyncStorage', 'getAllKeys', {
-                    success: (data) => resolve(data),
-                    fail: (error) => reject(error),
-                });
-            });
-        },
         getItem: async (payload) => {
-            const message = serializeMessage({ module: 'AsyncStorage', command: 'getItem', data: payload });
-            window.ReactNativeWebView.postMessage(message);
-            return new Promise((resolve, reject) => {
-                observer.registerObserver('AsyncStorage', 'getItem', {
-                    success: (data) => resolve(data),
-                    fail: (error) => reject(error),
-                });
-            });
+            postMessage('getItem', payload);
+            const result = registerObserver({ command: 'getItem' });
+            return result;
         },
         setItem: async (payload) => {
-            const message = serializeMessage({ module: 'AsyncStorage', command: 'setItem', data: payload });
-            window.ReactNativeWebView.postMessage(message);
-        },
-        mergeItem: async (payload) => {
-            const message = serializeMessage({ module: 'AsyncStorage', command: 'mergeItem', data: payload });
-            window.ReactNativeWebView.postMessage(message);
+            postMessage('setItem', payload);
         },
         removeItem: async (payload) => {
-            const message = serializeMessage({ module: 'AsyncStorage', command: 'removeItem', data: payload });
-            window.ReactNativeWebView.postMessage(message);
+            postMessage('removeItem', payload);
+        },
+        clear: async () => {
+            postMessage('clear');
+        },
+        getAllKeys: async () => {
+            return registerObserver({ command: 'getAllKeys' });
+        },
+        mergeItem: async (payload) => {
+            postMessage('mergeItem', payload);
         },
         multiGet: async (payload) => {
-            const message = serializeMessage({ module: 'AsyncStorage', command: 'multiGet', data: payload });
-            window.ReactNativeWebView.postMessage(message);
-            return new Promise((resolve, reject) => {
-                observer.registerObserver('AsyncStorage', 'multiGet', {
-                    success: (data) => resolve(data),
-                    fail: (error) => reject(error),
-                });
-            });
+            postMessage('multiGet', payload);
+            return registerObserver({ command: 'multiGet' });
         },
         multiMerge: async (payload) => {
-            const message = serializeMessage({ module: 'AsyncStorage', command: 'multiMerge', data: payload });
-            window.ReactNativeWebView.postMessage(message);
+            postMessage('multiMerge', payload);
         },
         multiRemove: async (payload) => {
-            const message = serializeMessage({ module: 'AsyncStorage', command: 'multiRemove', data: payload });
-            window.ReactNativeWebView.postMessage(message);
+            postMessage('multiRemove', payload);
         },
         multiSet: async (payload) => {
-            const message = serializeMessage({ module: 'AsyncStorage', command: 'multiSet', data: payload });
-            window.ReactNativeWebView.postMessage(message);
+            postMessage('multiSet', payload);
         },
     };
 };

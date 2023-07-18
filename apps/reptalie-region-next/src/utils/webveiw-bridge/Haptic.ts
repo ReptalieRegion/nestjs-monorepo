@@ -1,8 +1,10 @@
 import { IHapticInterface, serializeMessage } from '@reptalieregion/webview-bridge';
+import ConcreteSubject from '../observer/Observer';
 
-export const Haptic: IHapticInterface = {
-    trigger: (payload) => {
-        const message = serializeMessage({ module: 'Haptic', command: 'trigger', data: payload });
-        window.ReactNativeWebView.postMessage(message);
-    },
+export const Haptic = (observer: ConcreteSubject): IHapticInterface => {
+    return {
+        trigger: (payload) => {
+            observer.postMessage({ module: 'Haptic', command: 'trigger', data: payload });
+        },
+    };
 };

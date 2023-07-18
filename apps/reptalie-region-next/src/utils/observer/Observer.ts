@@ -1,88 +1,40 @@
-import { TWebviewBridge } from '@reptalieregion/webview-bridge';
+import { PostMessageType, PostReturnType, serializeMessage } from '@reptalieregion/webview-bridge';
 
-type Observer = {
-    [module in keyof TWebviewBridge]: {
-        [command in keyof TWebviewBridge[module]]: ObserverCallback<any> | null;
-    };
-};
-
-interface ObserverCallback<TData> {
-    success: (data: TData) => void;
-    fail: (error: any) => void;
+interface ObserverCallback {
+    success: (data: unknown) => void;
+    fail: (error: unknown) => void;
 }
 
 interface Subject {
-    registerObserver<
-        ModuleType extends keyof TWebviewBridge = keyof TWebviewBridge,
-        CommandType extends keyof TWebviewBridge[ModuleType] = keyof TWebviewBridge[ModuleType],
-    >(
-        module: ModuleType,
-        command: CommandType,
-        callback: ObserverCallback<ReturnType<TWebviewBridge[ModuleType][CommandType]>>,
-    ): void;
-    notifyObservers(data: any): void;
+    registerObserver(props: Pick<PostMessageType, 'module' | 'command'>): void;
+    notifyObservers(data: PostReturnType): void;
 }
 
 export default class ConcreteSubject implements Subject {
-    private observers: Observer = {
-        AsyncStorage: {
-            clear: null,
-            getAllKeys: null,
-            getItem: null,
-            mergeItem: null,
-            multiGet: null,
-            multiMerge: null,
-            multiRemove: null,
-            multiSet: null,
-            removeItem: null,
-            setItem: null,
-        },
-        Haptic: {
-            trigger: null,
-        },
-        Navigation: {
-            push: null,
-        },
-    };
+    private observers: { [key: string]: ObserverCallback } = {};
 
-    registerObserver<
-        ModuleType extends keyof TWebviewBridge = keyof TWebviewBridge,
-        CommandType extends keyof TWebviewBridge[ModuleType] = keyof TWebviewBridge[ModuleType],
-    >(
-        module: ModuleType,
-        command: CommandType,
-        callback: ObserverCallback<ReturnType<TWebviewBridge[ModuleType][CommandType]>>,
-    ) {
-        if (module === 'AsyncStorage') {
-            this.observers[module as 'AsyncStorage'][command as keyof TWebviewBridge['AsyncStorage']] = callback;
-            return;
-        }
-
-        if (module === 'Haptic') {
-            this.observers[module as 'Haptic'][command as keyof TWebviewBridge['Haptic']] = callback;
-            return;
-        }
-
-        if (module === 'Navigation') {
-            this.observers[module as 'Navigation'][command as keyof TWebviewBridge['Navigation']] = callback;
-            return;
+    postMessage(message: PostMessageType) {
+        const serializedMessage = serializeMessage(message);
+        if (window && window.ReactNativeWebView) {
+            window.ReactNativeWebView.postMessage(serializedMessage);
         }
     }
 
-    notifyObservers<
-        ModuleType extends keyof TWebviewBridge = keyof TWebviewBridge,
-        CommandType extends keyof TWebviewBridge[ModuleType] = keyof TWebviewBridge[ModuleType],
-    >({ module, command, returnValue }: { module: ModuleType; command: CommandType; returnValue: unknown }) {
-        const fn = this.observers[module]?.[command];
-        if (fn === null) {
-            return;
-        }
+    registerObserver(message: Pick<PostMessageType, 'module' | 'command'>) {
+        return new Promise<any>((resolve, reject) => {
+            this.observers[`${message.module}.${message.command}`] = {
+                success: (data: any) => resolve(data),
+                fail: (error) => reject(error),
+            };
+        });
+    }
 
-        if (!returnValue) {
-            fn?.fail('no value');
-            return;
-        }
+    notifyObservers({ module, command, data }: PostReturnType) {
+        const functions = this.observers[`${module}.${command}`];
 
-        fn?.success(returnValue);
+        if (functions) {
+            const { fail, success } = functions;
+            data ? success(data) : fail('no value');
+        }
     }
 }

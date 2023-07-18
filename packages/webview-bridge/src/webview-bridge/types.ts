@@ -3,7 +3,7 @@ import { IAsyncStorage } from '../react-native-async-storage/types';
 import { IHapticInterface } from '../react-native-haptic-feedback/types';
 import { INavigate } from '../react-navigation/types';
 
-type TWebviewBridgeCommandData = {
+export type TWebviewBridgeCommandData = {
     [Module in keyof TWebviewBridge]: {
         [Command in keyof TWebviewBridge[Module]]: {
             module: Module;
@@ -13,9 +13,9 @@ type TWebviewBridgeCommandData = {
     };
 };
 
-type PromiseType<T> = T extends Promise<infer U> ? U : T;
+export type PromiseType<T> = T extends Promise<infer U> ? U : T;
 
-type TWebviewBridgeCommandReturn = {
+export type TWebviewBridgeCommandReturn = {
     [Module in keyof TWebviewBridge]: {
         [Command in keyof TWebviewBridge[Module]]: {
             module: Module;
@@ -25,13 +25,13 @@ type TWebviewBridgeCommandReturn = {
     };
 };
 
-type Unbox<T> = T extends { [K in keyof T]: infer U } ? U : never;
+export type Unbox<T> = T extends { [K in keyof T]: infer U } ? U : never;
 
-type MessageType<T extends keyof TWebviewBridgeCommandData> = Unbox<{
+export type MessageType<T extends keyof TWebviewBridgeCommandData> = Unbox<{
     [K in keyof TWebviewBridgeCommandData[T]]: TWebviewBridgeCommandData[T][keyof TWebviewBridgeCommandData[T]];
 }>;
 
-type ReturnMessageType<T extends keyof TWebviewBridgeCommandData> = Unbox<{
+export type ReturnMessageType<T extends keyof TWebviewBridgeCommandData> = Unbox<{
     [K in keyof TWebviewBridgeCommandReturn[T]]: TWebviewBridgeCommandReturn[T][keyof TWebviewBridgeCommandReturn[T]];
 }>;
 

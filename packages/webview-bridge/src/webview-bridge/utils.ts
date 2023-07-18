@@ -4,7 +4,7 @@ const deserialize = <T>(messageStr: string): T | null => {
     try {
         const message = JSON.parse(messageStr);
 
-        if (message && message?.module && message.module === WEBVIEW_BRIDGES) {
+        if (message && message?.module && message.module in WEBVIEW_BRIDGES) {
             return message as T;
         }
     } catch {

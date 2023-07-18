@@ -4,7 +4,7 @@ const deserialize = <T>(messageStr: string): T | null => {
     try {
         const message = JSON.parse(messageStr);
 
-        if (message && message?.module !== undefined && WEBVIEW_BRIDGES.indexOf(message.module) !== -1) {
+        if (message && message?.module !== undefined && isWebviewBridgeModule(message.module)) {
             return message as T;
         }
     } catch {
@@ -12,6 +12,10 @@ const deserialize = <T>(messageStr: string): T | null => {
     }
 
     return null;
+};
+
+export const isWebviewBridgeModule = (module: string) => {
+    return WEBVIEW_BRIDGES.indexOf(module) !== -1;
 };
 
 export const deserializeMessage = (messageStr: string): PostMessageType | null => {

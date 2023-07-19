@@ -3,12 +3,26 @@ import { IAsyncStorage } from '../react-native-async-storage/types';
 import { IHapticInterface } from '../react-native-haptic-feedback/types';
 import { INavigate } from '../react-navigation/types';
 
+export type TWebviewBridgeModule = keyof TWebviewBridge;
+
+export type TWebviewBridgeCommand<Module extends TWebviewBridgeModule> = keyof TWebviewBridge[Module];
+
+export type TWebviewBridgeDataType<
+    Module extends TWebviewBridgeModule,
+    Command extends TWebviewBridgeCommand<Module>,
+> = FunctionArguments<TWebviewBridge[Module][Command]>[0];
+
+export type TWebviewBridgeReturnType<
+    Module extends TWebviewBridgeModule,
+    Command extends TWebviewBridgeCommand<Module>,
+> = PromiseType<ReturnType<TWebviewBridge[Module][Command]>>;
+
 export type TWebviewBridgeCommandData = {
-    [Module in keyof TWebviewBridge]: {
-        [Command in keyof TWebviewBridge[Module]]: {
+    [Module in TWebviewBridgeModule]: {
+        [Command in TWebviewBridgeCommand<Module>]: {
             module: Module;
             command: Command;
-            data: FunctionArguments<TWebviewBridge[Module][Command]>[0];
+            data: TWebviewBridgeDataType<Module, Command>;
         };
     };
 };
@@ -16,11 +30,11 @@ export type TWebviewBridgeCommandData = {
 export type PromiseType<T> = T extends Promise<infer U> ? U : T;
 
 export type TWebviewBridgeCommandReturn = {
-    [Module in keyof TWebviewBridge]: {
-        [Command in keyof TWebviewBridge[Module]]: {
+    [Module in TWebviewBridgeModule]: {
+        [Command in TWebviewBridgeCommand<Module>]: {
             module: Module;
             command: Command;
-            data: PromiseType<ReturnType<TWebviewBridge[Module][Command]>>;
+            data: TWebviewBridgeReturnType<Module, Command>;
         };
     };
 };

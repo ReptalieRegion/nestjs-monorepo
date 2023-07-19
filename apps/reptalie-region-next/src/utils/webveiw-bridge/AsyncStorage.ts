@@ -1,8 +1,8 @@
 import { IAsyncStorage } from '@reptalieregion/webview-bridge';
-import ConcreteSubject from '../observer/Observer';
+import WebviewBridgeManager from './utils/WebviewBridgeManager';
 
-export const AsyncStorage = (observer: ConcreteSubject): IAsyncStorage => {
-    const { postMessage, registerObserver } = observer.createAndRegisterObserver('AsyncStorage');
+export const AsyncStorage = (observer: WebviewBridgeManager): IAsyncStorage => {
+    const { postMessage, registerObserver } = observer.createObserverAndPostMessage('AsyncStorage');
 
     return {
         getItem: async (payload) => {

@@ -20,8 +20,8 @@ interface Observers {
     };
 }
 
-interface Subject {
-    createAndRegisterObserver<Module extends TWebviewBridgeModule>(
+interface IWebviewBridgeManager {
+    createObserverAndPostMessage<Module extends TWebviewBridgeModule>(
         module: Module,
     ): {
         registerObserver: <Command extends TWebviewBridgeCommand<Module>>(
@@ -39,19 +39,10 @@ interface Subject {
     notifyObservers(message: PostReturnType): void;
 }
 
-export default class ConcreteSubject implements Subject {
+export default class WebviewBridgeManager implements IWebviewBridgeManager {
     private observers: Observers = {};
 
-    postMessage<Module extends TWebviewBridgeModule, Command extends TWebviewBridgeCommand<Module>>(
-        message: TWebviewBridgeSerializeMessage<Module, Command>,
-    ) {
-        const serializedMessage = serializeMessage(message);
-        if (window && window.ReactNativeWebView) {
-            window.ReactNativeWebView.postMessage(serializedMessage);
-        }
-    }
-
-    createAndRegisterObserver<Module extends TWebviewBridgeModule>(module: Module) {
+    createObserverAndPostMessage<Module extends TWebviewBridgeModule>(module: Module) {
         return {
             registerObserver: <Command extends TWebviewBridgeCommand<Module>>(command: Command) =>
                 this.registerObserver({ module, command }),
@@ -73,6 +64,15 @@ export default class ConcreteSubject implements Subject {
         if (functions) {
             const { fail, success } = functions;
             payload ? success(payload) : fail('no value');
+        }
+    }
+
+    private postMessage<Module extends TWebviewBridgeModule, Command extends TWebviewBridgeCommand<Module>>(
+        message: TWebviewBridgeSerializeMessage<Module, Command>,
+    ) {
+        const serializedMessage = serializeMessage(message);
+        if (window && window.ReactNativeWebView && serializedMessage) {
+            window.ReactNativeWebView.postMessage(serializedMessage);
         }
     }
 

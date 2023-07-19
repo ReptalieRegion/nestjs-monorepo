@@ -1,8 +1,8 @@
 import { IHapticInterface } from '@reptalieregion/webview-bridge';
-import ConcreteSubject from '../observer/Observer';
+import WebviewBridgeManager from './utils/WebviewBridgeManager';
 
-export const Haptic = (observer: ConcreteSubject): IHapticInterface => {
-    const { postMessage } = observer.createAndRegisterObserver('Haptic');
+export const Haptic = (observer: WebviewBridgeManager): IHapticInterface => {
+    const { postMessage } = observer.createObserverAndPostMessage('Haptic');
 
     return {
         trigger: (payload) => {

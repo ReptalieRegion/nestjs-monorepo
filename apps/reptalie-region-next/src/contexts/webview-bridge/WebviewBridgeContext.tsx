@@ -1,9 +1,9 @@
 'use client';
 
-import ConcreteSubject from '@/utils/observer/Observer';
 import { AsyncStorage } from '@/utils/webveiw-bridge/AsyncStorage';
 import { Haptic } from '@/utils/webveiw-bridge/Haptic';
 import { Navigate } from '@/utils/webveiw-bridge/Navigate';
+import WebviewBridgeManager from '@/utils/webveiw-bridge/utils/WebviewBridgeManager';
 
 import {
     IAsyncStorage,
@@ -22,7 +22,7 @@ type TWebviewBridgeValue = {
 
 export const WebviewBridgeContext = createContext<TWebviewBridgeValue>({});
 
-const subject = new ConcreteSubject();
+const webviewBridgeManager = new WebviewBridgeManager();
 
 const makeReturnValue = (event: MessageEvent<any>) => {
     try {
@@ -36,7 +36,7 @@ const makeReturnValue = (event: MessageEvent<any>) => {
         }
 
         if (isWebviewBridgeModule(message.module)) {
-            subject.notifyObservers(message);
+            webviewBridgeManager.notifyObservers(message);
         }
     } catch (error) {
         console.error(error);
@@ -52,9 +52,9 @@ const WebviewBridgeComponent = ({ children }: PropsWithChildren) => {
     }, []);
 
     const webviewBridge = {
-        Haptic: Haptic(subject),
-        Navigate: Navigate(subject),
-        AsyncStorage: AsyncStorage(subject),
+        Haptic: Haptic(webviewBridgeManager),
+        Navigate: Navigate(webviewBridgeManager),
+        AsyncStorage: AsyncStorage(webviewBridgeManager),
     };
 
     return <WebviewBridgeContext.Provider value={webviewBridge}>{children}</WebviewBridgeContext.Provider>;

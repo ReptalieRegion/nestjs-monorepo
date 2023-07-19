@@ -1,4 +1,4 @@
-import { INavigate, serializeMessage } from '@reptalieregion/webview-bridge';
+import { INavigate } from '@reptalieregion/webview-bridge';
 import ConcreteSubject from '../observer/Observer';
 
 export const Navigate = (observer: ConcreteSubject): INavigate => {

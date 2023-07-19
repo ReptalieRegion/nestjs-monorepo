@@ -1,48 +1,41 @@
-import { AsyncStorageMessageType, IAsyncStorage, TWebviewBridge } from '@reptalieregion/webview-bridge';
+import { IAsyncStorage } from '@reptalieregion/webview-bridge';
 import ConcreteSubject from '../observer/Observer';
 
 export const AsyncStorage = (observer: ConcreteSubject): IAsyncStorage => {
-    const postMessage = (command: keyof TWebviewBridge['AsyncStorage'], data?: any) => {
-        observer.postMessage({ module: 'AsyncStorage', command, data });
-    };
-
-    const registerObserver = ({ command }: Pick<AsyncStorageMessageType, 'command'>) => {
-        return observer.registerObserver({ module: 'AsyncStorage', command });
-    };
+    const { postMessage, registerObserver } = observer.createAndRegisterObserver('AsyncStorage');
 
     return {
         getItem: async (payload) => {
-            postMessage('getItem', payload);
-            const result = registerObserver({ command: 'getItem' });
-            return result;
+            postMessage({ command: 'getItem', payload });
+            return registerObserver('getItem');
         },
         setItem: async (payload) => {
-            postMessage('setItem', payload);
+            postMessage({ command: 'setItem', payload });
         },
         removeItem: async (payload) => {
-            postMessage('removeItem', payload);
+            postMessage({ command: 'removeItem', payload });
         },
         clear: async () => {
-            postMessage('clear');
+            postMessage({ command: 'clear', payload: undefined });
         },
         getAllKeys: async () => {
-            return registerObserver({ command: 'getAllKeys' });
+            return registerObserver('getAllKeys');
         },
         mergeItem: async (payload) => {
-            postMessage('mergeItem', payload);
+            postMessage({ command: 'mergeItem', payload });
         },
         multiGet: async (payload) => {
-            postMessage('multiGet', payload);
-            return registerObserver({ command: 'multiGet' });
+            postMessage({ command: 'multiGet', payload });
+            return registerObserver('multiGet');
         },
         multiMerge: async (payload) => {
-            postMessage('multiMerge', payload);
+            postMessage({ command: 'multiMerge', payload });
         },
         multiRemove: async (payload) => {
-            postMessage('multiRemove', payload);
+            postMessage({ command: 'multiRemove', payload });
         },
         multiSet: async (payload) => {
-            postMessage('multiSet', payload);
+            postMessage({ command: 'multiSet', payload });
         },
     };
 };

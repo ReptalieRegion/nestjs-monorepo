@@ -15,6 +15,12 @@ interface DeleteResult {
     message: string;
 }
 
+const MAX_RETRIES = 3;
+
+function delay(ms: number) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 @Injectable()
 export class ImageToS3Service {
     private s3: S3Client;
@@ -46,13 +52,23 @@ export class ImageToS3Service {
             if (!isKeyExists) {
                 throw new NotFoundException('Image not found.');
             }
+            
+            let retries = 0;
 
-            try {
-                await this.s3.send(new DeleteObjectCommand(Params));
-                deleteResults.push({ key: key, message: 'Image deletion successful' });
-            } catch (error) {
-                console.log('Error deleting image:', error);
-                throw error;
+            while (retries < MAX_RETRIES) {
+                try {
+                    await this.s3.send(new DeleteObjectCommand(Params));
+                    deleteResults.push({ key: key, message: 'Image deletion successful' });
+                    break;
+                } catch (error) {
+                    retries++;
+                    console.log(`Image deletion failed, retrying... Retry count: ${retries}`);
+                    await delay(retries * 5 * 1000);
+                }
+            }
+
+            if (retries === MAX_RETRIES) {
+                throw new Error('Image deletion failed after multiple retries');
             }
         }
 
@@ -60,7 +76,7 @@ export class ImageToS3Service {
     }
 
     // 이미지 업로드
-    async uploadToS3(files: Express.Multer.File[]): Promise<string[]> {
+    async uploadToS3(files: Express.Multer.File[]) {
         const imageKeys: string[] = [];
 
         for (const file of files) {
@@ -72,20 +88,30 @@ export class ImageToS3Service {
                 Body: file.buffer,
             };
 
-            try {
-                const uploadResult = await this.s3.send(new PutObjectCommand(uploadParams));
+            let retries = 0;
 
-                if (uploadResult.$metadata.httpStatusCode !== 200) {
-                    throw new Error('Image upload failed');
+            while (retries < MAX_RETRIES) {
+                try {
+                    const uploadResult = await this.s3.send(new PutObjectCommand(uploadParams));
+
+                    if (uploadResult.$metadata.httpStatusCode !== 200) {
+                        throw new Error('Image upload failed');
+                    }
+
+                    imageKeys.push(key);
+                    break;
+                } catch (error) {
+                    retries++;
+                    console.log(`Image upload failed, retrying... Retry count: ${retries}`);
+                    await delay(retries * 5 * 1000);
                 }
+            }
 
-                imageKeys.push(key);
-            } catch (error) {
+            if (retries === MAX_RETRIES) {
                 if (imageKeys.length !== 0) {
                     await this.deleteImagesFromS3(imageKeys);
                 }
-
-                throw error;
+                throw new Error('Image upload failed after multiple retries');
             }
         }
 

@@ -17,24 +17,42 @@ export type TWebviewBridgeReturnType<
     Command extends TWebviewBridgeCommand<Module>,
 > = PromiseType<ReturnType<TWebviewBridge[Module][Command]>>;
 
+export type TWebviewBridgeSerializeReturnMessage<
+    Module extends TWebviewBridgeModule,
+    Command extends TWebviewBridgeCommand<Module>,
+> = {
+    module: Module;
+    command: Command;
+    payload: TWebviewBridgeReturnType<Module, Command>;
+};
+
+export type TWebviewBridgeSerializeMessage<
+    Module extends TWebviewBridgeModule,
+    Command extends TWebviewBridgeCommand<Module>,
+> = {
+    module: Module;
+    command: Command;
+    payload: TWebviewBridgeDataType<Module, Command>;
+};
+
+export type PromiseType<T> = T extends Promise<infer U> ? U : T;
+
 export type TWebviewBridgeCommandData = {
     [Module in TWebviewBridgeModule]: {
         [Command in TWebviewBridgeCommand<Module>]: {
             module: Module;
             command: Command;
-            data: TWebviewBridgeDataType<Module, Command>;
+            payload: TWebviewBridgeDataType<Module, Command>;
         };
     };
 };
-
-export type PromiseType<T> = T extends Promise<infer U> ? U : T;
 
 export type TWebviewBridgeCommandReturn = {
     [Module in TWebviewBridgeModule]: {
         [Command in TWebviewBridgeCommand<Module>]: {
             module: Module;
             command: Command;
-            data: TWebviewBridgeReturnType<Module, Command>;
+            payload: TWebviewBridgeReturnType<Module, Command>;
         };
     };
 };

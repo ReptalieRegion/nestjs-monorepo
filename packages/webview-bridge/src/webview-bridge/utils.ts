@@ -1,4 +1,12 @@
-import { PostMessageType, PostReturnType, WEBVIEW_BRIDGES } from './types';
+import {
+    PostMessageType,
+    PostReturnType,
+    TWebviewBridgeCommand,
+    TWebviewBridgeModule,
+    TWebviewBridgeSerializeMessage,
+    TWebviewBridgeSerializeReturnMessage,
+    WEBVIEW_BRIDGES,
+} from './types';
 
 const deserialize = <T>(messageStr: string): T | null => {
     try {
@@ -26,14 +34,22 @@ export const deserializeReturnMessage = (messageStr: string): PostReturnType | n
     return deserialize<PostReturnType>(messageStr);
 };
 
-export const serializeReturnMessage = ({ module, command, data }: PostReturnType) => {
-    const message = { module, command, data };
+export const serializeReturnMessage = <Module extends TWebviewBridgeModule, Command extends TWebviewBridgeCommand<Module>>({
+    module,
+    command,
+    payload,
+}: TWebviewBridgeSerializeReturnMessage<Module, Command>) => {
+    const message = { module, command, payload };
 
     return JSON.stringify(message);
 };
 
-export const serializeMessage = ({ module, command, data }: PostMessageType) => {
-    const message = { module, command, data };
+export const serializeMessage = <Module extends TWebviewBridgeModule, Command extends TWebviewBridgeCommand<Module>>({
+    module,
+    command,
+    payload,
+}: TWebviewBridgeSerializeMessage<Module, Command>) => {
+    const message = { module, command, payload };
 
     return JSON.stringify(message);
 };

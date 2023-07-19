@@ -1,8 +1,12 @@
-import { IHapticInterface, serialize } from '@reptalieregion/webview-bridge';
+import { IHapticInterface } from '@reptalieregion/webview-bridge';
+import WebviewBridgeManager from './utils/WebviewBridgeManager';
 
-export const Haptic: IHapticInterface = {
-    trigger: (payload) => {
-        const message = serialize('Haptic', 'trigger', payload);
-        window.ReactNativeWebView.postMessage(message);
-    },
+export const Haptic = (observer: WebviewBridgeManager): IHapticInterface => {
+    const { postMessage } = observer.createObserverAndPostMessage('Haptic');
+
+    return {
+        trigger: (payload) => {
+            postMessage({ command: 'trigger', payload });
+        },
+    };
 };

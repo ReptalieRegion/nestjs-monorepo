@@ -1,17 +1,18 @@
 'use client';
 
 import useSwipe from '@/hooks/useSwipe';
-import { useEffect, useState } from 'react';
+import { useContext, useEffect } from 'react';
 import { IPostsData } from '<API>';
 import sharePostsStore from '@/stores/share-post';
 import MobileDiv from '@/components/ui/element/div/MobileDiv';
 import HeartAnimation from '../atoms/HeartAnimation';
 import ImagesContent from '../atoms/ImagesContent';
-import { Haptic } from '@/utils/webveiw-bridge/Haptic';
+import { WebviewBridgeContext } from '@/contexts/webview-bridge/WebviewBridgeContext';
 
 type TImagesSliderProps = Pick<IPostsData, 'images' | 'postId'>;
 
 const PostImageCarousel = ({ postId, images }: TImagesSliderProps) => {
+    const { Haptic } = useContext(WebviewBridgeContext);
     const { swipeRef, sliderCount } = useSwipe<HTMLDivElement>(images.length);
     const setStartLikeAnimation = sharePostsStore((state) => state.setStartLikeAnimation);
     const setCurrentImageIndex = sharePostsStore((state) => state.setCurrentImageIndex);
@@ -25,7 +26,7 @@ const PostImageCarousel = ({ postId, images }: TImagesSliderProps) => {
         setStartLikeAnimation(postId, true);
 
         if (!startLikeAnimation) {
-            Haptic.trigger({
+            Haptic?.trigger({
                 type: 'impactLight',
                 options: { enableVibrateFallback: true, ignoreAndroidSystemSettings: false },
             });

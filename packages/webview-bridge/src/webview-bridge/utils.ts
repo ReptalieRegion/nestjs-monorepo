@@ -41,7 +41,7 @@ export const serializeReturnMessage = <Module extends TWebviewBridgeModule, Comm
 }: TWebviewBridgeSerializeReturnMessage<Module, Command>) => {
     const message = { module, command, payload };
 
-    return JSON.stringify(message);
+    return module && command && payload ? JSON.stringify(message) : undefined;
 };
 
 export const serializeMessage = <Module extends TWebviewBridgeModule, Command extends TWebviewBridgeCommand<Module>>({
@@ -51,5 +51,5 @@ export const serializeMessage = <Module extends TWebviewBridgeModule, Command ex
 }: TWebviewBridgeSerializeMessage<Module, Command>) => {
     const message = { module, command, payload };
 
-    return JSON.stringify(message);
+    return module && command && payload ? JSON.stringify(message) : undefined;
 };

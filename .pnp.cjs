@@ -24,16 +24,8 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
         "reference": "workspace:apps/reptalie-region-next"\
       },\
       {\
-        "name": "@reptalie-region/lib",\
-        "reference": "workspace:packages/lib"\
-      },\
-      {\
         "name": "tailwind-config",\
         "reference": "workspace:packages/tailwind-config"\
-      },\
-      {\
-        "name": "@reptalie-region/ui",\
-        "reference": "workspace:packages/ui"\
       },\
       {\
         "name": "@reptalieregion/webview-bridge",\
@@ -45,8 +37,6 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
     "fallbackExclusionList": [\
       ["@reptalie-region-nest/server", ["workspace:apps/reptalie-region-nest"]],\
       ["@reptalie-region-next/web", ["workspace:apps/reptalie-region-next"]],\
-      ["@reptalie-region/lib", ["workspace:packages/lib"]],\
-      ["@reptalie-region/ui", ["workspace:packages/ui"]],\
       ["@reptalieregion/webview-bridge", ["workspace:packages/webview-bridge"]],\
       ["tailwind-config", ["workspace:packages/tailwind-config"]],\
       ["test", ["workspace:."]]\
@@ -5506,8 +5496,6 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageDependencies": [\
             ["@reptalie-region-next/web", "workspace:apps/reptalie-region-next"],\
             ["@hookform/resolvers", "virtual:2797db5cbe4f814e6efc26bd0694b895d88e4850c36d629598e4d4cf8874f70f82387a6419ed5967753de3c8c8a10706da46dec9e5929e438e3f4d483ffac064#npm:3.1.1"],\
-            ["@reptalie-region/lib", "workspace:packages/lib"],\
-            ["@reptalie-region/ui", "workspace:packages/ui"],\
             ["@reptalieregion/webview-bridge", "workspace:packages/webview-bridge"],\
             ["@svgr/webpack", "npm:8.0.1"],\
             ["@tanstack/react-query", "virtual:2797db5cbe4f814e6efc26bd0694b895d88e4850c36d629598e4d4cf8874f70f82387a6419ed5967753de3c8c8a10706da46dec9e5929e438e3f4d483ffac064#npm:4.29.12"],\
@@ -5532,31 +5520,6 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["typescript", "patch:typescript@npm%3A5.0.4#~builtin<compat/typescript>::version=5.0.4&hash=b5f058"],\
             ["yup", "npm:1.2.0"],\
             ["zustand", "virtual:2797db5cbe4f814e6efc26bd0694b895d88e4850c36d629598e4d4cf8874f70f82387a6419ed5967753de3c8c8a10706da46dec9e5929e438e3f4d483ffac064#npm:4.3.8"]\
-          ],\
-          "linkType": "SOFT"\
-        }]\
-      ]],\
-      ["@reptalie-region/lib", [\
-        ["workspace:packages/lib", {\
-          "packageLocation": "./packages/lib/",\
-          "packageDependencies": [\
-            ["@reptalie-region/lib", "workspace:packages/lib"],\
-            ["typescript", "patch:typescript@npm%3A5.1.3#~builtin<compat/typescript>::version=5.1.3&hash=5da071"]\
-          ],\
-          "linkType": "SOFT"\
-        }]\
-      ]],\
-      ["@reptalie-region/ui", [\
-        ["workspace:packages/ui", {\
-          "packageLocation": "./packages/ui/",\
-          "packageDependencies": [\
-            ["@reptalie-region/ui", "workspace:packages/ui"],\
-            ["@types/node", "npm:20.3.1"],\
-            ["@types/react", "npm:18.2.12"],\
-            ["@types/react-dom", "npm:18.2.5"],\
-            ["react", "npm:18.2.0"],\
-            ["react-dom", "virtual:727901be73596c476637c9eb069792dd981d2acb4614d66c21abeee0d840002f0e2ce1b83d088d72260540f33004207b3b445035f38844cabcffe6ce90224110#npm:18.2.0"],\
-            ["typescript", "patch:typescript@npm%3A5.1.3#~builtin<compat/typescript>::version=5.1.3&hash=5da071"]\
           ],\
           "linkType": "SOFT"\
         }]\
@@ -6536,14 +6499,6 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./.yarn/cache/@types-react-dom-npm-18.2.4-5d62ac2096-8301f35cf1.zip/node_modules/@types/react-dom/",\
           "packageDependencies": [\
             ["@types/react-dom", "npm:18.2.4"],\
-            ["@types/react", "npm:18.2.12"]\
-          ],\
-          "linkType": "HARD"\
-        }],\
-        ["npm:18.2.5", {\
-          "packageLocation": "./.yarn/cache/@types-react-dom-npm-18.2.5-994872ac5e-c48209f8c6.zip/node_modules/@types/react-dom/",\
-          "packageDependencies": [\
-            ["@types/react-dom", "npm:18.2.5"],\
             ["@types/react", "npm:18.2.12"]\
           ],\
           "linkType": "HARD"\
@@ -14619,21 +14574,6 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageDependencies": [\
             ["react-dom", "virtual:2797db5cbe4f814e6efc26bd0694b895d88e4850c36d629598e4d4cf8874f70f82387a6419ed5967753de3c8c8a10706da46dec9e5929e438e3f4d483ffac064#npm:18.2.0"],\
             ["@types/react", "npm:18.2.6"],\
-            ["loose-envify", "npm:1.4.0"],\
-            ["react", "npm:18.2.0"],\
-            ["scheduler", "npm:0.23.0"]\
-          ],\
-          "packagePeers": [\
-            "@types/react",\
-            "react"\
-          ],\
-          "linkType": "HARD"\
-        }],\
-        ["virtual:727901be73596c476637c9eb069792dd981d2acb4614d66c21abeee0d840002f0e2ce1b83d088d72260540f33004207b3b445035f38844cabcffe6ce90224110#npm:18.2.0", {\
-          "packageLocation": "./.yarn/__virtual__/react-dom-virtual-172e0f16fc/0/cache/react-dom-npm-18.2.0-dd675bca1c-7d323310be.zip/node_modules/react-dom/",\
-          "packageDependencies": [\
-            ["react-dom", "virtual:727901be73596c476637c9eb069792dd981d2acb4614d66c21abeee0d840002f0e2ce1b83d088d72260540f33004207b3b445035f38844cabcffe6ce90224110#npm:18.2.0"],\
-            ["@types/react", "npm:18.2.12"],\
             ["loose-envify", "npm:1.4.0"],\
             ["react", "npm:18.2.0"],\
             ["scheduler", "npm:0.23.0"]\

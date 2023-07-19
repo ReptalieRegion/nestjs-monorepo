@@ -3602,8 +3602,6 @@ __metadata:
   resolution: "@reptalie-region-next/web@workspace:apps/reptalie-region-next"
   dependencies:
     "@hookform/resolvers": ^3.1.0
-    "@reptalie-region/lib": "workspace:^"
-    "@reptalie-region/ui": "workspace:^"
     "@reptalieregion/webview-bridge": "workspace:^"
     "@svgr/webpack": ^8.0.1
     "@tanstack/react-query": ^4.29.5
@@ -3628,27 +3626,6 @@ __metadata:
     typescript: 5.0.4
     yup: ^1.1.1
     zustand: ^4.3.8
-  languageName: unknown
-  linkType: soft
-
-"@reptalie-region/lib@workspace:^, @reptalie-region/lib@workspace:packages/lib":
-  version: 0.0.0-use.local
-  resolution: "@reptalie-region/lib@workspace:packages/lib"
-  dependencies:
-    typescript: ^5.0.4
-  languageName: unknown
-  linkType: soft
-
-"@reptalie-region/ui@workspace:^, @reptalie-region/ui@workspace:packages/ui":
-  version: 0.0.0-use.local
-  resolution: "@reptalie-region/ui@workspace:packages/ui"
-  dependencies:
-    "@types/node": ^20.1.2
-    "@types/react": ^18.2.6
-    "@types/react-dom": ^18.2.4
-    react: ^18.2.0
-    react-dom: ^18.2.0
-    typescript: ^5.0.4
   languageName: unknown
   linkType: soft
 
@@ -4247,7 +4224,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:*, @types/node@npm:^20.1.2":
+"@types/node@npm:*":
   version: 20.3.1
   resolution: "@types/node@npm:20.3.1"
   checksum: 63a393ab6d947be17320817b35d7277ef03728e231558166ed07ee30b09fd7c08861be4d746f10fdc63ca7912e8cd023939d4eab887ff6580ff704ff24ed810c
@@ -4353,16 +4330,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react-dom@npm:^18.2.4":
-  version: 18.2.5
-  resolution: "@types/react-dom@npm:18.2.5"
-  dependencies:
-    "@types/react": "*"
-  checksum: c48209f8c60cb9054f3deee5365bc9fd6dadd8f901b67f1612a334057b2671518fc5145f14aca63ff276a926ccb5358308a6cf58ec700178f382bb3ebde96d91
-  languageName: node
-  linkType: hard
-
-"@types/react@npm:*, @types/react@npm:^18.2.6":
+"@types/react@npm:*":
   version: 18.2.12
   resolution: "@types/react@npm:18.2.12"
   dependencies:
@@ -10868,7 +10836,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-dom@npm:18.2.0, react-dom@npm:^18.2.0":
+"react-dom@npm:18.2.0":
   version: 18.2.0
   resolution: "react-dom@npm:18.2.0"
   dependencies:
@@ -10903,7 +10871,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react@npm:18.2.0, react@npm:^18.2.0":
+"react@npm:18.2.0":
   version: 18.2.0
   resolution: "react@npm:18.2.0"
   dependencies:

@@ -1,17 +1,81 @@
-version: '3.1'
+version: '3.7'
 services:
-    mongodb:
+    key-gen:
+        build: ./mongodb-replica/key
+        volumes:
+            - keys:/keys
+        restart: 'no'
+
+    init-replica:
+        build: ./mongodb-replica/init
+        restart: 'no'
+        networks:
+            - reptalie-region
+
+    mongodb1:
         image: arm64v8/mongo:6.0
         platform: linux/arm64/v8
-        container_name: reptalie-region-mongodb-6.0
+        tty: true
+        container_name: mongodb1
+        command: --replSet myRepl --keyFile /keys/mongodb-keyfile
+        restart: always
         ports:
             - 27017:27017
-        restart: always
+        depends_on:
+            - key-gen
+        volumes:
+            - ./data/mongodb1:/data/db
+            - keys:/keys
         environment:
             - MONGO_INITDB_ROOT_USERNAME=admin
-            - MONGO_INITDB_ROOT_PASSWORD=reptalieregionpassword1234
+            - MONGO_INITDB_ROOT_PASSWORD=1234
             - MONGO_INITDB_DATABASE=reptalie-region-local
+        networks:
+            - reptalie-region
+
+    mongodb2:
+        image: arm64v8/mongo:6.0
+        platform: linux/arm64/v8
+        container_name: mongodb2
+        command: --replSet myRepl --keyFile /keys/mongodb-keyfile
+        restart: always
+        ports:
+            - 27018:27017
+        depends_on:
+            - key-gen
         volumes:
-            - type: bind
-              source: ./data
-              target: /data/db
+            - ./data/mongodb2:/data/db
+            - keys:/keys
+        environment:
+            - MONGO_INITDB_ROOT_USERNAME=admin
+            - MONGO_INITDB_ROOT_PASSWORD=1234
+            - MONGO_INITDB_DATABASE=reptalie-region-local
+        networks:
+            - reptalie-region
+
+    mongodb3:
+        image: arm64v8/mongo:6.0
+        platform: linux/arm64/v8
+        container_name: mongodb3
+        command: --replSet myRepl --keyFile /keys/mongodb-keyfile
+        restart: always
+        ports:
+            - 27019:27017
+        depends_on:
+            - key-gen
+        volumes:
+            - ./data/mongodb3:/data/db
+            - keys:/keys
+        environment:
+            - MONGO_INITDB_ROOT_USERNAME=admin
+            - MONGO_INITDB_ROOT_PASSWORD=1234
+            - MONGO_INITDB_DATABASE=reptalie-region-local
+        networks:
+            - reptalie-region
+
+volumes:
+    keys:
+
+networks:
+    reptalie-region:
+        external: true

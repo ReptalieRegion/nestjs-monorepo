@@ -5468,6 +5468,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@types/uuid", "npm:9.0.2"],\
             ["@typescript-eslint/eslint-plugin", "virtual:4193bf06da2ec84559cd057c0b05b7b506ca9e325d38300a6a4ebc0278e1b48cf2ad44e18e2976b41e0318d7e02f72a97edb0a4ccd702e3dc4f399b1d6655dd8#npm:5.59.11"],\
             ["@typescript-eslint/parser", "virtual:4193bf06da2ec84559cd057c0b05b7b506ca9e325d38300a6a4ebc0278e1b48cf2ad44e18e2976b41e0318d7e02f72a97edb0a4ccd702e3dc4f399b1d6655dd8#npm:5.59.11"],\
+            ["bson", "npm:5.3.0"],\
             ["cache-manager", "npm:5.2.2"],\
             ["cache-manager-redis-yet", "npm:4.1.1"],\
             ["class-transformer", "npm:0.5.1"],\

@@ -2,12 +2,13 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 
 import { Document, SchemaTypes } from 'mongoose';
 import { IResponseUserDTO } from '../dto/user/response-user.dto';
+import { getCurrentDate } from '../utils/time/time';
 
 export interface UserDocument extends User, Document {
     view(): Partial<IResponseUserDTO>;
 }
 
-@Schema({ versionKey: false })
+@Schema({ versionKey: false, timestamps: { currentTime: getCurrentDate } })
 export class User {
     @Prop({ trim: true, unique: true, required: true, type: SchemaTypes.String })
     email: string;
@@ -41,7 +42,6 @@ export class User {
 }
 
 const userSchema = SchemaFactory.createForClass(User);
-userSchema.set('timestamps', true);
 userSchema.index({ createdAt: 1 });
 userSchema.methods = {
     view(): Partial<IResponseUserDTO> {

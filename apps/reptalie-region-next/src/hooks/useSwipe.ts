@@ -3,6 +3,8 @@ import customDirection, { TMoveType } from '@/utils/gestures/Direction';
 import customLongTouch from '@/utils/gestures/LongTouch';
 import customScroll from '@/utils/gestures/Scroll';
 
+const longTouch = customLongTouch();
+
 const useSwipe = <T extends HTMLElement>(maxSlideCount = 0) => {
     const swipeRef = useRef<T>(null);
     const slideCountRef = useRef(0);
@@ -15,11 +17,7 @@ const useSwipe = <T extends HTMLElement>(maxSlideCount = 0) => {
         }
 
         const { clientWidth, clientHeight } = swiperElement;
-        const longTouch = customLongTouch();
-        const direction = customDirection()({
-            width: clientWidth,
-            height: clientHeight,
-        });
+        const direction = customDirection()({ width: clientWidth, height: clientHeight });
         const scroll = customScroll({ element: swipeRef.current })();
 
         const touchStart = (event: TouchEvent) => {

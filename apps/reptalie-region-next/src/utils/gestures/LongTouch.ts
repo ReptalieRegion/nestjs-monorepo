@@ -4,13 +4,15 @@ interface ILongTouchInfo {
     longTouchTimer?: NodeJS.Timeout;
 }
 
-const touchInfo: ILongTouchInfo = {
+const defaultTouchInfo: ILongTouchInfo = {
     isLongTouch: false,
     startEvent: false,
     longTouchTimer: undefined,
 };
 
 const customLongTouch = (delay = 300) => {
+    const touchInfo: ILongTouchInfo = { ...defaultTouchInfo };
+
     const start = () => {
         if (touchInfo.startEvent) {
             return;

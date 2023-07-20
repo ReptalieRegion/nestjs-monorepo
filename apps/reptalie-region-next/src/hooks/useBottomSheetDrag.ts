@@ -3,21 +3,23 @@ import { useEffect, useRef, useState } from 'react';
 
 interface IUseBottomSheet {
     minHeight: number;
+    height: number;
     maxHeight: number;
 }
 
-const useBottomSheetDrag = ({ minHeight, maxHeight }: IUseBottomSheet) => {
+const longTouch = customLongTouch();
+
+const useBottomSheetDrag = ({ minHeight, maxHeight, height }: IUseBottomSheet) => {
     const bottomSheetDragAreaRef = useRef<HTMLDivElement>(null);
     const isDragging = useRef<boolean>(false);
     const startYRef = useRef<number>(0);
     const deltaYRef = useRef<number>(0);
     const [isTouchEnd, setIsTouchEnd] = useState<boolean>(false);
-    const [lastHeight, setLastHeight] = useState<number>(minHeight);
-    const [changeHeight, setChangeHeight] = useState<number>(minHeight);
+    const [lastHeight, setLastHeight] = useState<number>(height);
+    const [changeHeight, setChangeHeight] = useState<number>(height);
 
     useEffect(() => {
         const bottomSheetDragAreaElement = bottomSheetDragAreaRef.current;
-        const longTouch = customLongTouch();
         if (!bottomSheetDragAreaElement) {
             return;
         }
@@ -36,7 +38,8 @@ const useBottomSheetDrag = ({ minHeight, maxHeight }: IUseBottomSheet) => {
             }
 
             const newDeltaY = event.touches[0].clientY - startYRef.current;
-            const newHeight = Math.min(Math.max(lastHeight - newDeltaY, minHeight), maxHeight);
+            const newHeight = clampHeight(lastHeight - newDeltaY);
+
             deltaYRef.current = newDeltaY;
             setChangeHeight(newHeight);
         };
@@ -50,11 +53,28 @@ const useBottomSheetDrag = ({ minHeight, maxHeight }: IUseBottomSheet) => {
             setIsTouchEnd(true);
         };
 
+        const clampHeight = (height: number) => {
+            if (height < minHeight) {
+                return minHeight;
+            }
+            if (height > maxHeight) {
+                return maxHeight;
+            }
+
+            return height;
+        };
+
         const createHeight = () => {
             const isLongTouch = longTouch.getIsLongTouch();
             const isDownMotion = deltaYRef.current > 0;
+
             if (isLongTouch) {
-                return changeHeight < maxHeight / 2 ? minHeight : maxHeight;
+                const midPoint = (height + maxHeight) / 2;
+                if (changeHeight > midPoint) {
+                    return maxHeight;
+                }
+
+                return height;
             }
 
             return isDownMotion ? minHeight : maxHeight;
@@ -69,7 +89,7 @@ const useBottomSheetDrag = ({ minHeight, maxHeight }: IUseBottomSheet) => {
             bottomSheetDragAreaElement.removeEventListener('touchmove', touchMove);
             bottomSheetDragAreaElement.removeEventListener('touchend', touchEnd);
         };
-    }, [changeHeight, lastHeight, maxHeight, minHeight]);
+    }, [changeHeight, lastHeight, maxHeight, minHeight, height]);
 
     return { bottomSheetDragAreaRef, changeHeight, isTouchEnd };
 };

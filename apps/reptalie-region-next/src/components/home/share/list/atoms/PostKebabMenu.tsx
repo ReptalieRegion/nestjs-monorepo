@@ -2,7 +2,7 @@
 
 import PostOptionsBottomSheet, {
     IPostOptionsBottomSheetProps,
-} from '@/components/home/share/ui-prompts/bottomSheet/PostOptionsBottomSheet';
+} from '@/components/home/share/list/ui-prompts/bottomSheet/PostOptionsBottomSheet';
 import MoreIcon from '@/assets/icons/more.svg';
 import useUIPromptManager from '@/hooks/useUIPromptManager';
 

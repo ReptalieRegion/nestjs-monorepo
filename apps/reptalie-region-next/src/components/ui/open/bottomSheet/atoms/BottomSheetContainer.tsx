@@ -4,7 +4,7 @@ import { ReactNode, useEffect } from 'react';
 
 interface IBottomSheetContainerProps {
     children: ReactNode;
-    height?: number;
+    height: number;
     enableHeightTransition?: boolean;
     close?: () => void;
 }

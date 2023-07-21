@@ -1,5 +1,5 @@
 const My = () => {
-    return <div>my</div>;
+    return <div className="flex-1">my</div>;
 };
 
 export default My;

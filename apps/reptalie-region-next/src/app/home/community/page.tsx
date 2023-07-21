@@ -1,5 +1,5 @@
 const Community = () => {
-    return <div>community</div>;
+    return <div className="flex-1">community</div>;
 };
 
 export default Community;

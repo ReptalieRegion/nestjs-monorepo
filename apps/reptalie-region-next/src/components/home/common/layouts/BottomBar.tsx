@@ -8,6 +8,7 @@ import Home from '@/assets/icons/home.svg';
 import My from '@/assets/icons/my.svg';
 import Share from '@/assets/icons/share.svg';
 import { RouterContext } from '@/contexts/router/RouterContext';
+import { WebviewBridgeContext } from '@/contexts/webview-bridge/WebviewBridgeContext';
 
 const menus = [
     { pageURL: '/home', Icon: Home, name: '홈' },
@@ -19,12 +20,17 @@ const menus = [
 
 export const HomeBottomBar = () => {
     const router = useContext(RouterContext);
+    const { Haptic } = useContext(WebviewBridgeContext);
     const path = usePathname();
     const [clickMenu, setClickMenu] = useState<string>('');
 
     const handleIconClick = (currentPath: string) => {
         setClickMenu(currentPath);
         router.replace(currentPath);
+        Haptic?.trigger({
+            type: 'impactLight',
+            options: { enableVibrateFallback: true, ignoreAndroidSystemSettings: false },
+        });
     };
 
     useEffect(() => {

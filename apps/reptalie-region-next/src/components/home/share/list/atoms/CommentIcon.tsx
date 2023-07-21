@@ -2,12 +2,15 @@
 
 import { IPostsData } from '<API>';
 import Comment from '@/assets/icons/comment.svg';
+import { RouterContext } from '@/contexts/router/RouterContext';
+import { useContext } from 'react';
 
 type ICommentProps = Pick<IPostsData, 'postId'>;
 
 const CommentIcon = ({ postId }: ICommentProps) => {
+    const route = useContext(RouterContext);
     const handleClickComment = () => {
-        console.log(postId);
+        route.push(`/home/share/comment/${postId}`);
     };
 
     return (

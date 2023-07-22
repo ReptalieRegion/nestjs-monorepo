@@ -1,12 +1,10 @@
-import { INavigate } from '@reptalieregion/webview-bridge';
+import { INavigation } from '@reptalieregion/webview-bridge';
 import WebviewBridgeManager from './utils/WebviewBridgeManager';
 
-export const Navigate = (observer: WebviewBridgeManager): INavigate => {
-    const { postMessage } = observer.createObserverAndPostMessage('Navigation');
-
+export const Navigation = (observer: WebviewBridgeManager): INavigation => {
     return {
         push: (payload) => {
-            postMessage({ command: 'push', payload });
+            observer.postMessage({ module: 'Navigation', command: 'push', payload });
         },
     };
 };

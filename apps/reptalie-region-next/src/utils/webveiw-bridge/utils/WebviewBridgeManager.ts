@@ -1,92 +1,64 @@
 import {
-    PostReturnType,
-    TWebviewBridgeCommand,
-    TWebviewBridgeDataType,
-    TWebviewBridgeModule,
-    TWebviewBridgeReturnType,
-    TWebviewBridgeSerializeMessage,
-    serializeMessage,
+    RNPostMessageType,
+    RNPostReturnType,
+    TRNBridgeCommand,
+    TRNBridgeModule,
+    TRNBridgeReturnType,
+    serializeNextJSCall,
 } from '@reptalieregion/webview-bridge';
 
-type ModuleAndCommand<Module extends TWebviewBridgeModule, Command extends TWebviewBridgeCommand<Module>> = {
-    module: Module;
-    command: Command;
-};
-
-interface Observers {
+export type Observers = {
     [key: string]: {
         success: (payload: unknown) => void;
         fail: (error: unknown) => void;
     };
-}
+};
+
+type ModuleAndCommand<Module extends TRNBridgeModule, Command extends TRNBridgeCommand<Module>> = {
+    module: Module;
+    command: Command;
+};
 
 interface IWebviewBridgeManager {
-    createObserverAndPostMessage<Module extends TWebviewBridgeModule>(
-        module: Module,
-    ): {
-        registerObserver: <Command extends TWebviewBridgeCommand<Module>>(
-            command: Command,
-        ) => Promise<TWebviewBridgeReturnType<Module, Command>>;
-        postMessage: <Command extends TWebviewBridgeCommand<Module>>({
-            command,
-            payload,
-        }: {
-            command: Command;
-            payload: TWebviewBridgeDataType<Module, Command>;
-        }) => void;
-    };
-
-    notifyObservers(message: PostReturnType): void;
+    postMessage(message: RNPostMessageType): void;
+    notifyObservers(message: RNPostReturnType): void;
+    registerObserver<
+        Module extends TRNBridgeModule = TRNBridgeModule,
+        Command extends TRNBridgeCommand<Module> = TRNBridgeCommand<Module>,
+    >({
+        module,
+        command,
+    }: ModuleAndCommand<Module, Command>): Promise<unknown>;
 }
 
 export default class WebviewBridgeManager implements IWebviewBridgeManager {
     private observers: Observers = {};
 
-    createObserverAndPostMessage<Module extends TWebviewBridgeModule>(module: Module) {
-        return {
-            registerObserver: <Command extends TWebviewBridgeCommand<Module>>(command: Command) =>
-                this.registerObserver({ module, command }),
-            postMessage: <Command extends TWebviewBridgeCommand<Module>>({
-                command,
-                payload,
-            }: {
-                command: Command;
-                payload: TWebviewBridgeDataType<Module, Command>;
-            }) => {
-                this.postMessage({ module, command, payload });
-            },
-        };
-    }
-
-    notifyObservers({ module, command, payload }: PostReturnType) {
-        const functions = this.observers[`${module}.${command}`];
+    notifyObservers(message: RNPostReturnType) {
+        const functions = this.observers[`${message.module}.${message.command}`];
 
         if (functions) {
             const { fail, success } = functions;
-            payload ? success(payload) : fail('no value');
+            message.payload ? success(message.payload) : fail('no value');
         }
     }
 
-    private postMessage<Module extends TWebviewBridgeModule, Command extends TWebviewBridgeCommand<Module>>(
-        message: TWebviewBridgeSerializeMessage<Module, Command>,
-    ) {
-        const serializedMessage = serializeMessage(message);
+    postMessage(message: RNPostMessageType) {
+        const serializedMessage = serializeNextJSCall(message);
         if (window && window.ReactNativeWebView && serializedMessage) {
             window.ReactNativeWebView.postMessage(serializedMessage);
         }
     }
 
-    private registerObserver<Module extends TWebviewBridgeModule, Command extends TWebviewBridgeCommand<Module>>({
-        module,
-        command,
-    }: ModuleAndCommand<Module, Command>) {
-        return new Promise<TWebviewBridgeReturnType<Module, Command>>((resolve, reject) => {
-            if (typeof command === 'string') {
-                this.observers[`${module}.${command}`] = {
-                    success: (payload: any) => resolve(payload),
-                    fail: (error) => reject(error),
-                };
-            }
+    registerObserver<
+        Module extends TRNBridgeModule = TRNBridgeModule,
+        Command extends TRNBridgeCommand<Module> = TRNBridgeCommand<Module>,
+    >({ module, command }: ModuleAndCommand<Module, Command>) {
+        return new Promise<TRNBridgeReturnType<Module, Command>>((resolve, reject) => {
+            this.observers[`${module}.${String(command)}`] = {
+                success: (payload: any) => resolve(payload),
+                fail: (error) => reject(error),
+            };
         });
     }
 }

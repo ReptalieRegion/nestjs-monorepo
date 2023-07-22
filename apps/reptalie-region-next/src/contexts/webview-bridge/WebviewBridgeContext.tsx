@@ -2,21 +2,22 @@
 
 import { AsyncStorage } from '@/utils/webveiw-bridge/AsyncStorage';
 import { Haptic } from '@/utils/webveiw-bridge/Haptic';
-import { Navigate } from '@/utils/webveiw-bridge/Navigate';
+import { Navigation } from '@/utils/webveiw-bridge/Navigate';
 import WebviewBridgeManager from '@/utils/webveiw-bridge/utils/WebviewBridgeManager';
 
 import {
     IAsyncStorage,
-    IHapticInterface,
-    INavigate,
-    deserializeReturnMessage,
-    isWebviewBridgeModule,
+    IHaptic,
+    INavigation,
+    deserializeNextJS,
+    isNextModule,
+    isRNModule,
 } from '@reptalieregion/webview-bridge';
 import { createContext, useEffect, PropsWithChildren } from 'react';
 
 type TWebviewBridgeValue = {
-    Haptic?: IHapticInterface;
-    Navigate?: INavigate;
+    Haptic?: IHaptic;
+    Navigation?: INavigation;
     AsyncStorage?: IAsyncStorage;
 };
 
@@ -30,12 +31,17 @@ const makeReturnValue = (event: MessageEvent<any>) => {
             return;
         }
 
-        const message = deserializeReturnMessage(event.data);
-        if (!message?.module) {
+        const deserialized = deserializeNextJS(event.data);
+        if (!deserialized) {
             return;
         }
 
-        if (isWebviewBridgeModule(message.module)) {
+        const { type, message } = deserialized;
+        if (type === 'call' && isNextModule(message.module)) {
+            return;
+        }
+
+        if (type === 'return' && isRNModule(message.module)) {
             webviewBridgeManager.notifyObservers(message);
         }
     } catch (error) {
@@ -53,7 +59,7 @@ const WebviewBridgeComponent = ({ children }: PropsWithChildren) => {
 
     const webviewBridge = {
         Haptic: Haptic(webviewBridgeManager),
-        Navigate: Navigate(webviewBridgeManager),
+        Navigation: Navigation(webviewBridgeManager),
         AsyncStorage: AsyncStorage(webviewBridgeManager),
     };
 

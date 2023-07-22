@@ -2,40 +2,38 @@ import { IAsyncStorage } from '@reptalieregion/webview-bridge';
 import WebviewBridgeManager from './utils/WebviewBridgeManager';
 
 export const AsyncStorage = (observer: WebviewBridgeManager): IAsyncStorage => {
-    const { postMessage, registerObserver } = observer.createObserverAndPostMessage('AsyncStorage');
-
     return {
         getItem: async (payload) => {
-            postMessage({ command: 'getItem', payload });
-            return registerObserver('getItem');
+            observer.postMessage({ module: 'AsyncStorage', command: 'getItem', payload });
+            return observer.registerObserver({ module: 'AsyncStorage', command: 'getItem' });
         },
         setItem: async (payload) => {
-            postMessage({ command: 'setItem', payload });
+            observer.postMessage({ module: 'AsyncStorage', command: 'setItem', payload });
         },
         removeItem: async (payload) => {
-            postMessage({ command: 'removeItem', payload });
+            observer.postMessage({ module: 'AsyncStorage', command: 'removeItem', payload });
         },
         clear: async () => {
-            postMessage({ command: 'clear', payload: undefined });
+            observer.postMessage({ module: 'AsyncStorage', command: 'clear', payload: undefined });
         },
         getAllKeys: async () => {
-            return registerObserver('getAllKeys');
+            return observer.registerObserver({ module: 'AsyncStorage', command: 'getAllKeys' });
         },
         mergeItem: async (payload) => {
-            postMessage({ command: 'mergeItem', payload });
+            observer.postMessage({ module: 'AsyncStorage', command: 'mergeItem', payload });
         },
         multiGet: async (payload) => {
-            postMessage({ command: 'multiGet', payload });
-            return registerObserver('multiGet');
+            observer.postMessage({ module: 'AsyncStorage', command: 'multiGet', payload });
+            return observer.registerObserver({ module: 'AsyncStorage', command: 'multiGet' });
         },
         multiMerge: async (payload) => {
-            postMessage({ command: 'multiMerge', payload });
+            observer.postMessage({ module: 'AsyncStorage', command: 'multiMerge', payload });
         },
         multiRemove: async (payload) => {
-            postMessage({ command: 'multiRemove', payload });
+            observer.postMessage({ module: 'AsyncStorage', command: 'multiRemove', payload });
         },
         multiSet: async (payload) => {
-            postMessage({ command: 'multiSet', payload });
+            observer.postMessage({ module: 'AsyncStorage', command: 'multiSet', payload });
         },
     };
 };

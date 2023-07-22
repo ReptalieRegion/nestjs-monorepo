@@ -1,4 +1,4 @@
-import { BridgeFunction } from '../common';
+import { BridgeFunction } from '@/common';
 
 type TKeyValuePair = [string, string | null];
 

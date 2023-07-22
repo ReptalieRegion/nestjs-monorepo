@@ -1,4 +1,4 @@
-import { BridgeFunction } from '../common';
+import { BridgeFunction } from '@/common';
 
 export interface INavigate {
     push: BridgeFunction<TPushPayload, void>;

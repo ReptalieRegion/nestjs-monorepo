@@ -1,7 +1,5 @@
-import { FunctionArguments } from '../common/types';
-import { IAsyncStorage } from '../react-native-async-storage/types';
-import { IHapticInterface } from '../react-native-haptic-feedback/types';
-import { INavigate } from '../react-navigation/types';
+import { FunctionArguments } from '@/common';
+import { IAsyncStorage, IHapticInterface, INavigate } from '@/react-native';
 
 export type TWebviewBridgeModule = keyof TWebviewBridge;
 

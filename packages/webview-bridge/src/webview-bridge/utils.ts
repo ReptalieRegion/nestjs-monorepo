@@ -65,7 +65,8 @@ export const deserialize = <CallMessage, ReturnMessage>(
             'message.module',
             'message.command',
         ]);
-        if (isSafelyMessage) {
+
+        if (!isSafelyMessage) {
             throw new DeserializationError('Message type info or message not found');
         }
 

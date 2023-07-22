@@ -1,4 +1,4 @@
-import { BridgeFunction } from '@/common';
+import { BridgeFunction } from '../../common';
 
 type HapticFeedbackTypes =
     | 'selection'
@@ -32,6 +32,6 @@ export type TTriggerPayload = {
     };
 };
 
-export interface IHapticInterface {
+export interface IHaptic {
     trigger: BridgeFunction<TTriggerPayload, void>;
 }

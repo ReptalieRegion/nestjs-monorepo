@@ -93,10 +93,10 @@ export const deserialize = <CallMessage, ReturnMessage>(
 };
 
 export const deserializeRN = (messageStr: string) =>
-    deserialize<RNPostMessageType, NextJSPostReturnType>({ from: 'RN', messageStr });
+    deserialize<RNPostMessageType, NextJSPostReturnType>({ from: 'NextJS', messageStr });
 
 export const deserializeNextJS = (messageStr: string) =>
-    deserialize<NextJSPostMessageType, RNPostReturnType>({ from: 'NextJS', messageStr });
+    deserialize<NextJSPostMessageType, RNPostReturnType>({ from: 'RN', messageStr });
 
 export const isNextModule = (module: string) => NEXT_JS_MODULES.indexOf(module) !== -1;
 

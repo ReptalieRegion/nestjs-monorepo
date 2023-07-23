@@ -16,12 +16,12 @@ const NextJSNavigation = (router: IRouterContextValue): INextJSNavigation => {
             router.back();
         },
         replace: (payload: TNextJSNavigationReplace): void => {
-            const { href } = payload;
-            router.replace(href);
+            const { href, options } = payload;
+            router.replace(href, options);
         },
         prefetch: (payload: TNextJSNAvigationPrefetch): void => {
-            const { url } = payload;
-            router.prefetch(url);
+            const { url, options } = payload;
+            router.prefetch(url, options);
         },
     };
 };

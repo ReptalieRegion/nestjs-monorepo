@@ -6,7 +6,6 @@ const Layout = ({ children }: { children: ReactNode }) => {
         <div className="h-[100vh] flex flex-col">
             <HomeHeader />
             {children}
-            <HomeBottomBar />
         </div>
     );
 };

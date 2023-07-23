@@ -36,7 +36,7 @@ type TCurrentOptions = {
     };
 };
 
-interface IRouterContextValue {
+export interface IRouterContextValue {
     push: (href: string, options?: NavigateOptions) => void;
     back: () => void;
     replace: (href: string, options?: NavigateOptions) => void;

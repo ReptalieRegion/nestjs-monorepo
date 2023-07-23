@@ -1,22 +1,25 @@
 'use client';
 
-import { AsyncStorage } from '@/utils/webveiw-bridge/AsyncStorage';
-import { Haptic } from '@/utils/webveiw-bridge/Haptic';
-import { Navigate } from '@/utils/webveiw-bridge/Navigate';
-import WebviewBridgeManager from '@/utils/webveiw-bridge/utils/WebviewBridgeManager';
+import { createContext, useEffect, PropsWithChildren, useContext } from 'react';
 
+import WebviewBridgeManager from '@/utils/webview-bridge/utils/WebviewBridgeManager';
 import {
     IAsyncStorage,
-    IHapticInterface,
-    INavigate,
-    deserializeReturnMessage,
-    isWebviewBridgeModule,
+    IHaptic,
+    INavigation,
+    deserializeNextJS,
+    isNextModule,
+    isRNModule,
+    serializeNextJSReturn,
 } from '@reptalieregion/webview-bridge';
-import { createContext, useEffect, PropsWithChildren } from 'react';
+import { Haptic, Navigation, AsyncStorage } from '@/utils/webview-bridge/react-native';
+
+import { RouterContext } from '../router/RouterContext';
+import { WebviewBridgeRunner } from '@/utils/webview-bridge/nextjs';
 
 type TWebviewBridgeValue = {
-    Haptic?: IHapticInterface;
-    Navigate?: INavigate;
+    Haptic?: IHaptic;
+    Navigation?: INavigation;
     AsyncStorage?: IAsyncStorage;
 };
 
@@ -24,36 +27,47 @@ export const WebviewBridgeContext = createContext<TWebviewBridgeValue>({});
 
 const webviewBridgeManager = new WebviewBridgeManager();
 
-const makeReturnValue = (event: MessageEvent<any>) => {
-    try {
-        if (typeof event.data !== 'string') {
-            return;
-        }
-
-        const message = deserializeReturnMessage(event.data);
-        if (!message?.module) {
-            return;
-        }
-
-        if (isWebviewBridgeModule(message.module)) {
-            webviewBridgeManager.notifyObservers(message);
-        }
-    } catch (error) {
-        console.error(error);
-    }
-};
-
 const WebviewBridgeComponent = ({ children }: PropsWithChildren) => {
+    const router = useContext(RouterContext);
+
     useEffect(() => {
-        window.addEventListener('message', makeReturnValue);
+        const makeReturnValue = async (event: MessageEvent<any>) => {
+            try {
+                if (typeof event.data !== 'string') {
+                    return;
+                }
+
+                const deserialized = deserializeNextJS(event.data);
+                if (!deserialized) {
+                    return;
+                }
+
+                const { type, message } = deserialized;
+                if (type === 'call' && isNextModule(message.module)) {
+                    const result = await WebviewBridgeRunner({ message, router });
+                    if (result.payload) {
+                        const returnMessage = serializeNextJSReturn(result);
+                        window.ReactNativeWebView.postMessage(returnMessage);
+                    }
+                    return;
+                }
+
+                if (type === 'return' && isRNModule(message.module)) {
+                    webviewBridgeManager.notifyObservers(message);
+                }
+            } catch (error) {
+                console.error(error);
+            }
+        };
+        window.addEventListener('message', makeReturnValue, true);
         return () => {
             window.removeEventListener('message', makeReturnValue);
         };
-    }, []);
+    }, [router]);
 
     const webviewBridge = {
         Haptic: Haptic(webviewBridgeManager),
-        Navigate: Navigate(webviewBridgeManager),
+        Navigation: Navigation(webviewBridgeManager),
         AsyncStorage: AsyncStorage(webviewBridgeManager),
     };
 

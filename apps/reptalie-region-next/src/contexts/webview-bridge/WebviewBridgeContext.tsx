@@ -1,10 +1,8 @@
 'use client';
 
-import { AsyncStorage } from '@/utils/webveiw-bridge/AsyncStorage';
-import { Haptic } from '@/utils/webveiw-bridge/Haptic';
-import { Navigation } from '@/utils/webveiw-bridge/Navigate';
-import WebviewBridgeManager from '@/utils/webveiw-bridge/utils/WebviewBridgeManager';
+import { createContext, useEffect, PropsWithChildren, useContext } from 'react';
 
+import WebviewBridgeManager from '@/utils/webview-bridge/utils/WebviewBridgeManager';
 import {
     IAsyncStorage,
     IHaptic,
@@ -13,7 +11,9 @@ import {
     isNextModule,
     isRNModule,
 } from '@reptalieregion/webview-bridge';
-import { createContext, useEffect, PropsWithChildren } from 'react';
+import { Haptic, Navigation, AsyncStorage } from '@/utils/webview-bridge/react-native';
+
+import { RouterContext } from '../router/RouterContext';
 
 type TWebviewBridgeValue = {
     Haptic?: IHaptic;
@@ -25,37 +25,48 @@ export const WebviewBridgeContext = createContext<TWebviewBridgeValue>({});
 
 const webviewBridgeManager = new WebviewBridgeManager();
 
-const makeReturnValue = (event: MessageEvent<any>) => {
-    try {
-        if (typeof event.data !== 'string') {
-            return;
-        }
-
-        const deserialized = deserializeNextJS(event.data);
-        if (!deserialized) {
-            return;
-        }
-
-        const { type, message } = deserialized;
-        if (type === 'call' && isNextModule(message.module)) {
-            return;
-        }
-
-        if (type === 'return' && isRNModule(message.module)) {
-            webviewBridgeManager.notifyObservers(message);
-        }
-    } catch (error) {
-        console.error(error);
-    }
-};
-
 const WebviewBridgeComponent = ({ children }: PropsWithChildren) => {
+    const router = useContext(RouterContext);
+
     useEffect(() => {
-        window.addEventListener('message', makeReturnValue);
+        const makeReturnValue = (event: MessageEvent<any>) => {
+            try {
+                if (typeof event.data !== 'string') {
+                    return;
+                }
+
+                const deserialized = deserializeNextJS(event.data);
+                if (!deserialized) {
+                    return;
+                }
+
+                const { type, message } = deserialized;
+                if (type === 'call' && isNextModule(message.module)) {
+                    if (message.module === 'NextJSNavigation') {
+                        if (message.command === 'push') {
+                            const { href, options } = message.payload;
+                            router.push(href, options);
+                        }
+                        if (message.command === 'replace') {
+                            const { href } = message.payload;
+                            router.replace(href);
+                        }
+                    }
+                    return;
+                }
+
+                if (type === 'return' && isRNModule(message.module)) {
+                    webviewBridgeManager.notifyObservers(message);
+                }
+            } catch (error) {
+                console.error(error);
+            }
+        };
+        window.addEventListener('message', makeReturnValue, true);
         return () => {
             window.removeEventListener('message', makeReturnValue);
         };
-    }, []);
+    }, [router]);
 
     const webviewBridge = {
         Haptic: Haptic(webviewBridgeManager),

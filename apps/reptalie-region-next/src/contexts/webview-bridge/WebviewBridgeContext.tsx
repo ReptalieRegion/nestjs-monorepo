@@ -10,10 +10,12 @@ import {
     deserializeNextJS,
     isNextModule,
     isRNModule,
+    serializeNextJSReturn,
 } from '@reptalieregion/webview-bridge';
 import { Haptic, Navigation, AsyncStorage } from '@/utils/webview-bridge/react-native';
 
 import { RouterContext } from '../router/RouterContext';
+import { WebviewBridgeRunner } from '@/utils/webview-bridge/nextjs';
 
 type TWebviewBridgeValue = {
     Haptic?: IHaptic;
@@ -29,7 +31,7 @@ const WebviewBridgeComponent = ({ children }: PropsWithChildren) => {
     const router = useContext(RouterContext);
 
     useEffect(() => {
-        const makeReturnValue = (event: MessageEvent<any>) => {
+        const makeReturnValue = async (event: MessageEvent<any>) => {
             try {
                 if (typeof event.data !== 'string') {
                     return;
@@ -42,15 +44,10 @@ const WebviewBridgeComponent = ({ children }: PropsWithChildren) => {
 
                 const { type, message } = deserialized;
                 if (type === 'call' && isNextModule(message.module)) {
-                    if (message.module === 'NextJSNavigation') {
-                        if (message.command === 'push') {
-                            const { href, options } = message.payload;
-                            router.push(href, options);
-                        }
-                        if (message.command === 'replace') {
-                            const { href } = message.payload;
-                            router.replace(href);
-                        }
+                    const result = await WebviewBridgeRunner({ message, router });
+                    if (result.payload) {
+                        const returnMessage = serializeNextJSReturn(result);
+                        window.ReactNativeWebView.postMessage(returnMessage);
                     }
                     return;
                 }

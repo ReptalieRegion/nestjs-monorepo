@@ -1,3 +1,3 @@
-export * from './AsyncStorage';
-export * from './Haptic';
-export * from './Navigate';
+export * from './AsyncStorage/AsyncStorage';
+export * from './Haptic/Haptic';
+export * from './Navigation/Navigation';

@@ -1,5 +1,5 @@
 import { IAsyncStorage } from '@reptalieregion/webview-bridge';
-import WebviewBridgeManager from '../utils/WebviewBridgeManager';
+import WebviewBridgeManager from '../../utils/WebviewBridgeManager';
 
 export const AsyncStorage = (observer: WebviewBridgeManager): IAsyncStorage => {
     return {

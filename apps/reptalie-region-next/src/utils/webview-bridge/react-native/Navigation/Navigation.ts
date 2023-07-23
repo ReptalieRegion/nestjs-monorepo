@@ -1,5 +1,5 @@
 import { INavigation } from '@reptalieregion/webview-bridge';
-import WebviewBridgeManager from '../utils/WebviewBridgeManager';
+import WebviewBridgeManager from '../../utils/WebviewBridgeManager';
 
 export const Navigation = (observer: WebviewBridgeManager): INavigation => {
     return {

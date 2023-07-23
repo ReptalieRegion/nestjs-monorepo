@@ -1,4 +1,4 @@
-import { BridgeFunction } from '../common';
+import { BridgeFunction, NotExistsArguments } from '../../common';
 
 type TKeyValuePair = [string, string | null];
 
@@ -33,10 +33,10 @@ export interface IAsyncStorage {
     getItem: BridgeFunction<TGetItem, Promise<string | null>>;
     mergeItem: BridgeFunction<TMergeItem, Promise<void>>;
     removeItem: BridgeFunction<TRemoveItem, Promise<void>>;
-    getAllKeys: BridgeFunction<undefined, Promise<readonly string[]>>;
+    getAllKeys: BridgeFunction<NotExistsArguments, Promise<readonly string[]>>;
     multiGet: BridgeFunction<TMultiGet, Promise<readonly TKeyValuePair[]>>;
     multiSet: BridgeFunction<TMultiSet, Promise<void>>;
     multiMerge: BridgeFunction<TMultiMerge, Promise<void>>;
     multiRemove: BridgeFunction<TMultiRemove, Promise<void>>;
-    clear: BridgeFunction<undefined, Promise<void>>;
+    clear: BridgeFunction<NotExistsArguments, Promise<void>>;
 }

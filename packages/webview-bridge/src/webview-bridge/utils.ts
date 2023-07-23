@@ -1,55 +1,103 @@
-import {
-    PostMessageType,
-    PostReturnType,
-    TWebviewBridgeCommand,
-    TWebviewBridgeModule,
-    TWebviewBridgeSerializeMessage,
-    TWebviewBridgeSerializeReturnMessage,
-    WEBVIEW_BRIDGES,
-} from './types';
+import { doPathsExist } from '../common/utils';
+import { NEXT_JS_MODULES, NextJSPostMessageType, NextJSPostReturnType } from './rn-requests-webview/types';
+import { RN_MODULES, RNPostMessageType, RNPostReturnType } from './webview-requests-rn';
 
-const deserialize = <T>(messageStr: string): T | null => {
-    try {
-        const message = JSON.parse(messageStr);
-
-        if (message && message?.module !== undefined && isWebviewBridgeModule(message.module)) {
-            return message as T;
-        }
-    } catch {
-        console.error('Error parsing message string:', messageStr);
+class SerializationError extends Error {
+    constructor(message: string) {
+        super(`[Serialization Error] ${message}`);
+        this.name = 'SerializationError';
     }
+}
 
-    return null;
+type MessageOrigin = 'RN' | 'NextJS';
+type MessageType = 'call' | 'return';
+
+type MessageTypeInfo = {
+    from: MessageOrigin;
+    type: MessageType;
 };
 
-export const isWebviewBridgeModule = (module: string) => {
-    return WEBVIEW_BRIDGES.indexOf(module) !== -1;
+type SerializedMessage = NextJSPostMessageType | NextJSPostReturnType | RNPostMessageType | RNPostReturnType;
+
+const serialize = (messageTypeInfo: MessageTypeInfo, message: SerializedMessage) => {
+    try {
+        const result = JSON.stringify({ messageTypeInfo, message });
+        return result;
+    } catch (error) {
+        throw new SerializationError(JSON.stringify(error));
+    }
 };
 
-export const deserializeMessage = (messageStr: string): PostMessageType | null => {
-    return deserialize<PostMessageType>(messageStr);
+export const serializeRNCall = (message: NextJSPostMessageType) => serialize({ from: 'RN', type: 'call' }, message);
+export const serializeRNReturn = (message: RNPostReturnType) => serialize({ from: 'RN', type: 'return' }, message);
+export const serializeNextJSCall = (message: RNPostMessageType) => serialize({ from: 'NextJS', type: 'call' }, message);
+export const serializeNextJSReturn = (message: NextJSPostReturnType) => serialize({ from: 'NextJS', type: 'return' }, message);
+
+class DeserializationError extends Error {
+    constructor(message: string) {
+        super(`[Deserialization Error] ${message}`);
+        this.name = 'DeserializationError';
+    }
+}
+
+type DeserializationInfo = {
+    from: MessageOrigin;
+    messageStr: string;
 };
 
-export const deserializeReturnMessage = (messageStr: string): PostReturnType | null => {
-    return deserialize<PostReturnType>(messageStr);
+type DeserializationReturn<Type extends MessageType, ReturnType> = {
+    type: Type;
+    message: ReturnType;
 };
 
-export const serializeReturnMessage = <Module extends TWebviewBridgeModule, Command extends TWebviewBridgeCommand<Module>>({
-    module,
-    command,
-    payload,
-}: TWebviewBridgeSerializeReturnMessage<Module, Command>) => {
-    const message = { module, command, payload };
+export const deserialize = <CallMessage, ReturnMessage>(
+    info: DeserializationInfo,
+): DeserializationReturn<'call', CallMessage> | DeserializationReturn<'return', ReturnMessage> => {
+    try {
+        const parsedMessage = JSON.parse(info.messageStr);
+        if (!parsedMessage) {
+            throw new DeserializationError('Parsed message not found');
+        }
 
-    return module && command && payload ? JSON.stringify(message) : undefined;
+        const isSafelyMessage = doPathsExist(parsedMessage, [
+            'messageTypeInfo.from',
+            'messageTypeInfo.type',
+            'message.module',
+            'message.command',
+        ]);
+
+        if (!isSafelyMessage) {
+            throw new DeserializationError('Message type info or message not found');
+        }
+
+        const {
+            messageTypeInfo: { from, type },
+            message,
+        } = parsedMessage;
+
+        if (from === info.from && type === 'call') {
+            return { type: 'call', message: message as CallMessage };
+        }
+
+        if (from === info.from && type === 'return') {
+            return { type: 'return', message: message as ReturnMessage };
+        }
+
+        throw new DeserializationError('From or type not match');
+    } catch (error) {
+        if (error instanceof DeserializationError) {
+            throw error;
+        }
+        throw new DeserializationError(JSON.stringify(error));
+    }
 };
 
-export const serializeMessage = <Module extends TWebviewBridgeModule, Command extends TWebviewBridgeCommand<Module>>({
-    module,
-    command,
-    payload,
-}: TWebviewBridgeSerializeMessage<Module, Command>) => {
-    const message = { module, command, payload };
+export const deserializeRN = (messageStr: string) =>
+    deserialize<RNPostMessageType, NextJSPostReturnType>({ from: 'NextJS', messageStr });
 
-    return module && command && payload ? JSON.stringify(message) : undefined;
-};
+export const deserializeNextJS = (messageStr: string) =>
+    deserialize<NextJSPostMessageType, RNPostReturnType>({ from: 'RN', messageStr });
+
+export const isNextModule = (module: string) => NEXT_JS_MODULES.indexOf(module) !== -1;
+
+export const isRNModule = (module: string) => RN_MODULES.indexOf(module) !== -1;

@@ -2,7 +2,6 @@
 
 import PostWriteIcon from '@/assets/icons/post_write.svg';
 import { WebviewBridgeContext } from '@/contexts/webview-bridge/WebviewBridgeContext';
-import { Navigate } from '@/utils/webveiw-bridge/Navigate';
 import { useContext } from 'react';
 
 interface IPostWriteProps {
@@ -10,10 +9,10 @@ interface IPostWriteProps {
 }
 
 const PostWrite = ({ className }: IPostWriteProps) => {
-    const { Navigate } = useContext(WebviewBridgeContext);
+    const { Navigation } = useContext(WebviewBridgeContext);
 
     const handleRouteImageCrop = () => {
-        Navigate?.push({ route: 'ImageCropPage' });
+        Navigation?.push({ route: 'ImageCropPage' });
     };
 
     return (

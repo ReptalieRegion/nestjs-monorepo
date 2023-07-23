@@ -3,7 +3,6 @@
 import Logo from '@/assets/icons/logo.svg';
 import BackButton from '@/assets/icons/back_button.svg';
 import { IHeaderProps, TLeftIcon } from '<Header>';
-import { useRouter } from 'next/navigation';
 import { useContext } from 'react';
 import { RouterContext } from '@/contexts/router/RouterContext';
 

@@ -12,8 +12,9 @@ export class ImageRepository extends BaseRepository<ImageDocument> {
         super(imageModel);
     }
 
-    async createImage(ImageInfo: InputImageDTO, session: ClientSession) {
-        const image = new this.imageModel(ImageInfo);
-        return image.save({ session });
+    async createImage(imageInfo: InputImageDTO, session: ClientSession) {
+        const image = new this.imageModel(imageInfo);
+        const savedImage = await image.save({ session });
+        return savedImage.Mapper();
     }
 }

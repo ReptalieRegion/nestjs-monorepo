@@ -1,8 +1,8 @@
 import { IsString } from 'class-validator';
 
-export class InputSharePostLikeDTO {
+export class InputShareLikeDTO {
     @IsString()
-    readonly sharePostId: string;
+    readonly postId: string;
 
     @IsString()
     readonly userId: string;

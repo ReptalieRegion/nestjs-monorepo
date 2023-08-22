@@ -1,4 +1,4 @@
-import { IsString, IsArray, IsEnum, IsOptional } from 'class-validator';
+import { IsString, IsArray, IsEnum } from 'class-validator';
 
 export enum ImageType {
     Share = 'share',
@@ -7,14 +7,13 @@ export enum ImageType {
 }
 
 export class InputImageDTO {
-    @IsOptional()
     @IsArray()
     @IsString({ each: true })
-    imageKey?: string[];
+    readonly imageKeys?: string[];
 
     @IsEnum(ImageType)
-    type: ImageType;
+    readonly type: ImageType;
 
     @IsString()
-    typeId: string;
+    readonly typeId: string;
 }

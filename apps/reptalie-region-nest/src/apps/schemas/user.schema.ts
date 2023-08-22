@@ -1,11 +1,12 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 
-import { Document, SchemaTypes } from 'mongoose';
+import mongoose, { Document, SchemaTypes } from 'mongoose';
 import { IResponseUserDTO } from '../dto/user/response-user.dto';
 import { getCurrentDate } from '../utils/time/time';
 
 export interface UserDocument extends User, Document {
     view(): Partial<IResponseUserDTO>;
+    Mapper(): Partial<IResponseUserDTO>;
 }
 
 @Schema({ versionKey: false, timestamps: { currentTime: getCurrentDate } })
@@ -64,6 +65,42 @@ userSchema.methods = {
             }),
             {},
         );
+
+        return viewFields;
+    },
+
+    Mapper(): Partial<IResponseUserDTO> {
+        const fields: Array<keyof IResponseUserDTO> = [
+            'id',
+            'address',
+            'email',
+            'nickname',
+            'name',
+            'point',
+            'recommender',
+            'phone',
+            'profileImage',
+        ];
+
+        const viewFields = fields.reduce((prev, field) => {
+            const value = this.get(field);
+
+            if (value === undefined) {
+                return prev;
+            }
+
+            if (value instanceof mongoose.Types.ObjectId) {
+                return {
+                    ...prev,
+                    [field]: value.toHexString(),
+                };
+            }
+
+            return {
+                ...prev,
+                [field]: value,
+            };
+        }, {});
 
         return viewFields;
     },

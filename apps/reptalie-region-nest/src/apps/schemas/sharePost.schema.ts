@@ -1,18 +1,19 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 
-import { Document, SchemaTypes } from 'mongoose';
-import { IResponseSharePostDTO } from '../dto/sharePost/response-sharePost.dto';
+import mongoose, { Document, SchemaTypes } from 'mongoose';
+import { IResponseSharePostDTO } from '../dto/share/post/response-sharePost.dto';
 import { getCurrentDate } from '../utils/time/time';
 import { User } from './user.schema';
 
 export interface SharePostDocument extends SharePost, Document {
     view(): Partial<IResponseSharePostDTO>;
+    Mapper(): Partial<IResponseSharePostDTO>;
 }
 
 @Schema({ versionKey: false, timestamps: { currentTime: getCurrentDate } })
 export class SharePost {
-    @Prop({ required: true, type: SchemaTypes.String })
-    content: string;
+    @Prop({ required: true, type: [SchemaTypes.String] })
+    contents: string[];
 
     @Prop({ ref: 'User', type: SchemaTypes.ObjectId })
     userId: User;
@@ -25,7 +26,7 @@ const SharePostSchema = SchemaFactory.createForClass(SharePost);
 SharePostSchema.index({ userId: 1 });
 SharePostSchema.methods = {
     view(): Partial<IResponseSharePostDTO> {
-        const fields: Array<keyof IResponseSharePostDTO> = ['id', 'content', 'userId', 'isDeleted', 'createdAt', 'updatedAt'];
+        const fields: Array<keyof IResponseSharePostDTO> = ['id', 'contents', 'userId', 'isDeleted', 'createdAt', 'updatedAt'];
 
         const viewFields = fields.reduce(
             (prev, field) => ({
@@ -34,6 +35,32 @@ SharePostSchema.methods = {
             }),
             {},
         );
+
+        return viewFields;
+    },
+
+    Mapper(): Partial<IResponseSharePostDTO> {
+        const fields: Array<keyof IResponseSharePostDTO> = ['id', 'contents', 'userId', 'isDeleted', 'createdAt', 'updatedAt'];
+
+        const viewFields = fields.reduce((prev, field) => {
+            const value = this.get(field);
+
+            if (value === undefined) {
+                return prev;
+            }
+
+            if (value instanceof mongoose.Types.ObjectId) {
+                return {
+                    ...prev,
+                    [field]: value.toHexString(),
+                };
+            }
+
+            return {
+                ...prev,
+                [field]: value,
+            };
+        }, {});
 
         return viewFields;
     },

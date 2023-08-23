@@ -12,13 +12,13 @@ import { TokenInterceptor } from './interceptors/token.interceptor';
 export class AuthController {
     constructor(private readonly authService: AuthService) {}
 
-    @Post('register')
+    @Post('sign-up')
     @HttpCode(HttpStatus.CREATED)
     async register(@Body() createUserDTO: InputUserDTO) {
-        return await this.authService.register(createUserDTO);
+        return await this.authService.signUp(createUserDTO);
     }
 
-    @Post('login')
+    @Post('sign-in')
     @UseGuards(LocalAuthGuard)
     @HttpCode(HttpStatus.OK)
     async signIn(@AuthUser() user: IResponseUserDTO) {

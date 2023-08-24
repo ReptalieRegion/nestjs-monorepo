@@ -13,8 +13,8 @@ export class ShareCommentRepository extends BaseRepository<ShareCommentDocument>
         super(shareCommentModel);
     }
 
-    async createComment(commentInfo: InputShareCommentDTO, session: ClientSession) {
-        const comment = new this.shareCommentModel(commentInfo);
+    async createComment(userId: string, commentInfo: InputShareCommentDTO, session: ClientSession) {
+        const comment = new this.shareCommentModel({ ...commentInfo, userId });
         const savedComment = await comment.save({ session });
         return savedComment.Mapper();
     }

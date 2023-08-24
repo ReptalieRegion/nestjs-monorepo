@@ -4,9 +4,6 @@ export class InputShareCommentReplyDTO {
     @IsString()
     readonly commentId: string;
 
-    @IsString()
-    readonly userId: string;
-
     @IsArray()
     @IsString({ each: true })
     readonly contents: string[];

@@ -44,16 +44,14 @@ export class ShareWriterService {
     ) {}
 
     // 일상공유 게시글 등록 및 이미지 등록
-    async createSharePostWithImages(inputSharePostDTO: InputSharePostDTO, files: Express.Multer.File[]) {
+    async createSharePostWithImages(userId: string, inputSharePostDTO: InputSharePostDTO, files: Express.Multer.File[]) {
         const session: ClientSession = await this.connection.startSession();
         session.startTransaction();
 
         let imageKeys: string[] = [];
 
         try {
-            await this.userSearcherService.isExistsUserId(inputSharePostDTO.userId);
-
-            const sharePost = await this.sharePostRepository.createSharePost(inputSharePostDTO, session);
+            const sharePost = await this.sharePostRepository.createSharePost(userId, inputSharePostDTO, session);
 
             if (!sharePost?.id) {
                 throw new BadRequestException('Failed to create share post');
@@ -79,18 +77,14 @@ export class ShareWriterService {
     }
 
     // 일상공유 댓글 등록
-    async createShareComment(inputShareCommentDTO: InputShareCommentDTO) {
+    async createShareComment(userId: string, inputShareCommentDTO: InputShareCommentDTO) {
         const session: ClientSession = await this.connection.startSession();
         session.startTransaction();
 
         try {
-            // 필수 데이터의 존재 여부 검사
-            await Promise.all([
-                this.userSearcherService.isExistsUserId(inputShareCommentDTO.userId),
-                this.shareSearcherService.isExistsPostId(inputShareCommentDTO.postId),
-            ]);
+            await this.shareSearcherService.isExistsPostId(inputShareCommentDTO.postId);
 
-            const comment = await this.shareCommentRepository.createComment(inputShareCommentDTO, session);
+            const comment = await this.shareCommentRepository.createComment(userId, inputShareCommentDTO, session);
 
             if (!comment?.id) {
                 throw new BadRequestException('Failed to create comment');
@@ -112,17 +106,14 @@ export class ShareWriterService {
     }
 
     // 일상공유 대댓글 등록
-    async createShareCommentReply(inputShareCommentReplyDTO: InputShareCommentReplyDTO) {
+    async createShareCommentReply(userId: string, inputShareCommentReplyDTO: InputShareCommentReplyDTO) {
         const session: ClientSession = await this.connection.startSession();
         session.startTransaction();
 
         try {
-            const [, shareComment] = await Promise.all([
-                this.userSearcherService.isExistsUserId(inputShareCommentReplyDTO.userId),
-                this.shareSearcherService.isExistsCommentId(inputShareCommentReplyDTO.commentId),
-            ]);
+            const shareComment = await this.shareSearcherService.isExistsCommentId(inputShareCommentReplyDTO.commentId);
 
-            const reply = await this.shareCommentReplyRepository.createCommentReply(inputShareCommentReplyDTO, session);
+            const reply = await this.shareCommentReplyRepository.createCommentReply(userId, inputShareCommentReplyDTO, session);
 
             if (!reply?.id) {
                 throw new BadRequestException('Failed to create comment-reply');

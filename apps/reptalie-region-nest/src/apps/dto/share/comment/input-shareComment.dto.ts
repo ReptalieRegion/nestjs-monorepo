@@ -4,9 +4,6 @@ export class InputShareCommentDTO {
     @IsString()
     readonly postId: string;
 
-    @IsString()
-    readonly userId: string;
-
     @IsArray()
     @IsString({ each: true })
     readonly contents: string[];

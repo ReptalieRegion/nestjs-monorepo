@@ -13,8 +13,8 @@ export class SharePostRepository extends BaseRepository<SharePostDocument> {
         super(sharePostModel);
     }
 
-    async createSharePost(sharePostInfo: InputSharePostDTO, session: ClientSession) {
-        const sharePost = new this.sharePostModel(sharePostInfo);
+    async createSharePost(userId: string, sharePostInfo: InputSharePostDTO, session: ClientSession) {
+        const sharePost = new this.sharePostModel({ ...sharePostInfo, userId });
         const savedSharePost = await sharePost.save({ session });
         return savedSharePost.Mapper();
     }

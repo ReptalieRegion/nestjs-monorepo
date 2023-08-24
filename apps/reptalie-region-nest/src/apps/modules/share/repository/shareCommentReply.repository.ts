@@ -14,8 +14,8 @@ export class ShareCommentReplyRepository extends BaseRepository<ShareCommentRepl
         super(shareCommentReplyModel);
     }
 
-    async createCommentReply(replyInfo: InputShareCommentReplyDTO, session: ClientSession) {
-        const reply = new this.shareCommentReplyModel(replyInfo);
+    async createCommentReply(userId: string, replyInfo: InputShareCommentReplyDTO, session: ClientSession) {
+        const reply = new this.shareCommentReplyModel({ ...replyInfo, userId });
         const savedReply = await reply.save({ session });
         return savedReply.Mapper();
     }

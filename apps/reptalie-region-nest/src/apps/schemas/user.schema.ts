@@ -12,7 +12,7 @@ export interface UserDocument extends User, Document {
 @Schema({ versionKey: false, timestamps: { currentTime: getCurrentDate } })
 export class User {
     @Prop({ trim: true, unique: true, required: true, type: SchemaTypes.String })
-    email: string;
+    userId: string;
 
     @Prop({ required: true, type: SchemaTypes.String })
     password: string;
@@ -49,7 +49,7 @@ userSchema.methods = {
         const fields: Array<keyof IResponseUserDTO> = [
             'id',
             'address',
-            'email',
+            'userId',
             'nickname',
             'name',
             'point',
@@ -73,7 +73,7 @@ userSchema.methods = {
         const fields: Array<keyof IResponseUserDTO> = [
             'id',
             'address',
-            'email',
+            'userId',
             'nickname',
             'name',
             'point',

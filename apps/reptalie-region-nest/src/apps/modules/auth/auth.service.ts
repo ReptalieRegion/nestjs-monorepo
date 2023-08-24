@@ -33,8 +33,8 @@ export class AuthService {
         return user.view();
     }
 
-    async signIn(loginInfo: Pick<CreateUserDTO, 'email' | 'password'>): Promise<Partial<IResponseUserDTO> | null> {
-        const user = await this.userRepository.findByEmail(loginInfo.email);
+    async signIn(loginInfo: Pick<CreateUserDTO, 'userId' | 'password'>): Promise<Partial<IResponseUserDTO> | null> {
+        const user = await this.userRepository.findByEmail(loginInfo.userId);
         if (!user) {
             return null;
         }

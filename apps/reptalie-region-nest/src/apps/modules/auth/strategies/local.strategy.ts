@@ -9,16 +9,16 @@ import { AuthService } from '../auth.service';
 export class LocalStrategy extends PassportStrategy(Strategy) {
     constructor(private readonly authService: AuthService) {
         super({
-            usernameField: 'email',
+            usernameField: 'userId',
             passwordField: 'password',
             passReqToCallback: false,
         });
     }
 
-    async validate(email: string, password: string) {
-        const user = await this.authService.login({ email, password });
+    async validate(userId: string, password: string) {
+        const user = await this.authService.signIn({ userId, password });
         if (user === null) {
-            throw new UnauthorizedException();
+            throw new UnauthorizedException('Invalid credentials. Please check your email and password.');
         }
 
         return user;

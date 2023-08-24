@@ -1,12 +1,12 @@
-import { ImageToS3Service, ImageToS3ServiceToken } from './imageToS3.service';
-import { ImageToTableService, ImageToTableServiceToken } from './imageToTable.service';
+import { ImageS3HandlerService, ImageS3HandlerServiceToken } from './service/imageS3Handler.service';
+import { ImageWriterService, ImageWriterServiceToken } from './service/imageWriter.service';
 
-export const ImageToS3ServiceProvider = {
-    provide: ImageToS3ServiceToken,
-    useClass: ImageToS3Service,
+export const ImageS3HandlerServiceProvider = {
+    provide: ImageS3HandlerServiceToken,
+    useClass: ImageS3HandlerService,
 };
 
-export const ImageToTableServiceProvider = {
-    provide: ImageToTableServiceToken,
-    useClass: ImageToTableService,
+export const ImageWriterServiceProvider = {
+    provide: ImageWriterServiceToken,
+    useClass: ImageWriterService,
 };

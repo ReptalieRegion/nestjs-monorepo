@@ -1,40 +1,37 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 
-import mongoose, { Document, SchemaTypes, Types } from 'mongoose';
-import { ImageType } from '../dto/image/input-image.dto';
-import { IResponseImageDTO } from '../dto/image/response-image.dto';
+import mongoose, { Document, SchemaTypes } from 'mongoose';
+import { IResponseShareLikeDTO } from '../dto/share/like/response-shareLike.dto';
 import { getCurrentDate } from '../utils/time/time';
+import { SharePost } from './sharePost.schema';
+import { User } from './user.schema';
 
-export interface ImageDocument extends Image, Document {
-    view(): Partial<IResponseImageDTO>;
-    Mapper(): Partial<IResponseImageDTO>;
+export interface ShareLikeDocument extends ShareLike, Document {
+    view(): Partial<IResponseShareLikeDTO>;
+    Mapper(): Partial<IResponseShareLikeDTO>;
 }
 
 @Schema({ versionKey: false, timestamps: { currentTime: getCurrentDate } })
-export class Image {
-    @Prop({ required: true, type: [SchemaTypes.String] })
-    imageKeys: string[];
+export class ShareLike {
+    @Prop({ ref: 'sharePost', type: SchemaTypes.ObjectId })
+    postId: SharePost;
 
-    @Prop({ required: true, enum: ImageType })
-    type: ImageType;
-
-    @Prop({ required: true, type: SchemaTypes.ObjectId, refPath: 'type' })
-    typeId: Types.ObjectId;
+    @Prop({ ref: 'user', type: SchemaTypes.ObjectId })
+    userId: User;
 
     @Prop({ default: false, type: SchemaTypes.Boolean })
-    isDeleted: boolean;
+    isCancled: boolean;
 }
 
-const ImageSchema = SchemaFactory.createForClass(Image);
-ImageSchema.index({ type: 1, typeId: 1 });
-ImageSchema.methods = {
-    view(): Partial<IResponseImageDTO> {
-        const fields: Array<keyof IResponseImageDTO> = [
+const ShareLikeSchema = SchemaFactory.createForClass(ShareLike);
+ShareLikeSchema.index({ sharePostId: 1 });
+ShareLikeSchema.methods = {
+    view(): Partial<IResponseShareLikeDTO> {
+        const fields: Array<keyof IResponseShareLikeDTO> = [
             'id',
-            'imageKeys',
-            'type',
-            'typeId',
-            'isDeleted',
+            'postId',
+            'userId',
+            'isCancled',
             'createdAt',
             'updatedAt',
         ];
@@ -50,13 +47,12 @@ ImageSchema.methods = {
         return viewFields;
     },
 
-    Mapper(): Partial<IResponseImageDTO> {
-        const fields: Array<keyof IResponseImageDTO> = [
+    Mapper(): Partial<IResponseShareLikeDTO> {
+        const fields: Array<keyof IResponseShareLikeDTO> = [
             'id',
-            'imageKeys',
-            'type',
-            'typeId',
-            'isDeleted',
+            'postId',
+            'userId',
+            'isCancled',
             'createdAt',
             'updatedAt',
         ];
@@ -85,4 +81,4 @@ ImageSchema.methods = {
     },
 };
 
-export { ImageSchema };
+export { ShareLikeSchema };

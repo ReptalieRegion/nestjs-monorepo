@@ -15,15 +15,15 @@ export class AuthService {
     constructor(
         private readonly userRepository: UserRepository,
         private readonly cryptographyService: PBKDF2Service,
-        private readonly redisServier: RedisService,
+        private readonly redisService: RedisService,
         private readonly jwtService: JwtService,
     ) {}
 
-    async register(inputUserDTO: InputUserDTO): Promise<Partial<IResponseUserDTO> | null> {
+    async signUp(inputUserDTO: InputUserDTO): Promise<Partial<IResponseUserDTO> | null> {
         const { password } = inputUserDTO;
         const encryptPBKDF2Info = this.cryptographyService.encryptPBKDF2(password);
         if (encryptPBKDF2Info === undefined) {
-            throw new BadRequestException();
+            throw new BadRequestException('Failed to process the request. Please provide valid input data for sign-up.');
         }
 
         const { salt, hashedPassword } = encryptPBKDF2Info;
@@ -33,8 +33,8 @@ export class AuthService {
         return user.view();
     }
 
-    async login(loginInfo: Pick<CreateUserDTO, 'email' | 'password'>): Promise<Partial<IResponseUserDTO> | null> {
-        const user = await this.userRepository.findByEmail(loginInfo.email);
+    async signIn(loginInfo: Pick<CreateUserDTO, 'userId' | 'password'>): Promise<Partial<IResponseUserDTO> | null> {
+        const user = await this.userRepository.findByEmail(loginInfo.userId);
         if (!user) {
             return null;
         }
@@ -56,7 +56,7 @@ export class AuthService {
      * @description 사용자가 가지고 있는 refresh token이 db에 저장된 토큰값과 일치하는지 확인
      */
     async verifyRefreshToken(token: string, userId: string) {
-        const cachedRefreshToken = await this.redisServier.get(userId);
+        const cachedRefreshToken = await this.redisService.get(userId);
 
         if (token && cachedRefreshToken && token === cachedRefreshToken) {
             return await this.userRepository.findById(userId);

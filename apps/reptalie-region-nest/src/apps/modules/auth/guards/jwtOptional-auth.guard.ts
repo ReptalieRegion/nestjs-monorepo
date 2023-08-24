@@ -9,7 +9,7 @@ import { AuthService } from '../auth.service';
 import { JwtStrategy } from '../strategies/jwt.strategy';
 
 @Injectable()
-export class JwtAuthGuard extends AuthGuard('jwt') {
+export class JwtOptionalAuthGuard extends AuthGuard('jwt') {
     constructor(
         private readonly authService: AuthService,
         private readonly jwtStrategy: JwtStrategy,
@@ -24,7 +24,8 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
         const token = request.signedCookies['access_token'];
 
         if (!token) {
-            throw new UnauthorizedException('Access denied. Authentication token is missing.');
+            request.user = undefined;
+            return true;
         }
 
         try {

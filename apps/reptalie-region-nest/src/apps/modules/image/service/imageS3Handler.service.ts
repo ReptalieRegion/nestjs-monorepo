@@ -1,9 +1,9 @@
 import { PutObjectCommand, S3Client, DeleteObjectCommand, HeadObjectCommand, S3ClientConfig } from '@aws-sdk/client-s3';
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import * as mime from 'mime-types';
 import { v4 as uuidv4 } from 'uuid';
 
-export const ImageToS3ServiceToken = 'ImageToS3ServiceToken';
+export const ImageS3HandlerServiceToken = 'ImageS3HandlerServiceToken';
 
 interface IS3ObjectParams {
     Key: string;
@@ -22,7 +22,7 @@ function delay(ms: number) {
 }
 
 @Injectable()
-export class ImageToS3Service {
+export class ImageS3HandlerService {
     private s3: S3Client;
 
     constructor() {
@@ -39,6 +39,10 @@ export class ImageToS3Service {
 
     // 이미지 삭제
     async deleteImagesFromS3(keys: string[]) {
+        if (keys.length === 0) {
+            return;
+        }
+
         const deleteResults: DeleteResult[] = [];
 
         for (const key of keys) {
@@ -52,7 +56,7 @@ export class ImageToS3Service {
             if (!isKeyExists) {
                 throw new NotFoundException('Image not found.');
             }
-            
+
             let retries = 0;
 
             while (retries < MAX_RETRIES) {
@@ -68,7 +72,7 @@ export class ImageToS3Service {
             }
 
             if (retries === MAX_RETRIES) {
-                throw new Error('Image deletion failed after multiple retries');
+                throw new InternalServerErrorException('Image deletion failed after multiple retries');
             }
         }
 
@@ -111,7 +115,7 @@ export class ImageToS3Service {
                 if (imageKeys.length !== 0) {
                     await this.deleteImagesFromS3(imageKeys);
                 }
-                throw new Error('Image upload failed after multiple retries');
+                throw new InternalServerErrorException('Image upload failed after multiple retries');
             }
         }
 

@@ -1,39 +1,40 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 
 import mongoose, { Document, SchemaTypes, Types } from 'mongoose';
-import { ImageType } from '../dto/image/input-image.dto';
-import { IResponseImageDTO } from '../dto/image/response-image.dto';
+import { TagType } from '../dto/tag/input-tag.dto';
+import { IResponseTagDTO } from '../dto/tag/response-tag.dto';
 import { getCurrentDate } from '../utils/time/time';
+import { User } from './user.schema';
 
-export interface ImageDocument extends Image, Document {
-    view(): Partial<IResponseImageDTO>;
-    Mapper(): Partial<IResponseImageDTO>;
+export interface TagDocument extends Tag, Document {
+    view(): Partial<IResponseTagDTO>;
+    Mapper(): Partial<IResponseTagDTO>;
 }
 
 @Schema({ versionKey: false, timestamps: { currentTime: getCurrentDate } })
-export class Image {
-    @Prop({ required: true, type: [SchemaTypes.String] })
-    imageKeys: string[];
-
-    @Prop({ required: true, enum: ImageType })
-    type: ImageType;
+export class Tag {
+    @Prop({ required: true, enum: TagType })
+    type: TagType;
 
     @Prop({ required: true, type: SchemaTypes.ObjectId, refPath: 'type' })
     typeId: Types.ObjectId;
+
+    @Prop({ index: true, ref: 'user', type: SchemaTypes.ObjectId })
+    tagIds: User;
 
     @Prop({ default: false, type: SchemaTypes.Boolean })
     isDeleted: boolean;
 }
 
-const ImageSchema = SchemaFactory.createForClass(Image);
-ImageSchema.index({ type: 1, typeId: 1 });
-ImageSchema.methods = {
-    view(): Partial<IResponseImageDTO> {
-        const fields: Array<keyof IResponseImageDTO> = [
+const TagSchema = SchemaFactory.createForClass(Tag);
+TagSchema.index({ type: 1, typeId: 1 });
+TagSchema.methods = {
+    view(): Partial<IResponseTagDTO> {
+        const fields: Array<keyof IResponseTagDTO> = [
             'id',
-            'imageKeys',
             'type',
             'typeId',
+            'tagIds',
             'isDeleted',
             'createdAt',
             'updatedAt',
@@ -50,12 +51,12 @@ ImageSchema.methods = {
         return viewFields;
     },
 
-    Mapper(): Partial<IResponseImageDTO> {
-        const fields: Array<keyof IResponseImageDTO> = [
+    Mapper(): Partial<IResponseTagDTO> {
+        const fields: Array<keyof IResponseTagDTO> = [
             'id',
-            'imageKeys',
             'type',
             'typeId',
+            'tagIds',
             'isDeleted',
             'createdAt',
             'updatedAt',
@@ -85,4 +86,4 @@ ImageSchema.methods = {
     },
 };
 
-export { ImageSchema };
+export { TagSchema };

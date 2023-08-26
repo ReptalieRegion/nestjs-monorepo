@@ -23,6 +23,7 @@ RUN cd ./apps/reptile-region-nest && yarn build
 RUN cd ./apps/reptile-region-nest && yarn prod-install /deploy/dependencies
 
 # Copy other needed files
+RUN cp -r ./apps/reptile-region-nest/.env /deploy/.env
 RUN cp -r ./apps/reptile-region-nest/dist /deploy/dist
 
 # 🚀 Build the runner image
@@ -31,6 +32,7 @@ WORKDIR /runner
 
 # Copy files in logical layer order
 COPY --from=builder /deploy/dependencies .
+COPY --from=builder /deploy/.env .env
 COPY --from=builder /deploy/dist ./dist
 
 # ⚙️ Configure the default command

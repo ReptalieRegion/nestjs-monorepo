@@ -1,13 +1,13 @@
 version: '3.7'
 services:
     key-gen:
-        build: ./mongodb-replica/key
+        build: ./dockers/mongodb-replica/key
         volumes:
             - keys:/keys
         restart: 'no'
 
     init-replica:
-        build: ./mongodb-replica/init
+        build: ./dockers/mongodb-replica/init
         restart: 'no'
         networks:
             - reptalie-region

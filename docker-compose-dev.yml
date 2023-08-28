@@ -1,0 +1,14 @@
+version: '3.7'
+services:
+    nestjs:
+        build:
+            context: .
+            dockerfile: ./dockers/nestjs/Dockerfile
+        ports:
+            - 3333:3333
+        networks:
+            - nestjs
+
+networks:
+    nestjs:
+        external: true

@@ -19,8 +19,9 @@
         "prepare": "husky install",
         "build:webview-bridge": "yarn workspace @reptalieregion/webview-bridge run build",
         "publish:webview-bridge": "yarn workspace @reptalieregion/webview-bridge run publish",
-        "init:local:mongo": "cd ./dockers && docker-compose -f docker-compose-local.yml up -d",
-        "init:local:network": "cd ./dockers && docker network create reptalie-region"
+        "init:local:mongo": "docker-compose -f docker-compose-local.yml up -d",
+        "init:local:network": "docker network create reptalie-region",
+        "server:deploy:build": "docker-compose -f docker-compose-dev.yml up -d"
     },
     "workspaces": [
         "apps/*",

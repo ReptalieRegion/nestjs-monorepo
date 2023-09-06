@@ -8,7 +8,6 @@ import {
 
 import { AuthModule } from '../auth/auth.module';
 import { ImageModule } from '../image/image.module';
-import { TagModule } from '../tag/tag.module';
 import { UserModule } from '../user/user.module';
 import { ShareCommentRepository } from './repository/shareComment.repository';
 import { ShareCommentReplyRepository } from './repository/shareCommentReply.repository';
@@ -20,7 +19,6 @@ import { ShareWriterServiceProvider, ShareSearcherServiceProvider, ShareUpdaterS
 @Module({
     imports: [
         AuthModule,
-        TagModule,
         UserModule,
         ImageModule,
         MongooseModuleSharePost,

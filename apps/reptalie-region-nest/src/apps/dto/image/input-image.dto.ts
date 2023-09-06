@@ -9,7 +9,7 @@ export enum ImageType {
 export class InputImageDTO {
     @IsArray()
     @IsString({ each: true })
-    readonly imageKeys?: string[];
+    readonly imageKey?: string[];
 
     @IsEnum(ImageType)
     readonly type: ImageType;

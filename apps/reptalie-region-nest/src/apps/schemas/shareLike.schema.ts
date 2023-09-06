@@ -13,7 +13,7 @@ export interface ShareLikeDocument extends ShareLike, Document {
 
 @Schema({ versionKey: false, timestamps: { currentTime: getCurrentDate } })
 export class ShareLike {
-    @Prop({ ref: 'sharePost', type: SchemaTypes.ObjectId })
+    @Prop({ index: true, ref: 'sharePost', type: SchemaTypes.ObjectId })
     postId: SharePost;
 
     @Prop({ ref: 'user', type: SchemaTypes.ObjectId })
@@ -24,17 +24,10 @@ export class ShareLike {
 }
 
 const ShareLikeSchema = SchemaFactory.createForClass(ShareLike);
-ShareLikeSchema.index({ sharePostId: 1 });
+ShareLikeSchema.index({ postId: 1, userId: 1 });
 ShareLikeSchema.methods = {
     view(): Partial<IResponseShareLikeDTO> {
-        const fields: Array<keyof IResponseShareLikeDTO> = [
-            'id',
-            'postId',
-            'userId',
-            'isCancled',
-            'createdAt',
-            'updatedAt',
-        ];
+        const fields: Array<keyof IResponseShareLikeDTO> = ['id', 'postId', 'userId', 'isCancled', 'createdAt', 'updatedAt'];
 
         const viewFields = fields.reduce(
             (prev, field) => ({
@@ -48,14 +41,7 @@ ShareLikeSchema.methods = {
     },
 
     Mapper(): Partial<IResponseShareLikeDTO> {
-        const fields: Array<keyof IResponseShareLikeDTO> = [
-            'id',
-            'postId',
-            'userId',
-            'isCancled',
-            'createdAt',
-            'updatedAt',
-        ];
+        const fields: Array<keyof IResponseShareLikeDTO> = ['id', 'postId', 'userId', 'isCancled', 'createdAt', 'updatedAt'];
 
         const viewFields = fields.reduce((prev, field) => {
             const value = this.get(field);

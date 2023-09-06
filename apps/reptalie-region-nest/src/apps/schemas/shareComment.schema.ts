@@ -13,14 +13,14 @@ export interface ShareCommentDocument extends ShareComment, Document {
 
 @Schema({ versionKey: false, timestamps: { currentTime: getCurrentDate } })
 export class ShareComment {
-    @Prop({ ref: 'sharePost', type: SchemaTypes.ObjectId })
+    @Prop({ index: true, ref: 'sharePost', type: SchemaTypes.ObjectId })
     postId: SharePost;
 
-    @Prop({ ref: 'user', type: SchemaTypes.ObjectId })
+    @Prop({ index: true, ref: 'user', type: SchemaTypes.ObjectId })
     userId: User;
 
-    @Prop({ required: true, type: [SchemaTypes.String] })
-    contents: string[];
+    @Prop({ required: true, type: SchemaTypes.String })
+    contents: string;
 
     @Prop({ default: 0, type: SchemaTypes.Number })
     replyCount: number;
@@ -30,7 +30,7 @@ export class ShareComment {
 }
 
 const ShareCommentSchema = SchemaFactory.createForClass(ShareComment);
-ShareCommentSchema.index({ sharePostId: 1 });
+ShareCommentSchema.index({ userId: 1, _id: 1 });
 ShareCommentSchema.methods = {
     view(): Partial<IResponseShareCommentDTO> {
         const fields: Array<keyof IResponseShareCommentDTO> = [

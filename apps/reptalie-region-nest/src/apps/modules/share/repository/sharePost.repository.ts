@@ -28,4 +28,18 @@ export class SharePostRepository extends BaseRepository<SharePostDocument> {
         const sharePost = await this.sharePostModel.findOne({ _id: new ObjectId(id) }, { _id: 1 }).exec();
         return sharePost?.Mapper();
     }
+
+    async findPostIdWithUserIdById(postId: string, userId: string) {
+        const sharePost = await this.sharePostModel
+            .findOne({ _id: new ObjectId(postId), userId: new ObjectId(userId) }, { _id: 1 })
+            .exec();
+        return sharePost?.Mapper();
+    }
+
+    async updateSharePost(postId: string, userId: string, contents: string, session: ClientSession) {
+        const response = await this.sharePostModel
+            .updateOne({ _id: new ObjectId(postId), userId: new ObjectId(userId) }, { $set: { contents } }, { session })
+            .exec();
+        return response.modifiedCount;
+    }
 }

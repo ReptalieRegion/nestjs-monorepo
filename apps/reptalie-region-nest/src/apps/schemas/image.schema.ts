@@ -12,8 +12,8 @@ export interface ImageDocument extends Image, Document {
 
 @Schema({ versionKey: false, timestamps: { currentTime: getCurrentDate } })
 export class Image {
-    @Prop({ required: true, type: [SchemaTypes.String] })
-    imageKeys: string[];
+    @Prop({ required: true, type: SchemaTypes.String })
+    imageKey: string;
 
     @Prop({ required: true, enum: ImageType })
     type: ImageType;
@@ -27,11 +27,12 @@ export class Image {
 
 const ImageSchema = SchemaFactory.createForClass(Image);
 ImageSchema.index({ type: 1, typeId: 1 });
+ImageSchema.index({ imageKey: 1, typeId: 1 });
 ImageSchema.methods = {
     view(): Partial<IResponseImageDTO> {
         const fields: Array<keyof IResponseImageDTO> = [
             'id',
-            'imageKeys',
+            'imageKey',
             'type',
             'typeId',
             'isDeleted',
@@ -53,7 +54,7 @@ ImageSchema.methods = {
     Mapper(): Partial<IResponseImageDTO> {
         const fields: Array<keyof IResponseImageDTO> = [
             'id',
-            'imageKeys',
+            'imageKey',
             'type',
             'typeId',
             'isDeleted',

@@ -12,8 +12,8 @@ export interface SharePostDocument extends SharePost, Document {
 
 @Schema({ versionKey: false, timestamps: { currentTime: getCurrentDate } })
 export class SharePost {
-    @Prop({ required: true, type: [SchemaTypes.String] })
-    contents: string[];
+    @Prop({ required: true, type: SchemaTypes.String })
+    contents: string;
 
     @Prop({ ref: 'User', type: SchemaTypes.ObjectId })
     userId: User;

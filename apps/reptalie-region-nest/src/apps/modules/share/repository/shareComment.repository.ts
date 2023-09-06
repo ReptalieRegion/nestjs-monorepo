@@ -13,9 +13,9 @@ export class ShareCommentRepository extends BaseRepository<ShareCommentDocument>
         super(shareCommentModel);
     }
 
-    async createComment(userId: string, commentInfo: InputShareCommentDTO, session: ClientSession) {
+    async createComment(userId: string, commentInfo: InputShareCommentDTO) {
         const comment = new this.shareCommentModel({ ...commentInfo, userId });
-        const savedComment = await comment.save({ session });
+        const savedComment = await comment.save();
         return savedComment.Mapper();
     }
 
@@ -24,13 +24,24 @@ export class ShareCommentRepository extends BaseRepository<ShareCommentDocument>
         return shareComment?.Mapper();
     }
 
-    async incrementReplyCount(id: string, session: ClientSession) {
-        const response = await this.shareCommentModel.updateOne(
-            { _id: new ObjectId(id) },
-            { $inc: { replyCount: 1 } },
-            { session },
-        );
+    async findCommentIdWithUserIdById(commentId: string, userId: string) {
+        const shareComment = await this.shareCommentModel
+            .findOne({ _id: new ObjectId(commentId), userId: new ObjectId(userId) }, { _id: 1 })
+            .exec();
+        return shareComment?.Mapper();
+    }
 
+    async updateComment(commentId: string, userId: string, contents: string) {
+        const response = await this.shareCommentModel
+            .updateOne({ _id: new ObjectId(commentId), userId: new ObjectId(userId) }, { $set: { contents } })
+            .exec();
+        return response.modifiedCount;
+    }
+
+    async incrementReplyCount(id: string, session: ClientSession) {
+        const response = await this.shareCommentModel
+            .updateOne({ _id: new ObjectId(id) }, { $inc: { replyCount: 1 } }, { session })
+            .exec();
         return response.modifiedCount;
     }
 }

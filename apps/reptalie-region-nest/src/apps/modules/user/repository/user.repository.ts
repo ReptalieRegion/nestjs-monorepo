@@ -3,9 +3,9 @@ import { InjectModel } from '@nestjs/mongoose';
 import { ObjectId } from 'bson';
 import { Model } from 'mongoose';
 
-import { CreateUserDTO } from '../../dto/user/create-user.dto';
-import { UserDocument, User } from '../../schemas/user.schema';
-import { BaseRepository } from '../base/base.repository';
+import { CreateUserDTO } from '../../../dto/user/create-user.dto';
+import { UserDocument, User } from '../../../schemas/user.schema';
+import { BaseRepository } from '../../base/base.repository';
 
 @Injectable()
 export class UserRepository extends BaseRepository<UserDocument> {
@@ -28,6 +28,11 @@ export class UserRepository extends BaseRepository<UserDocument> {
 
     async findUserIdById(id: string) {
         const user = await this.userModel.findOne({ _id: new ObjectId(id) }, { _id: 1 }).exec();
+        return user?.Mapper();
+    }
+
+    async findUserIdWithNickNameById(id: string) {
+        const user = await this.userModel.findOne({ _id: new ObjectId(id) }, { _id: 1, nickname: 1 }).exec();
         return user?.Mapper();
     }
 

@@ -5,7 +5,7 @@ import { PBKDF2Service } from '../../utils/cryptography/pbkdf2';
 import { CustomJwtModule, MongooseModuleUser } from '../../utils/customModules';
 import { RedisModule } from '../redis/redis.module';
 import { RedisService } from '../redis/redis.service';
-import { UserRepository } from '../user/user.repository';
+import { UserRepository } from '../user/repository/user.repository';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { JwtStrategy } from './strategies/jwt.strategy';

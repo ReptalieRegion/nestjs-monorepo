@@ -108,7 +108,7 @@ export class ShareWriterService {
         const inputShareLikeDTO: InputShareLikeDTO = { userId: userId, postId: postId };
 
         const like = await this.shareLikeRepository.createLike(inputShareLikeDTO);
-        if (!like?.id) {
+        if (!like) {
             throw new InternalServerErrorException('Failed to create ShareLike');
         }
     }

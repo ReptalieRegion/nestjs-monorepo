@@ -7,7 +7,7 @@ import { InputUserDTO } from '../../dto/user/input-user.dto';
 import { IResponseUserDTO } from '../../dto/user/response-user.dto';
 import { PBKDF2Service } from '../../utils/cryptography/pbkdf2';
 import { RedisService } from '../redis/redis.service';
-import { UserRepository } from '../user/user.repository';
+import { UserRepository } from '../user/repository/user.repository';
 import { IJwtPayload } from './interfaces/jwtPayload';
 
 @Injectable()

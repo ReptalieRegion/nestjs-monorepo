@@ -1,10 +1,10 @@
 import { MongooseModule } from '@nestjs/mongoose';
+import { Follow, FollowSchema } from '../../schemas/follow.schema';
 import { Image, ImageSchema } from '../../schemas/image.schema';
 import { ShareComment, ShareCommentSchema } from '../../schemas/shareComment.schema';
 import { ShareCommentReply, ShareCommentReplySchema } from '../../schemas/shareCommentReply.schema';
 import { ShareLike, ShareLikeSchema } from '../../schemas/shareLike.schema';
 import { SharePost, SharePostSchema } from '../../schemas/sharePost.schema';
-import { Tag, TagSchema } from '../../schemas/tag.schema';
 import { User, userSchema } from '../../schemas/user.schema';
 
 export const CustomMongooseModule = MongooseModule.forRoot(process.env.MONGODB_URI ?? '', {
@@ -27,4 +27,4 @@ export const MongooseModuleShareLike = MongooseModule.forFeature([{ name: ShareL
 
 export const MongooseModuleImage = MongooseModule.forFeature([{ name: Image.name, schema: ImageSchema }]);
 
-export const MongooseModuleTag = MongooseModule.forFeature([{ name: Tag.name, schema: TagSchema }]);
+export const MongooseModuleFollow = MongooseModule.forFeature([{ name: Follow.name, schema: FollowSchema }]);

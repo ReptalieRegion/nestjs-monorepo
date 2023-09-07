@@ -1,15 +1,34 @@
 import { Module } from '@nestjs/common';
 
-import { MongooseModuleUser } from '../../utils/customModules';
+import { MongooseModuleFollow, MongooseModuleUser } from '../../utils/customModules';
 import { AuthModule } from '../auth/auth.module';
+import { FollowRepository } from './repository/follow.repository';
+import { UserRepository } from './repository/user.repository';
 import { UserController } from './user.controller';
-import { UserSearcherServiceProvider } from './user.providers';
-import { UserRepository } from './user.repository';
+import {
+    UserDeleterServiceProvider,
+    UserSearcherServiceProvider,
+    UserUpdaterServiceProvider,
+    UserWriterServiceProvicer,
+} from './user.providers';
 
 @Module({
-    imports: [AuthModule, MongooseModuleUser],
+    imports: [AuthModule, MongooseModuleUser, MongooseModuleFollow],
     controllers: [UserController],
-    providers: [UserRepository, UserSearcherServiceProvider],
-    exports: [UserRepository, UserSearcherServiceProvider],
+    providers: [
+        UserRepository,
+        FollowRepository,
+        UserSearcherServiceProvider,
+        UserWriterServiceProvicer,
+        UserUpdaterServiceProvider,
+        UserDeleterServiceProvider,
+    ],
+    exports: [
+        UserRepository,
+        UserSearcherServiceProvider,
+        UserWriterServiceProvicer,
+        UserUpdaterServiceProvider,
+        UserDeleterServiceProvider,
+    ],
 })
 export class UserModule {}

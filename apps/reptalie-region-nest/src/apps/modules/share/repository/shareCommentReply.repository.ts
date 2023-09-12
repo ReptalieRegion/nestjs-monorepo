@@ -21,9 +21,9 @@ export class ShareCommentReplyRepository extends BaseRepository<ShareCommentRepl
         return savedReply.Mapper();
     }
 
-    async findCommentReplyIdWithUserIdById(commentReplyId: string, userId: string) {
+    async findCommentReplyIdWithUserId(commentReplyId: string, userId: string) {
         const shareCommentReply = await this.shareCommentReplyModel
-            .findOne({ _id: new ObjectId(commentReplyId), userId: new ObjectId(userId) }, { _id: 1 })
+            .findOne({ _id: new ObjectId(commentReplyId), userId: new ObjectId(userId) }, { _id: 1, commentId: 1 })
             .exec();
         return shareCommentReply?.Mapper();
     }
@@ -31,6 +31,31 @@ export class ShareCommentReplyRepository extends BaseRepository<ShareCommentRepl
     async updateCommentReply(commentReplyId: string, userId: string, contents: string) {
         const response = await this.shareCommentReplyModel
             .updateOne({ _id: new ObjectId(commentReplyId), userId: new ObjectId(userId) }, { $set: { contents } })
+            .exec();
+        return response.modifiedCount;
+    }
+
+    async deleteShareCommentReply(commentReplyId: string, userId: string, session: ClientSession) {
+        const response = await this.shareCommentReplyModel
+            .updateOne(
+                { _id: new ObjectId(commentReplyId), userId: new ObjectId(userId) },
+                { $set: { isDeleted: true } },
+                { session },
+            )
+            .exec();
+        return response.modifiedCount;
+    }
+
+    async deleteManyShareCommentReply(commentId: string, session: ClientSession) {
+        const response = await this.shareCommentReplyModel
+            .updateMany({ commentId: new ObjectId(commentId) }, { $set: { isDeleted: true } }, { session })
+            .exec();
+        return response.modifiedCount;
+    }
+
+    async deleteManyShareCommentReplyByArrayCommentId(commentIds: string[], session: ClientSession) {
+        const response = await this.shareCommentReplyModel
+            .updateMany({ commentId: { $in: commentIds }, isDeleted: false }, { $set: { isDeleted: true } }, { session })
             .exec();
         return response.modifiedCount;
     }

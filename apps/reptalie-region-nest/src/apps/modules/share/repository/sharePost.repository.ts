@@ -42,4 +42,11 @@ export class SharePostRepository extends BaseRepository<SharePostDocument> {
             .exec();
         return response.modifiedCount;
     }
+
+    async deleteSharePost(postId: string, userId: string, session: ClientSession) {
+        const response = await this.sharePostModel
+            .updateOne({ _id: new ObjectId(postId), userId: new ObjectId(userId) }, { $set: { isDeleted: true } }, { session })
+            .exec();
+        return response.modifiedCount;
+    }
 }

@@ -1,3 +1,4 @@
+import { ShareDeleterService, ShareDeleterServiceToken } from './service/shareDeleter.service';
 import { ShareSearcherService, ShareSearcherServiceToken } from './service/shareSearcher.service';
 import { ShareUpdaterService, ShareUpdaterServiceToken } from './service/shareUpdater.service';
 import { ShareWriterService, ShareWriterServiceToken } from './service/shareWriter.service';
@@ -15,4 +16,9 @@ export const ShareSearcherServiceProvider = {
 export const ShareUpdaterServiceProvider = {
     provide: ShareUpdaterServiceToken,
     useClass: ShareUpdaterService,
+};
+
+export const ShareDeleterServiceProvider = {
+    provide: ShareDeleterServiceToken,
+    useClass: ShareDeleterService,
 };

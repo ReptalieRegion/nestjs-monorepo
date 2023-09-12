@@ -72,7 +72,7 @@ export class ShareSearcherService {
 
     async isExistsCommentIdWithUserId(commentId: string, userId: string) {
         try {
-            const comment = await this.shareCommentRepository.findCommentIdWithUserIdById(commentId, userId);
+            const comment = await this.shareCommentRepository.findCommentIdWithUserId(commentId, userId);
 
             if (!comment) {
                 throw new NotFoundException('Comment not found for the specified user and comment id.');
@@ -86,10 +86,7 @@ export class ShareSearcherService {
 
     async isExistsCommentReplyIdWithUserID(commentReplyId: string, userId: string) {
         try {
-            const commentReply = await this.shareCommentReplyRepository.findCommentReplyIdWithUserIdById(
-                commentReplyId,
-                userId,
-            );
+            const commentReply = await this.shareCommentReplyRepository.findCommentReplyIdWithUserId(commentReplyId, userId);
 
             if (!commentReply) {
                 throw new NotFoundException('CommentReply not found for the specified user and commentReply id.');
@@ -98,6 +95,20 @@ export class ShareSearcherService {
             return commentReply;
         } catch (error) {
             handleBSONAndCastError(error, 'ShareCommentReplyId Invalid ObjectId');
+        }
+    }
+
+    async findCommentIdByPostId(postId: string) {
+        try {
+            const comment = await this.shareCommentRepository.findCommentIdByPostId(postId);
+
+            if (!comment) {
+                throw new NotFoundException('Comment not found for the specified post id.');
+            }
+
+            return comment.map((entity) => entity.id as string);
+        } catch (error) {
+            handleBSONAndCastError(error, 'postId Invalid ObjectId');
         }
     }
 }

@@ -37,6 +37,13 @@ export class ShareUpdaterService {
         }
     }
 
+    async decrementReplyCount(id: string, session: ClientSession) {
+        const result = await this.shareCommentRepository.decrementReplyCount(id, session);
+        if (result === 0) {
+            throw new InternalServerErrorException('Failed to decrement reply count for the comment.');
+        }
+    }
+
     async toggleShareLike(userId: string, postId: string) {
         const like = await this.shareSearcherService.getLikeStatus(postId, userId);
 
@@ -65,7 +72,7 @@ export class ShareUpdaterService {
             }
 
             if (inputSharePostDTO.deletefiles) {
-                await this.imageDeleterService.deleteImage(inputSharePostDTO.deletefiles, postId, session);
+                await this.imageDeleterService.deleteImageByImageKeys(inputSharePostDTO.deletefiles, postId, session);
             }
 
             await session.commitTransaction();

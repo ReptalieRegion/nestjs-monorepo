@@ -14,7 +14,12 @@ import { ShareCommentReplyRepository } from './repository/shareCommentReply.repo
 import { ShareLikeRepository } from './repository/shareLike.repository';
 import { SharePostRepository } from './repository/sharePost.repository';
 import { ShareController } from './share.controller';
-import { ShareWriterServiceProvider, ShareSearcherServiceProvider, ShareUpdaterServiceProvider } from './share.providers';
+import {
+    ShareWriterServiceProvider,
+    ShareSearcherServiceProvider,
+    ShareUpdaterServiceProvider,
+    ShareDeleterServiceProvider,
+} from './share.providers';
 
 @Module({
     imports: [
@@ -35,6 +40,7 @@ import { ShareWriterServiceProvider, ShareSearcherServiceProvider, ShareUpdaterS
         ShareWriterServiceProvider,
         ShareSearcherServiceProvider,
         ShareUpdaterServiceProvider,
+        ShareDeleterServiceProvider,
     ],
     exports: [],
 })

@@ -9,6 +9,7 @@ import {
     UseGuards,
     Put,
     Param,
+    Delete,
 } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { InputShareCommentDTO } from '../../dto/share/comment/input-shareComment.dto';
@@ -18,6 +19,7 @@ import { IResponseUserDTO } from '../../dto/user/response-user.dto';
 import { controllerErrorHandler } from '../../utils/error/errorHandler';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { AuthUser } from '../user/user.decorator';
+import { ShareDeleterService, ShareDeleterServiceToken } from './service/shareDeleter.service';
 import { ShareUpdaterService, ShareUpdaterServiceToken } from './service/shareUpdater.service';
 import { ShareWriterService, ShareWriterServiceToken } from './service/shareWriter.service';
 
@@ -28,6 +30,8 @@ export class ShareController {
         private readonly shareWriterService: ShareWriterService,
         @Inject(ShareUpdaterServiceToken)
         private readonly shareUpdaterService: ShareUpdaterService,
+        @Inject(ShareDeleterServiceToken)
+        private readonly shareDeleterService: ShareDeleterService,
     ) {}
 
     @Post('post')
@@ -134,6 +138,39 @@ export class ShareController {
         try {
             await this.shareUpdaterService.updateShareCommentReply(user.id, commentReplyId, inputShareCommentReplyDTO);
             return { statusCode: HttpStatus.OK, message: 'ShareCommentReply updated successfully' };
+        } catch (error) {
+            controllerErrorHandler(error);
+        }
+    }
+
+    @Delete('posts/:id')
+    @UseGuards(JwtAuthGuard)
+    async deleteSharePost(@AuthUser() user: IResponseUserDTO, @Param('id') postId: string) {
+        try {
+            const post = await this.shareDeleterService.deleteSharePost(user.id, postId);
+            return { statusCode: HttpStatus.OK, response: post };
+        } catch (error) {
+            controllerErrorHandler(error);
+        }
+    }
+
+    @Delete('comments/:id')
+    @UseGuards(JwtAuthGuard)
+    async deleteShareComment(@AuthUser() user: IResponseUserDTO, @Param('id') commentId: string) {
+        try {
+            const comment = await this.shareDeleterService.deleteShareComment(user.id, commentId);
+            return { statusCode: HttpStatus.OK, response: comment };
+        } catch (error) {
+            controllerErrorHandler(error);
+        }
+    }
+
+    @Delete('comment-replies/:id')
+    @UseGuards(JwtAuthGuard)
+    async deleteShareCommentReply(@AuthUser() user: IResponseUserDTO, @Param('id') commentReplyId: string) {
+        try {
+            const commentReply = await this.shareDeleterService.deleteShareCommentReply(user.id, commentReplyId);
+            return { statusCode: HttpStatus.OK, response: commentReply };
         } catch (error) {
             controllerErrorHandler(error);
         }

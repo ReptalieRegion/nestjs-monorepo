@@ -24,9 +24,9 @@ export class ShareCommentRepository extends BaseRepository<ShareCommentDocument>
         return shareComment?.Mapper();
     }
 
-    async findCommentIdWithUserIdById(commentId: string, userId: string) {
+    async findCommentIdWithUserId(commentId: string, userId: string) {
         const shareComment = await this.shareCommentModel
-            .findOne({ _id: new ObjectId(commentId), userId: new ObjectId(userId) }, { _id: 1 })
+            .findOne({ _id: new ObjectId(commentId), userId: new ObjectId(userId) }, { _id: 1, postId: 1, replyCount: 1 })
             .exec();
         return shareComment?.Mapper();
     }
@@ -38,9 +38,41 @@ export class ShareCommentRepository extends BaseRepository<ShareCommentDocument>
         return response.modifiedCount;
     }
 
+    async deleteShareComment(commentId: string, userId: string, session: ClientSession) {
+        const response = await this.shareCommentModel
+            .updateOne(
+                { _id: new ObjectId(commentId), userId: new ObjectId(userId) },
+                { $set: { isDeleted: true } },
+                { session },
+            )
+            .exec();
+        return response.modifiedCount;
+    }
+
     async incrementReplyCount(id: string, session: ClientSession) {
         const response = await this.shareCommentModel
             .updateOne({ _id: new ObjectId(id) }, { $inc: { replyCount: 1 } }, { session })
+            .exec();
+        return response.modifiedCount;
+    }
+
+    async decrementReplyCount(id: string, session: ClientSession) {
+        const response = await this.shareCommentModel
+            .updateOne({ _id: new ObjectId(id) }, { $inc: { replyCount: -1 } }, { session })
+            .exec();
+        return response.modifiedCount;
+    }
+
+    async findCommentIdByPostId(postId: string) {
+        const commentIds = await this.shareCommentModel
+            .find({ postId: new ObjectId(postId), isDeleted: false }, { _id: 1 })
+            .exec();
+        return commentIds.map((entity) => entity.Mapper());
+    }
+
+    async deleteManyShareComment(postId: string, session: ClientSession) {
+        const response = await this.shareCommentModel
+            .updateMany({ postId: new ObjectId(postId), isDeleted: false }, { $set: { isDeleted: true } }, { session })
             .exec();
         return response.modifiedCount;
     }

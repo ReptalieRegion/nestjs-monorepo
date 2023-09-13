@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import {
     MongooseModuleSharePost,
     MongooseModuleShareComment,
@@ -24,8 +24,8 @@ import {
 @Module({
     imports: [
         AuthModule,
-        UserModule,
         ImageModule,
+        forwardRef(() => UserModule),
         MongooseModuleSharePost,
         MongooseModuleShareComment,
         MongooseModuleShareCommentReply,
@@ -42,6 +42,11 @@ import {
         ShareUpdaterServiceProvider,
         ShareDeleterServiceProvider,
     ],
-    exports: [],
+    exports: [
+        ShareWriterServiceProvider,
+        ShareSearcherServiceProvider,
+        ShareUpdaterServiceProvider,
+        ShareDeleterServiceProvider,
+    ],
 })
 export class ShareModule {}

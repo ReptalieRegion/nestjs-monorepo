@@ -40,4 +40,11 @@ export class ImageRepository extends BaseRepository<ImageDocument> {
             .exec();
         return response.modifiedCount;
     }
+
+    async findProfileImage(typeId: string) {
+        const image = await this.imageModel
+            .findOne({ type: ImageType.Profile, typeId: new ObjectId(typeId), isDeleted: false }, { imageKey: 1 })
+            .exec();
+        return image?.Mapper();
+    }
 }

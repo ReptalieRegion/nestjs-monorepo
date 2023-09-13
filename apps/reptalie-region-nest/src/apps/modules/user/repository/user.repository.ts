@@ -22,22 +22,13 @@ export class UserRepository extends BaseRepository<UserDocument> {
         return await this.userModel.findOne({ email }).exec();
     }
 
-    async findByNickname(nickname: string) {
-        return await this.userModel.findOne({ nickname }).exec();
-    }
-
-    async findUserIdById(id: string) {
-        const user = await this.userModel.findOne({ _id: new ObjectId(id) }, { _id: 1 }).exec();
-        return user?.Mapper();
-    }
-
-    async findUserIdWithNickNameById(id: string) {
+    async findByUserId(id: string) {
         const user = await this.userModel.findOne({ _id: new ObjectId(id) }, { _id: 1, nickname: 1 }).exec();
         return user?.Mapper();
     }
 
-    async findUserIdByTaggedId(TagUserId: string[]) {
-        const users = await this.userModel.find({ _id: { $in: TagUserId } }, { _id: 1 }).exec();
-        return users.map((entity) => entity.Mapper());
+    async findByNickname(nickname: string) {
+        const user = await this.userModel.findOne({ nickname: nickname }, { _id: 1, nickname: 1 }).exec();
+        return user?.Mapper();
     }
 }

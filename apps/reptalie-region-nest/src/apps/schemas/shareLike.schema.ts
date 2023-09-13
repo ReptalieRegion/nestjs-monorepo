@@ -20,14 +20,14 @@ export class ShareLike {
     userId: User;
 
     @Prop({ default: false, type: SchemaTypes.Boolean })
-    isCancled: boolean;
+    isCanceled: boolean;
 }
 
 const ShareLikeSchema = SchemaFactory.createForClass(ShareLike);
 ShareLikeSchema.index({ postId: 1, userId: 1 });
 ShareLikeSchema.methods = {
     view(): Partial<IResponseShareLikeDTO> {
-        const fields: Array<keyof IResponseShareLikeDTO> = ['id', 'postId', 'userId', 'isCancled', 'createdAt', 'updatedAt'];
+        const fields: Array<keyof IResponseShareLikeDTO> = ['id', 'postId', 'userId', 'isCanceled', 'createdAt', 'updatedAt'];
 
         const viewFields = fields.reduce(
             (prev, field) => ({
@@ -41,7 +41,7 @@ ShareLikeSchema.methods = {
     },
 
     Mapper(): Partial<IResponseShareLikeDTO> {
-        const fields: Array<keyof IResponseShareLikeDTO> = ['id', 'postId', 'userId', 'isCancled', 'createdAt', 'updatedAt'];
+        const fields: Array<keyof IResponseShareLikeDTO> = ['id', 'postId', 'userId', 'isCanceled', 'createdAt', 'updatedAt'];
 
         const viewFields = fields.reduce((prev, field) => {
             const value = this.get(field);

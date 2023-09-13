@@ -16,9 +16,9 @@ export class UserUpdaterService {
     ) {}
 
     async toggleFollow(following: string, follower: string) {
-        const follow = await this.userSearcherService.getFollowStatus(following, follower);
+        const follow = await this.userSearcherService.getFollowInfo(following, follower);
 
-        const result = await this.followeRepository.updateIsCancledById(follow.id, follow.isCancled);
+        const result = await this.followeRepository.updateFollow(follow.id, follow.isCanceled);
         if (result === 0) {
             throw new InternalServerErrorException('Failed to toggle the Follow status.');
         }

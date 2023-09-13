@@ -16,49 +16,9 @@ export class ShareSearcherService {
         private readonly shareLikeRepository: ShareLikeRepository,
     ) {}
 
-    async isExistsPostId(postId: string) {
+    async isExistsPostWithUserId(postId: string, userId: string) {
         try {
-            const sharePost = await this.sharePostRepository.findPostIdById(postId);
-
-            if (!sharePost) {
-                throw new NotFoundException('SharePostId does not exist');
-            }
-
-            return sharePost;
-        } catch (error) {
-            handleBSONAndCastError(error, 'SharePostId Invalid ObjectId');
-        }
-    }
-
-    async isExistsCommentId(id: string) {
-        try {
-            const shareComment = await this.shareCommentRepository.findCommentIdWithReplyCountById(id);
-
-            if (!shareComment) {
-                throw new NotFoundException('ShareCommentId does not exist');
-            }
-
-            return shareComment;
-        } catch (error) {
-            handleBSONAndCastError(error, 'ShareCommentId Invalid ObjectId');
-        }
-    }
-
-    async getLikeStatus(postId: string, userId: string) {
-        await this.isExistsPostId(postId);
-
-        const like = await this.shareLikeRepository.findPostIdWithUserIdByIsCancled(userId, postId);
-
-        if (!like || !like?.id || like?.isCancled === undefined) {
-            throw new NotFoundException('Like status not found for the specified user and post.');
-        }
-
-        return { id: like.id, isCancled: like.isCancled };
-    }
-
-    async isExistsPostIdWithUserId(postId: string, userId: string) {
-        try {
-            const post = await this.sharePostRepository.findPostIdWithUserIdById(postId, userId);
+            const post = await this.sharePostRepository.findPostWithUserId(postId, userId);
 
             if (!post) {
                 throw new NotFoundException('Post not found for the specified user and post id.');
@@ -70,9 +30,9 @@ export class ShareSearcherService {
         }
     }
 
-    async isExistsCommentIdWithUserId(commentId: string, userId: string) {
+    async isExistsCommentWithUserId(commentId: string, userId: string) {
         try {
-            const comment = await this.shareCommentRepository.findCommentIdWithUserId(commentId, userId);
+            const comment = await this.shareCommentRepository.findCommentWithUserId(commentId, userId);
 
             if (!comment) {
                 throw new NotFoundException('Comment not found for the specified user and comment id.');
@@ -84,9 +44,9 @@ export class ShareSearcherService {
         }
     }
 
-    async isExistsCommentReplyIdWithUserID(commentReplyId: string, userId: string) {
+    async isExistsCommentReplyWithUserId(commentReplyId: string, userId: string) {
         try {
-            const commentReply = await this.shareCommentReplyRepository.findCommentReplyIdWithUserId(commentReplyId, userId);
+            const commentReply = await this.shareCommentReplyRepository.findCommentReplyWithUserId(commentReplyId, userId);
 
             if (!commentReply) {
                 throw new NotFoundException('CommentReply not found for the specified user and commentReply id.');
@@ -98,9 +58,21 @@ export class ShareSearcherService {
         }
     }
 
-    async findCommentIdByPostId(postId: string) {
+    async getLikeInfo(postId: string, userId: string) {
+        await this.isExistsPostWithUserId(postId, userId);
+
+        const like = await this.shareLikeRepository.findLikeByIsCanceled(userId, postId);
+
+        if (!like || !like?.id || like?.isCanceled === undefined) {
+            throw new NotFoundException('Like status not found for the specified user and post.');
+        }
+
+        return { id: like.id, isCanceled: like.isCanceled };
+    }
+
+    async findCommentIdsByPostId(postId: string) {
         try {
-            const comment = await this.shareCommentRepository.findCommentIdByPostId(postId);
+            const comment = await this.shareCommentRepository.findCommentIdsByPostId(postId);
 
             if (!comment) {
                 throw new NotFoundException('Comment not found for the specified post id.');
@@ -110,5 +82,9 @@ export class ShareSearcherService {
         } catch (error) {
             handleBSONAndCastError(error, 'postId Invalid ObjectId');
         }
+    }
+
+    async getUserPostCount(userId: string) {
+        return this.sharePostRepository.countDocuments({ userId: userId }).exec();
     }
 }

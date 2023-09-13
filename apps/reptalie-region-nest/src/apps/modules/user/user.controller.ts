@@ -3,6 +3,7 @@ import { Controller, Get, HttpStatus, Inject, Param, Post, Put, Query, UseGuards
 import { IResponseUserDTO } from '../../dto/user/response-user.dto';
 import { controllerErrorHandler } from '../../utils/error/errorHandler';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { JwtOptionalAuthGuard } from '../auth/guards/jwtOptional-auth.guard';
 import { UserSearcherService, UserSearcherServiceToken } from './service/userSearcher.service';
 import { UserUpdaterService, UserUpdaterServiceToken } from './service/userUpdater.service';
 import { UserWriterService, UserWriterServiceToken } from './service/userWriter.service';
@@ -29,12 +30,6 @@ export class UserController {
         return await this.userSearcherService.isExistsNickname(nickname);
     }
 
-    @UseGuards(JwtAuthGuard)
-    @Get('profile')
-    async getProfile(@AuthUser() user: IResponseUserDTO) {
-        return user;
-    }
-
     @Post(':id/follow')
     @UseGuards(JwtAuthGuard)
     async createFollow(@AuthUser() user: IResponseUserDTO, @Param('id') follower: string) {
@@ -52,6 +47,17 @@ export class UserController {
         try {
             await this.userUpdaterService.toggleFollow(user.id, follower);
             return { statusCode: HttpStatus.OK, message: 'Follow toggled successfully' };
+        } catch (error) {
+            controllerErrorHandler(error);
+        }
+    }
+
+    @Get('profile')
+    @UseGuards(JwtOptionalAuthGuard)
+    async getUserProfile(@AuthUser() user: IResponseUserDTO, @Query('nickname') nickname: string) {
+        try {
+            const profile = await this.userSearcherService.getUserProfile(user?.id, nickname);
+            return { statusCode: HttpStatus.OK, response: profile };
         } catch (error) {
             controllerErrorHandler(error);
         }

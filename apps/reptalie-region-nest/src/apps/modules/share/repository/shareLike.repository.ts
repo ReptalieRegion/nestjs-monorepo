@@ -19,16 +19,15 @@ export class ShareLikeRepository extends BaseRepository<ShareLikeDocument> {
         return savedLike.Mapper();
     }
 
-    async findPostIdWithUserIdByIsCancled(userId: string, postId: string) {
+    async findLikeByIsCanceled(userId: string, postId: string) {
         const like = await this.shareLikeModel
-            .findOne({ userId: new ObjectId(userId), postId: new ObjectId(postId) }, { _id: 1, isCancled: 1 })
+            .findOne({ userId: new ObjectId(userId), postId: new ObjectId(postId) }, { _id: 1, isCanceled: 1 })
             .exec();
-
         return like?.Mapper();
     }
 
-    async updateIsCancledById(id: string, isCancled: boolean) {
-        const response = await this.shareLikeModel.updateOne({ _id: new ObjectId(id) }, { $set: { isCancled: !isCancled } });
+    async updateLike(id: string, isCanceled: boolean) {
+        const response = await this.shareLikeModel.updateOne({ _id: new ObjectId(id) }, { $set: { isCanceled: !isCanceled } });
         return response.modifiedCount;
     }
 }

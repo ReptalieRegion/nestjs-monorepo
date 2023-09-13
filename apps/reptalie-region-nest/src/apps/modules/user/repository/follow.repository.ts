@@ -19,15 +19,22 @@ export class FollowRepository extends BaseRepository<FollowDocument> {
         return savedFollow.Mapper();
     }
 
-    async findFollowingWithFollowerByIsCancled(following: string, follower: string) {
+    async findFollowByIsCanceled(following: string, follower: string) {
         const follow = await this.followModel
-            .findOne({ following: new ObjectId(following), follower: new ObjectId(follower) }, { _id: 1, isCancled: 1 })
+            .findOne({ following: new ObjectId(following), follower: new ObjectId(follower) }, { _id: 1, isCanceled: 1 })
             .exec();
         return follow?.Mapper();
     }
 
-    async updateIsCancledById(id: string, isCancled: boolean) {
-        const response = await this.followModel.updateOne({ _id: new ObjectId(id) }, { $set: { isCancled: !isCancled } });
+    async updateFollow(id: string, isCanceled: boolean) {
+        const response = await this.followModel.updateOne({ _id: new ObjectId(id) }, { $set: { isCanceled: !isCanceled } });
         return response.modifiedCount;
+    }
+
+    async findFollowRelationship(currentUserId: string, targetUserId: string) {
+        const follow = await this.followModel
+            .findOne({ following: new ObjectId(currentUserId), follower: new ObjectId(targetUserId) }, { isCanceled: 1 })
+            .exec();
+        return follow?.Mapper();
     }
 }

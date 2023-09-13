@@ -1,5 +1,6 @@
 import { ImageDeleterService, ImageDeleterServiceToken } from './service/imageDeleter.service';
 import { ImageS3HandlerService, ImageS3HandlerServiceToken } from './service/imageS3Handler.service';
+import { ImageSearcherService, ImageSearcherServiceToken } from './service/imageSearcher.service';
 import { ImageWriterService, ImageWriterServiceToken } from './service/imageWriter.service';
 
 export const ImageS3HandlerServiceProvider = {
@@ -12,7 +13,12 @@ export const ImageWriterServiceProvider = {
     useClass: ImageWriterService,
 };
 
-export const ImageDeleterServiceProvicer = {
+export const ImageDeleterServiceProvider = {
     provide: ImageDeleterServiceToken,
     useClass: ImageDeleterService,
+};
+
+export const ImageSearcherServiceProvider = {
+    provide: ImageSearcherServiceToken,
+    useClass: ImageSearcherService,
 };

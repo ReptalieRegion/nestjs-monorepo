@@ -37,14 +37,14 @@ export class ShareController {
     @Post('post')
     @UseGuards(JwtAuthGuard)
     @UseInterceptors(FilesInterceptor('files', 5))
-    async createSharePostWithImages(
+    async createPostWithImages(
         @AuthUser() user: IResponseUserDTO,
         @UploadedFiles()
         files: Express.Multer.File[],
         @Body() inputSharePostDTO: InputSharePostDTO,
     ) {
         try {
-            await this.shareWriterService.createSharePostWithImages(user.id, inputSharePostDTO, files);
+            await this.shareWriterService.createPostWithImages(user.id, inputSharePostDTO, files);
             return { statusCode: HttpStatus.CREATED, message: 'SharePost created successfully' };
         } catch (error) {
             controllerErrorHandler(error);
@@ -53,9 +53,9 @@ export class ShareController {
 
     @Post('comment')
     @UseGuards(JwtAuthGuard)
-    async createShareComment(@AuthUser() user: IResponseUserDTO, @Body() inputShareCommentDTO: InputShareCommentDTO) {
+    async createComment(@AuthUser() user: IResponseUserDTO, @Body() inputShareCommentDTO: InputShareCommentDTO) {
         try {
-            await this.shareWriterService.createShareComment(user.id, inputShareCommentDTO);
+            await this.shareWriterService.createComment(user.id, inputShareCommentDTO);
             return { statusCode: HttpStatus.CREATED, message: 'ShareComment created successfully' };
         } catch (error) {
             controllerErrorHandler(error);
@@ -64,12 +64,9 @@ export class ShareController {
 
     @Post('comment-reply')
     @UseGuards(JwtAuthGuard)
-    async createShareCommentReply(
-        @AuthUser() user: IResponseUserDTO,
-        @Body() inputShareCommentReplyDTO: InputShareCommentReplyDTO,
-    ) {
+    async createCommentReply(@AuthUser() user: IResponseUserDTO, @Body() inputShareCommentReplyDTO: InputShareCommentReplyDTO) {
         try {
-            await this.shareWriterService.createShareCommentReply(user.id, inputShareCommentReplyDTO);
+            await this.shareWriterService.createCommentReply(user.id, inputShareCommentReplyDTO);
             return { statusCode: HttpStatus.CREATED, message: 'ShareCommentReply created successfully' };
         } catch (error) {
             controllerErrorHandler(error);
@@ -78,9 +75,9 @@ export class ShareController {
 
     @Post('posts/:id/like')
     @UseGuards(JwtAuthGuard)
-    async createShareLike(@AuthUser() user: IResponseUserDTO, @Param('id') postId: string) {
+    async createLike(@AuthUser() user: IResponseUserDTO, @Param('id') postId: string) {
         try {
-            await this.shareWriterService.createShareLike(user.id, postId);
+            await this.shareWriterService.createLike(user.id, postId);
             return { statusCode: HttpStatus.CREATED, message: 'ShareLike created successfully' };
         } catch (error) {
             controllerErrorHandler(error);
@@ -89,9 +86,9 @@ export class ShareController {
 
     @Put('posts/:id/like')
     @UseGuards(JwtAuthGuard)
-    async toggleShareLike(@AuthUser() user: IResponseUserDTO, @Param('id') postId: string) {
+    async toggleLike(@AuthUser() user: IResponseUserDTO, @Param('id') postId: string) {
         try {
-            await this.shareUpdaterService.toggleShareLike(user.id, postId);
+            await this.shareUpdaterService.toggleLike(user.id, postId);
             return { statusCode: HttpStatus.OK, message: 'ShareLike toggled successfully' };
         } catch (error) {
             controllerErrorHandler(error);
@@ -100,13 +97,13 @@ export class ShareController {
 
     @Put('posts/:id')
     @UseGuards(JwtAuthGuard)
-    async updateSharePost(
+    async updatePost(
         @AuthUser() user: IResponseUserDTO,
         @Param('id') postId: string,
         @Body() inputSharePostDTO: InputSharePostDTO,
     ) {
         try {
-            await this.shareUpdaterService.updateSharePost(user.id, postId, inputSharePostDTO);
+            await this.shareUpdaterService.updatePost(user.id, postId, inputSharePostDTO);
             return { statusCode: HttpStatus.OK, message: 'SharePost updated successfully' };
         } catch (error) {
             controllerErrorHandler(error);
@@ -115,13 +112,13 @@ export class ShareController {
 
     @Put('comments/:id')
     @UseGuards(JwtAuthGuard)
-    async updateShareComment(
+    async updateComment(
         @AuthUser() user: IResponseUserDTO,
         @Param('id') commentId: string,
         @Body() inputShareCommentDTO: InputShareCommentDTO,
     ) {
         try {
-            await this.shareUpdaterService.updateShareComment(user.id, commentId, inputShareCommentDTO);
+            await this.shareUpdaterService.updateComment(user.id, commentId, inputShareCommentDTO);
             return { statusCode: HttpStatus.OK, message: 'ShareComment updated successfully' };
         } catch (error) {
             controllerErrorHandler(error);
@@ -130,13 +127,13 @@ export class ShareController {
 
     @Put('comment-replies/:id')
     @UseGuards(JwtAuthGuard)
-    async updateShareCommentReply(
+    async updateCommentReply(
         @AuthUser() user: IResponseUserDTO,
         @Param('id') commentReplyId: string,
         @Body() inputShareCommentReplyDTO: InputShareCommentReplyDTO,
     ) {
         try {
-            await this.shareUpdaterService.updateShareCommentReply(user.id, commentReplyId, inputShareCommentReplyDTO);
+            await this.shareUpdaterService.updateCommentReply(user.id, commentReplyId, inputShareCommentReplyDTO);
             return { statusCode: HttpStatus.OK, message: 'ShareCommentReply updated successfully' };
         } catch (error) {
             controllerErrorHandler(error);
@@ -145,9 +142,9 @@ export class ShareController {
 
     @Delete('posts/:id')
     @UseGuards(JwtAuthGuard)
-    async deleteSharePost(@AuthUser() user: IResponseUserDTO, @Param('id') postId: string) {
+    async deletePost(@AuthUser() user: IResponseUserDTO, @Param('id') postId: string) {
         try {
-            const post = await this.shareDeleterService.deleteSharePost(user.id, postId);
+            const post = await this.shareDeleterService.deletePost(user.id, postId);
             return { statusCode: HttpStatus.OK, response: post };
         } catch (error) {
             controllerErrorHandler(error);
@@ -156,9 +153,9 @@ export class ShareController {
 
     @Delete('comments/:id')
     @UseGuards(JwtAuthGuard)
-    async deleteShareComment(@AuthUser() user: IResponseUserDTO, @Param('id') commentId: string) {
+    async deleteComment(@AuthUser() user: IResponseUserDTO, @Param('id') commentId: string) {
         try {
-            const comment = await this.shareDeleterService.deleteShareComment(user.id, commentId);
+            const comment = await this.shareDeleterService.deleteComment(user.id, commentId);
             return { statusCode: HttpStatus.OK, response: comment };
         } catch (error) {
             controllerErrorHandler(error);
@@ -167,9 +164,9 @@ export class ShareController {
 
     @Delete('comment-replies/:id')
     @UseGuards(JwtAuthGuard)
-    async deleteShareCommentReply(@AuthUser() user: IResponseUserDTO, @Param('id') commentReplyId: string) {
+    async deleteCommentReply(@AuthUser() user: IResponseUserDTO, @Param('id') commentReplyId: string) {
         try {
-            const commentReply = await this.shareDeleterService.deleteShareCommentReply(user.id, commentReplyId);
+            const commentReply = await this.shareDeleterService.deleteCommentReply(user.id, commentReplyId);
             return { statusCode: HttpStatus.OK, response: commentReply };
         } catch (error) {
             controllerErrorHandler(error);

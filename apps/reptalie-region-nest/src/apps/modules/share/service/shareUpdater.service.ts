@@ -31,42 +31,37 @@ export class ShareUpdaterService {
     ) {}
 
     async incrementReplyCount(id: string, session: ClientSession) {
-        const result = await this.shareCommentRepository.incrementReplyCount(id, session);
+        const result = await this.shareCommentRepository.incrementReplyCountById(id, session);
         if (result === 0) {
             throw new InternalServerErrorException('Failed to increment reply count for the comment.');
         }
     }
 
     async decrementReplyCount(id: string, session: ClientSession) {
-        const result = await this.shareCommentRepository.decrementReplyCount(id, session);
+        const result = await this.shareCommentRepository.decrementReplyCountById(id, session);
         if (result === 0) {
             throw new InternalServerErrorException('Failed to decrement reply count for the comment.');
         }
     }
 
-    async toggleShareLike(userId: string, postId: string) {
-        const like = await this.shareSearcherService.getLikeStatus(postId, userId);
+    async toggleLike(userId: string, postId: string) {
+        const like = await this.shareSearcherService.getLikeInfo(postId, userId);
 
-        const result = await this.shareLikeRepository.updateIsCancledById(like.id, like.isCancled);
+        const result = await this.shareLikeRepository.updateLike(like.id, like.isCanceled);
         if (result === 0) {
             throw new InternalServerErrorException('Failed to toggle the like status.');
         }
     }
 
-    async updateSharePost(userId: string, postId: string, inputSharePostDTO: InputSharePostDTO) {
+    async updatePost(userId: string, postId: string, inputSharePostDTO: InputSharePostDTO) {
         const session: ClientSession = await this.connection.startSession();
         session.startTransaction();
 
         try {
-            await this.shareSearcherService.isExistsPostIdWithUserId(postId, userId);
+            await this.shareSearcherService.isExistsPostWithUserId(postId, userId);
 
-            const updateResult = await this.sharePostRepository.updateSharePost(
-                postId,
-                userId,
-                inputSharePostDTO.contents,
-                session,
-            );
-            
+            const updateResult = await this.sharePostRepository.updatePost(postId, userId, inputSharePostDTO.contents, session);
+
             if (updateResult === 0) {
                 throw new InternalServerErrorException('Failed to update post.');
             }
@@ -84,8 +79,8 @@ export class ShareUpdaterService {
         }
     }
 
-    async updateShareComment(userId: string, commentId: string, inputShareCommentDTO: InputShareCommentDTO) {
-        await this.shareSearcherService.isExistsCommentIdWithUserId(commentId, userId);
+    async updateComment(userId: string, commentId: string, inputShareCommentDTO: InputShareCommentDTO) {
+        await this.shareSearcherService.isExistsCommentWithUserId(commentId, userId);
 
         const updateResult = await this.shareCommentRepository.updateComment(commentId, userId, inputShareCommentDTO.contents);
         if (updateResult === 0) {
@@ -93,12 +88,8 @@ export class ShareUpdaterService {
         }
     }
 
-    async updateShareCommentReply(
-        userId: string,
-        commentReplyId: string,
-        inputShareCommentReplyDTO: InputShareCommentReplyDTO,
-    ) {
-        await this.shareSearcherService.isExistsCommentReplyIdWithUserID(commentReplyId, userId);
+    async updateCommentReply(userId: string, commentReplyId: string, inputShareCommentReplyDTO: InputShareCommentReplyDTO) {
+        await this.shareSearcherService.isExistsCommentReplyWithUserId(commentReplyId, userId);
 
         const updateResult = await this.shareCommnetReplyRepository.updateCommentReply(
             commentReplyId,

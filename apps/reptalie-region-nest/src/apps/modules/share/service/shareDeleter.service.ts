@@ -29,29 +29,31 @@ export class ShareDeleterService {
         private readonly imageDeleterService: ImageDeleterService,
     ) {}
 
-    async deleteSharePost(userId: string, postId: string) {
+    async deletePost(userId: string, postId: string) {
         const session: ClientSession = await this.connection.startSession();
         session.startTransaction();
 
         try {
-            await this.shareSearcherService.isExistsPostIdWithUserId(postId, userId);
+            await this.shareSearcherService.isExistsPostWithUserId(postId, userId);
 
-            const deletePostResult = await this.sharePostRepository.deleteSharePost(postId, userId, session);
+            const deletePostResult = await this.sharePostRepository.deletePost(postId, userId, session);
             if (deletePostResult === 0) {
                 throw new InternalServerErrorException('Failed to delete SharePost.');
             }
 
             await this.imageDeleterService.deleteImageByTypeId(ImageType.Share, postId, session);
 
-            const commentIds = await this.shareSearcherService.findCommentIdByPostId(postId);
+            const commentIds = await this.shareSearcherService.findCommentIdsByPostId(postId);
 
             const deleteCommentResult = await this.shareCommentRepository.deleteManyShareComment(postId, session);
             if (deleteCommentResult === 0) {
                 throw new InternalServerErrorException('Failed to delete ShareComment.');
             }
             if (commentIds) {
-                const deleteCommentReplyResult =
-                    await this.shareCommentReplyRepository.deleteManyShareCommentReplyByArrayCommentId(commentIds, session);
+                const deleteCommentReplyResult = await this.shareCommentReplyRepository.deleteManyCommentReplyByCommentIds(
+                    commentIds,
+                    session,
+                );
                 if (deleteCommentReplyResult === 0) {
                     throw new InternalServerErrorException('Failed to delete ShareCommentReply.');
                 }
@@ -67,20 +69,20 @@ export class ShareDeleterService {
         }
     }
 
-    async deleteShareComment(userId: string, commentId: string) {
+    async deleteComment(userId: string, commentId: string) {
         const session: ClientSession = await this.connection.startSession();
         session.startTransaction();
 
         try {
-            const comment = await this.shareSearcherService.isExistsCommentIdWithUserId(commentId, userId);
+            const comment = await this.shareSearcherService.isExistsCommentWithUserId(commentId, userId);
 
-            const deleteResult = await this.shareCommentRepository.deleteShareComment(commentId, userId, session);
+            const deleteResult = await this.shareCommentRepository.deleteComment(commentId, userId, session);
             if (deleteResult === 0) {
                 throw new InternalServerErrorException('Failed to delete ShareComment.');
             }
 
             if (comment?.replyCount) {
-                await this.shareCommentReplyRepository.deleteManyShareCommentReply(commentId, session);
+                await this.shareCommentReplyRepository.deleteManyCommentReply(commentId, session);
             }
 
             await session.commitTransaction();
@@ -93,19 +95,14 @@ export class ShareDeleterService {
         }
     }
 
-    async deleteShareCommentReply(userId: string, commentReplyId: string) {
+    async deleteCommentReply(userId: string, commentReplyId: string) {
         const session: ClientSession = await this.connection.startSession();
         session.startTransaction();
 
         try {
-            const commentReply = await this.shareSearcherService.isExistsCommentReplyIdWithUserID(commentReplyId, userId);
+            const commentReply = await this.shareSearcherService.isExistsCommentReplyWithUserId(commentReplyId, userId);
 
-            const deleteResult = await this.shareCommentReplyRepository.deleteShareCommentReply(
-                commentReplyId,
-                userId,
-                session,
-            );
-
+            const deleteResult = await this.shareCommentReplyRepository.deleteCommentReply(commentReplyId, userId, session);
             if (deleteResult === 0) {
                 throw new InternalServerErrorException('Failed to delete ShareCommentReply.');
             }

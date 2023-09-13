@@ -22,7 +22,7 @@ export class Follow {
     followerNickname: string;
 
     @Prop({ default: false, type: SchemaTypes.Boolean })
-    isCancled: boolean;
+    isCanceled: boolean;
 }
 
 const FollowSchema = SchemaFactory.createForClass(Follow);
@@ -34,7 +34,7 @@ FollowSchema.methods = {
             'following',
             'follower',
             'followerNickname',
-            'isCancled',
+            'isCanceled',
             'createdAt',
             'updatedAt',
         ];
@@ -56,7 +56,7 @@ FollowSchema.methods = {
             'following',
             'follower',
             'followerNickname',
-            'isCancled',
+            'isCanceled',
             'createdAt',
             'updatedAt',
         ];

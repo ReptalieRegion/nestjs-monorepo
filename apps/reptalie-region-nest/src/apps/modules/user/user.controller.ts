@@ -62,4 +62,19 @@ export class UserController {
             controllerErrorHandler(error);
         }
     }
+
+    @Get('follower/list')
+    @UseGuards(JwtAuthGuard)
+    async getUserFollowers(
+        @AuthUser() user: IResponseUserDTO,
+        @Query('search') search: string,
+        @Query('pageParams') pageParams: number,
+    ) {
+        try {
+            const followers = await this.userSearcherService.getUserFollowers(user.id, search, pageParams);
+            return { statusCode: HttpStatus.OK, response: followers };
+        } catch (error) {
+            controllerErrorHandler(error);
+        }
+    }
 }

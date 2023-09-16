@@ -37,4 +37,27 @@ export class FollowRepository extends BaseRepository<FollowDocument> {
             .exec();
         return follow?.Mapper();
     }
+
+    async findFollowersForInfiniteScroll(following: string, search: string, pageParams: number, limitSize: number) {
+        const followers = await this.followModel
+            .find(
+                {
+                    following: new ObjectId(following),
+                    isCanceled: false,
+                    followerNickname: { $regex: new RegExp(`^${search}`, 'i') },
+                },
+                { follower: 1, followerNickname: 1 },
+            )
+            .skip(pageParams * limitSize)
+            .limit(limitSize)
+            .exec();
+
+        const isLastPage = followers.length < limitSize
+
+        return {
+            followers: followers.map((entity) => entity.Mapper()),
+            isLastPage: isLastPage,
+            pageParams: pageParams + 1
+        }
+    }
 }

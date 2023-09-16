@@ -99,4 +99,24 @@ export class UserSearcherService {
             },
         };
     }
+
+    async getUserFollowers(userId: string, search: string, pageParams: number) {
+        const followers = await this.followRepository.findFollowersForInfiniteScroll(userId, search, pageParams, 10);
+
+        const items = await Promise.all(
+            followers.followers.map(async (entity) => {
+                const profile = entity.follower && (await this.imageSearcherService.getUserProfileImage(entity.follower));
+
+                return {
+                    id: entity.follower,
+                    profile: profile,
+                    nickname: entity.followerNickname,
+                };
+            }),
+        );
+
+        const nextPage = followers.isLastPage ? undefined : followers.pageParams;
+
+        return { items: items, nextPage: nextPage };
+    }
 }

@@ -65,4 +65,22 @@ export class ShareCommentReplyRepository extends BaseRepository<ShareCommentRepl
             .exec();
         return response.modifiedCount;
     }
+
+    async findCommentRepliesForInfiniteScroll(commentId: string, pageParams: number, limitSize: number) {
+        const commentReplies = await this.shareCommentReplyModel
+            .find({ commentId: new ObjectId(commentId), isDeleted: false })
+            .populate({ path: 'userId', select: '_id nickname' })
+            .sort({ createdAt: -1 })
+            .skip(pageParams * limitSize)
+            .limit(limitSize)
+            .exec();
+
+        const isLastPage = commentReplies.length < limitSize;
+
+        return {
+            commentReplies: commentReplies.map((entity) => ({ ...entity.Mapper(), userId: entity.userId.Mapper() })),
+            isLastPage: isLastPage,
+            pageParams: pageParams + 1,
+        };
+    }
 }

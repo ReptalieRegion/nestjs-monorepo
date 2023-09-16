@@ -100,7 +100,7 @@ export class UserSearcherService {
         };
     }
 
-    async getUserFollowers(userId: string, search: string, pageParams: number) {
+    async getUserFollowersInfiniteScroll(userId: string, search: string, pageParams: number) {
         const followers = await this.followRepository.findFollowersForInfiniteScroll(userId, search, pageParams, 10);
 
         const items = await Promise.all(

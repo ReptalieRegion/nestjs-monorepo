@@ -74,4 +74,22 @@ export class ShareCommentRepository extends BaseRepository<ShareCommentDocument>
             .exec();
         return shareComment?.Mapper();
     }
+
+    async findCommentsForInfiniteScroll(postId: string, pageParams: number, limitSize: number) {
+        const comments = await this.shareCommentModel
+            .find({ postId: new ObjectId(postId), isDeleted: false })
+            .populate({ path: 'userId', select: '_id nickname' })
+            .sort({ createdAt: -1 }) 
+            .skip(pageParams * limitSize)
+            .limit(limitSize)
+            .exec();
+
+        const isLastPage = comments.length < limitSize;
+
+        return {
+            comments: comments.map((entity) => ({ ...entity.Mapper(), userId: entity.userId.Mapper() })),
+            isLastPage: isLastPage,
+            pageParams: pageParams + 1,
+        };
+    }
 }

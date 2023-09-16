@@ -11,6 +11,9 @@ export interface UserDocument extends User, Document {
 
 @Schema({ versionKey: false, timestamps: { currentTime: getCurrentDate } })
 export class User {
+    Mapper(): any {
+        throw new Error('Method not implemented.');
+    }
     @Prop({ trim: true, unique: true, required: true, type: SchemaTypes.String })
     userId: string;
 

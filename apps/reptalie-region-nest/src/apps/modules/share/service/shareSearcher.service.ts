@@ -1,5 +1,6 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { handleBSONAndCastError } from '../../../utils/error/errorHandler';
+import { ImageSearcherService, ImageSearcherServiceToken } from '../../image/service/imageSearcher.service';
 import { ShareCommentRepository } from '../repository/shareComment.repository';
 import { ShareCommentReplyRepository } from '../repository/shareCommentReply.repository';
 import { ShareLikeRepository } from '../repository/shareLike.repository';
@@ -14,6 +15,9 @@ export class ShareSearcherService {
         private readonly shareCommentRepository: ShareCommentRepository,
         private readonly shareCommentReplyRepository: ShareCommentReplyRepository,
         private readonly shareLikeRepository: ShareLikeRepository,
+
+        @Inject(ImageSearcherServiceToken)
+        private readonly imageSearcherService: ImageSearcherService,
     ) {}
 
     async isExistsPostWithUserId(postId: string, userId: string) {
@@ -86,5 +90,66 @@ export class ShareSearcherService {
 
     async getUserPostCount(userId: string) {
         return this.sharePostRepository.countDocuments({ userId: userId }).exec();
+    }
+
+    async getCommentsInfiniteScroll(userId: string, postId: string, pageParams: number) {
+        const comments = await this.shareCommentRepository.findCommentsForInfiniteScroll(postId, pageParams, 10);
+
+        const items = await Promise.all(
+            comments.comments.map(async (entity) => {
+                const profile = entity.userId.id && (await this.imageSearcherService.getUserProfileImage(entity.userId.id));
+
+                return {
+                    user: {
+                        id: entity.userId.id,
+                        profile: profile,
+                        nickname: entity.userId.nickname,
+                    },
+                    comment: {
+                        id: entity.id,
+                        contents: entity.contents,
+                        replyCount: entity.replyCount,
+                        isMine: userId ? entity.userId.id === userId : false,
+                        isModified: entity.createdAt?.getTime() !== entity.updatedAt?.getTime(),
+                    },
+                };
+            }),
+        );
+
+        const nextPage = comments.isLastPage ? undefined : comments.pageParams;
+
+        return { items: items, nextPage: nextPage };
+    }
+
+    async getCommentRepliesInfiniteScroll(userId: string, commentId: string, pageParams: number) {
+        const commentReplies = await this.shareCommentReplyRepository.findCommentRepliesForInfiniteScroll(
+            commentId,
+            pageParams,
+            10,
+        );
+
+        const items = await Promise.all(
+            commentReplies.commentReplies.map(async (entity) => {
+                const profile = entity.userId.id && (await this.imageSearcherService.getUserProfileImage(entity.userId.id));
+
+                return {
+                    user: {
+                        id: entity.userId.id,
+                        profile: profile,
+                        nickname: entity.userId.nickname,
+                    },
+                    comment: {
+                        id: entity.id,
+                        contents: entity.contents,
+                        isMine: userId ? entity.userId.id === userId : false,
+                        isModified: entity.createdAt?.getTime() !== entity.updatedAt?.getTime(),
+                    },
+                };
+            }),
+        );
+
+        const nextPage = commentReplies.isLastPage ? undefined : commentReplies.pageParams;
+
+        return { items: items, nextPage: nextPage };
     }
 }

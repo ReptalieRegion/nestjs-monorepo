@@ -10,6 +10,8 @@ import {
     Put,
     Param,
     Delete,
+    Get,
+    Query,
 } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { InputShareCommentDTO } from '../../dto/share/comment/input-shareComment.dto';
@@ -18,8 +20,10 @@ import { InputSharePostDTO } from '../../dto/share/post/input-sharePost.dto';
 import { IResponseUserDTO } from '../../dto/user/response-user.dto';
 import { controllerErrorHandler } from '../../utils/error/errorHandler';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { JwtOptionalAuthGuard } from '../auth/guards/jwtOptional-auth.guard';
 import { AuthUser } from '../user/user.decorator';
 import { ShareDeleterService, ShareDeleterServiceToken } from './service/shareDeleter.service';
+import { ShareSearcherService, ShareSearcherServiceToken } from './service/shareSearcher.service';
 import { ShareUpdaterService, ShareUpdaterServiceToken } from './service/shareUpdater.service';
 import { ShareWriterService, ShareWriterServiceToken } from './service/shareWriter.service';
 
@@ -32,6 +36,8 @@ export class ShareController {
         private readonly shareUpdaterService: ShareUpdaterService,
         @Inject(ShareDeleterServiceToken)
         private readonly shareDeleterService: ShareDeleterService,
+        @Inject(ShareSearcherServiceToken)
+        private readonly shareSearcherService: ShareSearcherService,
     ) {}
 
     @Post('post')
@@ -168,6 +174,40 @@ export class ShareController {
         try {
             const commentReply = await this.shareDeleterService.deleteCommentReply(user.id, commentReplyId);
             return { statusCode: HttpStatus.OK, response: commentReply };
+        } catch (error) {
+            controllerErrorHandler(error);
+        }
+    }
+
+    @Get('posts/:id/comments/list')
+    @UseGuards(JwtOptionalAuthGuard)
+    async getCommentsInfiniteScroll(
+        @AuthUser() user: IResponseUserDTO,
+        @Param('id') postId: string,
+        @Query('pageParams') pageParams: number,
+    ) {
+        try {
+            const comments = await this.shareSearcherService.getCommentsInfiniteScroll(user?.id, postId, pageParams);
+            return { statusCode: HttpStatus.OK, response: comments };
+        } catch (error) {
+            controllerErrorHandler(error);
+        }
+    }
+
+    @Get('comments/:id/replies/list')
+    @UseGuards(JwtOptionalAuthGuard)
+    async getCommentRepliesInfiniteScroll(
+        @AuthUser() user: IResponseUserDTO,
+        @Param('id') commentId: string,
+        @Query('pageParams') pageParams: number,
+    ) {
+        try {
+            const commentReplies = await this.shareSearcherService.getCommentRepliesInfiniteScroll(
+                user?.id,
+                commentId,
+                pageParams,
+            );
+            return { statusCode: HttpStatus.OK, response: commentReplies };
         } catch (error) {
             controllerErrorHandler(error);
         }

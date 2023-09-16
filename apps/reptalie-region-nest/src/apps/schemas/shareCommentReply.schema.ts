@@ -16,7 +16,7 @@ export class ShareCommentReply {
     @Prop({ index: true, ref: 'shareComment', type: SchemaTypes.ObjectId })
     commentId: ShareComment;
 
-    @Prop({ index: true, ref: 'user', type: SchemaTypes.ObjectId })
+    @Prop({ index: true, ref: 'User', type: SchemaTypes.ObjectId })
     userId: User;
 
     @Prop({ required: true, type: SchemaTypes.String })

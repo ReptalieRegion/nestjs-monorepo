@@ -30,4 +30,11 @@ export class ShareLikeRepository extends BaseRepository<ShareLikeDocument> {
         const response = await this.shareLikeModel.updateOne({ _id: new ObjectId(id) }, { $set: { isCanceled: !isCanceled } });
         return response.modifiedCount;
     }
+
+    async findLikeCheck(userId: string, postId: string) {
+        const like = await this.shareLikeModel
+            .findOne({ userId: new ObjectId(userId), postId: new ObjectId(postId), isCanceled: false }, { _id: 1 })
+            .exec();
+        return like ? true : false;
+    }
 }

@@ -67,7 +67,7 @@ export class ShareWriterService {
 
     // 일상공유 댓글 등록
     async createComment(userId: string, inputShareCommentDTO: InputShareCommentDTO) {
-        await this.shareSearcherService.isExistsPostWithUserId(inputShareCommentDTO.postId, userId);
+        await this.shareSearcherService.isExistsPost(inputShareCommentDTO.postId);
 
         const comment = await this.shareCommentRepository.createComment(userId, inputShareCommentDTO);
         if (!comment?.id) {
@@ -81,10 +81,7 @@ export class ShareWriterService {
         session.startTransaction();
 
         try {
-            const comment = await this.shareSearcherService.isExistsCommentWithUserId(
-                inputShareCommentReplyDTO.commentId,
-                userId,
-            );
+            const comment = await this.shareSearcherService.isExistsComment(inputShareCommentReplyDTO.commentId);
 
             const reply = await this.shareCommentReplyRepository.createCommentReply(userId, inputShareCommentReplyDTO, session);
             if (!reply?.id) {
@@ -106,7 +103,7 @@ export class ShareWriterService {
 
     // 일상공유 게시물 좋아요 등록
     async createLike(userId: string, postId: string) {
-        await this.shareSearcherService.isExistsPostWithUserId(postId, userId);
+        await this.shareSearcherService.isExistsPost(postId);
 
         const inputShareLikeDTO: InputShareLikeDTO = { userId: userId, postId: postId };
 

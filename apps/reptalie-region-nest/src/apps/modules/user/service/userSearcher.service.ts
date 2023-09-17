@@ -1,4 +1,4 @@
-import { Inject, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable, InternalServerErrorException, NotFoundException, forwardRef } from '@nestjs/common';
 import { handleBSONAndCastError } from '../../../utils/error/errorHandler';
 import { ImageSearcherService, ImageSearcherServiceToken } from '../../image/service/imageSearcher.service';
 import { ShareSearcherService, ShareSearcherServiceToken } from '../../share/service/shareSearcher.service';
@@ -13,7 +13,7 @@ export class UserSearcherService {
         private readonly userRepository: UserRepository,
         private readonly followRepository: FollowRepository,
 
-        @Inject(ShareSearcherServiceToken)
+        @Inject(forwardRef(() => ShareSearcherServiceToken))
         private readonly shareSearcherService: ShareSearcherService,
         @Inject(ImageSearcherServiceToken)
         private readonly imageSearcherService: ImageSearcherService,
@@ -118,5 +118,9 @@ export class UserSearcherService {
         const nextPage = followers.isLastPage ? undefined : followers.pageParams;
 
         return { items: items, nextPage: nextPage };
+    }
+
+    async getUserFollowers(userId: string) {
+        return this.followRepository.findUserFollowers(userId);
     }
 }

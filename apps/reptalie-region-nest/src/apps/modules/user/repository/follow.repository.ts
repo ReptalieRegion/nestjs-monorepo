@@ -52,12 +52,19 @@ export class FollowRepository extends BaseRepository<FollowDocument> {
             .limit(limitSize)
             .exec();
 
-        const isLastPage = followers.length < limitSize
+        const isLastPage = followers.length < limitSize;
 
         return {
             followers: followers.map((entity) => entity.Mapper()),
             isLastPage: isLastPage,
-            pageParams: pageParams + 1
-        }
+            pageParams: pageParams + 1,
+        };
+    }
+
+    async findUserFollowers(userId: string) {
+        const followers = await this.followModel
+            .find({ following: new ObjectId(userId), isCanceled: false }, { follower: 1 })
+            .exec();
+        return followers.map((entity) => entity.Mapper().id as string);
     }
 }

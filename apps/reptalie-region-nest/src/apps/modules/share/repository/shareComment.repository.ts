@@ -65,6 +65,13 @@ export class ShareCommentRepository extends BaseRepository<ShareCommentDocument>
         return commentIds.map((entity) => entity.Mapper());
     }
 
+    async findComment(commentId: string) {
+        const shareComment = await this.shareCommentModel
+            .findOne({ _id: new ObjectId(commentId), isDeleted: false }, { _id: 1, postId: 1, replyCount: 1 })
+            .exec();
+        return shareComment?.Mapper();
+    }
+
     async findCommentWithUserId(commentId: string, userId: string) {
         const shareComment = await this.shareCommentModel
             .findOne(
@@ -79,7 +86,7 @@ export class ShareCommentRepository extends BaseRepository<ShareCommentDocument>
         const comments = await this.shareCommentModel
             .find({ postId: new ObjectId(postId), isDeleted: false })
             .populate({ path: 'userId', select: '_id nickname' })
-            .sort({ createdAt: -1 }) 
+            .sort({ createdAt: -1 })
             .skip(pageParams * limitSize)
             .limit(limitSize)
             .exec();

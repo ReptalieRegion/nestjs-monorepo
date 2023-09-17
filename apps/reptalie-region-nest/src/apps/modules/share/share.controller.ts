@@ -179,6 +179,35 @@ export class ShareController {
         }
     }
 
+    @Get('posts/list')
+    @UseGuards(JwtOptionalAuthGuard)
+    async getPostsInfiniteScroll(
+        @AuthUser() user: IResponseUserDTO,
+        @Query('pageParams') pageParams: number,
+    ) {
+        try {
+            const posts = await this.shareSearcherService.getPostsInfiniteScroll(user?.id, pageParams);
+            return { statusCode: HttpStatus.OK, response: posts };
+        } catch (error) {
+            controllerErrorHandler(error);
+        }
+    }
+
+    @Get('posts/list/users/:id')
+    @UseGuards(JwtOptionalAuthGuard)
+    async getUserPostsInfiniteScroll(
+        @AuthUser() user: IResponseUserDTO,
+        @Param('id') targetUserId: string,
+        @Query('pageParams') pageParams: number,
+    ) {
+        try {
+            const posts = await this.shareSearcherService.getUserPostsInfiniteScroll(user?.id, targetUserId, pageParams);
+            return { statusCode: HttpStatus.OK, response: posts };
+        } catch (error) {
+            controllerErrorHandler(error);
+        }
+    }
+
     @Get('posts/:id/comments/list')
     @UseGuards(JwtOptionalAuthGuard)
     async getCommentsInfiniteScroll(

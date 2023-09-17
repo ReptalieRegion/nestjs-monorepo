@@ -16,4 +16,14 @@ export class ImageSearcherService {
 
         return { src: `${process.env.AWS_IMAGE_BASEURL}${profileImage.imageKey}` };
     }
+
+    async getPostImages(typeId: string) {
+        const postImages = await this.imageRepository.findPostImages(typeId);
+
+        if (!postImages) {
+            throw new NotFoundException('Profile image not found.');
+        }
+
+        return postImages.map((entity) => ({ src: `${process.env.AWS_IMAGE_BASEURL}${entity.imageKey}` }));
+    }
 }

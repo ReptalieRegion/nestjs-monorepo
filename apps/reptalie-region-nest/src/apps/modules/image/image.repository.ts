@@ -47,4 +47,11 @@ export class ImageRepository extends BaseRepository<ImageDocument> {
             .exec();
         return image?.Mapper();
     }
+
+    async findPostImages(typeId: string) {
+        const images = await this.imageModel
+            .find({ type: ImageType.Share, typeId: new ObjectId(typeId), isDeleted: false }, { imageKey: 1 })
+            .exec();
+        return images.map((entitiy) => entitiy.Mapper());
+    }
 }

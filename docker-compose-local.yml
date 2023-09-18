@@ -24,7 +24,7 @@ services:
         depends_on:
             - key-gen
         volumes:
-            - ./data/mongodb1:/data/db
+            - ./dockers/data/mongodb1:/data/db
             - keys:/keys
         environment:
             - MONGO_INITDB_ROOT_USERNAME=admin
@@ -44,7 +44,7 @@ services:
         depends_on:
             - key-gen
         volumes:
-            - ./data/mongodb2:/data/db
+            - ./dockers/data/mongodb2:/data/db
             - keys:/keys
         environment:
             - MONGO_INITDB_ROOT_USERNAME=admin
@@ -64,7 +64,7 @@ services:
         depends_on:
             - key-gen
         volumes:
-            - ./data/mongodb3:/data/db
+            - ./dockers/data/mongodb3:/data/db
             - keys:/keys
         environment:
             - MONGO_INITDB_ROOT_USERNAME=admin

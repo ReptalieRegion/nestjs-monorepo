@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import { ObjectId } from 'bson';
 import { Model, ClientSession } from 'mongoose';
 
-import { InputImageDTO } from '../../dto/image/input-image.dto';
+import { ImageType } from '../../dto/image/input-image.dto';
 import { ImageDocument, Image } from '../../schemas/image.schema';
 import { BaseRepository } from '../base/base.repository';
 
@@ -12,9 +13,45 @@ export class ImageRepository extends BaseRepository<ImageDocument> {
         super(imageModel);
     }
 
-    async createImage(imageInfo: InputImageDTO, session: ClientSession) {
-        const image = new this.imageModel(imageInfo);
-        const savedImage = await image.save({ session });
-        return savedImage.Mapper();
+    async createImage(imageInfo: object[], session: ClientSession) {
+        const image = await this.imageModel.insertMany(imageInfo, { session });
+        return image.map((entitiy) => entitiy.Mapper());
+    }
+
+    async deleteImageByImageKeys(imageKeys: string[], typeId: string, session: ClientSession) {
+        const response = await this.imageModel
+            .updateMany(
+                { typeId: new ObjectId(typeId), imageKey: { $in: imageKeys } },
+                { $set: { isDeleted: true } },
+                { session },
+            )
+            .exec();
+
+        return response.modifiedCount;
+    }
+
+    async deleteImageByTypeId(type: ImageType, typeId: string, session: ClientSession) {
+        const response = await this.imageModel
+            .updateMany(
+                { typeId: new ObjectId(typeId), type: type, isDeleted: false },
+                { $set: { isDeleted: true } },
+                { session },
+            )
+            .exec();
+        return response.modifiedCount;
+    }
+
+    async findProfileImage(typeId: string) {
+        const image = await this.imageModel
+            .findOne({ type: ImageType.Profile, typeId: new ObjectId(typeId), isDeleted: false }, { imageKey: 1 })
+            .exec();
+        return image?.Mapper();
+    }
+
+    async findPostImages(typeId: string) {
+        const images = await this.imageModel
+            .find({ type: ImageType.Share, typeId: new ObjectId(typeId), isDeleted: false }, { imageKey: 1 })
+            .exec();
+        return images.map((entitiy) => entitiy.Mapper());
     }
 }

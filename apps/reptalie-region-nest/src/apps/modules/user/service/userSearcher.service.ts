@@ -1,46 +1,23 @@
-import { Injectable, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
-import { BSONError } from 'bson';
-import { UserRepository } from '../user.repository';
+import { Inject, Injectable, InternalServerErrorException, NotFoundException, forwardRef } from '@nestjs/common';
+import { handleBSONAndCastError } from '../../../utils/error/errorHandler';
+import { ImageSearcherService, ImageSearcherServiceToken } from '../../image/service/imageSearcher.service';
+import { ShareSearcherService, ShareSearcherServiceToken } from '../../share/service/shareSearcher.service';
+import { FollowRepository } from '../repository/follow.repository';
+import { UserRepository } from '../repository/user.repository';
 
 export const UserSearcherServiceToken = 'UserSearcherServiceToken';
 
 @Injectable()
 export class UserSearcherService {
-    constructor(private readonly userRepository: UserRepository) {}
+    constructor(
+        private readonly userRepository: UserRepository,
+        private readonly followRepository: FollowRepository,
 
-    async isExistsUserId(id: string) {
-        try {
-            const user = await this.userRepository.findUserIdById(id);
-
-            if (!user) {
-                throw new NotFoundException('User ID does not exist');
-            }
-
-            return user;
-        } catch (error) {
-            if (error instanceof BSONError) {
-                throw new UnprocessableEntityException('User Id Invalid ObjectId');
-            }
-            throw error;
-        }
-    }
-    async isExistsTagsId(tagIds: string[]) {
-        try {
-            const user = await this.userRepository.findUserIdByTaggedId(tagIds);
-
-            if (!user || tagIds.length !== user.length) {
-                throw new NotFoundException('TagIds does not exist');
-            }
-
-            return user;
-        } catch (error) {
-            const typedError = error as Error;
-            if (typedError instanceof BSONError || typedError.name === 'CastError') {
-                throw new UnprocessableEntityException('TagIds Invalid ObjectId');
-            }
-            throw typedError;
-        }
-    }
+        @Inject(forwardRef(() => ShareSearcherServiceToken))
+        private readonly shareSearcherService: ShareSearcherService,
+        @Inject(ImageSearcherServiceToken)
+        private readonly imageSearcherService: ImageSearcherService,
+    ) {}
 
     async isExistsEmail(email: string) {
         const user = await this.userRepository.findByEmail(email);
@@ -49,6 +26,101 @@ export class UserSearcherService {
 
     async isExistsNickname(nickname: string) {
         const user = await this.userRepository.findByNickname(nickname);
-        return Boolean(user);
+        if (!user) {
+            throw new NotFoundException('User Nickname does not exist');
+        }
+
+        return user;
+    }
+
+    async isExistsUserId(id: string) {
+        try {
+            const user = await this.userRepository.findByUserId(id);
+
+            if (!user) {
+                throw new NotFoundException('User ID does not exist');
+            }
+
+            return user;
+        } catch (error) {
+            handleBSONAndCastError(error, 'UserId Invalid ObjectId');
+        }
+    }
+
+    async isExistsFollow(currentUserId: string, targetUserId: string) {
+        const follow = await this.followRepository.findFollowRelationship(currentUserId, targetUserId);
+        return follow ? (follow.isCanceled ? false : true) : false;
+    }
+
+    async getFollowInfo(following: string, follower: string) {
+        await this.isExistsUserId(follower);
+
+        const follow = await this.followRepository.findFollowByIsCanceled(following, follower);
+
+        if (!follow || !follow?.id || follow?.isCanceled === undefined) {
+            throw new NotFoundException('Follow status not found for the specified following and follower.');
+        }
+
+        return { id: follow.id, isCanceled: follow.isCanceled };
+    }
+
+    async getFollowCounts(targetUserId: string) {
+        const [followerCount, followingCount] = await Promise.all([
+            this.followRepository.countDocuments({ follower: targetUserId }).exec(),
+            this.followRepository.countDocuments({ following: targetUserId }).exec(),
+        ]);
+
+        return { follower: followerCount, following: followingCount };
+    }
+
+    async getUserProfile(currentUserId: string, targetUserNickname: string) {
+        const targetUserInfo = await this.isExistsNickname(targetUserNickname);
+
+        if (!targetUserInfo.id) {
+            throw new InternalServerErrorException('Could not find the target user.');
+        }
+
+        const followCounts = await this.getFollowCounts(targetUserInfo.id);
+        const isFollow = currentUserId ? await this.isExistsFollow(currentUserId, targetUserInfo.id) : undefined;
+        const profile = await this.imageSearcherService.getUserProfileImage(targetUserInfo.id);
+        const postCount = await this.shareSearcherService.getUserPostCount(targetUserInfo.id);
+
+        return {
+            user: {
+                id: targetUserInfo.id,
+                nickname: targetUserNickname,
+                followerCount: followCounts.follower,
+                followingCount: followCounts.following,
+                profile: profile,
+                isFollow: isFollow,
+            },
+            post: {
+                count: postCount,
+            },
+        };
+    }
+
+    async getUserFollowersInfiniteScroll(userId: string, search: string, pageParams: number) {
+        const followers = await this.followRepository.findFollowersForInfiniteScroll(userId, search, pageParams, 10);
+
+        const items = await Promise.all(
+            followers.followers.map(async (entity) => {
+                const profile = entity.follower && (await this.imageSearcherService.getUserProfileImage(entity.follower));
+
+                return {
+                    id: entity.follower,
+                    profile: profile,
+                    nickname: entity.followerNickname,
+                };
+            }),
+        );
+
+        const nextPage = followers.isLastPage ? undefined : followers.pageParams;
+
+        return { items: items, nextPage: nextPage };
+    }
+
+    async getUserFollowers(userId: string) {
+        return this.followRepository.findUserFollowers(userId);
     }
 }

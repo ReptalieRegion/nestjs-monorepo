@@ -1,5 +1,5 @@
 import { PutObjectCommand, S3Client, DeleteObjectCommand, HeadObjectCommand, S3ClientConfig } from '@aws-sdk/client-s3';
-import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import * as mime from 'mime-types';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -54,7 +54,7 @@ export class ImageS3HandlerService {
             const isKeyExists = await this.checkS3ObjectExists(Params);
 
             if (!isKeyExists) {
-                throw new NotFoundException('Image not found.');
+                throw new NotFoundException('Image does not exist.');
             }
 
             let retries = 0;
@@ -81,6 +81,10 @@ export class ImageS3HandlerService {
 
     // 이미지 업로드
     async uploadToS3(files: Express.Multer.File[]) {
+        if (files.length === 0) {
+            throw new BadRequestException('No files were uploaded.');
+        }
+        
         const imageKeys: string[] = [];
 
         for (const file of files) {
@@ -112,9 +116,7 @@ export class ImageS3HandlerService {
             }
 
             if (retries === MAX_RETRIES) {
-                if (imageKeys.length !== 0) {
-                    await this.deleteImagesFromS3(imageKeys);
-                }
+                await this.deleteImagesFromS3(imageKeys);
                 throw new InternalServerErrorException('Image upload failed after multiple retries');
             }
         }

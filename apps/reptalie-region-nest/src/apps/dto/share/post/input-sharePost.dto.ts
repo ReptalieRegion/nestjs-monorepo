@@ -1,12 +1,11 @@
-import { IsArray, IsString, IsOptional } from 'class-validator';
+import { IsArray, IsOptional, IsString } from 'class-validator';
 
 export class InputSharePostDTO {
-    @IsArray()
-    @IsString({ each: true })
-    readonly contents: string[];
+    @IsString()
+    readonly contents: string;
 
     @IsOptional()
     @IsArray()
     @IsString({ each: true })
-    readonly tagIds: string[];
+    readonly deletefiles: string[];
 }

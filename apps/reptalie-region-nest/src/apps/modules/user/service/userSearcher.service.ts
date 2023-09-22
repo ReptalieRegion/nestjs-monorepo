@@ -27,7 +27,7 @@ export class UserSearcherService {
     ) {}
 
     async getUserFollowersInfiniteScroll(following: string, search: string, pageParam: number, limitSize: number) {
-        const followers = await this.followRepository
+        const follow = await this.followRepository
             .find(
                 {
                     following,
@@ -45,19 +45,20 @@ export class UserSearcherService {
             .limit(limitSize)
             .exec();
 
-        const items = followers.map((entity) => {
-            const followerInfo = entity.follower.Mapper();
+        const items = follow.map((entity) => {
+            const followerInfo = Object(entity.Mapper().follower).Mapper();
+            console.log(followerInfo);
 
             return {
-                id: followerInfo.id,
-                nickname: followerInfo.nickname,
+                id: followerInfo?.id,
+                nickname: followerInfo?.nickname,
                 profile: {
-                    src: `${process.env.AWS_IMAGE_BASEURL}${Object(followerInfo.imageId).imageKey}`,
+                    src: `${process.env.AWS_IMAGE_BASEURL}${Object(followerInfo?.imageId).imageKey}`,
                 },
             };
         });
 
-        const isLastPage = followers.length < limitSize;
+        const isLastPage = follow.length < limitSize;
         const nextPage = isLastPage ? undefined : pageParam + 1;
 
         return { items, nextPage };
@@ -88,10 +89,10 @@ export class UserSearcherService {
 
     async getUserInfo(option: OperationOption) {
         if (option.user.user) {
-            const userInfo = option.user.user.Mapper();
+            const userInfo = Object(option.user.user).Mapper();
 
             return {
-                id: userInfo.id,
+                id: userInfo.userId,
                 nickname: userInfo.nickname,
                 profile: {
                     src: `${process.env.AWS_IMAGE_BASEURL}${Object(userInfo.imageId).imageKey}`,

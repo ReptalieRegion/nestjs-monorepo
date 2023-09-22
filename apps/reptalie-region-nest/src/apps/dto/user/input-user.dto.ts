@@ -22,13 +22,5 @@ export class InputUserDTO {
 
     @IsString()
     @IsOptional()
-    readonly profileImage?: string;
-
-    @IsString()
-    @IsOptional()
-    readonly point?: string;
-
-    @IsString()
-    @IsOptional()
     readonly recommender?: string;
 }

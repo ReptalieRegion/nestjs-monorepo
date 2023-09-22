@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { ImageType } from '../../../dto/image/input-image.dto';
 import { ImageRepository } from '../image.repository';
 
 export const ImageSearcherServiceToken = 'ImageSearcherServiceToken';
@@ -7,9 +8,11 @@ export const ImageSearcherServiceToken = 'ImageSearcherServiceToken';
 export class ImageSearcherService {
     constructor(private readonly imageRepository: ImageRepository) {}
 
-    async getUserProfileImage(typeId: string) {
-        const profileImage = await this.imageRepository.findProfileImage(typeId);
-
+    async getProfileImage(typeId: string) {
+        const profileImage = await this.imageRepository
+            .findOne({ type: ImageType.Profile, typeId, isDeleted: false }, { imageKey: 1 })
+            .exec();
+            
         if (!profileImage) {
             throw new NotFoundException('Profile image not found.');
         }
@@ -18,11 +21,15 @@ export class ImageSearcherService {
     }
 
     async getPostImages(typeId: string) {
-        const postImages = await this.imageRepository.findPostImages(typeId);
+        const postImages = await this.imageRepository
+            .find({ type: ImageType.Share, typeId, isDeleted: false }, { imageKey: 1 })
+            .exec();
 
         if (!postImages) {
-            throw new NotFoundException('Profile image not found.');
+            throw new NotFoundException('Post image not found.');
         }
+
+        
 
         return postImages.map((entity) => ({ src: `${process.env.AWS_IMAGE_BASEURL}${entity.imageKey}` }));
     }

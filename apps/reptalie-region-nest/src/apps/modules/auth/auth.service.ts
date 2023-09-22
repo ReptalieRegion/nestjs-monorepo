@@ -2,6 +2,7 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { JwtService, JwtSignOptions, JwtVerifyOptions } from '@nestjs/jwt';
 import { CookieOptions, Response } from 'express';
 
+import mongoose from 'mongoose';
 import { CreateUserDTO } from '../../dto/user/create-user.dto';
 import { InputUserDTO } from '../../dto/user/input-user.dto';
 import { IResponseUserDTO } from '../../dto/user/response-user.dto';
@@ -27,7 +28,12 @@ export class AuthService {
         }
 
         const { salt, hashedPassword } = encryptPBKDF2Info;
-        const cloneUserInfo: CreateUserDTO = Object.assign({}, inputUserDTO, { password: hashedPassword, salt });
+        const cloneUserInfo: CreateUserDTO = Object.assign(
+            {},
+            inputUserDTO,
+            { password: hashedPassword, salt },
+            { imageId: new mongoose.Types.ObjectId() },
+        );
         const user = await this.userRepository.createUser(cloneUserInfo);
 
         return user.view();

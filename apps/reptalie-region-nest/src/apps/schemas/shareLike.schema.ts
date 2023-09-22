@@ -13,10 +13,10 @@ export interface ShareLikeDocument extends ShareLike, Document {
 
 @Schema({ versionKey: false, timestamps: { currentTime: getCurrentDate } })
 export class ShareLike {
-    @Prop({ index: true, ref: 'sharePost', type: SchemaTypes.ObjectId })
+    @Prop({ index: true, ref: 'SharePost', type: SchemaTypes.ObjectId })
     postId: SharePost;
 
-    @Prop({ ref: 'user', type: SchemaTypes.ObjectId })
+    @Prop({ ref: 'User', type: SchemaTypes.ObjectId })
     userId: User;
 
     @Prop({ default: false, type: SchemaTypes.Boolean })

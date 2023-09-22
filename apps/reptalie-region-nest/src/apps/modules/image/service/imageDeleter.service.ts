@@ -11,17 +11,21 @@ export class ImageDeleterService {
     constructor(private readonly imageRepository: ImageRepository) {}
 
     async deleteImageByImageKeys(imageKeys: string[], typeId: string, session: ClientSession) {
-        const deleteResult = await this.imageRepository.deleteImageByImageKeys(imageKeys, typeId, session);
+        const result = await this.imageRepository
+            .updateMany({ typeId, imageKey: { $in: imageKeys }, isDeleted: false }, { $set: { isDeleted: true } }, { session })
+            .exec();
 
-        if (deleteResult === 0) {
+        if (result.modifiedCount === 0) {
             throw new NotFoundException('Image not found');
         }
     }
 
     async deleteImageByTypeId(type: ImageType, typeId: string, session: ClientSession) {
-        const deleteResult = await this.imageRepository.deleteImageByTypeId(type, typeId, session);
+        const result = await this.imageRepository
+            .updateMany({ typeId, type, isDeleted: false }, { $set: { isDeleted: true } }, { session })
+            .exec();
 
-        if (deleteResult === 0) {
+        if (result.modifiedCount === 0) {
             throw new NotFoundException('Image not found');
         }
     }

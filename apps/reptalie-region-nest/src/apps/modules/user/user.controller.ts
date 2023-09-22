@@ -1,4 +1,4 @@
-import { Controller, Get, HttpStatus, Inject, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, HttpCode, HttpStatus, Inject, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
 
 import { IResponseUserDTO } from '../../dto/user/response-user.dto';
 import { controllerErrorHandler } from '../../utils/error/errorHandler';
@@ -32,10 +32,10 @@ export class UserController {
 
     @Post(':id/follow')
     @UseGuards(JwtAuthGuard)
-    async createFollow(@AuthUser() user: IResponseUserDTO, @Param('id') follower: string) {
+    @HttpCode(HttpStatus.CREATED)
+    async createFollow(@AuthUser() user: IResponseUserDTO, @Param('nickname') follower: string) {
         try {
-            await this.userWriterService.createFollow(user.id, follower);
-            return { statusCode: HttpStatus.CREATED, message: 'Follow created successfully' };
+            return this.userWriterService.createFollow(user.id, follower);
         } catch (error) {
             controllerErrorHandler(error);
         }
@@ -43,27 +43,28 @@ export class UserController {
 
     @Put(':id/follow')
     @UseGuards(JwtAuthGuard)
-    async toggleFollow(@AuthUser() user: IResponseUserDTO, @Param('id') follower: string) {
+    @HttpCode(HttpStatus.OK)
+    async toggleFollow(@AuthUser() user: IResponseUserDTO, @Param('nickname') follower: string) {
         try {
-            await this.userUpdaterService.toggleFollow(user.id, follower);
-            return { statusCode: HttpStatus.OK, message: 'Follow toggled successfully' };
+            return this.userUpdaterService.toggleFollow(user.id, follower);
         } catch (error) {
             controllerErrorHandler(error);
         }
     }
 
     @Get('profile')
+    @HttpCode(HttpStatus.OK)
     @UseGuards(JwtOptionalAuthGuard)
     async getUserProfile(@AuthUser() user: IResponseUserDTO, @Query('nickname') nickname: string) {
         try {
-            const profile = await this.userSearcherService.getUserProfile(user?.id, nickname);
-            return { statusCode: HttpStatus.OK, response: profile };
+            return this.userSearcherService.getProfile(user?.id, nickname);
         } catch (error) {
             controllerErrorHandler(error);
         }
     }
 
     @Get('follower/list')
+    @HttpCode(HttpStatus.OK)
     @UseGuards(JwtAuthGuard)
     async getUserFollowersInfiniteScroll(
         @AuthUser() user: IResponseUserDTO,
@@ -71,8 +72,7 @@ export class UserController {
         @Query('pageParams') pageParams: number,
     ) {
         try {
-            const followers = await this.userSearcherService.getUserFollowersInfiniteScroll(user.id, search, pageParams);
-            return { statusCode: HttpStatus.OK, response: followers };
+            return this.userSearcherService.getUserFollowersInfiniteScroll(user.id, search, pageParams, 10);
         } catch (error) {
             controllerErrorHandler(error);
         }

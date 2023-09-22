@@ -1,5 +1,4 @@
 import { Inject, Injectable, InternalServerErrorException } from '@nestjs/common';
-import { InputFollowDTO } from '../../../dto/follow/input-follow.dto';
 import { FollowRepository } from '../repository/follow.repository';
 import { UserSearcherService, UserSearcherServiceToken } from './userSearcher.service';
 
@@ -17,15 +16,16 @@ export class UserWriterService {
     async createFollow(userId: string, follower: string) {
         const followerInfo = await this.userSearcherService.isExistsUserId(follower);
 
-        const inputFollowDTO: InputFollowDTO = {
+        const follow = await this.followeRepository.createFollow({
             following: userId,
             follower: followerInfo?.id,
             followerNickname: followerInfo?.nickname,
-        };
+        });
 
-        const follow = await this.followeRepository.createFollow(inputFollowDTO);
         if (!follow) {
             throw new InternalServerErrorException('Failed to create Follow');
         }
+
+        return { user: { nickname: follow.followerNickname } };
     }
 }

@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { ObjectId } from 'bson';
 import { Model } from 'mongoose';
 
 import { CreateUserDTO } from '../../../dto/user/create-user.dto';
@@ -19,16 +18,6 @@ export class UserRepository extends BaseRepository<UserDocument> {
     }
 
     async findByEmail(email: string) {
-        return await this.userModel.findOne({ email }).exec();
-    }
-
-    async findByUserId(id: string) {
-        const user = await this.userModel.findOne({ _id: new ObjectId(id) }, { _id: 1, nickname: 1 }).exec();
-        return user?.Mapper();
-    }
-
-    async findByNickname(nickname: string) {
-        const user = await this.userModel.findOne({ nickname: nickname }, { _id: 1, nickname: 1 }).exec();
-        return user?.Mapper();
+        return await this.userModel.findOne({ userId: email }).exec();
     }
 }

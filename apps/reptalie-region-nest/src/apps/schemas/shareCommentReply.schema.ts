@@ -13,7 +13,7 @@ export interface ShareCommentReplyDocument extends ShareCommentReply, Document {
 
 @Schema({ versionKey: false, timestamps: { currentTime: getCurrentDate } })
 export class ShareCommentReply {
-    @Prop({ index: true, ref: 'shareComment', type: SchemaTypes.ObjectId })
+    @Prop({ index: true, ref: 'ShareComment', type: SchemaTypes.ObjectId })
     commentId: ShareComment;
 
     @Prop({ index: true, ref: 'User', type: SchemaTypes.ObjectId })

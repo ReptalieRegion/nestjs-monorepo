@@ -13,7 +13,7 @@ export interface ShareCommentDocument extends ShareComment, Document {
 
 @Schema({ versionKey: false, timestamps: { currentTime: getCurrentDate } })
 export class ShareComment {
-    @Prop({ index: true, ref: 'sharePost', type: SchemaTypes.ObjectId })
+    @Prop({ index: true, ref: 'SharePost', type: SchemaTypes.ObjectId })
     postId: SharePost;
 
     @Prop({ index: true, ref: 'User', type: SchemaTypes.ObjectId })
@@ -21,9 +21,6 @@ export class ShareComment {
 
     @Prop({ required: true, type: SchemaTypes.String })
     contents: string;
-
-    @Prop({ default: 0, type: SchemaTypes.Number })
-    replyCount: number;
 
     @Prop({ default: false, type: SchemaTypes.Boolean })
     isDeleted: boolean;
@@ -38,7 +35,6 @@ ShareCommentSchema.methods = {
             'postId',
             'userId',
             'contents',
-            'replyCount',
             'isDeleted',
             'createdAt',
             'updatedAt',
@@ -61,7 +57,6 @@ ShareCommentSchema.methods = {
             'postId',
             'userId',
             'contents',
-            'replyCount',
             'isDeleted',
             'createdAt',
             'updatedAt',

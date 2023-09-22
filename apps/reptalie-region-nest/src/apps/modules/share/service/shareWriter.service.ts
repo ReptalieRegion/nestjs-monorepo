@@ -4,16 +4,16 @@ import mongoose, { ClientSession } from 'mongoose';
 import { ImageType } from '../../../dto/image/input-image.dto';
 import { InputShareCommentDTO } from '../../../dto/share/comment/input-shareComment.dto';
 import { InputShareCommentReplyDTO } from '../../../dto/share/commentReply/input-shareCommentReply.dto';
-import { InputShareLikeDTO } from '../../../dto/share/like/input-shareLike.dto';
 import { InputSharePostDTO } from '../../../dto/share/post/input-sharePost.dto';
+import { IResponseUserDTO } from '../../../dto/user/response-user.dto';
 import { ImageS3HandlerServiceToken, ImageS3HandlerService } from '../../image/service/imageS3Handler.service';
 import { ImageWriterServiceToken, ImageWriterService } from '../../image/service/imageWriter.service';
+import { UserSearcherService, UserSearcherServiceToken } from '../../user/service/userSearcher.service';
 import { ShareCommentRepository } from '../repository/shareComment.repository';
 import { ShareCommentReplyRepository } from '../repository/shareCommentReply.repository';
 import { ShareLikeRepository } from '../repository/shareLike.repository';
 import { SharePostRepository } from '../repository/sharePost.repository';
 import { ShareSearcherService, ShareSearcherServiceToken } from './shareSearcher.service';
-import { ShareUpdaterService, ShareUpdaterServiceToken } from './shareUpdater.service';
 
 export const ShareWriterServiceToken = 'ShareWriterServiceToken';
 
@@ -28,27 +28,30 @@ export class ShareWriterService {
         private readonly shareCommentReplyRepository: ShareCommentReplyRepository,
         private readonly shareLikeRepository: ShareLikeRepository,
 
-        @Inject(ShareUpdaterServiceToken)
-        private readonly shareUpdaterService: ShareUpdaterService,
-        @Inject(ShareSearcherServiceToken)
-        private readonly shareSearcherService: ShareSearcherService,
         @Inject(ImageS3HandlerServiceToken)
         private readonly imageS3HandlerService: ImageS3HandlerService,
         @Inject(ImageWriterServiceToken)
         private readonly imageWriterService: ImageWriterService,
+        @Inject(UserSearcherServiceToken)
+        private readonly userSearcherService: UserSearcherService,
+        @Inject(ShareSearcherServiceToken)
+        private readonly shareSearcherService: ShareSearcherService,
     ) {}
 
     // 일상공유 게시글 등록 및 이미지 등록
-    async createPostWithImages(userId: string, inputSharePostDTO: InputSharePostDTO, files: Express.Multer.File[]) {
+    async createPostWithImages(user: IResponseUserDTO, dto: InputSharePostDTO, files: Express.Multer.File[]) {
         const session: ClientSession = await this.connection.startSession();
         session.startTransaction();
 
         let imageKeys: string[] = [];
 
         try {
-            const sharePost = await this.sharePostRepository.createPost(userId, inputSharePostDTO, session);
-            if (!sharePost?.id) {
-                throw new InternalServerErrorException('Failed to create sharePost');
+            // 추후 user관련 구현 후 삭제할 예정
+            const userInfo = await this.userSearcherService.getUserInfo({ user: { targetUserId: user.id } });
+
+            const sharePost = await this.sharePostRepository.createPost(user.id, dto, session);
+            if (!sharePost.id) {
+                throw new InternalServerErrorException('Failed to save share post');
             }
 
             imageKeys = await this.imageS3HandlerService.uploadToS3(files);
@@ -56,6 +59,9 @@ export class ShareWriterService {
             await this.imageWriterService.createImage(sharePost.id, imageKeys, ImageType.Share, session);
 
             await session.commitTransaction();
+
+            const postInfo = await this.shareSearcherService.getPostInfo({ create: { post: { sharePost, imageKeys } } });
+            return { user: userInfo, post: postInfo };
         } catch (error) {
             await this.imageS3HandlerService.deleteImagesFromS3(imageKeys);
             await session.abortTransaction();
@@ -66,50 +72,46 @@ export class ShareWriterService {
     }
 
     // 일상공유 댓글 등록
-    async createComment(userId: string, inputShareCommentDTO: InputShareCommentDTO) {
-        await this.shareSearcherService.isExistsPost(inputShareCommentDTO.postId);
+    async createComment(user: IResponseUserDTO, dto: InputShareCommentDTO) {
+        await this.shareSearcherService.isExistsPost(dto.postId);
 
-        const comment = await this.shareCommentRepository.createComment(userId, inputShareCommentDTO);
-        if (!comment?.id) {
-            throw new InternalServerErrorException('Failed to create ShareComment');
+        // 추후 user관련 구현 후 삭제할 예정
+        const userInfo = await this.userSearcherService.getUserInfo({ user: { targetUserId: user.id } });
+
+        const comment = await this.shareCommentRepository.createComment(user.id, dto);
+        if (!comment.id) {
+            throw new InternalServerErrorException('Failed to save share comment');
         }
+
+        const commentInfo = await this.shareSearcherService.getCommentInfo({ create: { comment } });
+        return { user: userInfo, comment: commentInfo };
     }
 
     // 일상공유 대댓글 등록
-    async createCommentReply(userId: string, inputShareCommentReplyDTO: InputShareCommentReplyDTO) {
-        const session: ClientSession = await this.connection.startSession();
-        session.startTransaction();
+    async createCommentReply(user: IResponseUserDTO, dto: InputShareCommentReplyDTO) {
+        await this.shareSearcherService.isExistsComment(dto.commentId);
 
-        try {
-            const comment = await this.shareSearcherService.isExistsComment(inputShareCommentReplyDTO.commentId);
+        // 추후 user관련 구현 후 삭제할 예정
+        const userInfo = await this.userSearcherService.getUserInfo({ user: { targetUserId: user.id } });
 
-            const reply = await this.shareCommentReplyRepository.createCommentReply(userId, inputShareCommentReplyDTO, session);
-            if (!reply?.id) {
-                throw new InternalServerErrorException('Failed to create ShareCommentReply');
-            }
-
-            if (comment?.id) {
-                await this.shareUpdaterService.incrementReplyCount(comment.id, session);
-            }
-
-            await session.commitTransaction();
-        } catch (error) {
-            await session.abortTransaction();
-            throw error;
-        } finally {
-            await session.endSession();
+        const commentReply = await this.shareCommentReplyRepository.createCommentReply(user.id, dto);
+        if (!commentReply.id) {
+            throw new InternalServerErrorException('Failed to create ShareCommentReply');
         }
+
+        const commentReplyInfo = await this.shareSearcherService.getCommentReplyInfo({ create: { commentReply } });
+        return { user: userInfo, comment: commentReplyInfo };
     }
 
     // 일상공유 게시물 좋아요 등록
     async createLike(userId: string, postId: string) {
         await this.shareSearcherService.isExistsPost(postId);
 
-        const inputShareLikeDTO: InputShareLikeDTO = { userId: userId, postId: postId };
-
-        const like = await this.shareLikeRepository.createLike(inputShareLikeDTO);
+        const like = await this.shareLikeRepository.createLike({ userId, postId });
         if (!like) {
-            throw new InternalServerErrorException('Failed to create ShareLike');
+            throw new InternalServerErrorException('Failed to create share like');
         }
+
+        return { post: { id: like.postId } };
     }
 }

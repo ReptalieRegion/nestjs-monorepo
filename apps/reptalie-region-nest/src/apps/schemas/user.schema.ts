@@ -3,6 +3,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { Document, SchemaTypes } from 'mongoose';
 import { IResponseUserDTO } from '../dto/user/response-user.dto';
 import { getCurrentDate } from '../utils/time/time';
+import { Image } from './image.schema';
 
 export interface UserDocument extends User, Document {
     view(): Partial<IResponseUserDTO>;
@@ -14,6 +15,7 @@ export class User {
     Mapper(): any {
         throw new Error('Method not implemented.');
     }
+
     @Prop({ trim: true, unique: true, required: true, type: SchemaTypes.String })
     userId: string;
 
@@ -35,14 +37,11 @@ export class User {
     @Prop({ type: SchemaTypes.String })
     address: string;
 
-    @Prop({ type: SchemaTypes.String })
-    profileImage: string;
-
-    @Prop({ type: SchemaTypes.Number })
-    point: number;
-
-    @Prop({ ref: 'user', type: SchemaTypes.ObjectId })
+    @Prop({ ref: 'User', type: SchemaTypes.ObjectId })
     recommender: User;
+
+    @Prop({ ref: 'Image', type: SchemaTypes.ObjectId })
+    imageId: Image;
 }
 
 const userSchema = SchemaFactory.createForClass(User);
@@ -51,14 +50,13 @@ userSchema.methods = {
     view(): Partial<IResponseUserDTO> {
         const fields: Array<keyof IResponseUserDTO> = [
             'id',
-            'address',
             'userId',
-            'nickname',
             'name',
-            'point',
-            'recommender',
+            'nickname',
             'phone',
-            'profileImage',
+            'address',
+            'recommender',
+            'imageId',
         ];
 
         const viewFields = fields.reduce(
@@ -75,14 +73,13 @@ userSchema.methods = {
     Mapper(): Partial<IResponseUserDTO> {
         const fields: Array<keyof IResponseUserDTO> = [
             'id',
-            'address',
             'userId',
-            'nickname',
             'name',
-            'point',
-            'recommender',
+            'nickname',
             'phone',
-            'profileImage',
+            'address',
+            'recommender',
+            'imageId',
         ];
 
         const viewFields = fields.reduce((prev, field) => {

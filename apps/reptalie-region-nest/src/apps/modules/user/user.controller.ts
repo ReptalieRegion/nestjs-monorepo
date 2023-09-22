@@ -69,10 +69,10 @@ export class UserController {
     async getUserFollowersInfiniteScroll(
         @AuthUser() user: IResponseUserDTO,
         @Query('search') search: string,
-        @Query('pageParams') pageParams: number,
+        @Query('pageParam') pageParam: number,
     ) {
         try {
-            return this.userSearcherService.getUserFollowersInfiniteScroll(user.id, search, pageParams, 10);
+            return this.userSearcherService.getUserFollowersInfiniteScroll(user.id, search, pageParam, 10);
         } catch (error) {
             controllerErrorHandler(error);
         }

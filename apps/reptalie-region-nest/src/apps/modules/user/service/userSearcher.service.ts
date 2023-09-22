@@ -26,7 +26,7 @@ export class UserSearcherService {
         private readonly shareSearcherService: ShareSearcherService,
     ) {}
 
-    async getUserFollowersInfiniteScroll(following: string, search: string, pageParams: number, limitSize: number) {
+    async getUserFollowersInfiniteScroll(following: string, search: string, pageParam: number, limitSize: number) {
         const followers = await this.followRepository
             .find(
                 {
@@ -41,7 +41,7 @@ export class UserSearcherService {
                 select: 'nickname imageId',
                 populate: { path: 'imageId', model: 'Image', select: 'imageKey -_id' },
             })
-            .skip(pageParams * limitSize)
+            .skip(pageParam * limitSize)
             .limit(limitSize)
             .exec();
 
@@ -58,7 +58,7 @@ export class UserSearcherService {
         });
 
         const isLastPage = followers.length < limitSize;
-        const nextPage = isLastPage ? undefined : pageParams + 1;
+        const nextPage = isLastPage ? undefined : pageParam + 1;
 
         return { items, nextPage };
     }

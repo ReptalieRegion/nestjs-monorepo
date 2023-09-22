@@ -47,7 +47,7 @@ export class ShareSearcherService {
         private readonly userSearcherService: UserSearcherService,
     ) {}
 
-    async getPostsInfiniteScroll(userId: string, pageParams: number, limitSize: number) {
+    async getPostsInfiniteScroll(userId: string, pageParam: number, limitSize: number) {
         const followers = userId ? await this.userSearcherService.getUserFollowers(userId) : undefined;
 
         const posts = await this.sharePostRepository
@@ -58,7 +58,7 @@ export class ShareSearcherService {
                 populate: { path: 'imageId', model: 'Image', select: 'imageKey -_id' },
             })
             .sort({ updatedAt: -1, createdAt: -1 })
-            .skip(pageParams * limitSize)
+            .skip(pageParam * limitSize)
             .limit(limitSize)
             .exec();
 
@@ -87,18 +87,18 @@ export class ShareSearcherService {
         );
 
         const isLastPage = posts.length < limitSize;
-        const nextPage = isLastPage ? undefined : pageParams + 1;
+        const nextPage = isLastPage ? undefined : pageParam + 1;
 
         return { items, nextPage };
     }
 
-    async getUserPostsInfiniteScroll(currentUserId: string, targetNickname: string, pageParams: number, limitSize: number) {
+    async getUserPostsInfiniteScroll(currentUserId: string, targetNickname: string, pageParam: number, limitSize: number) {
         const targetUserId = (await this.userSearcherService.isExistsNickname(targetNickname)).id;
 
         const posts = await this.sharePostRepository
             .find({ userId: targetUserId, isDeleted: false })
             .sort({ createdAt: -1 })
-            .skip(pageParams * limitSize)
+            .skip(pageParam * limitSize)
             .limit(limitSize)
             .exec();
 
@@ -123,12 +123,12 @@ export class ShareSearcherService {
         );
 
         const isLastPage = posts.length < limitSize;
-        const nextPage = isLastPage ? undefined : pageParams + 1;
+        const nextPage = isLastPage ? undefined : pageParam + 1;
 
         return { items, nextPage };
     }
 
-    async getCommentsInfiniteScroll(userId: string, postId: string, pageParams: number, limitSize: number) {
+    async getCommentsInfiniteScroll(userId: string, postId: string, pageParam: number, limitSize: number) {
         const comments = await this.shareCommentRepository
             .find({ postId, isDeleted: false })
             .populate({
@@ -137,7 +137,7 @@ export class ShareSearcherService {
                 populate: { path: 'imageId', model: 'Image', select: 'imageKey -_id' },
             })
             .sort({ createdAt: -1 })
-            .skip(pageParams * limitSize)
+            .skip(pageParam * limitSize)
             .limit(limitSize)
             .exec();
 
@@ -160,12 +160,12 @@ export class ShareSearcherService {
         );
 
         const isLastPage = comments.length < limitSize;
-        const nextPage = isLastPage ? undefined : pageParams + 1;
+        const nextPage = isLastPage ? undefined : pageParam + 1;
 
         return { items, nextPage };
     }
 
-    async getCommentRepliesInfiniteScroll(userId: string, commentId: string, pageParams: number, limitSize: number) {
+    async getCommentRepliesInfiniteScroll(userId: string, commentId: string, pageParam: number, limitSize: number) {
         const commentReplies = await this.shareCommentReplyRepository
             .find({ commentId, isDeleted: false })
             .populate({
@@ -174,7 +174,7 @@ export class ShareSearcherService {
                 populate: { path: 'imageId', model: 'Image', select: 'imageKey -_id' },
             })
             .sort({ createdAt: -1 })
-            .skip(pageParams * limitSize)
+            .skip(pageParam * limitSize)
             .limit(limitSize)
             .exec();
 
@@ -196,7 +196,7 @@ export class ShareSearcherService {
         );
 
         const isLastPage = commentReplies.length < limitSize;
-        const nextPage = isLastPage ? undefined : pageParams + 1;
+        const nextPage = isLastPage ? undefined : pageParam + 1;
 
         return { items, nextPage };
     }

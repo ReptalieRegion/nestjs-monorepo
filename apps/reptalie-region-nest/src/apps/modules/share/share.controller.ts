@@ -182,9 +182,9 @@ export class ShareController {
     @Get('posts/list')
     @UseGuards(JwtOptionalAuthGuard)
     @HttpCode(HttpStatus.OK)
-    async getPostsInfiniteScroll(@AuthUser() user: IResponseUserDTO, @Query('pageParams') pageParams: number) {
+    async getPostsInfiniteScroll(@AuthUser() user: IResponseUserDTO, @Query('pageParam') pageParam: number) {
         try {
-            return this.shareSearcherService.getPostsInfiniteScroll(user?.id, pageParams, 10);
+            return this.shareSearcherService.getPostsInfiniteScroll(user?.id, pageParam, 10);
         } catch (error) {
             controllerErrorHandler(error);
         }
@@ -196,12 +196,12 @@ export class ShareController {
     async getUserPostsInfiniteScroll(
         @AuthUser() user: IResponseUserDTO,
         @Param('nickname') targetNickname: string,
-        @Query('pageParams') pageParams: number,
+        @Query('pageParam') pageParam: number,
     ) {
         try {
             console.log(targetNickname);
-            
-            return this.shareSearcherService.getUserPostsInfiniteScroll(user?.id, targetNickname, pageParams, 10);
+
+            return this.shareSearcherService.getUserPostsInfiniteScroll(user?.id, targetNickname, pageParam, 10);
         } catch (error) {
             controllerErrorHandler(error);
         }
@@ -213,10 +213,10 @@ export class ShareController {
     async getCommentsInfiniteScroll(
         @AuthUser() user: IResponseUserDTO,
         @Param('id') postId: string,
-        @Query('pageParams') pageParams: number,
+        @Query('pageParam') pageParam: number,
     ) {
         try {
-            return this.shareSearcherService.getCommentsInfiniteScroll(user?.id, postId, pageParams, 10);
+            return this.shareSearcherService.getCommentsInfiniteScroll(user?.id, postId, pageParam, 10);
         } catch (error) {
             controllerErrorHandler(error);
         }
@@ -228,10 +228,10 @@ export class ShareController {
     async getCommentRepliesInfiniteScroll(
         @AuthUser() user: IResponseUserDTO,
         @Param('id') commentId: string,
-        @Query('pageParams') pageParams: number,
+        @Query('pageParam') pageParam: number,
     ) {
         try {
-            return await this.shareSearcherService.getCommentRepliesInfiniteScroll(user?.id, commentId, pageParams, 10);
+            return await this.shareSearcherService.getCommentRepliesInfiniteScroll(user?.id, commentId, pageParam, 10);
         } catch (error) {
             controllerErrorHandler(error);
         }

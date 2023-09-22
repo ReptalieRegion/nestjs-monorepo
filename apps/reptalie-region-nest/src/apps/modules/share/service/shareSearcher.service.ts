@@ -94,7 +94,7 @@ export class ShareSearcherService {
 
     async getUserPostsInfiniteScroll(currentUserId: string, targetNickname: string, pageParams: number, limitSize: number) {
         const targetUserId = (await this.userSearcherService.isExistsNickname(targetNickname)).id;
-        
+
         const posts = await this.sharePostRepository
             .find({ userId: targetUserId, isDeleted: false })
             .sort({ createdAt: -1 })
@@ -109,13 +109,15 @@ export class ShareSearcherService {
                 const images = post.id && (await this.imageSearcherService.getPostImages(post.id));
 
                 return {
-                    id: post.id,
-                    contents: post.contents,
-                    images,
-                    isMine,
-                    isLike: currentUserId && post.id ? await this.isExistsLike(currentUserId, post?.id) : undefined,
-                    likeCount: post.id && (await this.getLikeCount(post.id)),
-                    commentCount: post.id && (await this.getCommentCount(post.id)),
+                    post: {
+                        id: post.id,
+                        contents: post.contents,
+                        images,
+                        isMine,
+                        isLike: currentUserId && post.id ? await this.isExistsLike(currentUserId, post?.id) : undefined,
+                        likeCount: post.id && (await this.getLikeCount(post.id)),
+                        commentCount: post.id && (await this.getCommentCount(post.id)),
+                    },
                 };
             }),
         );

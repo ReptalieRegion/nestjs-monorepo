@@ -33,7 +33,7 @@ export class UserController {
     @Post(':id/follow')
     @UseGuards(JwtAuthGuard)
     @HttpCode(HttpStatus.CREATED)
-    async createFollow(@AuthUser() user: IResponseUserDTO, @Param('nickname') follower: string) {
+    async createFollow(@AuthUser() user: IResponseUserDTO, @Param('id') follower: string) {
         try {
             return this.userWriterService.createFollow(user.id, follower);
         } catch (error) {
@@ -44,7 +44,7 @@ export class UserController {
     @Put(':id/follow')
     @UseGuards(JwtAuthGuard)
     @HttpCode(HttpStatus.OK)
-    async toggleFollow(@AuthUser() user: IResponseUserDTO, @Param('nickname') follower: string) {
+    async toggleFollow(@AuthUser() user: IResponseUserDTO, @Param('id') follower: string) {
         try {
             return this.userUpdaterService.toggleFollow(user.id, follower);
         } catch (error) {

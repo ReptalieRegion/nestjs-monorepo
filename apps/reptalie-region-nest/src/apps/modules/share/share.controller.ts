@@ -190,7 +190,7 @@ export class ShareController {
         }
     }
 
-    @Get('posts/list/users/:id')
+    @Get('posts/list/users/:nickname')
     @UseGuards(JwtOptionalAuthGuard)
     @HttpCode(HttpStatus.OK)
     async getUserPostsInfiniteScroll(
@@ -199,6 +199,8 @@ export class ShareController {
         @Query('pageParams') pageParams: number,
     ) {
         try {
+            console.log(targetNickname);
+            
             return this.shareSearcherService.getUserPostsInfiniteScroll(user?.id, targetNickname, pageParams, 10);
         } catch (error) {
             controllerErrorHandler(error);

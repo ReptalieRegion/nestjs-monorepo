@@ -178,8 +178,8 @@ export class UserSearcherService {
 
     async getFollowCount(targetUserId: string) {
         const [followerCount, followingCount] = await Promise.all([
-            this.followRepository.countDocuments({ follower: targetUserId }).exec(),
-            this.followRepository.countDocuments({ following: targetUserId }).exec(),
+            this.followRepository.countDocuments({ follower: targetUserId, isCanceled: false }).exec(),
+            this.followRepository.countDocuments({ following: targetUserId, isCanceled: false }).exec(),
         ]);
 
         return { follower: followerCount, following: followingCount };

@@ -199,8 +199,6 @@ export class ShareController {
         @Query('pageParam') pageParam: number,
     ) {
         try {
-            console.log(targetNickname);
-
             return this.shareSearcherService.getUserPostsInfiniteScroll(user?.id, targetNickname, pageParam, 10);
         } catch (error) {
             controllerErrorHandler(error);

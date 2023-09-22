@@ -92,7 +92,9 @@ export class ShareSearcherService {
         return { items, nextPage };
     }
 
-    async getUserPostsInfiniteScroll(currentUserId: string, targetUserId: string, pageParams: number, limitSize: number) {
+    async getUserPostsInfiniteScroll(currentUserId: string, targetNickname: string, pageParams: number, limitSize: number) {
+        const targetUserId = (await this.userSearcherService.isExistsNickname(targetNickname)).id;
+        
         const posts = await this.sharePostRepository
             .find({ userId: targetUserId, isDeleted: false })
             .sort({ createdAt: -1 })

@@ -195,11 +195,11 @@ export class ShareController {
     @HttpCode(HttpStatus.OK)
     async getUserPostsInfiniteScroll(
         @AuthUser() user: IResponseUserDTO,
-        @Param('id') targetUserId: string,
+        @Param('nickname') targetNickname: string,
         @Query('pageParams') pageParams: number,
     ) {
         try {
-            return this.shareSearcherService.getUserPostsInfiniteScroll(user?.id, targetUserId, pageParams, 10);
+            return this.shareSearcherService.getUserPostsInfiniteScroll(user?.id, targetNickname, pageParams, 10);
         } catch (error) {
             controllerErrorHandler(error);
         }

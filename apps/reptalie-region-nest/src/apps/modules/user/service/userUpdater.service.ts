@@ -28,12 +28,4 @@ export class UserUpdaterService {
 
         return { user: { nickname: follow?.followerNickname } };
     }
-
-    async updateUser(imageId: string, userId: string) {
-        const result = await this.userRepository.updateOne({ _id: userId }, { $set: { imageId: imageId } }).exec();
-
-        if (result.modifiedCount === 0) {
-            throw new InternalServerErrorException('Failed to update the imageId status.');
-        }
-    }
 }

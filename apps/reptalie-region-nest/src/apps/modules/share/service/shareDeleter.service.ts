@@ -64,7 +64,7 @@ export class ShareDeleterService {
             }
 
             await session.commitTransaction();
-            return this.shareSearcherService.getPostInfo({ delete: { postId } });
+            return  this.shareSearcherService.getPostInfo({ delete: { postId } });
         } catch (error) {
             await session.abortTransaction();
             handleBSONAndCastError(error, 'share post Id Invalid ObjectId');

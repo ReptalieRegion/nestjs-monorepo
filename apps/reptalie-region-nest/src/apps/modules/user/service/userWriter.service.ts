@@ -23,7 +23,7 @@ export class UserWriterService {
         });
 
         if (!follow) {
-            throw new InternalServerErrorException('Failed to create Follow');
+            throw new InternalServerErrorException('Failed to save follow.');
         }
 
         return { user: { nickname: follow.followerNickname } };

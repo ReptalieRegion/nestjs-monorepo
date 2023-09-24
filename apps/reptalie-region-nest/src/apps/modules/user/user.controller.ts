@@ -72,7 +72,7 @@ export class UserController {
         @Query('pageParam') pageParam: number,
     ) {
         try {
-            return this.userSearcherService.getUserFollowersInfiniteScroll(user.id, search, pageParam, 10);
+            return this.userSearcherService.getFollowersInfiniteScroll(user.id, search, pageParam, 10);
         } catch (error) {
             controllerErrorHandler(error);
         }

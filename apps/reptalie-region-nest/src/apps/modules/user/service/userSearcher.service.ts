@@ -26,7 +26,7 @@ export class UserSearcherService {
         private readonly shareSearcherService: ShareSearcherService,
     ) {}
 
-    async getUserFollowersInfiniteScroll(following: string, search: string, pageParam: number, limitSize: number) {
+    async getFollowersInfiniteScroll(following: string, search: string, pageParam: number, limitSize: number) {
         const follow = await this.followRepository
             .find(
                 {
@@ -47,7 +47,6 @@ export class UserSearcherService {
 
         const items = follow.map((entity) => {
             const followerInfo = Object(entity.Mapper().follower).Mapper();
-            console.log(followerInfo);
 
             return {
                 id: followerInfo?.id,
@@ -67,16 +66,12 @@ export class UserSearcherService {
     async getProfile(currentUserId: string, nickname: string) {
         const userInfo = await this.getUserInfo({ user: { nickname, currentUserId } });
         const followCount = await this.getFollowCount(userInfo?.id);
-        const postCount = await this.shareSearcherService.getPostCount(userInfo?.id);
 
         return {
             user: {
                 ...userInfo,
                 followerCount: followCount.follower,
                 followingCount: followCount.following,
-            },
-            post: {
-                count: postCount,
             },
         };
     }
@@ -88,34 +83,27 @@ export class UserSearcherService {
      */
 
     async getUserInfo(option: OperationOption) {
+        let userInfo, isFollow;
+
         if (option.user.user) {
-            const userInfo = Object(option.user.user).Mapper();
+            userInfo = Object(option.user.user).Mapper();
+        } else {
+            const { targetUserId, nickname, currentUserId } = option.user;
 
-            return {
-                id: userInfo.userId,
-                nickname: userInfo.nickname,
-                profile: {
-                    src: `${process.env.AWS_IMAGE_BASEURL}${Object(userInfo.imageId).imageKey}`,
-                },
-            };
-        }
+            userInfo = nickname
+                ? await this.userRepository
+                      .findOne({ nickname }, { nickname: 1, imageId: 1 })
+                      .populate({ path: 'imageId', select: 'imageKey -_id' })
+                      .exec()
+                : await this.userRepository
+                      .findOne({ _id: targetUserId }, { nickname: 1, imageId: 1 })
+                      .populate({ path: 'imageId', select: 'imageKey -_id' })
+                      .exec();
 
-        const _id = option.user.targetUserId;
-        const nickname = option.user.nickname;
-        const currentUserId = option.user.currentUserId;
-
-        const userInfo = nickname
-            ? await this.userRepository
-                  .findOne({ nickname }, { _id: 1, nickname: 1, imageId: 1 })
-                  .populate({ path: 'imageId', select: 'imageKey -_id' })
-                  .exec()
-            : await this.userRepository
-                  .findOne({ _id }, { _id: 1, nickname: 1, imageId: 1 })
-                  .populate({ path: 'imageId', select: 'imageKey -_id' })
-                  .exec();
-
-        if (!userInfo) {
-            throw new NotFoundException('User does not exist');
+            if (!userInfo) {
+                throw new NotFoundException('User does not exist');
+            }
+            isFollow = currentUserId ? await this.isExistsFollow(currentUserId, userInfo.id) : undefined;
         }
 
         return {
@@ -124,7 +112,7 @@ export class UserSearcherService {
             profile: {
                 src: `${process.env.AWS_IMAGE_BASEURL}${Object(userInfo.imageId).imageKey}`,
             },
-            isFollow: currentUserId ? await this.isExistsFollow(currentUserId, userInfo.id) : undefined,
+            isFollow,
         };
     }
 
@@ -140,7 +128,7 @@ export class UserSearcherService {
 
             return follow.Mapper();
         } catch (error) {
-            handleBSONAndCastError(error, 'follower Id Invalid ObjectId');
+            handleBSONAndCastError(error, 'follower Id Invalid ObjectId.');
         }
     }
 
@@ -163,12 +151,12 @@ export class UserSearcherService {
             const user = await this.userRepository.findOne({ _id: userId }, { _id: 1, nickname: 1 }).exec();
 
             if (!user) {
-                throw new NotFoundException('User Id does not exist');
+                throw new NotFoundException('User not found for the specified user id.');
             }
 
             return user.Mapper();
         } catch (error) {
-            handleBSONAndCastError(error, 'User Id Invalid ObjectId');
+            handleBSONAndCastError(error, 'user Id Invalid ObjectId.');
         }
     }
 

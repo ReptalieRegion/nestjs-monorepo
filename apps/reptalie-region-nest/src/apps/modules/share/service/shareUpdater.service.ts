@@ -56,7 +56,10 @@ export class ShareUpdaterService {
             }
 
             if (dto.deletefiles) {
-                await this.imageDeleterService.deleteImageByImageKeys(dto.deletefiles, postId, session);
+                const baseUrl = `${process.env.AWS_IMAGE_BASEURL}`;
+                const deletefiles = dto.deletefiles.map((value) => value.slice(baseUrl.length));
+
+                await this.imageDeleterService.deleteImageByImageKeys(deletefiles, postId, session);
             }
 
             await session.commitTransaction();
@@ -71,20 +74,21 @@ export class ShareUpdaterService {
         }
     }
 
-    async updateComment(userId: string, commentId: string, dto: InputShareCommentDTO) {
+    async updateComment(user: IResponseUserDTO, commentId: string, dto: InputShareCommentDTO) {
         try {
             const result = await this.shareCommentRepository
-                .updateOne({ _id: commentId, userId, isDeleted: false }, { $set: { contents: dto.contents } })
+                .updateOne({ _id: commentId, userId: user.id, isDeleted: false }, { $set: { contents: dto.contents } })
                 .exec();
 
             if (result.modifiedCount === 0) {
                 throw new InternalServerErrorException('Failed to update comment.');
             }
         } catch (error) {
-            handleBSONAndCastError(error, 'share comment Id Invalid ObjectId');
+            handleBSONAndCastError(error, 'share comment Id Invalid ObjectId.');
         }
 
-        return this.shareSearcherService.getCommentInfo({ update: { commentId } });
+        const commentInfo = await this.shareSearcherService.getCommentInfo({ update: { commentId } });
+        return { post: { ...commentInfo, user: { nickname: user.nickname } } };
     }
 
     async updateCommentReply(userId: string, commentReplyId: string, dto: InputShareCommentReplyDTO) {
@@ -94,23 +98,24 @@ export class ShareUpdaterService {
                 .exec();
 
             if (result.modifiedCount === 0) {
-                throw new InternalServerErrorException('Failed to update commentReply.');
+                throw new InternalServerErrorException('Failed to update comment reply.');
             }
         } catch (error) {
-            handleBSONAndCastError(error, 'share comment reply Id Invalid ObjectId');
+            handleBSONAndCastError(error, 'share comment reply Id Invalid ObjectId.');
         }
 
-        return this.shareSearcherService.getCommentReplyInfo({ update: { commentReplyId } });
+        const commentReplyInfo = await this.shareSearcherService.getCommentReplyInfo({ update: { commentReplyId } });
+        return { comment: { ...commentReplyInfo } };
     }
 
-    async toggleLike(userId: string, postId: string) {
-        const like = await this.shareSearcherService.getLikeInfo(postId, userId);
+    async toggleLike(user: IResponseUserDTO, postId: string) {
+        const like = await this.shareSearcherService.getLikeInfo(postId, user.id);
 
         const result = await this.shareLikeRepository.updateOne({ _id: like?.id }, { $set: { isCanceled: !like?.isCanceled } });
         if (result.modifiedCount === 0) {
             throw new InternalServerErrorException('Failed to toggle the like status.');
         }
 
-        return { post: { id: like?.postId } };
+        return { post: { id: like?.postId, user: { nickname: user.nickname } } };
     }
 }

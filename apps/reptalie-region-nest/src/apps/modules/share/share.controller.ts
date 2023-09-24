@@ -48,10 +48,10 @@ export class ShareController {
     async createPostWithImages(
         @AuthUser() user: IResponseUserDTO,
         @UploadedFiles() files: Express.Multer.File[],
-        @Body() inputSharePostDTO: InputSharePostDTO,
+        @Body() dto: InputSharePostDTO,
     ) {
         try {
-            return this.shareWriterService.createPostWithImages(user, inputSharePostDTO, files);
+            return this.shareWriterService.createPostWithImages(user, dto, files);
         } catch (error) {
             controllerErrorHandler(error);
         }
@@ -60,9 +60,9 @@ export class ShareController {
     @Post('comment')
     @UseGuards(JwtAuthGuard)
     @HttpCode(HttpStatus.CREATED)
-    async createComment(@AuthUser() user: IResponseUserDTO, @Body() inputShareCommentDTO: InputShareCommentDTO) {
+    async createComment(@AuthUser() user: IResponseUserDTO, @Body() dto: InputShareCommentDTO) {
         try {
-            return this.shareWriterService.createComment(user, inputShareCommentDTO);
+            return this.shareWriterService.createComment(user, dto);
         } catch (error) {
             controllerErrorHandler(error);
         }
@@ -71,9 +71,9 @@ export class ShareController {
     @Post('comment-reply')
     @UseGuards(JwtAuthGuard)
     @HttpCode(HttpStatus.CREATED)
-    async createCommentReply(@AuthUser() user: IResponseUserDTO, @Body() inputShareCommentReplyDTO: InputShareCommentReplyDTO) {
+    async createCommentReply(@AuthUser() user: IResponseUserDTO, @Body() dto: InputShareCommentReplyDTO) {
         try {
-            return this.shareWriterService.createCommentReply(user, inputShareCommentReplyDTO);
+            return this.shareWriterService.createCommentReply(user, dto);
         } catch (error) {
             controllerErrorHandler(error);
         }
@@ -84,7 +84,7 @@ export class ShareController {
     @HttpCode(HttpStatus.CREATED)
     async createLike(@AuthUser() user: IResponseUserDTO, @Param('id') postId: string) {
         try {
-            return this.shareWriterService.createLike(user.id, postId);
+            return this.shareWriterService.createLike(user, postId);
         } catch (error) {
             controllerErrorHandler(error);
         }
@@ -93,13 +93,9 @@ export class ShareController {
     @Put('posts/:id')
     @UseGuards(JwtAuthGuard)
     @HttpCode(HttpStatus.OK)
-    async updatePost(
-        @AuthUser() user: IResponseUserDTO,
-        @Param('id') postId: string,
-        @Body() inputSharePostDTO: InputSharePostDTO,
-    ) {
+    async updatePost(@AuthUser() user: IResponseUserDTO, @Param('id') postId: string, @Body() dto: InputSharePostDTO) {
         try {
-            return this.shareUpdaterService.updatePost(user, postId, inputSharePostDTO);
+            return this.shareUpdaterService.updatePost(user, postId, dto);
         } catch (error) {
             controllerErrorHandler(error);
         }
@@ -108,13 +104,9 @@ export class ShareController {
     @Put('comments/:id')
     @UseGuards(JwtAuthGuard)
     @HttpCode(HttpStatus.OK)
-    async updateComment(
-        @AuthUser() user: IResponseUserDTO,
-        @Param('id') commentId: string,
-        @Body() inputShareCommentDTO: InputShareCommentDTO,
-    ) {
+    async updateComment(@AuthUser() user: IResponseUserDTO, @Param('id') commentId: string, @Body() dto: InputShareCommentDTO) {
         try {
-            return this.shareUpdaterService.updateComment(user.id, commentId, inputShareCommentDTO);
+            return this.shareUpdaterService.updateComment(user, commentId, dto);
         } catch (error) {
             controllerErrorHandler(error);
         }
@@ -126,10 +118,10 @@ export class ShareController {
     async updateCommentReply(
         @AuthUser() user: IResponseUserDTO,
         @Param('id') commentReplyId: string,
-        @Body() inputShareCommentReplyDTO: InputShareCommentReplyDTO,
+        @Body() dto: InputShareCommentReplyDTO,
     ) {
         try {
-            return this.shareUpdaterService.updateCommentReply(user.id, commentReplyId, inputShareCommentReplyDTO);
+            return this.shareUpdaterService.updateCommentReply(user.id, commentReplyId, dto);
         } catch (error) {
             controllerErrorHandler(error);
         }
@@ -140,7 +132,7 @@ export class ShareController {
     @HttpCode(HttpStatus.OK)
     async toggleLike(@AuthUser() user: IResponseUserDTO, @Param('id') postId: string) {
         try {
-            return this.shareUpdaterService.toggleLike(user.id, postId);
+            return this.shareUpdaterService.toggleLike(user, postId);
         } catch (error) {
             controllerErrorHandler(error);
         }

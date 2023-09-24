@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { ClientSession, Model } from 'mongoose';
 
 import { CreateUserDTO } from '../../../dto/user/create-user.dto';
 import { UserDocument, User } from '../../../schemas/user.schema';
@@ -12,9 +12,9 @@ export class UserRepository extends BaseRepository<UserDocument> {
         super(userModel);
     }
 
-    async createUser(userInfo: CreateUserDTO) {
+    async createUser(userInfo: CreateUserDTO, session: ClientSession) {
         const user = new this.userModel(userInfo);
-        return await user.save();
+        return await user.save({ session });
     }
 
     async findByEmail(email: string) {

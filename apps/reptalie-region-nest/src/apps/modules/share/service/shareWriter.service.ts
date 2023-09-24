@@ -51,7 +51,7 @@ export class ShareWriterService {
 
             const sharePost = await this.sharePostRepository.createPost(user.id, dto, session);
             if (!sharePost.id) {
-                throw new InternalServerErrorException('Failed to save share post');
+                throw new InternalServerErrorException('Failed to save share post.');
             }
 
             imageKeys = await this.imageS3HandlerService.uploadToS3(files);
@@ -61,7 +61,7 @@ export class ShareWriterService {
             await session.commitTransaction();
 
             const postInfo = await this.shareSearcherService.getPostInfo({ create: { post: { sharePost, imageKeys } } });
-            return { user: userInfo, post: postInfo };
+            return { post: { ...postInfo, user: userInfo } };
         } catch (error) {
             await this.imageS3HandlerService.deleteImagesFromS3(imageKeys);
             await session.abortTransaction();
@@ -80,38 +80,44 @@ export class ShareWriterService {
 
         const comment = await this.shareCommentRepository.createComment(user.id, dto);
         if (!comment.id) {
-            throw new InternalServerErrorException('Failed to save share comment');
+            throw new InternalServerErrorException('Failed to save share comment.');
         }
 
         const commentInfo = await this.shareSearcherService.getCommentInfo({ create: { comment } });
-        return { user: userInfo, comment: commentInfo };
+
+        return { post: { id: comment.postId, comment: { ...commentInfo, user: userInfo } } };
     }
 
     // 일상공유 대댓글 등록
     async createCommentReply(user: IResponseUserDTO, dto: InputShareCommentReplyDTO) {
-        await this.shareSearcherService.isExistsComment(dto.commentId);
+        const comment = await this.shareSearcherService.isExistsComment(dto.commentId);
 
         // 추후 user관련 구현 후 삭제할 예정
         const userInfo = await this.userSearcherService.getUserInfo({ user: { targetUserId: user.id } });
 
         const commentReply = await this.shareCommentReplyRepository.createCommentReply(user.id, dto);
         if (!commentReply.id) {
-            throw new InternalServerErrorException('Failed to create ShareCommentReply');
+            throw new InternalServerErrorException('Failed to save share comment reply.');
         }
 
         const commentReplyInfo = await this.shareSearcherService.getCommentReplyInfo({ create: { commentReply } });
-        return { user: userInfo, comment: commentReplyInfo };
+        return {
+            post: {
+                id: comment?.postId,
+                comment: { id: commentReply.commentId, commentReply: { ...commentReplyInfo, user: userInfo } },
+            },
+        };
     }
 
     // 일상공유 게시물 좋아요 등록
-    async createLike(userId: string, postId: string) {
+    async createLike(user: IResponseUserDTO, postId: string) {
         await this.shareSearcherService.isExistsPost(postId);
 
-        const like = await this.shareLikeRepository.createLike({ userId, postId });
+        const like = await this.shareLikeRepository.createLike({ userId: user.id, postId });
         if (!like) {
-            throw new InternalServerErrorException('Failed to create share like');
+            throw new InternalServerErrorException('Failed to save share like.');
         }
 
-        return { post: { id: like.postId } };
+        return { post: { id: like.postId, user: { nickname: user.nickname } } };
     }
 }

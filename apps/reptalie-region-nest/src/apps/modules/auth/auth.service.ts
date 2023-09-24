@@ -1,12 +1,15 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { JwtService, JwtSignOptions, JwtVerifyOptions } from '@nestjs/jwt';
+import { InjectConnection } from '@nestjs/mongoose';
 import { CookieOptions, Response } from 'express';
 
-import mongoose from 'mongoose';
+import mongoose, { ClientSession } from 'mongoose';
+import { ImageType } from '../../dto/image/input-image.dto';
 import { CreateUserDTO } from '../../dto/user/create-user.dto';
 import { InputUserDTO } from '../../dto/user/input-user.dto';
 import { IResponseUserDTO } from '../../dto/user/response-user.dto';
 import { PBKDF2Service } from '../../utils/cryptography/pbkdf2';
+import { ImageWriterService, ImageWriterServiceToken } from '../image/service/imageWriter.service';
 import { RedisService } from '../redis/redis.service';
 import { UserRepository } from '../user/repository/user.repository';
 import { IJwtPayload } from './interfaces/jwtPayload';
@@ -14,6 +17,12 @@ import { IJwtPayload } from './interfaces/jwtPayload';
 @Injectable()
 export class AuthService {
     constructor(
+        @InjectConnection()
+        private readonly connection: mongoose.Connection,
+
+        @Inject(ImageWriterServiceToken)
+        private readonly imageWriterService: ImageWriterService,
+
         private readonly userRepository: UserRepository,
         private readonly cryptographyService: PBKDF2Service,
         private readonly redisService: RedisService,
@@ -21,22 +30,43 @@ export class AuthService {
     ) {}
 
     async signUp(inputUserDTO: InputUserDTO): Promise<Partial<IResponseUserDTO> | null> {
-        const { password } = inputUserDTO;
-        const encryptPBKDF2Info = this.cryptographyService.encryptPBKDF2(password);
-        if (encryptPBKDF2Info === undefined) {
-            throw new BadRequestException('Failed to process the request. Please provide valid input data for sign-up.');
+        const session: ClientSession = await this.connection.startSession();
+        session.startTransaction();
+
+        try {
+            const { password } = inputUserDTO;
+            const encryptPBKDF2Info = this.cryptographyService.encryptPBKDF2(password);
+            if (encryptPBKDF2Info === undefined) {
+                throw new BadRequestException('Failed to process the request. Please provide valid input data for sign-up.');
+            }
+
+            const { salt, hashedPassword } = encryptPBKDF2Info;
+            const cloneUserInfo: CreateUserDTO = Object.assign(
+                {},
+                inputUserDTO,
+                { password: hashedPassword, salt },
+                { imageId: new mongoose.Types.ObjectId() },
+            );
+            const user = await this.userRepository.createUser(cloneUserInfo, session);
+
+            const image = await this.imageWriterService.createImage(
+                user.id,
+                ['3d16d2c1-d2c4-4b8b-a496-3ef1c9ef45d6.png'],
+                ImageType.Profile,
+                session,
+            );
+
+            await this.userRepository.updateOne({ _id: user.id }, { $set: { imageId: image[0].id } }, { session }).exec();
+
+            await session.commitTransaction();
+
+            return user.view();
+        } catch (error) {
+            await session.abortTransaction();
+            throw error;
+        } finally {
+            await session.endSession();
         }
-
-        const { salt, hashedPassword } = encryptPBKDF2Info;
-        const cloneUserInfo: CreateUserDTO = Object.assign(
-            {},
-            inputUserDTO,
-            { password: hashedPassword, salt },
-            { imageId: new mongoose.Types.ObjectId() },
-        );
-        const user = await this.userRepository.createUser(cloneUserInfo);
-
-        return user.view();
     }
 
     async signIn(loginInfo: Pick<CreateUserDTO, 'userId' | 'password'>): Promise<Partial<IResponseUserDTO> | null> {

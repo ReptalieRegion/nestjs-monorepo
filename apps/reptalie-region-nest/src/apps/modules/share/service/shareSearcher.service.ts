@@ -69,10 +69,6 @@ export class ShareSearcherService {
                 const images = post.id && (await this.imageSearcherService.getPostImages(post.id));
 
                 return {
-                    user: {
-                        ...userInfo,
-                        isFollow: userId ? await this.userSearcherService.isExistsFollow(userId, userInfo.id) : undefined,
-                    },
                     post: {
                         id: post.id,
                         contents: post.contents,
@@ -81,6 +77,10 @@ export class ShareSearcherService {
                         isLike: userId && post.id ? await this.isExistsLike(userId, post.id) : undefined,
                         likeCount: post.id && (await this.getLikeCount(post.id)),
                         commentCount: post.id && (await this.getCommentCount(post.id)),
+                        user: {
+                            ...userInfo,
+                            isFollow: userId ? await this.userSearcherService.isExistsFollow(userId, userInfo.id) : undefined,
+                        },
                     },
                 };
             }),
@@ -147,13 +147,13 @@ export class ShareSearcherService {
                 const userInfo = await this.userSearcherService.getUserInfo({ user: { user: entity.userId } });
 
                 return {
-                    user: { ...userInfo },
                     comment: {
                         id: comment.id,
                         contents: comment.contents,
                         replyCount: comment.id && (await this.getCommentReplyCount(comment.id)),
                         isMine: userId ? userInfo.id === userId : false,
                         isModified: comment.createdAt?.getTime() !== comment.updatedAt?.getTime(),
+                        user: { ...userInfo },
                     },
                 };
             }),
@@ -184,12 +184,12 @@ export class ShareSearcherService {
                 const userInfo = await this.userSearcherService.getUserInfo({ user: { user: entity.userId } });
 
                 return {
-                    user: { ...userInfo },
                     comment: {
                         id: cmmentReply.id,
                         contents: cmmentReply.contents,
                         isMine: userId ? userInfo.id === userId : false,
                         isModified: cmmentReply.createdAt?.getTime() !== cmmentReply.updatedAt?.getTime(),
+                        user: { ...userInfo },
                     },
                 };
             }),
@@ -209,8 +209,7 @@ export class ShareSearcherService {
 
     async getPostInfo(option: OperationOption) {
         if (option.create?.post) {
-            const id = option.create.post.sharePost.id;
-            const contents = option.create.post.sharePost.contents;
+            const { id, contents } = option.create.post.sharePost;
             const images = option.create.post.imageKeys.map((value) => ({ src: `${process.env.AWS_IMAGE_BASEURL}${value}` }));
 
             return { id, contents, images, isMine: true, isLike: undefined, likeCount: 0, commentCount: 0 };
@@ -225,45 +224,54 @@ export class ShareSearcherService {
             return { id: _id, contents: postInfo?.contents, images, isMine: true, isLike, likeCount, commentCount };
         } else if (option.delete?.postId) {
             const _id = option.delete.postId;
-            const postInfo = (await this.sharePostRepository.findOne({ _id }).exec())?.Mapper();
+            const postInfo = (
+                await this.sharePostRepository.findOne({ _id }).populate({ path: 'userId', select: 'nickname' }).exec()
+            )?.Mapper();
 
-            return { post: { id: postInfo?.id }, user: { id: postInfo?.userId } };
+            return { post: { id: postInfo?.id, user: { nickname: Object(postInfo?.userId).nickname } } };
         }
     }
 
     async getCommentInfo(option: OperationOption) {
         if (option.create?.comment) {
-            const id = option.create.comment.id;
-            const contents = option.create.comment.contents;
+            const { id, contents } = option.create.comment;
 
             return { id, contents, replyCount: 0, isMine: true, isModified: false };
         } else if (option.update?.commentId) {
             const _id = option.update.commentId;
             const commentInfo = (await this.shareCommentRepository.findOne({ _id, isDeleted: false }).exec())?.Mapper();
 
-            return { post: { id: commentInfo?.postId }, comment: { id: commentInfo?.id, contensts: commentInfo?.contents } };
+            return { id: commentInfo?.postId, comment: { id: commentInfo?.id, contensts: commentInfo?.contents } };
         } else if (option.delete?.commentId) {
             const _id = option.delete.commentId;
-            const commentInfo = (await this.shareCommentRepository.findOne({ _id }).exec())?.Mapper();
+            const commentInfo = (
+                await this.shareCommentRepository
+                    .findOne({ _id })
+                    .populate({ path: 'postId', populate: { path: 'userId', select: 'nickname -_id' } })
+                    .exec()
+            )?.Mapper();
 
-            return { post: { id: commentInfo?.postId }, comment: { id: commentInfo?.id } };
+            const postInfo = Object(commentInfo?.postId).Mapper();
+            return {
+                post: {
+                    id: postInfo?.id,
+                    comment: { id: commentInfo?.id },
+                    user: { nickname: Object(postInfo.userId).nickname },
+                },
+            };
         }
     }
 
     async getCommentReplyInfo(option: OperationOption) {
         if (option.create?.commentReply) {
-            const id = option.create.commentReply.id;
-            const contents = option.create.commentReply.contents;
+            const { id, contents } = option.create.commentReply;
 
             return { id, contents, isMine: true, isModified: false };
         } else if (option.update?.commentReplyId) {
             const _id = option.update.commentReplyId;
             const replyInfo = (await this.shareCommentReplyRepository.findOne({ _id, isDeleted: false }).exec())?.Mapper();
 
-            return {
-                comment: { id: replyInfo?.commentId },
-                commentReply: { id: replyInfo?.id, contents: replyInfo?.contents },
-            };
+            return { id: replyInfo?.commentId, commentReply: { id: replyInfo?.id, contents: replyInfo?.contents } };
         } else if (option.delete?.commentReplyId) {
             const _id = option.delete.commentReplyId;
             const replyInfo = (
@@ -272,9 +280,7 @@ export class ShareSearcherService {
             const comment = Object(replyInfo?.commentId);
 
             return {
-                post: { id: comment.postId.toHexString() },
-                comment: { id: comment.id },
-                commentReply: { id: replyInfo?.id },
+                post: { id: comment.postId.toHexString(), comment: { id: comment.id, commentReply: { id: replyInfo?.id } } },
             };
         }
     }
@@ -289,7 +295,7 @@ export class ShareSearcherService {
 
             return like.Mapper();
         } catch (error) {
-            handleBSONAndCastError(error, 'share post Id Invalid ObjectId');
+            handleBSONAndCastError(error, 'share post Id Invalid ObjectId.');
         }
     }
 
@@ -298,12 +304,12 @@ export class ShareSearcherService {
             const post = await this.sharePostRepository.findOne({ _id: postId, isDeleted: false }, { _id: 1 }).exec();
 
             if (!post) {
-                throw new NotFoundException('Post not found for the specified user and post id.');
+                throw new NotFoundException('Post not found for the specified post id.');
             }
 
             return post.Mapper();
         } catch (error) {
-            handleBSONAndCastError(error, 'share post Id Invalid ObjectId');
+            handleBSONAndCastError(error, 'share post Id Invalid ObjectId.');
         }
     }
 
@@ -314,12 +320,12 @@ export class ShareSearcherService {
                 .exec();
 
             if (!comment) {
-                throw new NotFoundException('Comment not found for the specified user and comment id.');
+                throw new NotFoundException('Comment not found for the specified comment id.');
             }
 
             return comment.Mapper();
         } catch (error) {
-            handleBSONAndCastError(error, 'share comment Id Invalid ObjectId');
+            handleBSONAndCastError(error, 'share comment Id Invalid ObjectId.');
         }
     }
 

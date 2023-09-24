@@ -3,6 +3,7 @@ import { PassportModule } from '@nestjs/passport';
 
 import { PBKDF2Service } from '../../utils/cryptography/pbkdf2';
 import { CustomJwtModule, MongooseModuleUser } from '../../utils/customModules';
+import { ImageModule } from '../image/image.module';
 import { RedisModule } from '../redis/redis.module';
 import { RedisService } from '../redis/redis.service';
 import { UserRepository } from '../user/repository/user.repository';
@@ -12,7 +13,7 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 import { LocalStrategy } from './strategies/local.strategy';
 
 @Module({
-    imports: [MongooseModuleUser, CustomJwtModule, PassportModule, RedisModule],
+    imports: [MongooseModuleUser, CustomJwtModule, PassportModule, RedisModule, ImageModule],
     controllers: [AuthController],
     providers: [AuthService, PBKDF2Service, LocalStrategy, JwtStrategy, UserRepository, RedisService],
     exports: [PBKDF2Service, AuthService, JwtStrategy, RedisService],

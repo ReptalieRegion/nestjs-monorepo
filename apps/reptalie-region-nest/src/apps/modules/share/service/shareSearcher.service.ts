@@ -241,7 +241,7 @@ export class ShareSearcherService {
             const _id = option.update.commentId;
             const commentInfo = (await this.shareCommentRepository.findOne({ _id, isDeleted: false }).exec())?.Mapper();
 
-            return { id: commentInfo?.postId, comment: { id: commentInfo?.id, contensts: commentInfo?.contents } };
+            return { id: commentInfo?.postId, comment: { id: commentInfo?.id, contents: commentInfo?.contents } };
         } else if (option.delete?.commentId) {
             const _id = option.delete.commentId;
             const commentInfo = (

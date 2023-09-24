@@ -7,7 +7,7 @@ export const UserWriterServiceToken = 'UserWriterServiceToken';
 @Injectable()
 export class UserWriterService {
     constructor(
-        private readonly followeRepository: FollowRepository,
+        private readonly followRepository: FollowRepository,
 
         @Inject(UserSearcherServiceToken)
         private readonly userSearcherService: UserSearcherService,
@@ -16,7 +16,7 @@ export class UserWriterService {
     async createFollow(userId: string, follower: string) {
         const followerInfo = await this.userSearcherService.isExistsUserId(follower);
 
-        const follow = await this.followeRepository.createFollow({
+        const follow = await this.followRepository.createFollow({
             following: userId,
             follower: followerInfo?.id,
             followerNickname: followerInfo?.nickname,

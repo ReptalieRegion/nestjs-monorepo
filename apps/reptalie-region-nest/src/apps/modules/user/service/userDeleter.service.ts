@@ -9,7 +9,7 @@ export const UserDeleterServiceToken = 'UserDeleterServiceToken';
 export class UserDeleterService {
     constructor(
         private readonly userRepository: UserRepository,
-        private readonly followeRepository: FollowRepository,
+        private readonly followRepository: FollowRepository,
 
         @Inject(UserSearcherServiceToken)
         private readonly userSearcherService: UserSearcherService,

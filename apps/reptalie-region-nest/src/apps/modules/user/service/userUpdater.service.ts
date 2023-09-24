@@ -9,7 +9,7 @@ export const UserUpdaterServiceToken = 'UserUpdaterServiceToken';
 export class UserUpdaterService {
     constructor(
         private readonly userRepository: UserRepository,
-        private readonly followeRepository: FollowRepository,
+        private readonly followRepository: FollowRepository,
 
         @Inject(UserSearcherServiceToken)
         private readonly userSearcherService: UserSearcherService,
@@ -18,7 +18,7 @@ export class UserUpdaterService {
     async toggleFollow(following: string, follower: string) {
         const follow = await this.userSearcherService.getFollowInfo(following, follower);
 
-        const result = await this.followeRepository
+        const result = await this.followRepository
             .updateOne({ _id: follow?.id }, { $set: { isCanceled: !follow?.isCanceled } })
             .exec();
 

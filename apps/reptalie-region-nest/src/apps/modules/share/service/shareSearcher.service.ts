@@ -184,7 +184,7 @@ export class ShareSearcherService {
                 const userInfo = await this.userSearcherService.getUserInfo({ user: { user: entity.userId } });
 
                 return {
-                    comment: {
+                    commentReply: {
                         id: cmmentReply.id,
                         contents: cmmentReply.contents,
                         isMine: userId ? userInfo.id === userId : false,

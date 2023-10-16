@@ -2,7 +2,6 @@ import { Inject, Injectable, NotFoundException, forwardRef } from '@nestjs/commo
 import { IResponseShareCommentDTO } from '../../../dto/share/comment/response-shareCommnet.dto';
 import { IResponseShareCommentReplyDTO } from '../../../dto/share/commentReply/response-shareCommentReply.dto';
 import { IResponseSharePostDTO } from '../../../dto/share/post/response-sharePost.dto';
-import { SharePost } from '../../../schemas/sharePost.schema';
 import { serviceErrorHandler } from '../../../utils/error/errorHandler';
 import { ImageSearcherService, ImageSearcherServiceToken } from '../../image/service/imageSearcher.service';
 import { UserSearcherService, UserSearcherServiceToken } from '../../user/service/userSearcher.service';
@@ -45,46 +44,17 @@ export class ShareSearcherService {
         private readonly userSearcherService: UserSearcherService,
     ) {}
 
+    /**
+     *
+     *  추후 게시글 조회 로직 수정해야함
+     */
     async getPostsInfiniteScroll(currentUserId: string, pageParam: number, limitSize: number) {
-        const followers = currentUserId ? await this.userSearcherService.getUserFollowers(currentUserId) : undefined;
-
-        let posts: SharePost[] = [];
-        posts = await this.sharePostRepository
-            .find({ userId: { $in: followers }, isDeleted: false })
+        const posts = await this.sharePostRepository
+            .find({ isDeleted: false })
             .sort({ updatedAt: -1, createdAt: -1 })
             .skip(pageParam * limitSize)
             .limit(limitSize)
             .exec();
-
-        // if (followers) {
-        //     posts = await this.sharePostRepository
-        //         .find({ userId: { $in: followers }, isDeleted: false })
-        //         .sort({ updatedAt: -1, createdAt: -1 })
-        //         .skip(pageParam * limitSize)
-        //         .limit(limitSize)
-        //         .exec();
-        // }
-
-        // if (posts.length < limitSize) {
-        //     if (!followers) {
-        //         // 2. 만약 팔로워가 없거나 팔로워의 게시물이 부족한 경우, 모든 게시물을 가져오기
-        //         posts = await this.sharePostRepository
-        //             .find({ isDeleted: false })
-        //             .sort({ updatedAt: -1, createdAt: -1 })
-        //             .skip(pageParam * limitSize)
-        //             .limit(limitSize)
-        //             .exec();
-        //     } else {
-        //         // 3. 팔로워 게시물이 부족한 경우, 팔로우하지 않은 사용자의 게시물을 추가로 가져오기
-        //         const nonFollowerPosts = await this.sharePostRepository
-        //             .find({ userId: { $nin: followers }, isDeleted: false })
-        //             .sort({ updatedAt: -1, createdAt: -1 })
-        //             .skip(0) // 0부터 시작
-        //             .limit(limitSize - posts.length) // 부족한 만큼 가져오기
-        //             .exec();
-        //         posts = posts.concat(nonFollowerPosts);
-        //     }
-        // }
 
         const items = await Promise.all(
             posts.map(async (entity) => {

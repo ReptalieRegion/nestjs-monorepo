@@ -26,7 +26,7 @@ export class Follow {
 }
 
 const FollowSchema = SchemaFactory.createForClass(Follow);
-FollowSchema.index({ following: 1, follower: 1 });
+FollowSchema.index({ following: 1, follower: 1 }, { unique: true });
 FollowSchema.methods = {
     view(): Partial<IResponseFollowDTO> {
         const fields: Array<keyof IResponseFollowDTO> = [

@@ -31,8 +31,8 @@ export class UserController {
     }
 
     @Post(':id/follow')
-    @UseGuards(JwtAuthGuard)
     @HttpCode(HttpStatus.CREATED)
+    @UseGuards(JwtAuthGuard)
     async createFollow(@AuthUser() user: IResponseUserDTO, @Param('id') follower: string) {
         try {
             return this.userWriterService.createFollow(user.id, follower);
@@ -42,8 +42,8 @@ export class UserController {
     }
 
     @Put(':id/follow')
-    @UseGuards(JwtAuthGuard)
     @HttpCode(HttpStatus.OK)
+    @UseGuards(JwtAuthGuard)
     async toggleFollow(@AuthUser() user: IResponseUserDTO, @Param('id') follower: string) {
         try {
             return this.userUpdaterService.toggleFollow(user.id, follower);
@@ -57,7 +57,7 @@ export class UserController {
     @UseGuards(JwtOptionalAuthGuard)
     async getUserProfile(@AuthUser() user: IResponseUserDTO, @Query('nickname') nickname: string) {
         try {
-            return this.userSearcherService.getProfile(user?.id, nickname);
+            return this.userSearcherService.getProfile(user.id, nickname);
         } catch (error) {
             controllerErrorHandler(error);
         }
@@ -66,13 +66,43 @@ export class UserController {
     @Get('follower/list')
     @HttpCode(HttpStatus.OK)
     @UseGuards(JwtAuthGuard)
-    async getUserFollowersInfiniteScroll(
+    async getFollowersInfiniteScroll(
         @AuthUser() user: IResponseUserDTO,
         @Query('search') search: string,
         @Query('pageParam') pageParam: number,
     ) {
         try {
             return this.userSearcherService.getFollowersInfiniteScroll(user.id, search, pageParam, 10);
+        } catch (error) {
+            controllerErrorHandler(error);
+        }
+    }
+
+    @Get(':id/follower/list')
+    @HttpCode(HttpStatus.OK)
+    @UseGuards(JwtOptionalAuthGuard)
+    async getUserFollowersInfiniteScroll(
+        @AuthUser() user: IResponseUserDTO,
+        @Param('id') targetUserId: string,
+        @Query('pageParam') pageParam: number,
+    ) {
+        try {
+            return this.userSearcherService.getUserFollowersInfiniteScroll(user?.id, targetUserId, pageParam, 10);
+        } catch (error) {
+            controllerErrorHandler(error);
+        }
+    }
+
+    @Get(':id/following/list')
+    @HttpCode(HttpStatus.OK)
+    @UseGuards(JwtOptionalAuthGuard)
+    async getUserFollowingsInfiniteScroll(
+        @AuthUser() user: IResponseUserDTO,
+        @Param('id') targetUserId: string,
+        @Query('pageParam') pageParam: number,
+    ) {
+        try {
+            return this.userSearcherService.getUserFollowingsInfiniteScroll(user?.id, targetUserId, pageParam, 10);
         } catch (error) {
             controllerErrorHandler(error);
         }

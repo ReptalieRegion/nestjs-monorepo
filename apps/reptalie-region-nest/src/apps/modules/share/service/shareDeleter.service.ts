@@ -2,7 +2,7 @@ import { Inject, Injectable, InternalServerErrorException } from '@nestjs/common
 import { InjectConnection } from '@nestjs/mongoose';
 import mongoose, { ClientSession } from 'mongoose';
 import { ImageType } from '../../../dto/image/input-image.dto';
-import { handleBSONAndCastError } from '../../../utils/error/errorHandler';
+import { serviceErrorHandler } from '../../../utils/error/errorHandler';
 import { ImageDeleterService, ImageDeleterServiceToken } from '../../image/service/imageDeleter.service';
 import { ShareCommentRepository } from '../repository/shareComment.repository';
 import { ShareCommentReplyRepository } from '../repository/shareCommentReply.repository';
@@ -47,9 +47,9 @@ export class ShareDeleterService {
                 this.deleteLike(postId, session),
             ]);
 
-            const comments = await this.shareSearcherService.getComments(postId);
+            const commentIds = await this.shareSearcherService.getCommentIds(postId);
 
-            if (comments.length) {
+            if (commentIds.length) {
                 const commentResult = await this.shareCommentRepository
                     .updateMany({ postId, isDeleted: false }, { $set: { isDeleted: true } }, { session })
                     .exec();
@@ -59,15 +59,15 @@ export class ShareDeleterService {
                 }
 
                 await this.shareCommentReplyRepository
-                    .updateMany({ commentId: { $in: comments }, isDeleted: false }, { $set: { isDeleted: true } }, { session })
+                    .updateMany({ commentId: { $in: commentIds }, isDeleted: false }, { $set: { isDeleted: true } }, { session })
                     .exec();
             }
 
             await session.commitTransaction();
-            return  this.shareSearcherService.getPostInfo({ delete: { postId } });
+            return this.shareSearcherService.getPostInfo({ delete: { postId } });
         } catch (error) {
             await session.abortTransaction();
-            handleBSONAndCastError(error, 'share post Id Invalid ObjectId');
+            serviceErrorHandler(error, 'Invalid ObjectId for share post Id.');
         } finally {
             await session.endSession();
         }
@@ -102,7 +102,7 @@ export class ShareDeleterService {
             return this.shareSearcherService.getCommentInfo({ delete: { commentId } });
         } catch (error) {
             await session.abortTransaction();
-            handleBSONAndCastError(error, 'share comment Id Invalid ObjectId');
+            serviceErrorHandler(error, 'Invalid ObjectId for share comment Id.');
         } finally {
             await session.endSession();
         }
@@ -118,7 +118,7 @@ export class ShareDeleterService {
                 throw new InternalServerErrorException('Failed to delete share comment reply.');
             }
         } catch (error) {
-            handleBSONAndCastError(error, 'share comment reply Id Invalid ObjectId');
+            serviceErrorHandler(error, 'Invalid ObjectId for share comment reply Id.');
         }
 
         return this.shareSearcherService.getCommentReplyInfo({ delete: { commentReplyId } });

@@ -7,5 +7,5 @@ export class InputSharePostDTO {
     @IsOptional()
     @IsArray()
     @IsString({ each: true })
-    readonly deletefiles: string[];
+    readonly remainingImages: string[];
 }

@@ -12,7 +12,7 @@ export class ImageDeleterService {
 
     async deleteImageByImageKeys(imageKeys: string[], typeId: string, session: ClientSession) {
         const result = await this.imageRepository
-            .updateMany({ typeId, imageKey: { $in: imageKeys }, isDeleted: false }, { $set: { isDeleted: true } }, { session })
+            .updateMany({ typeId, imageKey: { $nin: imageKeys }, isDeleted: false }, { $set: { isDeleted: true } }, { session })
             .exec();
 
         if (result.modifiedCount === 0) {

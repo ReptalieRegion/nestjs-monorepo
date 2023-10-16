@@ -2,7 +2,8 @@ import { Inject, Injectable, NotFoundException, forwardRef } from '@nestjs/commo
 import { IResponseShareCommentDTO } from '../../../dto/share/comment/response-shareCommnet.dto';
 import { IResponseShareCommentReplyDTO } from '../../../dto/share/commentReply/response-shareCommentReply.dto';
 import { IResponseSharePostDTO } from '../../../dto/share/post/response-sharePost.dto';
-import { handleBSONAndCastError } from '../../../utils/error/errorHandler';
+import { SharePost } from '../../../schemas/sharePost.schema';
+import { serviceErrorHandler } from '../../../utils/error/errorHandler';
 import { ImageSearcherService, ImageSearcherServiceToken } from '../../image/service/imageSearcher.service';
 import { UserSearcherService, UserSearcherServiceToken } from '../../user/service/userSearcher.service';
 import { ShareCommentRepository } from '../repository/shareComment.repository';
@@ -12,25 +13,22 @@ import { SharePostRepository } from '../repository/sharePost.repository';
 
 export const ShareSearcherServiceToken = 'ShareSearcherServiceToken';
 
-interface OperationOption {
-    create?: {
-        post?: {
-            sharePost: Partial<IResponseSharePostDTO>;
-            imageKeys: string[];
-        };
-        comment?: Partial<IResponseShareCommentDTO>;
-        commentReply?: Partial<IResponseShareCommentReplyDTO>;
-    };
-    update?: {
-        postId?: string;
-        commentId?: string;
-        commentReplyId?: string;
-    };
-    delete?: {
-        postId?: string;
-        commentId?: string;
-        commentReplyId?: string;
-    };
+interface PostOption {
+    create?: { post: Partial<IResponseSharePostDTO>; imageKeys: string[] };
+    update?: { postId: string };
+    delete?: { postId: string };
+}
+
+interface CommentOption {
+    create?: { comment: Partial<IResponseShareCommentDTO> };
+    update?: { commentId: string };
+    delete?: { commentId: string };
+}
+
+interface CommentReplyOption {
+    create?: { commentReply: Partial<IResponseShareCommentReplyDTO> };
+    update?: { commentReplyId: string };
+    delete?: { commentReplyId: string };
 }
 
 @Injectable()
@@ -47,25 +45,51 @@ export class ShareSearcherService {
         private readonly userSearcherService: UserSearcherService,
     ) {}
 
-    async getPostsInfiniteScroll(userId: string, pageParam: number, limitSize: number) {
-        const followers = userId ? await this.userSearcherService.getUserFollowers(userId) : undefined;
+    async getPostsInfiniteScroll(currentUserId: string, pageParam: number, limitSize: number) {
+        const followers = currentUserId ? await this.userSearcherService.getUserFollowers(currentUserId) : undefined;
 
-        const posts = await this.sharePostRepository
-            .find({ $or: [{ userId: { $in: followers } }, { userId: { $nin: followers } }], isDeleted: false })
-            .populate({
-                path: 'userId',
-                select: 'nickname imageId',
-                populate: { path: 'imageId', model: 'Image', select: 'imageKey -_id' },
-            })
+        let posts: SharePost[] = [];
+        posts = await this.sharePostRepository
+            .find({ userId: { $in: followers }, isDeleted: false })
             .sort({ updatedAt: -1, createdAt: -1 })
             .skip(pageParam * limitSize)
             .limit(limitSize)
             .exec();
 
+        // if (followers) {
+        //     posts = await this.sharePostRepository
+        //         .find({ userId: { $in: followers }, isDeleted: false })
+        //         .sort({ updatedAt: -1, createdAt: -1 })
+        //         .skip(pageParam * limitSize)
+        //         .limit(limitSize)
+        //         .exec();
+        // }
+
+        // if (posts.length < limitSize) {
+        //     if (!followers) {
+        //         // 2. 만약 팔로워가 없거나 팔로워의 게시물이 부족한 경우, 모든 게시물을 가져오기
+        //         posts = await this.sharePostRepository
+        //             .find({ isDeleted: false })
+        //             .sort({ updatedAt: -1, createdAt: -1 })
+        //             .skip(pageParam * limitSize)
+        //             .limit(limitSize)
+        //             .exec();
+        //     } else {
+        //         // 3. 팔로워 게시물이 부족한 경우, 팔로우하지 않은 사용자의 게시물을 추가로 가져오기
+        //         const nonFollowerPosts = await this.sharePostRepository
+        //             .find({ userId: { $nin: followers }, isDeleted: false })
+        //             .sort({ updatedAt: -1, createdAt: -1 })
+        //             .skip(0) // 0부터 시작
+        //             .limit(limitSize - posts.length) // 부족한 만큼 가져오기
+        //             .exec();
+        //         posts = posts.concat(nonFollowerPosts);
+        //     }
+        // }
+
         const items = await Promise.all(
             posts.map(async (entity) => {
-                const post = entity.Mapper();
-                const userInfo = await this.userSearcherService.getUserInfo({ user: { user: entity.userId } });
+                const post = Object(entity).Mapper();
+                const userInfo = await this.userSearcherService.getUserInfo({ targetUserId: post.userId, currentUserId });
                 const images = post.id && (await this.imageSearcherService.getPostImages(post.id));
 
                 return {
@@ -73,14 +97,11 @@ export class ShareSearcherService {
                         id: post.id,
                         contents: post.contents,
                         images,
-                        isMine: userId ? userId === userInfo.id : false,
-                        isLike: userId && post.id ? await this.isExistsLike(userId, post.id) : undefined,
+                        isMine: currentUserId ? currentUserId === userInfo.id : false,
+                        isLike: currentUserId && post.id ? await this.isExistsLike(currentUserId, post.id) : undefined,
                         likeCount: post.id && (await this.getLikeCount(post.id)),
                         commentCount: post.id && (await this.getCommentCount(post.id)),
-                        user: {
-                            ...userInfo,
-                            isFollow: userId ? await this.userSearcherService.isExistsFollow(userId, userInfo.id) : undefined,
-                        },
+                        user: { ...userInfo },
                     },
                 };
             }),
@@ -97,7 +118,7 @@ export class ShareSearcherService {
 
         const posts = await this.sharePostRepository
             .find({ userId: targetUserId, isDeleted: false })
-            .sort({ createdAt: -1 })
+            .sort({ updatedAt: -1, createdAt: -1 })
             .skip(pageParam * limitSize)
             .limit(limitSize)
             .exec();
@@ -136,7 +157,7 @@ export class ShareSearcherService {
                 select: 'nickname imageId',
                 populate: { path: 'imageId', model: 'Image', select: 'imageKey -_id' },
             })
-            .sort({ createdAt: -1 })
+            .sort({ updatedAt: -1, createdAt: -1 })
             .skip(pageParam * limitSize)
             .limit(limitSize)
             .exec();
@@ -144,7 +165,7 @@ export class ShareSearcherService {
         const items = await Promise.all(
             comments.map(async (entity) => {
                 const comment = entity.Mapper();
-                const userInfo = await this.userSearcherService.getUserInfo({ user: { user: entity.userId } });
+                const userInfo = await this.userSearcherService.getUserInfo({ user: entity.userId });
 
                 return {
                     comment: {
@@ -173,7 +194,7 @@ export class ShareSearcherService {
                 select: 'nickname imageId',
                 populate: { path: 'imageId', model: 'Image', select: 'imageKey -_id' },
             })
-            .sort({ createdAt: -1 })
+            .sort({ updatedAt: -1, createdAt: -1 })
             .skip(pageParam * limitSize)
             .limit(limitSize)
             .exec();
@@ -181,7 +202,7 @@ export class ShareSearcherService {
         const items = await Promise.all(
             commentReplies.map(async (entity) => {
                 const cmmentReply = entity.Mapper();
-                const userInfo = await this.userSearcherService.getUserInfo({ user: { user: entity.userId } });
+                const userInfo = await this.userSearcherService.getUserInfo({ user: entity.userId });
 
                 return {
                     commentReply: {
@@ -201,172 +222,206 @@ export class ShareSearcherService {
         return { items, nextPage };
     }
 
+    async getLikeListForPostInfiniteScroll(userId: string, postId: string, pageParam: number, limitSize: number) {
+        try {
+            const likes = await this.shareLikeRepository
+                .find({ postId, isCanceled: false }, { userId: 1 })
+                .populate({
+                    path: 'userId',
+                    select: 'nickname imageId',
+                    populate: { path: 'imageId', model: 'Image', select: 'imageKey -_id' },
+                })
+                .skip(pageParam * limitSize)
+                .limit(limitSize)
+                .exec();
+
+            const currentUserId = userId ? userId : undefined;
+
+            const items = await Promise.all(
+                likes.map(async (entity) => {
+                    const userInfo = await this.userSearcherService.getUserInfo({ user: entity.userId, currentUserId });
+
+                    return { user: { ...userInfo } };
+                }),
+            );
+
+            const isLastPage = likes.length < limitSize;
+            const nextPage = isLastPage ? undefined : pageParam + 1;
+
+            return { items, nextPage };
+        } catch (error) {
+            serviceErrorHandler(error, 'Invalid ObjectId for user Id');
+        }
+    }
+
     /**
      *    여러 곳에서 공유되는 함수들 모음
      *
      *
      */
 
-    async getPostInfo(option: OperationOption) {
-        if (option.create?.post) {
-            const { id, contents } = option.create.post.sharePost;
-            const images = option.create.post.imageKeys.map((value) => ({ src: `${process.env.AWS_IMAGE_BASEURL}${value}` }));
+    async getPostInfo(option: PostOption) {
+        if (option.create) {
+            const { id, contents } = option.create.post;
+            const images = option.create.imageKeys.map((value) => ({ src: `${process.env.AWS_IMAGE_BASEURL}${value}` }));
 
             return { id, contents, images, isMine: true, isLike: undefined, likeCount: 0, commentCount: 0 };
-        } else if (option.update?.postId) {
-            const _id = option.update.postId;
-            const postInfo = (await this.sharePostRepository.findOne({ _id, isDeleted: false }).exec())?.Mapper();
-            const images = postInfo?.id && (await this.imageSearcherService.getPostImages(postInfo?.id));
-            const isLike = postInfo?.userId && postInfo?.id ? await this.isExistsLike(postInfo.userId, postInfo.id) : undefined;
-            const likeCount = postInfo?.id && (await this.getLikeCount(postInfo.id));
-            const commentCount = postInfo?.id && (await this.getCommentCount(postInfo.id));
+        } else if (option.update) {
+            const id = option.update.postId;
+            const post = await this.sharePostRepository.findOne({ _id: id, isDeleted: false }).exec();
+            const mappedPost = post?.Mapper();
+            const [images, isLike, likeCount, commentCount] = await Promise.all([
+                mappedPost?.id && this.imageSearcherService.getPostImages(mappedPost.id),
+                mappedPost?.userId && mappedPost?.id ? this.isExistsLike(mappedPost.userId, mappedPost.id) : undefined,
+                mappedPost?.id && this.getLikeCount(mappedPost.id),
+                mappedPost?.id && this.getCommentCount(mappedPost.id),
+            ]);
 
-            return { id: _id, contents: postInfo?.contents, images, isMine: true, isLike, likeCount, commentCount };
-        } else if (option.delete?.postId) {
+            return { id, contents: mappedPost?.contents, images, isMine: true, isLike, likeCount, commentCount };
+        } else if (option.delete) {
             const _id = option.delete.postId;
-            const postInfo = (
-                await this.sharePostRepository.findOne({ _id }).populate({ path: 'userId', select: 'nickname' }).exec()
-            )?.Mapper();
+            const post = await this.sharePostRepository
+                .findOne({ _id })
+                .populate({ path: 'userId', select: 'nickname' })
+                .exec();
+            const mappedPost = { ...post?.Mapper(), userId: post?.userId };
 
-            return { post: { id: postInfo?.id, user: { nickname: Object(postInfo?.userId).nickname } } };
+            return { post: { id: mappedPost?.id, user: { nickname: mappedPost?.userId?.nickname } } };
         }
     }
 
-    async getCommentInfo(option: OperationOption) {
-        if (option.create?.comment) {
+    async getCommentInfo(option: CommentOption) {
+        if (option.create) {
             const { id, contents } = option.create.comment;
 
             return { id, contents, replyCount: 0, isMine: true, isModified: false };
-        } else if (option.update?.commentId) {
+        } else if (option.update) {
             const _id = option.update.commentId;
-            const commentInfo = (await this.shareCommentRepository.findOne({ _id, isDeleted: false }).exec())?.Mapper();
+            const comment = await this.shareCommentRepository.findOne({ _id, isDeleted: false }).exec();
+            const mappedComment = comment?.Mapper();
 
-            return { id: commentInfo?.postId, comment: { id: commentInfo?.id, contents: commentInfo?.contents } };
-        } else if (option.delete?.commentId) {
+            return { id: mappedComment?.postId, comment: { id: mappedComment?.id, contents: mappedComment?.contents } };
+        } else if (option.delete) {
             const _id = option.delete.commentId;
-            const commentInfo = (
-                await this.shareCommentRepository
-                    .findOne({ _id })
-                    .populate({ path: 'postId', populate: { path: 'userId', select: 'nickname -_id' } })
-                    .exec()
-            )?.Mapper();
+            const comment = await this.shareCommentRepository
+                .findOne({ _id })
+                .populate({ path: 'postId', populate: { path: 'userId', select: 'nickname -_id' } })
+                .exec();
 
-            const postInfo = Object(commentInfo?.postId).Mapper();
+            const mappedComment = { ...comment?.Mapper(), postId: { ...Object(comment?.postId).Mapper() } };
+
             return {
                 post: {
-                    id: postInfo?.id,
-                    comment: { id: commentInfo?.id },
-                    user: { nickname: Object(postInfo.userId).nickname },
+                    id: mappedComment.postId.id,
+                    comment: { id: mappedComment.id },
+                    user: { nickname: mappedComment.postId.userId.nickname },
                 },
             };
         }
     }
 
-    async getCommentReplyInfo(option: OperationOption) {
-        if (option.create?.commentReply) {
+    async getCommentReplyInfo(option: CommentReplyOption) {
+        if (option.create) {
             const { id, contents } = option.create.commentReply;
 
             return { id, contents, isMine: true, isModified: false };
-        } else if (option.update?.commentReplyId) {
+        } else if (option.update) {
             const _id = option.update.commentReplyId;
-            const replyInfo = (await this.shareCommentReplyRepository.findOne({ _id, isDeleted: false }).exec())?.Mapper();
-
-            return { id: replyInfo?.commentId, commentReply: { id: replyInfo?.id, contents: replyInfo?.contents } };
-        } else if (option.delete?.commentReplyId) {
-            const _id = option.delete.commentReplyId;
-            const replyInfo = (
-                await this.shareCommentReplyRepository.findOne({ _id }).populate({ path: 'commentId', select: 'postId' }).exec()
-            )?.Mapper();
-            const comment = Object(replyInfo?.commentId);
+            const commentReply = await this.shareCommentReplyRepository.findOne({ _id, isDeleted: false }).exec();
+            const mappedCommentReply = commentReply?.Mapper();
 
             return {
-                post: { id: comment.postId.toHexString(), comment: { id: comment.id, commentReply: { id: replyInfo?.id } } },
+                id: mappedCommentReply?.commentId,
+                commentReply: { id: mappedCommentReply?.id, contents: mappedCommentReply?.contents },
+            };
+        } else if (option.delete) {
+            const _id = option.delete.commentReplyId;
+            const commentReply = await this.shareCommentReplyRepository
+                .findOne({ _id })
+                .populate({ path: 'commentId', select: 'postId' })
+                .exec();
+
+            const mappedCommentReply = { ...commentReply?.Mapper(), commentId: Object(commentReply?.commentId).Mapper() };
+
+            return {
+                post: {
+                    id: mappedCommentReply.commentId.postId,
+                    comment: { id: mappedCommentReply.commentId.id, commentReply: { id: mappedCommentReply?.id } },
+                },
             };
         }
     }
 
-    async getLikeInfo(postId: string, userId: string) {
+    async getLikeStatus(postId: string, userId: string) {
         try {
-            const like = await this.shareLikeRepository.findOne({ userId, postId }, { postId: 1, isCanceled: 1 }).exec();
+            const like = await this.shareLikeRepository
+                .findOne({ userId, postId })
+                .populate({ path: 'postId', select: 'userId', populate: { path: 'userId', select: 'nickname -_id' } })
+                .exec();
 
             if (!like) {
-                throw new NotFoundException('Like status not found for the specified user and post.');
+                throw new NotFoundException('Not found for the specified share like status.');
             }
 
-            return like.Mapper();
+            return { ...like.Mapper(), postId: Object(like.postId).Mapper() };
         } catch (error) {
-            handleBSONAndCastError(error, 'share post Id Invalid ObjectId.');
+            serviceErrorHandler(error, 'Invalid ObjectId for share post Id.');
         }
     }
 
     async isExistsPost(postId: string) {
         try {
-            const post = await this.sharePostRepository.findOne({ _id: postId, isDeleted: false }, { _id: 1 }).exec();
+            const post = await this.sharePostRepository
+                .findOne({ _id: postId, isDeleted: false })
+                .populate({ path: 'userId', select: 'nickname -_id' })
+                .exec();
 
             if (!post) {
-                throw new NotFoundException('Post not found for the specified post id.');
+                throw new NotFoundException('Not found for the specified share Post Id.');
             }
 
-            return post.Mapper();
+            return { ...post.Mapper(), userId: Object(post.userId).Mapper() };
         } catch (error) {
-            handleBSONAndCastError(error, 'share post Id Invalid ObjectId.');
+            serviceErrorHandler(error, 'Invalid ObjectId for share post Id.');
         }
     }
 
     async isExistsComment(commentId: string) {
         try {
-            const comment = await this.shareCommentRepository
-                .findOne({ _id: commentId, isDeleted: false }, { _id: 1, postId: 1, replyCount: 1 })
-                .exec();
+            const comment = await this.shareCommentRepository.findOne({ _id: commentId, isDeleted: false }).exec();
 
             if (!comment) {
-                throw new NotFoundException('Comment not found for the specified comment id.');
+                throw new NotFoundException('Not found for the specified share comment Id.');
             }
 
             return comment.Mapper();
         } catch (error) {
-            handleBSONAndCastError(error, 'share comment Id Invalid ObjectId.');
+            serviceErrorHandler(error, 'Invalid ObjectId for share comment Id .');
         }
     }
 
-    async isExistsCommentReply(commentReplyId: string) {
-        try {
-            const commentReply = await this.shareCommentReplyRepository
-                .findOne({ _id: commentReplyId, isDeleted: false }, { _id: 1, commentId: 1 })
-                .exec();
-
-            if (!commentReply) {
-                throw new NotFoundException('Comment reply not found for the specified user and comment reply id.');
-            }
-
-            return commentReply.Mapper();
-        } catch (error) {
-            handleBSONAndCastError(error, 'share comment reply Id Invalid ObjectId');
-        }
-    }
-
-    async isExistsLike(userId: string, postId: string) {
-        const like = await this.shareLikeRepository.findOne({ userId, postId }, { isCanceled: 1 }).exec();
+    async isExistsLike(userId: string, postId: string): Promise<boolean | undefined> {
+        const like = await this.shareLikeRepository.findOne({ userId, postId }).exec();
         return like ? (like.isCanceled ? false : true) : undefined;
     }
 
-    async getPostCount(userId: string) {
+    async getPostCount(userId: string): Promise<number> {
         return this.sharePostRepository.countDocuments({ userId, isDeleted: false }).exec();
     }
 
-    async getLikeCount(postId: string) {
+    async getLikeCount(postId: string): Promise<number> {
         return this.shareLikeRepository.countDocuments({ postId, isCanceled: false }).exec();
     }
 
-    async getCommentCount(postId: string) {
+    async getCommentCount(postId: string): Promise<number> {
         return this.shareCommentRepository.countDocuments({ postId, isDeleted: false }).exec();
     }
 
-    async getCommentReplyCount(commentId: string) {
+    async getCommentReplyCount(commentId: string): Promise<number> {
         return this.shareCommentReplyRepository.countDocuments({ commentId, isDeleted: false }).exec();
     }
 
-    async getComments(postId: string) {
+    async getCommentIds(postId: string): Promise<string[]> {
         const comments = await this.shareCommentRepository.find({ postId, isDeleted: false }, { _id: 1 }).exec();
         return comments.map((entity) => entity.Mapper().id as string);
     }

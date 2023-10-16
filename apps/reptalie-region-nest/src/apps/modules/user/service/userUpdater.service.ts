@@ -1,4 +1,4 @@
-import { Inject, Injectable, InternalServerErrorException } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { FollowRepository } from '../repository/follow.repository';
 import { UserRepository } from '../repository/user.repository';
 import { UserSearcherService, UserSearcherServiceToken } from './userSearcher.service';
@@ -16,16 +16,20 @@ export class UserUpdaterService {
     ) {}
 
     async toggleFollow(following: string, follower: string) {
-        const follow = await this.userSearcherService.getFollowInfo(following, follower);
+        if (following === follower) {
+            throw new BadRequestException('Following and follower cannot be the same user.');
+        }
+
+        const followStatus = await this.userSearcherService.getFollowStatus(following, follower);
 
         const result = await this.followRepository
-            .updateOne({ _id: follow?.id }, { $set: { isCanceled: !follow?.isCanceled } })
+            .updateOne({ _id: followStatus?.id }, { $set: { isCanceled: !followStatus?.isCanceled } })
             .exec();
 
         if (result.modifiedCount === 0) {
-            throw new InternalServerErrorException('Failed to toggle the Follow status.');
+            throw new InternalServerErrorException('Failed to update follow status.');
         }
 
-        return { user: { nickname: follow?.followerNickname } };
+        return { user: { nickname: followStatus?.followerNickname } };
     }
 }

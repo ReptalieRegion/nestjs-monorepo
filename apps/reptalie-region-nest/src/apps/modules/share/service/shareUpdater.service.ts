@@ -5,7 +5,7 @@ import { InputShareCommentDTO } from '../../../dto/share/comment/input-shareComm
 import { InputShareCommentReplyDTO } from '../../../dto/share/commentReply/input-shareCommentReply.dto';
 import { InputSharePostDTO } from '../../../dto/share/post/input-sharePost.dto';
 import { IResponseUserDTO } from '../../../dto/user/response-user.dto';
-import { handleBSONAndCastError } from '../../../utils/error/errorHandler';
+import { serviceErrorHandler } from '../../../utils/error/errorHandler';
 import { ImageDeleterService, ImageDeleterServiceToken } from '../../image/service/imageDeleter.service';
 import { UserSearcherService, UserSearcherServiceToken } from '../../user/service/userSearcher.service';
 import { ShareCommentRepository } from '../repository/shareComment.repository';
@@ -41,7 +41,7 @@ export class ShareUpdaterService {
 
         try {
             // 추후 user관련 구현 후 삭제할 예정
-            const userInfo = await this.userSearcherService.getUserInfo({ user: { targetUserId: user.id } });
+            const userInfo = await this.userSearcherService.getUserInfo({ targetUserId: user.id });
 
             const result = await this.sharePostRepository
                 .updateOne(
@@ -52,12 +52,12 @@ export class ShareUpdaterService {
                 .exec();
 
             if (result.modifiedCount === 0) {
-                throw new InternalServerErrorException('Failed to update post.');
+                throw new InternalServerErrorException('Failed to update share post.');
             }
 
-            if (dto.deletefiles) {
+            if (dto.remainingImages) {
                 const baseUrl = `${process.env.AWS_IMAGE_BASEURL}`;
-                const deletefiles = dto.deletefiles.map((value) => value.slice(baseUrl.length));
+                const deletefiles = dto.remainingImages.map((value) => value.slice(baseUrl.length));
 
                 await this.imageDeleterService.deleteImageByImageKeys(deletefiles, postId, session);
             }
@@ -65,10 +65,10 @@ export class ShareUpdaterService {
             await session.commitTransaction();
 
             const postInfo = await this.shareSearcherService.getPostInfo({ update: { postId } });
-            return { user: userInfo, post: postInfo };
+            return { post: { ...postInfo, user: userInfo } };
         } catch (error) {
             await session.abortTransaction();
-            handleBSONAndCastError(error, 'share post Id Invalid ObjectId');
+            serviceErrorHandler(error, 'Invalid ObjectId for share post Id.');
         } finally {
             await session.endSession();
         }
@@ -81,10 +81,10 @@ export class ShareUpdaterService {
                 .exec();
 
             if (result.modifiedCount === 0) {
-                throw new InternalServerErrorException('Failed to update comment.');
+                throw new InternalServerErrorException('Failed to update share comment.');
             }
         } catch (error) {
-            handleBSONAndCastError(error, 'share comment Id Invalid ObjectId.');
+            serviceErrorHandler(error, 'Invalid ObjectId for share comment Id.');
         }
 
         const commentInfo = await this.shareSearcherService.getCommentInfo({ update: { commentId } });
@@ -98,24 +98,27 @@ export class ShareUpdaterService {
                 .exec();
 
             if (result.modifiedCount === 0) {
-                throw new InternalServerErrorException('Failed to update comment reply.');
+                throw new InternalServerErrorException('Failed to update share comment reply.');
             }
         } catch (error) {
-            handleBSONAndCastError(error, 'share comment reply Id Invalid ObjectId.');
+            serviceErrorHandler(error, 'Invalid ObjectId for share comment reply Id.');
         }
 
         const commentReplyInfo = await this.shareSearcherService.getCommentReplyInfo({ update: { commentReplyId } });
         return { comment: { ...commentReplyInfo } };
     }
 
-    async toggleLike(user: IResponseUserDTO, postId: string) {
-        const like = await this.shareSearcherService.getLikeInfo(postId, user.id);
+    async toggleLike(userId: string, postId: string) {
+        const likeStatus = await this.shareSearcherService.getLikeStatus(postId, userId);
 
-        const result = await this.shareLikeRepository.updateOne({ _id: like?.id }, { $set: { isCanceled: !like?.isCanceled } });
+        const result = await this.shareLikeRepository
+            .updateOne({ _id: likeStatus?.id }, { $set: { isCanceled: !likeStatus?.isCanceled } })
+            .exec();
+
         if (result.modifiedCount === 0) {
-            throw new InternalServerErrorException('Failed to toggle the like status.');
+            throw new InternalServerErrorException('Failed to toggle the share like status.');
         }
 
-        return { post: { id: like?.postId, user: { nickname: user.nickname } } };
+        return { post: { id: likeStatus?.postId.id, user: { nickname: likeStatus?.postId.userId.nickname } } };
     }
 }

@@ -66,9 +66,9 @@ export class UserSearcherService {
     async getUserFollowersInfiniteScroll(userId: string, targetUserId: string, pageParam: number, limitSize: number) {
         try {
             const followers = await this.followRepository
-                .find({ following: targetUserId, isCanceled: false }, { follower: 1 })
+                .find({ follower: targetUserId, isCanceled: false }, { following: 1 })
                 .populate({
-                    path: 'follower',
+                    path: 'following',
                     select: 'nickname imageId',
                     populate: { path: 'imageId', model: 'Image', select: 'imageKey -_id' },
                 })
@@ -98,9 +98,9 @@ export class UserSearcherService {
     async getUserFollowingsInfiniteScroll(userId: string, targetUserId: string, pageParam: number, limitSize: number) {
         try {
             const followings = await this.followRepository
-                .find({ follower: targetUserId, isCanceled: false }, { following: 1 })
+                .find({ following: targetUserId, isCanceled: false }, { follower: 1 })
                 .populate({
-                    path: 'following',
+                    path: 'follower',
                     select: 'nickname imageId',
                     populate: { path: 'imageId', model: 'Image', select: 'imageKey -_id' },
                 })
@@ -216,8 +216,8 @@ export class UserSearcherService {
 
     async getFollowCount(targetUserId: string) {
         const [followerCount, followingCount] = await Promise.all([
-            this.followRepository.countDocuments({ following: targetUserId, isCanceled: false }).exec(),
             this.followRepository.countDocuments({ follower: targetUserId, isCanceled: false }).exec(),
+            this.followRepository.countDocuments({ following: targetUserId, isCanceled: false }).exec(),
         ]);
 
         return { follower: followerCount, following: followingCount };

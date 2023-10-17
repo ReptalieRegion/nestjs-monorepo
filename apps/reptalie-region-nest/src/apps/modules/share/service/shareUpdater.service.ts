@@ -35,6 +35,14 @@ export class ShareUpdaterService {
         private readonly userSearcherService: UserSearcherService,
     ) {}
 
+    /**
+     * 게시물을 업데이트합니다.
+     *
+     * @param user - 게시물을 업데이트하는 사용자입니다.
+     * @param postId - 업데이트할 게시물의 ID입니다.
+     * @param dto - 게시물의 업데이트 정보를 담고 있는 데이터 전송 객체입니다.
+     * @returns 업데이트된 게시물 정보를 반환합니다.
+     */
     async updatePost(user: IResponseUserDTO, postId: string, dto: InputSharePostDTO) {
         const session: ClientSession = await this.connection.startSession();
         session.startTransaction();
@@ -74,6 +82,14 @@ export class ShareUpdaterService {
         }
     }
 
+    /**
+     * 댓글을 업데이트합니다.
+     *
+     * @param user - 댓글을 업데이트하는 사용자입니다.
+     * @param commentId - 업데이트할 댓글의 ID입니다.
+     * @param dto - 댓글의 업데이트 정보를 담고 있는 데이터 전송 객체입니다.
+     * @returns 업데이트된 댓글 정보를 반환합니다.
+     */
     async updateComment(user: IResponseUserDTO, commentId: string, dto: InputShareCommentDTO) {
         try {
             const result = await this.shareCommentRepository
@@ -91,6 +107,14 @@ export class ShareUpdaterService {
         return { post: { ...commentInfo, user: { nickname: user.nickname } } };
     }
 
+    /**
+     * 댓글에 대한 답글을 업데이트합니다.
+     *
+     * @param userId - 답글을 업데이트하는 사용자의 ID입니다.
+     * @param commentReplyId - 업데이트할 답글의 ID입니다.
+     * @param dto - 답글의 업데이트 정보를 담고 있는 데이터 전송 객체입니다.
+     * @returns 업데이트된 답글 정보를 반환합니다.
+     */
     async updateCommentReply(userId: string, commentReplyId: string, dto: InputShareCommentReplyDTO) {
         try {
             const result = await this.shareCommnetReplyRepository
@@ -108,6 +132,13 @@ export class ShareUpdaterService {
         return { comment: { ...commentReplyInfo } };
     }
 
+    /**
+     * 게시물에 대한 좋아요 상태를 전환합니다.
+     *
+     * @param userId - 좋아요 상태를 전환하는 사용자의 ID입니다.
+     * @param postId - 좋아요 상태를 전환할 게시물의 ID입니다.
+     * @returns 전환된 좋아요 상태를 반환합니다.
+     */
     async toggleLike(userId: string, postId: string) {
         const likeStatus = await this.shareSearcherService.getLikeStatus(postId, userId);
 

@@ -6,7 +6,6 @@ import { getCurrentDate } from '../utils/time/time';
 import { User } from './user.schema';
 
 export interface SharePostDocument extends SharePost, Document {
-    view(): Partial<IResponseSharePostDTO>;
     Mapper(): Partial<IResponseSharePostDTO>;
 }
 
@@ -25,20 +24,6 @@ export class SharePost {
 const SharePostSchema = SchemaFactory.createForClass(SharePost);
 SharePostSchema.index({ userId: 1 });
 SharePostSchema.methods = {
-    view(): Partial<IResponseSharePostDTO> {
-        const fields: Array<keyof IResponseSharePostDTO> = ['id', 'contents', 'userId', 'isDeleted', 'createdAt', 'updatedAt'];
-
-        const viewFields = fields.reduce(
-            (prev, field) => ({
-                ...prev,
-                [field]: this.get(field),
-            }),
-            {},
-        );
-
-        return viewFields;
-    },
-
     Mapper(): Partial<IResponseSharePostDTO> {
         const fields: Array<keyof IResponseSharePostDTO> = ['id', 'contents', 'userId', 'isDeleted', 'createdAt', 'updatedAt'];
 

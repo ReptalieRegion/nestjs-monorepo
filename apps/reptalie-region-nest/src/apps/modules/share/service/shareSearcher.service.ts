@@ -83,6 +83,15 @@ export class ShareSearcherService {
         return { items, nextPage };
     }
 
+    /**
+     * 무한 스크롤로 사용자 게시물을 가져옵니다.
+     *
+     * @param currentUserId - 현재 사용자의 ID입니다.
+     * @param targetNickname - 게시물을 가져올 대상 사용자의 별명입니다.
+     * @param pageParam - 현재 페이지 번호입니다.
+     * @param limitSize - 한 페이지당 가져올 게시물 수입니다.
+     * @returns 가져온 게시물과 다음 페이지 번호를 반환합니다.
+     */
     async getUserPostsInfiniteScroll(currentUserId: string, targetNickname: string, pageParam: number, limitSize: number) {
         const targetUserId = (await this.userSearcherService.isExistsNickname(targetNickname)).id;
 
@@ -119,6 +128,15 @@ export class ShareSearcherService {
         return { items, nextPage };
     }
 
+    /**
+     * 게시물의 댓글을 무한 스크롤로 가져옵니다.
+     *
+     * @param userId - 현재 사용자의 ID입니다.
+     * @param postId - 게시물의 ID입니다.
+     * @param pageParam - 현재 페이지 번호입니다.
+     * @param limitSize - 한 페이지당 가져올 댓글 수입니다.
+     * @returns 가져온 댓글과 다음 페이지 번호를 반환합니다.
+     */
     async getCommentsInfiniteScroll(userId: string, postId: string, pageParam: number, limitSize: number) {
         const comments = await this.shareCommentRepository
             .find({ postId, isDeleted: false })
@@ -156,6 +174,15 @@ export class ShareSearcherService {
         return { items, nextPage };
     }
 
+    /**
+     * 댓글에 대한 답글을 무한 스크롤로 가져옵니다.
+     *
+     * @param userId - 현재 사용자의 ID입니다.
+     * @param commentId - 댓글의 ID입니다.
+     * @param pageParam - 현재 페이지 번호입니다.
+     * @param limitSize - 한 페이지당 가져올 답글 수입니다.
+     * @returns 가져온 답글과 다음 페이지 번호를 반환합니다.
+     */
     async getCommentRepliesInfiniteScroll(userId: string, commentId: string, pageParam: number, limitSize: number) {
         const commentReplies = await this.shareCommentReplyRepository
             .find({ commentId, isDeleted: false })
@@ -192,6 +219,15 @@ export class ShareSearcherService {
         return { items, nextPage };
     }
 
+    /**
+     * 게시물에 대한 좋아요를 무한 스크롤로 가져옵니다.
+     *
+     * @param userId - 현재 사용자의 ID입니다.
+     * @param postId - 게시물의 ID입니다.
+     * @param pageParam - 현재 페이지 번호입니다.
+     * @param limitSize - 한 페이지당 가져올 좋아요 수입니다.
+     * @returns 가져온 좋아요 정보와 다음 페이지 번호를 반환합니다.
+     */
     async getLikeListForPostInfiniteScroll(userId: string, postId: string, pageParam: number, limitSize: number) {
         try {
             const likes = await this.shareLikeRepository

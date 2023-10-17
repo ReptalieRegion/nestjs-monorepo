@@ -10,6 +10,13 @@ export const ImageDeleterServiceToken = 'ImageDeleterServiceToken';
 export class ImageDeleterService {
     constructor(private readonly imageRepository: ImageRepository) {}
 
+    /**
+     * 이미지 키 목록을 기반으로 이미지를 삭제합니다.
+     *
+     * @param imageKeys - 삭제할 이미지의 키 목록입니다.
+     * @param typeId - 이미지의 타입 ID입니다.
+     * @param session - 현재 세션입니다.
+     */
     async deleteImageByImageKeys(imageKeys: string[], typeId: string, session: ClientSession) {
         const result = await this.imageRepository
             .updateMany({ typeId, imageKey: { $nin: imageKeys }, isDeleted: false }, { $set: { isDeleted: true } }, { session })
@@ -20,6 +27,13 @@ export class ImageDeleterService {
         }
     }
 
+    /**
+     * 특정 타입 및 타입 ID를 기반으로 이미지를 삭제합니다.
+     *
+     * @param type - 이미지의 타입입니다.
+     * @param typeId - 이미지의 타입 ID입니다.
+     * @param session - 현재 세션입니다.
+     */
     async deleteImageByTypeId(type: ImageType, typeId: string, session: ClientSession) {
         const result = await this.imageRepository
             .updateMany({ typeId, type, isDeleted: false }, { $set: { isDeleted: true } }, { session })

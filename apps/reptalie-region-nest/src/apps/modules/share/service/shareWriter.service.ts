@@ -39,7 +39,14 @@ export class ShareWriterService {
         private readonly shareSearcherService: ShareSearcherService,
     ) {}
 
-    // 일상공유 게시글 등록 및 이미지 등록
+    /**
+     * 이미지를 포함한 새로운 게시물을 생성합니다.
+     *
+     * @param user - 게시물을 생성하는 사용자입니다.
+     * @param dto - 게시물의 세부 정보를 담고 있는 데이터 전송 객체입니다.
+     * @param files - 게시물과 연결될 이미지 파일들의 배열입니다.
+     * @returns 생성된 게시물과 사용자 정보를 반환합니다.
+     */
     async createPostWithImages(user: IResponseUserDTO, dto: InputSharePostDTO, files: Express.Multer.File[]) {
         const session: ClientSession = await this.connection.startSession();
         session.startTransaction();
@@ -72,7 +79,13 @@ export class ShareWriterService {
         }
     }
 
-    // 일상공유 댓글 등록
+    /**
+     * 새 댓글을 생성합니다.
+     *
+     * @param user - 댓글을 생성하는 사용자입니다.
+     * @param dto - 댓글의 세부 정보를 담고 있는 데이터 전송 객체입니다.
+     * @returns 생성된 댓글과 사용자 정보를 반환합니다.
+     */
     async createComment(user: IResponseUserDTO, dto: InputShareCommentDTO) {
         await this.shareSearcherService.isExistsPost(dto.postId);
 
@@ -89,7 +102,13 @@ export class ShareWriterService {
         return { post: { id: comment.postId, comment: { ...commentInfo, user: userInfo } } };
     }
 
-    // 일상공유 대댓글 등록
+    /**
+     * 댓글에 대한 답글을 생성합니다.
+     *
+     * @param user - 댓글에 대한 답글을 생성하는 사용자입니다.
+     * @param dto - 댓글에 대한 답글의 세부 정보를 담고 있는 데이터 전송 객체입니다.
+     * @returns 생성된 댓글에 대한 답글과 사용자 정보를 반환합니다.
+     */
     async createCommentReply(user: IResponseUserDTO, dto: InputShareCommentReplyDTO) {
         const comment = await this.shareSearcherService.isExistsComment(dto.commentId);
 
@@ -110,7 +129,13 @@ export class ShareWriterService {
         };
     }
 
-    // 일상공유 게시물 좋아요 등록
+    /**
+     * 게시물에 좋아요를 생성합니다.
+     *
+     * @param userId - 좋아요를 생성하는 사용자의 ID입니다.
+     * @param postId - 좋아요를 생성할 게시물의 ID입니다.
+     * @returns 생성된 좋아요 정보를 반환합니다.
+     */
     async createLike(userId: string, postId: string) {
         try {
             const post = await this.shareSearcherService.isExistsPost(postId);

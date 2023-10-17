@@ -7,7 +7,6 @@ import { SharePost } from './sharePost.schema';
 import { User } from './user.schema';
 
 export interface ShareLikeDocument extends ShareLike, Document {
-    view(): Partial<IResponseShareLikeDTO>;
     Mapper(): Partial<IResponseShareLikeDTO>;
 }
 
@@ -26,20 +25,6 @@ export class ShareLike {
 const ShareLikeSchema = SchemaFactory.createForClass(ShareLike);
 ShareLikeSchema.index({ postId: 1, userId: 1 }, { unique: true });
 ShareLikeSchema.methods = {
-    view(): Partial<IResponseShareLikeDTO> {
-        const fields: Array<keyof IResponseShareLikeDTO> = ['id', 'postId', 'userId', 'isCanceled', 'createdAt', 'updatedAt'];
-
-        const viewFields = fields.reduce(
-            (prev, field) => ({
-                ...prev,
-                [field]: this.get(field),
-            }),
-            {},
-        );
-
-        return viewFields;
-    },
-
     Mapper(): Partial<IResponseShareLikeDTO> {
         const fields: Array<keyof IResponseShareLikeDTO> = ['id', 'postId', 'userId', 'isCanceled', 'createdAt', 'updatedAt'];
 

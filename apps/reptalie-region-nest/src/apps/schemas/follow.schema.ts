@@ -6,7 +6,6 @@ import { getCurrentDate } from '../utils/time/time';
 import { User } from './user.schema';
 
 export interface FollowDocument extends Follow, Document {
-    view(): Partial<IResponseFollowDTO>;
     Mapper(): Partial<IResponseFollowDTO>;
 }
 
@@ -28,28 +27,6 @@ export class Follow {
 const FollowSchema = SchemaFactory.createForClass(Follow);
 FollowSchema.index({ following: 1, follower: 1 }, { unique: true });
 FollowSchema.methods = {
-    view(): Partial<IResponseFollowDTO> {
-        const fields: Array<keyof IResponseFollowDTO> = [
-            'id',
-            'following',
-            'follower',
-            'followerNickname',
-            'isCanceled',
-            'createdAt',
-            'updatedAt',
-        ];
-
-        const viewFields = fields.reduce(
-            (prev, field) => ({
-                ...prev,
-                [field]: this.get(field),
-            }),
-            {},
-        );
-
-        return viewFields;
-    },
-
     Mapper(): Partial<IResponseFollowDTO> {
         const fields: Array<keyof IResponseFollowDTO> = [
             'id',

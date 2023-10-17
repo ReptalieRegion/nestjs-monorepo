@@ -7,7 +7,6 @@ import { SharePost } from './sharePost.schema';
 import { User } from './user.schema';
 
 export interface ShareCommentDocument extends ShareComment, Document {
-    view(): Partial<IResponseShareCommentDTO>;
     Mapper(): Partial<IResponseShareCommentDTO>;
 }
 
@@ -29,28 +28,6 @@ export class ShareComment {
 const ShareCommentSchema = SchemaFactory.createForClass(ShareComment);
 ShareCommentSchema.index({ userId: 1, _id: 1 });
 ShareCommentSchema.methods = {
-    view(): Partial<IResponseShareCommentDTO> {
-        const fields: Array<keyof IResponseShareCommentDTO> = [
-            'id',
-            'postId',
-            'userId',
-            'contents',
-            'isDeleted',
-            'createdAt',
-            'updatedAt',
-        ];
-
-        const viewFields = fields.reduce(
-            (prev, field) => ({
-                ...prev,
-                [field]: this.get(field),
-            }),
-            {},
-        );
-
-        return viewFields;
-    },
-
     Mapper(): Partial<IResponseShareCommentDTO> {
         const fields: Array<keyof IResponseShareCommentDTO> = [
             'id',

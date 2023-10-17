@@ -29,6 +29,13 @@ export class ShareDeleterService {
         private readonly imageDeleterService: ImageDeleterService,
     ) {}
 
+    /**
+     * 게시물을 삭제합니다.
+     *
+     * @param userId - 현재 사용자의 ID입니다.
+     * @param postId - 삭제할 게시물의 ID입니다.
+     * @returns 삭제된 게시물 정보를 반환합니다.
+     */
     async deletePost(userId: string, postId: string) {
         const session: ClientSession = await this.connection.startSession();
         session.startTransaction();
@@ -59,7 +66,11 @@ export class ShareDeleterService {
                 }
 
                 await this.shareCommentReplyRepository
-                    .updateMany({ commentId: { $in: commentIds }, isDeleted: false }, { $set: { isDeleted: true } }, { session })
+                    .updateMany(
+                        { commentId: { $in: commentIds }, isDeleted: false },
+                        { $set: { isDeleted: true } },
+                        { session },
+                    )
                     .exec();
             }
 
@@ -73,6 +84,13 @@ export class ShareDeleterService {
         }
     }
 
+    /**
+     * 댓글을 삭제합니다.
+     *
+     * @param userId - 현재 사용자의 ID입니다.
+     * @param commentId - 삭제할 댓글의 ID입니다.
+     * @returns 삭제된 댓글 정보를 반환합니다.
+     */
     async deleteComment(userId: string, commentId: string) {
         const session: ClientSession = await this.connection.startSession();
         session.startTransaction();
@@ -108,6 +126,13 @@ export class ShareDeleterService {
         }
     }
 
+    /**
+     * 댓글 답글을 삭제합니다.
+     *
+     * @param userId - 현재 사용자의 ID입니다.
+     * @param commentReplyId - 삭제할 댓글 답글의 ID입니다.
+     * @returns 삭제된 댓글 답글 정보를 반환합니다.
+     */
     async deleteCommentReply(userId: string, commentReplyId: string) {
         try {
             const result = await this.shareCommentReplyRepository
@@ -124,6 +149,12 @@ export class ShareDeleterService {
         return this.shareSearcherService.getCommentReplyInfo({ delete: { commentReplyId } });
     }
 
+    /**
+     * 게시물에 대한 좋아요 정보를 삭제합니다.
+     *
+     * @param postId - 게시물의 ID입니다.
+     * @param session - 현재 세션입니다.
+     */
     async deleteLike(postId: string, session: ClientSession) {
         const isLikeCount = await this.shareSearcherService.getLikeCount(postId);
 

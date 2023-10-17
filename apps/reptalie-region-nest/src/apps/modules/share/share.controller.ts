@@ -41,6 +41,11 @@ export class ShareController {
         private readonly shareSearcherService: ShareSearcherService,
     ) {}
 
+    /**
+     * 
+     *  Post 
+     * 
+     */
     @Post('post')
     @HttpCode(HttpStatus.CREATED)
     @UseGuards(JwtAuthGuard)
@@ -90,6 +95,11 @@ export class ShareController {
         }
     }
 
+    /**
+     * 
+     *  Put 
+     * 
+     */
     @Put('posts/:id')
     @HttpCode(HttpStatus.OK)
     @UseGuards(JwtAuthGuard)
@@ -138,6 +148,11 @@ export class ShareController {
         }
     }
 
+    /**
+     * 
+     *  Delete 
+     * 
+     */
     @Delete('posts/:id')
     @HttpCode(HttpStatus.OK)
     @UseGuards(JwtAuthGuard)
@@ -171,6 +186,11 @@ export class ShareController {
         }
     }
 
+    /**
+     * 
+     *  Get 
+     * 
+     */
     @Get('posts/list')
     @HttpCode(HttpStatus.OK)
     @UseGuards(JwtOptionalAuthGuard)

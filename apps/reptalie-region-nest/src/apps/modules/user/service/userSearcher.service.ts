@@ -80,7 +80,7 @@ export class UserSearcherService {
 
             const items = await Promise.all(
                 followers.map(async (entity) => {
-                    const userInfo = await this.getUserInfo({ user: entity.follower, currentUserId });
+                    const userInfo = await this.getUserInfo({ user: entity.following, currentUserId });
 
                     return { user: { ...userInfo } };
                 }),
@@ -112,7 +112,7 @@ export class UserSearcherService {
 
             const items = await Promise.all(
                 followings.map(async (entity) => {
-                    const userInfo = await this.getUserInfo({ user: entity.following, currentUserId });
+                    const userInfo = await this.getUserInfo({ user: entity.follower, currentUserId });
 
                     return { user: { ...userInfo } };
                 }),

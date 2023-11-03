@@ -1,6 +1,5 @@
 import { HttpStatus, ValidationPipe } from '@nestjs/common';
 import { NestExpressApplication } from '@nestjs/platform-express';
-import cookieParser from 'cookie-parser';
 import passport from 'passport';
 
 export const setup = (app: NestExpressApplication) => {
@@ -23,9 +22,6 @@ export const setup = (app: NestExpressApplication) => {
         origin: whitelist,
         credentials: true,
     });
-
-    // cookie 파싱
-    app.use(cookieParser(process.env.COOKIE_SECRET_KEY));
 
     // passport 미들웨어 초기화
     app.use(passport.initialize());

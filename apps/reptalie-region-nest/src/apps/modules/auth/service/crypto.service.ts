@@ -1,15 +1,21 @@
 import * as crypto from 'crypto';
 import * as fs from 'fs';
+import path from 'path';
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 
 export const CryptoServiceToken = 'CryptoServiceToken';
 
 @Injectable()
 export class CryptoService {
-    private privateKeyPath = 'key/private_key.pem';
-    private publicKeyPath = 'key/public_key.pem';
+    private keyRoot: string;
+    private privateKeyPath: string;
+    private publicKeyPath: string;
 
     constructor() {
+        const keyRoot = path.join(__dirname, '../../../key');
+        this.keyRoot = keyRoot;
+        this.privateKeyPath = path.join(keyRoot, 'private_key.pem');
+        this.publicKeyPath = path.join(keyRoot, 'public_key.pem');
         this.initializeKeys();
     }
 
@@ -59,16 +65,21 @@ export class CryptoService {
                 type: 'spki',
                 format: 'pem',
             },
-
             privateKeyEncoding: {
                 type: 'pkcs8',
                 format: 'pem',
                 cipher: 'aes-256-cbc',
-                passphrase: process.env.CRYPTO_SECRET_KEY,
+                passphrase: 'process.env.CRYPTO_SECRET_KEY',
             },
         });
 
-        fs.writeFileSync(this.privateKeyPath, privateKey);
-        fs.writeFileSync(this.publicKeyPath, publicKey);
+        fs.mkdir(this.keyRoot, (error) => {
+            if (error) {
+                console.log(error);
+            } else {
+                fs.writeFileSync(this.privateKeyPath, privateKey);
+                fs.writeFileSync(this.publicKeyPath, publicKey);
+            }
+        });
     }
 }

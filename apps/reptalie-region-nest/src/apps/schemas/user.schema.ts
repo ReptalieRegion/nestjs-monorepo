@@ -14,13 +14,13 @@ export class User {
     @Prop({ index: true, type: SchemaTypes.String, default: 'defaultValue' })
     nickname: string;
 
-    @Prop({ trim: true, index: true, type: SchemaTypes.String, default: 'defaultValue1' })
+    @Prop({ trim: true, index: true, type: SchemaTypes.String, default: 'defaultValue' })
     name: string;
 
-    @Prop({ index: true, type: SchemaTypes.String, default: 'defaultValue1' })
+    @Prop({ index: true, type: SchemaTypes.String, default: 'defaultValue' })
     phone: string;
 
-    @Prop({ type: SchemaTypes.String, default: 'defaultValue1' })
+    @Prop({ type: SchemaTypes.String, default: 'defaultValue' })
     address: string;
 
     @Prop({ ref: 'Image', type: SchemaTypes.ObjectId })

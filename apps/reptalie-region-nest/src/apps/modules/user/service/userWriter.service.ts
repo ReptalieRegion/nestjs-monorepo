@@ -29,9 +29,11 @@ export class UserWriterService {
         const dto: InputUserDTO = { imageId: String(new mongoose.Types.ObjectId()) };
 
         const user = await this.userRepository.createUser(dto, session);
+        console.log(user);
+        
         const imageKeys = ['3d16d2c1-d2c4-4b8b-a496-3ef1c9ef45d6.png'];
         const image = await this.imageWriterService.createImage(user.id as string, imageKeys, ImageType.Profile, session);
-        await this.userUpdaterService.updateUserImageId(user.id as string, image[0].id as string);
+        await this.userUpdaterService.updateUserImageId(user.id as string, image[0].id as string, session);
 
         return user;
     }

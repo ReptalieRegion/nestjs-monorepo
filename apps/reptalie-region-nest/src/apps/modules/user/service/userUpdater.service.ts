@@ -1,4 +1,5 @@
 import { BadRequestException, Inject, Injectable, InternalServerErrorException } from '@nestjs/common';
+import { ClientSession } from 'mongoose';
 import { FollowRepository } from '../repository/follow.repository';
 import { UserRepository } from '../repository/user.repository';
 import { UserSearcherService, UserSearcherServiceToken } from './userSearcher.service';
@@ -15,8 +16,8 @@ export class UserUpdaterService {
         private readonly userSearcherService: UserSearcherService,
     ) {}
 
-    async updateUserImageId(_id: string, imageId: string) {
-        const result = await this.userRepository.updateOne({ _id }, { $set: { imageId } }).exec();
+    async updateUserImageId(_id: string, imageId: string, session: ClientSession) {
+        const result = await this.userRepository.updateOne({ _id }, { $set: { imageId } }, { session }).exec();
 
         if (result.modifiedCount === 0) {
             throw new InternalServerErrorException('Failed to update image Id.');

@@ -69,7 +69,7 @@ export class CryptoService {
                 type: 'pkcs8',
                 format: 'pem',
                 cipher: 'aes-256-cbc',
-                passphrase: 'process.env.CRYPTO_SECRET_KEY',
+                passphrase: process.env.CRYPTO_SECRET_KEY,
             },
         });
 

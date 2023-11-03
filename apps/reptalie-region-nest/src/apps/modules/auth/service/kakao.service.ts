@@ -28,10 +28,9 @@ export class KakaoService {
 
     async kakaoSignIn(dto: EncryptedDataDTO) {
         const decryptedData = this.cryptoService.decrypt(dto.encryptedData);
-        const kakao = JSON.parse(decryptedData) as { socialId: string };
 
         const isExistsSocial = await this.socialRepository
-            .findOne({ provider: ProviderType.Kakao, uniqueId: kakao.socialId })
+            .findOne({ provider: ProviderType.Kakao, uniqueId: decryptedData })
             .populate({ path: 'userId', select: 'nickname' })
             .exec();
 
@@ -48,7 +47,7 @@ export class KakaoService {
 
             return { type: 'SIGN_UP', joinProgress: isExistsSocial.joinProgress };
         } else {
-            return this.kakaoSignUp(kakao.socialId);
+            return this.kakaoSignUp(decryptedData);
         }
     }
 

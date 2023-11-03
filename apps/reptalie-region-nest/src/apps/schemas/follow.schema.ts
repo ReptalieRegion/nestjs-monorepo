@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 
 import mongoose, { Document, SchemaTypes } from 'mongoose';
-import { IResponseFollowDTO } from '../dto/follow/response-follow.dto';
+import { IResponseFollowDTO } from '../dto/user/follow/response-follow.dto';
 import { getCurrentDate } from '../utils/time/time';
 import { User } from './user.schema';
 

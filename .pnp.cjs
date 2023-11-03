@@ -5464,7 +5464,6 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["class-transformer", "npm:0.5.1"],\
             ["class-validator", "npm:0.14.0"],\
             ["cookie-parser", "npm:1.4.6"],\
-            ["crypto", "npm:1.0.1"],\
             ["eslint", "npm:8.42.0"],\
             ["jest", "virtual:4193bf06da2ec84559cd057c0b05b7b506ca9e325d38300a6a4ebc0278e1b48cf2ad44e18e2976b41e0318d7e02f72a97edb0a4ccd702e3dc4f399b1d6655dd8#npm:29.5.0"],\
             ["jsonwebtoken", "npm:9.0.0"],\
@@ -8810,15 +8809,6 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["path-key", "npm:3.1.1"],\
             ["shebang-command", "npm:2.0.0"],\
             ["which", "npm:2.0.2"]\
-          ],\
-          "linkType": "HARD"\
-        }]\
-      ]],\
-      ["crypto", [\
-        ["npm:1.0.1", {\
-          "packageLocation": "./.yarn/cache/crypto-npm-1.0.1-7cb8e3dca6-087fe3165b.zip/node_modules/crypto/",\
-          "packageDependencies": [\
-            ["crypto", "npm:1.0.1"]\
           ],\
           "linkType": "HARD"\
         }]\

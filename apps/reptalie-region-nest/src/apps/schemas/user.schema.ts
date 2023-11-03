@@ -1,40 +1,27 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 
 import mongoose, { Document, SchemaTypes } from 'mongoose';
-import { IResponseUserDTO } from '../dto/user/response-user.dto';
+import { IResponseUserDTO } from '../dto/user/user/response-user.dto';
 import { getCurrentDate } from '../utils/time/time';
 import { Image } from './image.schema';
 
 export interface UserDocument extends User, Document {
-    view(): Partial<IResponseUserDTO>;
     Mapper(): Partial<IResponseUserDTO>;
 }
 
 @Schema({ versionKey: false, timestamps: { currentTime: getCurrentDate } })
 export class User {
-    @Prop({ trim: true, unique: true, required: true, type: SchemaTypes.String })
-    userId: string;
-
-    @Prop({ required: true, type: SchemaTypes.String })
-    password: string;
-
-    @Prop({ required: true, type: SchemaTypes.String })
-    salt: string;
-
-    @Prop({ trim: true, index: true, required: true, type: SchemaTypes.String })
-    name: string;
-
-    @Prop({ index: true, required: true, type: SchemaTypes.String })
+    @Prop({ index: true, type: SchemaTypes.String, default: 'defaultValue' })
     nickname: string;
 
-    @Prop({ index: true, required: true, type: SchemaTypes.String })
+    @Prop({ trim: true, index: true, type: SchemaTypes.String, default: 'defaultValue1' })
+    name: string;
+
+    @Prop({ index: true, type: SchemaTypes.String, default: 'defaultValue1' })
     phone: string;
 
-    @Prop({ type: SchemaTypes.String })
+    @Prop({ type: SchemaTypes.String, default: 'defaultValue1' })
     address: string;
-
-    @Prop({ ref: 'User', type: SchemaTypes.ObjectId })
-    recommender: User;
 
     @Prop({ ref: 'Image', type: SchemaTypes.ObjectId })
     imageId: Image;
@@ -43,45 +30,22 @@ export class User {
 const userSchema = SchemaFactory.createForClass(User);
 userSchema.index({ createdAt: 1 });
 userSchema.methods = {
-    view(): Partial<IResponseUserDTO> {
-        const fields: Array<keyof IResponseUserDTO> = [
-            'id',
-            'userId',
-            'name',
-            'nickname',
-            'phone',
-            'address',
-            'recommender',
-            'imageId',
-        ];
-
-        const viewFields = fields.reduce(
-            (prev, field) => ({
-                ...prev,
-                [field]: this.get(field),
-            }),
-            {},
-        );
-
-        return viewFields;
-    },
-
     Mapper(): Partial<IResponseUserDTO> {
         const fields: Array<keyof IResponseUserDTO> = [
             'id',
-            'userId',
             'name',
             'nickname',
             'phone',
             'address',
-            'recommender',
             'imageId',
+            'createdAt',
+            'updatedAt',
         ];
 
         const viewFields = fields.reduce((prev, field) => {
             const value = this.get(field);
 
-            if (value === undefined) {
+            if (value === undefined || value === 'defaultValue') {
                 return prev;
             }
 

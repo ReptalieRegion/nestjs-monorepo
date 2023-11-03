@@ -5,11 +5,10 @@ import { ImageType } from '../../../dto/image/input-image.dto';
 import { InputShareCommentDTO } from '../../../dto/share/comment/input-shareComment.dto';
 import { InputShareCommentReplyDTO } from '../../../dto/share/commentReply/input-shareCommentReply.dto';
 import { InputSharePostDTO } from '../../../dto/share/post/input-sharePost.dto';
-import { IResponseUserDTO } from '../../../dto/user/response-user.dto';
+import { IResponseUserDTO } from '../../../dto/user/user/response-user.dto';
 import { serviceErrorHandler } from '../../../utils/error/errorHandler';
 import { ImageS3HandlerServiceToken, ImageS3HandlerService } from '../../image/service/imageS3Handler.service';
 import { ImageWriterServiceToken, ImageWriterService } from '../../image/service/imageWriter.service';
-import { UserSearcherService, UserSearcherServiceToken } from '../../user/service/userSearcher.service';
 import { ShareCommentRepository } from '../repository/shareComment.repository';
 import { ShareCommentReplyRepository } from '../repository/shareCommentReply.repository';
 import { ShareLikeRepository } from '../repository/shareLike.repository';
@@ -33,8 +32,6 @@ export class ShareWriterService {
         private readonly imageS3HandlerService: ImageS3HandlerService,
         @Inject(ImageWriterServiceToken)
         private readonly imageWriterService: ImageWriterService,
-        @Inject(UserSearcherServiceToken)
-        private readonly userSearcherService: UserSearcherService,
         @Inject(ShareSearcherServiceToken)
         private readonly shareSearcherService: ShareSearcherService,
     ) {}
@@ -54,9 +51,6 @@ export class ShareWriterService {
         let imageKeys: string[] = [];
 
         try {
-            // 추후 user관련 구현 후 삭제할 예정
-            const userInfo = await this.userSearcherService.getUserInfo({ targetUserId: user.id });
-
             const post = await this.sharePostRepository.createPost(user.id, dto, session);
             if (!post.id) {
                 throw new InternalServerErrorException('Failed to save share post.');
@@ -69,7 +63,7 @@ export class ShareWriterService {
             await session.commitTransaction();
 
             const postInfo = await this.shareSearcherService.getPostInfo({ create: { post, imageKeys } });
-            return { post: { ...postInfo, user: userInfo } };
+            return { post: { ...postInfo, user } };
         } catch (error) {
             await this.imageS3HandlerService.deleteImagesFromS3(imageKeys);
             await session.abortTransaction();
@@ -87,10 +81,7 @@ export class ShareWriterService {
      * @returns 생성된 댓글과 사용자 정보를 반환합니다.
      */
     async createComment(user: IResponseUserDTO, dto: InputShareCommentDTO) {
-        await this.shareSearcherService.isExistsPost(dto.postId);
-
-        // 추후 user관련 구현 후 삭제할 예정
-        const userInfo = await this.userSearcherService.getUserInfo({ targetUserId: user.id });
+        await this.shareSearcherService.findPost(dto.postId);
 
         const comment = await this.shareCommentRepository.createComment(user.id, dto);
         if (!comment.id) {
@@ -99,7 +90,7 @@ export class ShareWriterService {
 
         const commentInfo = await this.shareSearcherService.getCommentInfo({ create: { comment } });
 
-        return { post: { id: comment.postId, comment: { ...commentInfo, user: userInfo } } };
+        return { post: { id: comment.postId, comment: { ...commentInfo, user } } };
     }
 
     /**
@@ -110,10 +101,7 @@ export class ShareWriterService {
      * @returns 생성된 댓글에 대한 답글과 사용자 정보를 반환합니다.
      */
     async createCommentReply(user: IResponseUserDTO, dto: InputShareCommentReplyDTO) {
-        const comment = await this.shareSearcherService.isExistsComment(dto.commentId);
-
-        // 추후 user관련 구현 후 삭제할 예정
-        const userInfo = await this.userSearcherService.getUserInfo({ targetUserId: user.id });
+        const comment = await this.shareSearcherService.findComment(dto.commentId);
 
         const commentReply = await this.shareCommentReplyRepository.createCommentReply(user.id, dto);
         if (!commentReply.id) {
@@ -124,7 +112,7 @@ export class ShareWriterService {
         return {
             post: {
                 id: comment?.postId,
-                comment: { id: commentReply.commentId, commentReply: { ...commentReplyInfo, user: userInfo } },
+                comment: { id: commentReply.commentId, commentReply: { ...commentReplyInfo, user } },
             },
         };
     }
@@ -138,7 +126,7 @@ export class ShareWriterService {
      */
     async createLike(userId: string, postId: string) {
         try {
-            const post = await this.shareSearcherService.isExistsPost(postId);
+            const post = await this.shareSearcherService.findPost(postId);
 
             const like = await this.shareLikeRepository.createLike({ userId, postId });
             if (!like) {

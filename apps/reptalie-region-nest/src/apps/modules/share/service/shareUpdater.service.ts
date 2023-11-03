@@ -4,7 +4,7 @@ import mongoose, { ClientSession } from 'mongoose';
 import { InputShareCommentDTO } from '../../../dto/share/comment/input-shareComment.dto';
 import { InputShareCommentReplyDTO } from '../../../dto/share/commentReply/input-shareCommentReply.dto';
 import { InputSharePostDTO } from '../../../dto/share/post/input-sharePost.dto';
-import { IResponseUserDTO } from '../../../dto/user/response-user.dto';
+import { IResponseUserDTO } from '../../../dto/user/user/response-user.dto';
 import { serviceErrorHandler } from '../../../utils/error/errorHandler';
 import { ImageDeleterService, ImageDeleterServiceToken } from '../../image/service/imageDeleter.service';
 import { UserSearcherService, UserSearcherServiceToken } from '../../user/service/userSearcher.service';
@@ -48,9 +48,6 @@ export class ShareUpdaterService {
         session.startTransaction();
 
         try {
-            // 추후 user관련 구현 후 삭제할 예정
-            const userInfo = await this.userSearcherService.getUserInfo({ targetUserId: user.id });
-
             const result = await this.sharePostRepository
                 .updateOne(
                     { _id: postId, userId: user.id, isDeleted: false },
@@ -73,7 +70,7 @@ export class ShareUpdaterService {
             await session.commitTransaction();
 
             const postInfo = await this.shareSearcherService.getPostInfo({ update: { postId } });
-            return { post: { ...postInfo, user: userInfo } };
+            return { post: { ...postInfo, user } };
         } catch (error) {
             await session.abortTransaction();
             serviceErrorHandler(error, 'Invalid ObjectId for share post Id.');

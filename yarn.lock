@@ -3572,7 +3572,6 @@ __metadata:
     class-transformer: ^0.5.1
     class-validator: ^0.14.0
     cookie-parser: ^1.4.6
-    crypto: ^1.0.1
     eslint: ^8.42.0
     jest: 29.5.0
     jsonwebtoken: ^9.0.0
@@ -6103,13 +6102,6 @@ __metadata:
     shebang-command: ^2.0.0
     which: ^2.0.1
   checksum: 671cc7c7288c3a8406f3c69a3ae2fc85555c04169e9d611def9a675635472614f1c0ed0ef80955d5b6d4e724f6ced67f0ad1bb006c2ea643488fcfef994d7f52
-  languageName: node
-  linkType: hard
-
-"crypto@npm:^1.0.1":
-  version: 1.0.1
-  resolution: "crypto@npm:1.0.1"
-  checksum: 087fe3165bd94c333a49e6ed66a0193911f63eac38a24f379b3001a5fe260a59c413646e53a0f67875ba13902b2686d81dc703cb2c147a4ec727dcdc04e5645e
   languageName: node
   linkType: hard
 

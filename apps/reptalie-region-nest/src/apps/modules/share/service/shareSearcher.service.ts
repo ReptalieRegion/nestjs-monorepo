@@ -93,7 +93,7 @@ export class ShareSearcherService {
      * @returns 가져온 게시물과 다음 페이지 번호를 반환합니다.
      */
     async getUserPostsInfiniteScroll(currentUserId: string, targetNickname: string, pageParam: number, limitSize: number) {
-        const targetUserId = (await this.userSearcherService.isExistsNickname(targetNickname)).id;
+        const targetUserId = (await this.userSearcherService.findNickname(targetNickname)).id;
 
         const posts = await this.sharePostRepository
             .find({ userId: targetUserId, isDeleted: false })
@@ -375,7 +375,12 @@ export class ShareSearcherService {
         }
     }
 
-    async isExistsPost(postId: string) {
+    async isExistsLike(userId: string, postId: string): Promise<boolean | undefined> {
+        const like = await this.shareLikeRepository.findOne({ userId, postId }).exec();
+        return like ? (like.isCanceled ? false : true) : undefined;
+    }
+
+    async findPost(postId: string) {
         try {
             const post = await this.sharePostRepository
                 .findOne({ _id: postId, isDeleted: false })
@@ -392,7 +397,7 @@ export class ShareSearcherService {
         }
     }
 
-    async isExistsComment(commentId: string) {
+    async findComment(commentId: string) {
         try {
             const comment = await this.shareCommentRepository.findOne({ _id: commentId, isDeleted: false }).exec();
 
@@ -404,11 +409,6 @@ export class ShareSearcherService {
         } catch (error) {
             serviceErrorHandler(error, 'Invalid ObjectId for share comment Id .');
         }
-    }
-
-    async isExistsLike(userId: string, postId: string): Promise<boolean | undefined> {
-        const like = await this.shareLikeRepository.findOne({ userId, postId }).exec();
-        return like ? (like.isCanceled ? false : true) : undefined;
     }
 
     async getPostCount(userId: string): Promise<number> {

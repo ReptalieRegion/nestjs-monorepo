@@ -2,19 +2,16 @@ import { IsOptional, IsString } from 'class-validator';
 
 export class InputUserDTO {
     @IsString()
-    readonly userId: string;
+    @IsOptional()
+    readonly name?: string;
 
     @IsString()
-    readonly password: string;
+    @IsOptional()
+    readonly nickname?: string;
 
     @IsString()
-    readonly name: string;
-
-    @IsString()
-    readonly nickname: string;
-
-    @IsString()
-    readonly phone: string;
+    @IsOptional()
+    readonly phone?: string;
 
     @IsString()
     @IsOptional()
@@ -22,5 +19,5 @@ export class InputUserDTO {
 
     @IsString()
     @IsOptional()
-    readonly recommender?: string;
+    readonly imageId: string;
 }

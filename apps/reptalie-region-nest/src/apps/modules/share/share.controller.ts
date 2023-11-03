@@ -18,7 +18,7 @@ import { FilesInterceptor } from '@nestjs/platform-express';
 import { InputShareCommentDTO } from '../../dto/share/comment/input-shareComment.dto';
 import { InputShareCommentReplyDTO } from '../../dto/share/commentReply/input-shareCommentReply.dto';
 import { InputSharePostDTO } from '../../dto/share/post/input-sharePost.dto';
-import { IResponseUserDTO } from '../../dto/user/response-user.dto';
+import { IResponseUserDTO } from '../../dto/user/user/response-user.dto';
 import { controllerErrorHandler } from '../../utils/error/errorHandler';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { JwtOptionalAuthGuard } from '../auth/guards/jwtOptional-auth.guard';
@@ -42,9 +42,9 @@ export class ShareController {
     ) {}
 
     /**
-     * 
-     *  Post 
-     * 
+     *
+     *  Post
+     *
      */
     @Post('post')
     @HttpCode(HttpStatus.CREATED)
@@ -96,9 +96,9 @@ export class ShareController {
     }
 
     /**
-     * 
-     *  Put 
-     * 
+     *
+     *  Put
+     *
      */
     @Put('posts/:id')
     @HttpCode(HttpStatus.OK)
@@ -149,9 +149,9 @@ export class ShareController {
     }
 
     /**
-     * 
-     *  Delete 
-     * 
+     *
+     *  Delete
+     *
      */
     @Delete('posts/:id')
     @HttpCode(HttpStatus.OK)
@@ -187,9 +187,9 @@ export class ShareController {
     }
 
     /**
-     * 
-     *  Get 
-     * 
+     *
+     *  Get
+     *
      */
     @Get('posts/list')
     @HttpCode(HttpStatus.OK)

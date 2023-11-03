@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { IResponseUserDTO } from '../../../dto/user/user/response-user.dto';
 import { User } from '../../../schemas/user.schema';
 import { serviceErrorHandler } from '../../../utils/error/errorHandler';
 import { FollowRepository } from '../repository/follow.repository';
@@ -50,13 +51,15 @@ export class UserSearcherService {
         return { items, nextPage };
     }
 
-    async getProfile(currentUserId: string, nickname: string) {
-        const userInfo = await this.getUserInfo({ nickname, currentUserId });
+    async getProfile(nickname: string, user?: IResponseUserDTO) {
+        const userInfo = await this.getUserInfo({ nickname, currentUserId: user?.id });
         const followCount = await this.getFollowCount(userInfo?.id);
+        const isMine = user?.nickname === nickname;
 
         return {
             user: {
                 ...userInfo,
+                isMine,
                 followerCount: followCount.follower,
                 followingCount: followCount.following,
             },
@@ -180,7 +183,12 @@ export class UserSearcherService {
         }
     }
 
-    async isExistsId(_id: string) {
+    async isExistsNickname(nickname: string): Promise<boolean> {
+        const user = await this.userRepository.findOne({ nickname }).exec();
+        return user ? true : false;
+    }
+
+    async findUserId(_id: string) {
         try {
             const user = await this.userRepository.findOne({ _id }).exec();
 
@@ -194,12 +202,7 @@ export class UserSearcherService {
         }
     }
 
-    async isExistsEmail(email: string) {
-        const user = await this.userRepository.findByEmail(email);
-        return Boolean(user);
-    }
-
-    async isExistsNickname(nickname: string) {
+    async findNickname(nickname: string) {
         const user = await this.userRepository.findOne({ nickname }).exec();
 
         if (!user) {

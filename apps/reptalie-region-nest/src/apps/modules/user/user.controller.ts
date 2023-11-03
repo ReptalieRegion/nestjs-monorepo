@@ -1,6 +1,6 @@
 import { Controller, Get, HttpCode, HttpStatus, Inject, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
 
-import { IResponseUserDTO } from '../../dto/user/response-user.dto';
+import { IResponseUserDTO } from '../../dto/user/user/response-user.dto';
 import { controllerErrorHandler } from '../../utils/error/errorHandler';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { JwtOptionalAuthGuard } from '../auth/guards/jwtOptional-auth.guard';
@@ -20,15 +20,11 @@ export class UserController {
         private readonly userUpdaterService: UserUpdaterService,
     ) {}
 
-    @Get('email-exists')
-    async getEmailDuplicateCheck(@Query('email') email: string) {
-        return await this.userSearcherService.isExistsEmail(email);
-    }
-
-    @Get('nickname-exists')
-    async getNicknameDuplicateCheck(@Query('nickname') nickname: string) {
-        return await this.userSearcherService.isExistsNickname(nickname);
-    }
+    /**
+     *
+     *  Post
+     *
+     */
 
     @Post(':id/follow')
     @HttpCode(HttpStatus.CREATED)
@@ -41,6 +37,11 @@ export class UserController {
         }
     }
 
+    /**
+     *
+     *  Put
+     *
+     */
     @Put(':id/follow')
     @HttpCode(HttpStatus.OK)
     @UseGuards(JwtAuthGuard)
@@ -52,12 +53,23 @@ export class UserController {
         }
     }
 
+    /**
+     *
+     *  Delete
+     *
+     */
+
+    /**
+     *
+     *  Get
+     *
+     */
     @Get('profile')
     @HttpCode(HttpStatus.OK)
     @UseGuards(JwtOptionalAuthGuard)
     async getUserProfile(@AuthUser() user: IResponseUserDTO, @Query('nickname') nickname: string) {
         try {
-            return this.userSearcherService.getProfile(user.id, nickname);
+            return this.userSearcherService.getProfile(nickname, user);
         } catch (error) {
             controllerErrorHandler(error);
         }
@@ -103,6 +115,16 @@ export class UserController {
     ) {
         try {
             return this.userSearcherService.getUserFollowingsInfiniteScroll(user?.id, targetUserId, pageParam, 10);
+        } catch (error) {
+            controllerErrorHandler(error);
+        }
+    }
+
+    @Get('duplicate/nickname/:nickname')
+    @HttpCode(HttpStatus.OK)
+    async duplicateNickname(@Param('nickname') nickname: string) {
+        try {
+            return this.userSearcherService.isExistsNickname(nickname);
         } catch (error) {
             controllerErrorHandler(error);
         }

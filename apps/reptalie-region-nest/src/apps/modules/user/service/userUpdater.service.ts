@@ -15,6 +15,14 @@ export class UserUpdaterService {
         private readonly userSearcherService: UserSearcherService,
     ) {}
 
+    async updateUserImageId(_id: string, imageId: string) {
+        const result = await this.userRepository.updateOne({ _id }, { $set: { imageId } }).exec();
+
+        if (result.modifiedCount === 0) {
+            throw new InternalServerErrorException('Failed to update image Id.');
+        }
+    }
+
     async toggleFollow(following: string, follower: string) {
         if (following === follower) {
             throw new BadRequestException('Following and follower cannot be the same user.');

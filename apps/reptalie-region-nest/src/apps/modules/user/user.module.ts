@@ -15,7 +15,13 @@ import {
 } from './user.providers';
 
 @Module({
-    imports: [forwardRef(() => ShareModule), ImageModule, AuthModule, MongooseModuleUser, MongooseModuleFollow],
+    imports: [
+        forwardRef(() => ShareModule),
+        forwardRef(() => AuthModule),
+        ImageModule,
+        MongooseModuleUser,
+        MongooseModuleFollow,
+    ],
     controllers: [UserController],
     providers: [
         UserRepository,
@@ -25,13 +31,6 @@ import {
         UserUpdaterServiceProvider,
         UserDeleterServiceProvider,
     ],
-    exports: [
-        UserRepository,
-        FollowRepository,
-        UserSearcherServiceProvider,
-        UserWriterServiceProvicer,
-        UserUpdaterServiceProvider,
-        UserDeleterServiceProvider,
-    ],
+    exports: [UserSearcherServiceProvider, UserWriterServiceProvicer, UserUpdaterServiceProvider, UserDeleterServiceProvider],
 })
 export class UserModule {}

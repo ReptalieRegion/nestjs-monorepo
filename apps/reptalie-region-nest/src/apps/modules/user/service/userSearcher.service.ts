@@ -183,9 +183,10 @@ export class UserSearcherService {
         }
     }
 
-    async isExistsNickname(nickname: string): Promise<boolean> {
+    async isDuplicateNickname(nickname: string): Promise<{ isDuplicate: boolean }> {
         const user = await this.userRepository.findOne({ nickname }).exec();
-        return user ? true : false;
+
+        return { isDuplicate: user ? true : false };
     }
 
     async findUserId(_id: string) {

@@ -35,17 +35,13 @@ export class KakaoService {
             .exec();
 
         if (isExistsSocial) {
+            const user = Object(isExistsSocial?.userId).Mapper();
             if (isExistsSocial.joinProgress === JoinProgressType.DONE) {
-                const userId = Object(isExistsSocial?.userId).Mapper().id;
-                const { accessToken, refreshToken } = await this.authService.tokenGenerationAndStorage(
-                    userId,
-                    ProviderType.Kakao,
-                );
-
-                return { type: 'SIGN_IN', accessToken, refreshToken };
+                const token = await this.authService.tokenGenerationAndStorage(user.id, ProviderType.Kakao);
+                return { type: 'SIGN_IN', accessToken: token.accessToken, refreshToken: token.refreshToken };
             }
 
-            return { type: 'SIGN_UP', joinProgress: isExistsSocial.joinProgress };
+            return { type: 'SIGN_UP', joinProgress: isExistsSocial.joinProgress, nickname: user.nickname, userId: user.id };
         } else {
             return this.kakaoSignUp(decryptedData);
         }
@@ -68,7 +64,7 @@ export class KakaoService {
             await this.socialRepository.createSocial(inputSocialData, session);
             await session.commitTransaction();
 
-            return { type: 'SIGN_UP', joinProgress: JoinProgressType.REGISTER0 };
+            return { type: 'SIGN_UP', joinProgress: JoinProgressType.REGISTER0, nickname: user.nickname, userId: user.id };
         } catch (error) {
             await session.abortTransaction();
             throw error;

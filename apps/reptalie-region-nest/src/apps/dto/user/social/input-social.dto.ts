@@ -7,8 +7,8 @@ export enum ProviderType {
 }
 
 export enum JoinProgressType {
-    DONE = 'done',
-    REGISTER0 = 'resister0',
+    DONE = 'DONE',
+    REGISTER0 = 'REGISTER0',
 }
 
 export class InputSocialDTO {

@@ -124,7 +124,7 @@ export class UserController {
     @HttpCode(HttpStatus.OK)
     async duplicateNickname(@Param('nickname') nickname: string) {
         try {
-            return this.userSearcherService.isExistsNickname(nickname);
+            return this.userSearcherService.isDuplicateNickname(nickname);
         } catch (error) {
             controllerErrorHandler(error);
         }

@@ -37,7 +37,7 @@ export class KakaoService {
         if (isExistsSocial) {
             const user = Object(isExistsSocial?.userId).Mapper();
             if (isExistsSocial.joinProgress === JoinProgressType.DONE) {
-                const token = await this.authService.tokenGenerationAndStorage(user.id, ProviderType.Kakao);
+                const token = await this.authService.tokenGenerationAndStorage(user.id);
                 return { type: 'SIGN_IN', accessToken: token.accessToken, refreshToken: token.refreshToken };
             }
 

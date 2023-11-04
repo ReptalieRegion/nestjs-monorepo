@@ -1,6 +1,10 @@
 import { Body, Controller, HttpCode, HttpStatus, Inject, Post, UseGuards, Headers, Delete } from '@nestjs/common';
 import { EncryptedDataDTO } from '../../dto/user/social/encryptedData.dto';
+import { JoinProgressDTO } from '../../dto/user/social/joinProgress.dto';
+import { IResponseUserDTO } from '../../dto/user/user/response-user.dto';
 import { controllerErrorHandler } from '../../utils/error/errorHandler';
+import { AuthUser } from '../user/user.decorator';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { JwtSocialAuthGuard } from './guards/jwtSocial-auth.guard';
 import { AppleService, AppleServiceToken } from './service/apple.service';
 import { AuthService, AuthServiceToken } from './service/auth.service';
@@ -60,7 +64,14 @@ export class AuthController {
 
     @Post('social/join-progress')
     @HttpCode(HttpStatus.OK)
-    async updateJoinProgress() {}
+    @UseGuards(JwtSocialAuthGuard)
+    async updateJoinProgress(@Body() dto: JoinProgressDTO) {
+        try {
+            return this.authService.updateJoinProgress(dto);
+        } catch (error) {
+            controllerErrorHandler(error);
+        }
+    }
 
     /**
      *
@@ -73,9 +84,16 @@ export class AuthController {
      *  Delete
      *
      */
-    @Delete('logout')
+    @Delete('sign-out')
     @HttpCode(HttpStatus.OK)
-    async logout() {}
+    @UseGuards(JwtAuthGuard)
+    async signOut(@AuthUser() user: IResponseUserDTO) {
+        try {
+            await this.authService.signOut(user.id);
+        } catch (error) {
+            controllerErrorHandler(error);
+        }
+    }
 
     /**
      *

@@ -11,7 +11,7 @@ export interface UserDocument extends User, Document {
 
 @Schema({ versionKey: false, timestamps: { currentTime: getCurrentDate } })
 export class User {
-    @Prop({ index: true, type: SchemaTypes.String, default: 'defaultValue' })
+    @Prop({ index: true, unique: true, type: SchemaTypes.String })
     nickname: string;
 
     @Prop({ trim: true, index: true, type: SchemaTypes.String, default: 'defaultValue' })

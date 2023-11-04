@@ -7,8 +7,12 @@ import {
     UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService, JwtSignOptions } from '@nestjs/jwt';
+import { InjectConnection } from '@nestjs/mongoose';
 import { JsonWebTokenError, TokenExpiredError } from 'jsonwebtoken';
-import { ProviderType } from '../../../dto/user/social/input-social.dto';
+import mongoose, { ClientSession } from 'mongoose';
+import { JoinProgressType } from '../../../dto/user/social/input-social.dto';
+import { JoinProgressDTO } from '../../../dto/user/social/joinProgress.dto';
+import { UserUpdaterService, UserUpdaterServiceToken } from '../../user/service/userUpdater.service';
 import { SocialRepository } from '../repository/social.repository';
 import { CryptoService, CryptoServiceToken } from './crypto.service';
 import { PBKDF2Service, PBKDF2ServiceToken } from './pbkdf2.service';
@@ -21,10 +25,15 @@ export class AuthService {
         private readonly jwtService: JwtService,
         private readonly socialRepository: SocialRepository,
 
+        @InjectConnection()
+        private readonly connection: mongoose.Connection,
+
         @Inject(CryptoServiceToken)
         private readonly cryptoService: CryptoService,
         @Inject(PBKDF2ServiceToken)
         private readonly pbkdf2Service: PBKDF2Service,
+        @Inject(UserUpdaterServiceToken)
+        private readonly userUpdaterService: UserUpdaterService,
     ) {}
 
     /**
@@ -39,12 +48,42 @@ export class AuthService {
         return { authToken, publicKey };
     }
 
+    async updateJoinProgress(dto: JoinProgressDTO) {
+        const session: ClientSession = await this.connection.startSession();
+        session.startTransaction();
+
+        try {
+            const { userId, nickname } = dto;
+
+            await this.userUpdaterService.updateNickname(nickname, userId, session);
+
+            const result = await this.socialRepository
+                .updateOne({ userId }, { $set: { joinProgress: JoinProgressType.DONE } }, { session })
+                .exec();
+
+            if (result.modifiedCount === 0) {
+                throw new InternalServerErrorException('Failed to update social join-progress');
+            }
+
+            await session.commitTransaction();
+
+            const { accessToken, refreshToken } = await this.tokenGenerationAndStorage(userId);
+
+            return { type: 'SIGN_UP', joinProgress: JoinProgressType.DONE, accessToken, refreshToken };
+        } catch (error) {
+            await session.abortTransaction();
+            throw error;
+        } finally {
+            await session.endSession();
+        }
+    }
+
     /**
      * 사용자 로그아웃을 수행합니다.
      *
      * @param userId - 로그아웃할 사용자의 ID입니다.
      */
-    async logout(userId: string) {
+    async signOut(userId: string) {
         const result = await this.socialRepository
             .updateOne({ userId }, { $set: { salt: 'defaultValue', refreshToken: 'defaultValue' } })
             .exec();
@@ -61,7 +100,7 @@ export class AuthService {
      * @param provider - 인증 공급자 유형입니다.
      * @returns 생성된 액세스 토큰 및 리프레시 토큰을 반환합니다.
      */
-    async tokenGenerationAndStorage(userId: string, provider: ProviderType) {
+    async tokenGenerationAndStorage(userId: string) {
         const { accessToken, refreshToken } = await this.makeAccessAndRefreshToken(userId);
         const encryptPBKDF2Info = this.pbkdf2Service.encryptPBKDF2(refreshToken);
 
@@ -72,7 +111,7 @@ export class AuthService {
         const { salt, encryptedData } = encryptPBKDF2Info;
         const encryptedSalt = this.cryptoService.encrypt(salt);
 
-        await this.updateRefreshTokenAndSalt(userId, encryptedData, encryptedSalt, provider);
+        await this.updateRefreshTokenAndSalt(userId, encryptedData, encryptedSalt);
 
         return { accessToken, refreshToken };
     }
@@ -99,15 +138,11 @@ export class AuthService {
             const isMatched = this.pbkdf2Service.comparePBKDF2(token, decryptedSalt, mapperedSocial.refreshToken as string);
 
             if (!isMatched) {
-                await this.logout(mapperedSocial.userId as string);
+                await this.signOut(mapperedSocial.userId as string);
                 throw new ForbiddenException('Refresh token mismatch.');
             }
 
-            const { accessToken, refreshToken } = await this.tokenGenerationAndStorage(
-                mapperedSocial.userId as string,
-                mapperedSocial.provider as ProviderType,
-            );
-
+            const { accessToken, refreshToken } = await this.tokenGenerationAndStorage(mapperedSocial.userId as string);
             return { accessToken, refreshToken };
         } catch (error) {
             if (error instanceof TokenExpiredError) {
@@ -250,8 +285,8 @@ export class AuthService {
      * @param salt - 업데이트할 솔트입니다.
      * @param provider - 사용자 공급자 유형입니다.
      */
-    private async updateRefreshTokenAndSalt(userId: string, refreshToken: string, salt: string, provider: ProviderType) {
-        const result = await this.socialRepository.updateOne({ provider, userId }, { $set: { refreshToken, salt } }).exec();
+    private async updateRefreshTokenAndSalt(userId: string, refreshToken: string, salt: string) {
+        const result = await this.socialRepository.updateOne({ userId }, { $set: { refreshToken, salt } }).exec();
 
         if (result.modifiedCount === 0) {
             throw new InternalServerErrorException('Failed to update the refresh token and salt');

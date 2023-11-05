@@ -1,5 +1,19 @@
-import { Controller, Get, HttpCode, HttpStatus, Inject, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
+import {
+    Controller,
+    Get,
+    HttpCode,
+    HttpStatus,
+    Inject,
+    Param,
+    Post,
+    Put,
+    Query,
+    UploadedFiles,
+    UseGuards,
+    UseInterceptors,
+} from '@nestjs/common';
 
+import { FilesInterceptor } from '@nestjs/platform-express';
 import { IResponseUserDTO } from '../../dto/user/user/response-user.dto';
 import { controllerErrorHandler } from '../../utils/error/errorHandler';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -48,6 +62,18 @@ export class UserController {
     async toggleFollow(@AuthUser() user: IResponseUserDTO, @Param('id') follower: string) {
         try {
             return this.userUpdaterService.toggleFollow(user.id, follower);
+        } catch (error) {
+            controllerErrorHandler(error);
+        }
+    }
+
+    @Put('me/profile-image')
+    @HttpCode(HttpStatus.OK)
+    @UseGuards(JwtAuthGuard)
+    @UseInterceptors(FilesInterceptor('files'))
+    async updateMyProfile(@AuthUser() user: IResponseUserDTO, @UploadedFiles() files: Express.Multer.File[]) {
+        try {
+            return this.userUpdaterService.updateMyProfileImage(user, files);
         } catch (error) {
             controllerErrorHandler(error);
         }

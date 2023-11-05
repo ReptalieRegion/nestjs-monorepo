@@ -24,9 +24,7 @@ export class AuthTokenService {
         const authToken = await this.issueAuthToken();
         const publicKey = this.authEncryptService.getPublicKey();
 
-        const ddd = this.authEncryptService.encryptCrypto('asdfasdf123123123')
-
-        return { authToken, publicKey, ddd };
+        return { authToken, publicKey };
     }
 
     /**

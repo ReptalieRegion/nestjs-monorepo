@@ -1,5 +1,11 @@
 import { BadRequestException, Inject, Injectable, InternalServerErrorException } from '@nestjs/common';
-import { ClientSession } from 'mongoose';
+import { InjectConnection } from '@nestjs/mongoose';
+import mongoose, { ClientSession } from 'mongoose';
+import { ImageType } from '../../../dto/image/input-image.dto';
+import { IResponseUserDTO } from '../../../dto/user/user/response-user.dto';
+import { ImageDeleterService, ImageDeleterServiceToken } from '../../image/service/imageDeleter.service';
+import { ImageS3HandlerService, ImageS3HandlerServiceToken } from '../../image/service/imageS3Handler.service';
+import { ImageWriterService, ImageWriterServiceToken } from '../../image/service/imageWriter.service';
 import { FollowRepository } from '../repository/follow.repository';
 import { UserRepository } from '../repository/user.repository';
 import { UserSearcherService, UserSearcherServiceToken } from './userSearcher.service';
@@ -9,11 +15,20 @@ export const UserUpdaterServiceToken = 'UserUpdaterServiceToken';
 @Injectable()
 export class UserUpdaterService {
     constructor(
+        @InjectConnection()
+        private readonly connection: mongoose.Connection,
+
         private readonly userRepository: UserRepository,
         private readonly followRepository: FollowRepository,
 
         @Inject(UserSearcherServiceToken)
         private readonly userSearcherService: UserSearcherService,
+        @Inject(ImageS3HandlerServiceToken)
+        private readonly imageS3HandlerService: ImageS3HandlerService,
+        @Inject(ImageWriterServiceToken)
+        private readonly imageWriterService: ImageWriterService,
+        @Inject(ImageDeleterServiceToken)
+        private readonly imageDeleterService: ImageDeleterService,
     ) {}
 
     /**
@@ -69,5 +84,36 @@ export class UserUpdaterService {
         }
 
         return { user: { nickname: followStatus?.followerNickname } };
+    }
+
+    /**
+     * 사용자 프로필 이미지를 업데이트합니다.
+     *
+     * @param user {IResponseUserDTO} - 업데이트할 사용자 정보
+     * @param files {Express.Multer.File[]} - 업로드된 이미지 파일 배열
+     * @returns - 업데이트된 프로필 이미지 정보를 반환합니다.
+     */
+    async updateMyProfileImage(user: IResponseUserDTO, files: Express.Multer.File[]) {
+        const session: ClientSession = await this.connection.startSession();
+        session.startTransaction();
+
+        let imageKeys: string[] = [];
+
+        try {
+            await this.imageDeleterService.deleteImageByTypeId(ImageType.Profile, user.id, session);
+            imageKeys = await this.imageS3HandlerService.uploadToS3(files);
+            const [image] = await this.imageWriterService.createImage(user.id, imageKeys, ImageType.Profile, session);
+            await this.updateImageId(user.id, image.id as string, session);
+
+            await session.commitTransaction();
+
+            return { profile: { src: `${process.env.AWS_IMAGE_BASEURL}${image.imageKey}` } };
+        } catch (error) {
+            await this.imageS3HandlerService.deleteImagesFromS3(imageKeys);
+            await session.abortTransaction();
+            throw error;
+        } finally {
+            await session.endSession();
+        }
     }
 }

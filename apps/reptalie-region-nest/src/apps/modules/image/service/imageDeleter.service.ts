@@ -13,7 +13,7 @@ export class ImageDeleterService {
     /**
      * 이미지 키 목록을 기반으로 이미지를 삭제합니다.
      *
-     * @param imageKeys - 삭제할 이미지의 키 목록입니다.
+     * @param imageKeys - 삭제하지 않고 남은 이미지 키 배열입니다.
      * @param typeId - 이미지의 타입 ID입니다.
      * @param session - 현재 세션입니다.
      */

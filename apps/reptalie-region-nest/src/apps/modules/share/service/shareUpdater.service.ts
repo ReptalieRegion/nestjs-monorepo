@@ -7,7 +7,6 @@ import { InputSharePostDTO } from '../../../dto/share/post/input-sharePost.dto';
 import { IResponseUserDTO } from '../../../dto/user/user/response-user.dto';
 import { serviceErrorHandler } from '../../../utils/error/errorHandler';
 import { ImageDeleterService, ImageDeleterServiceToken } from '../../image/service/imageDeleter.service';
-import { UserSearcherService, UserSearcherServiceToken } from '../../user/service/userSearcher.service';
 import { ShareCommentRepository } from '../repository/shareComment.repository';
 import { ShareCommentReplyRepository } from '../repository/shareCommentReply.repository';
 import { ShareLikeRepository } from '../repository/shareLike.repository';
@@ -31,8 +30,6 @@ export class ShareUpdaterService {
         private readonly shareSearcherService: ShareSearcherService,
         @Inject(ImageDeleterServiceToken)
         private readonly imageDeleterService: ImageDeleterService,
-        @Inject(UserSearcherServiceToken)
-        private readonly userSearcherService: UserSearcherService,
     ) {}
 
     /**

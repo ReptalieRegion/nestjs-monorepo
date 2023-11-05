@@ -11,6 +11,16 @@ export enum JoinProgressType {
     REGISTER0 = 'REGISTER0',
 }
 
+export interface IEncryptedData {
+    encryptedData: string;
+}
+
+export interface IJoinProgress {
+    userId: string;
+    joinProgress: JoinProgressType;
+    nickname: string;
+}
+
 export class InputSocialDTO {
     @IsString()
     userId: string;

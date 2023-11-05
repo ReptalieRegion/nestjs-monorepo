@@ -18,6 +18,15 @@ interface UserOption {
 export class UserSearcherService {
     constructor(private readonly userRepository: UserRepository, private readonly followRepository: FollowRepository) {}
 
+    /**
+     * 팔로워 목록을 페이지별로 무한 스크롤을 통해 검색합니다.
+     *
+     * @param following - 팔로워를 찾을 사용자 ID
+     * @param search - 검색할 팔로워의 닉네임 일부
+     * @param pageParam - 페이지 번호 (0부터 시작)
+     * @param limitSize - 한 페이지에 표시할 항목 수
+     * @returns 팔로워 목록 및 다음 페이지의 존재 여부를 반환합니다.
+     */
     async getFollowersInfiniteScroll(following: string, search: string, pageParam: number, limitSize: number) {
         const follow = await this.followRepository
             .find(
@@ -51,6 +60,13 @@ export class UserSearcherService {
         return { items, nextPage };
     }
 
+    /**
+     * 사용자의 프로필 정보를 검색합니다.
+     *
+     * @param nickname - 프로필을 검색할 닉네임
+     * @param user - 요청하는 사용자 정보 (선택 사항)
+     * @returns 사용자 프로필 정보를 반환합니다.
+     */
     async getProfile(nickname: string, user?: IResponseUserDTO) {
         const userInfo = await this.getUserInfo({ nickname, currentUserId: user?.id });
         const followCount = await this.getFollowCount(userInfo?.id);
@@ -66,6 +82,15 @@ export class UserSearcherService {
         };
     }
 
+    /**
+     * 사용자의 팔로워 목록을 페이지별로 무한 스크롤을 통해 검색합니다.
+     *
+     * @param userId - 현재 사용자의 ID
+     * @param targetUserId - 팔로워 목록을 검색할 대상 사용자 ID
+     * @param pageParam - 페이지 번호 (0부터 시작)
+     * @param limitSize - 한 페이지에 표시할 항목 수
+     * @returns 팔로워 목록 및 다음 페이지의 존재 여부를 반환합니다.
+     */
     async getUserFollowersInfiniteScroll(userId: string, targetUserId: string, pageParam: number, limitSize: number) {
         try {
             const followers = await this.followRepository
@@ -98,6 +123,15 @@ export class UserSearcherService {
         }
     }
 
+    /**
+     * 사용자의 팔로잉 목록을 페이지별로 무한 스크롤을 통해 검색합니다.
+     *
+     * @param userId - 현재 사용자의 ID
+     * @param targetUserId - 팔로잉 목록을 검색할 대상 사용자 ID
+     * @param pageParam - 페이지 번호 (0부터 시작)
+     * @param limitSize - 한 페이지에 표시할 항목 수
+     * @returns 팔로잉 목록 및 다음 페이지의 존재 여부를 반환합니다.
+     */
     async getUserFollowingsInfiniteScroll(userId: string, targetUserId: string, pageParam: number, limitSize: number) {
         try {
             const followings = await this.followRepository
@@ -136,6 +170,12 @@ export class UserSearcherService {
      *
      */
 
+    /**
+     * 사용자 정보를 검색합니다.
+     *
+     * @param option - 사용자 정보를 검색하는 데 필요한 옵션
+     * @returns 사용자 정보를 반환합니다.
+     */
     async getUserInfo(option: UserOption) {
         const { targetUserId, nickname, currentUserId, user } = option;
         let userInfo;
@@ -169,6 +209,13 @@ export class UserSearcherService {
         };
     }
 
+    /**
+     * 팔로우 상태를 검색합니다.
+     *
+     * @param following - 팔로우 대상 사용자 ID
+     * @param follower - 팔로우 요청자 사용자 ID
+     * @returns 팔로우 상태를 반환합니다.
+     */
     async getFollowStatus(following: string, follower: string) {
         try {
             const follow = await this.followRepository.findOne({ following, follower }).exec();
@@ -183,12 +230,24 @@ export class UserSearcherService {
         }
     }
 
+    /**
+     * 닉네임 중복 여부를 검색합니다.
+     *
+     * @param nickname - 검색할 닉네임
+     * @returns 중복 여부 정보를 반환합니다.
+     */
     async isDuplicateNickname(nickname: string): Promise<{ isDuplicate: boolean }> {
         const user = await this.userRepository.findOne({ nickname }).exec();
 
         return { isDuplicate: user ? true : false };
     }
 
+    /**
+     * 사용자 ID를 검색합니다.
+     *
+     * @param _id - 사용자 ID
+     * @returns 사용자 정보를 반환합니다.
+     */
     async findUserId(_id: string) {
         try {
             const user = await this.userRepository.findOne({ _id }).exec();
@@ -203,6 +262,12 @@ export class UserSearcherService {
         }
     }
 
+    /**
+     * 닉네임을 검색합니다.
+     *
+     * @param nickname - 검색할 닉네임
+     * @returns 사용자 정보를 반환합니다.
+     */
     async findNickname(nickname: string) {
         const user = await this.userRepository.findOne({ nickname }).exec();
 
@@ -213,11 +278,24 @@ export class UserSearcherService {
         return user.Mapper();
     }
 
+    /**
+     * 팔로우 상태의 존재 여부를 검색합니다.
+     *
+     * @param following - 팔로우 대상 사용자 ID
+     * @param follower - 팔로우 요청자 사용자 ID
+     * @returns 팔로우 상태의 존재 여부를 반환합니다.
+     */
     async isExistsFollow(following: string, follower: string) {
         const follow = await this.followRepository.findOne({ following, follower }).exec();
         return follow ? (follow.isCanceled ? false : true) : undefined;
     }
 
+    /**
+     * 사용자의 팔로워 및 팔로잉 수를 검색합니다.
+     *
+     * @param targetUserId - 대상 사용자 ID
+     * @returns 팔로우 수 정보를 반환합니다.
+     */
     async getFollowCount(targetUserId: string) {
         const [followerCount, followingCount] = await Promise.all([
             this.followRepository.countDocuments({ follower: targetUserId, isCanceled: false }).exec(),
@@ -227,6 +305,12 @@ export class UserSearcherService {
         return { follower: followerCount, following: followingCount };
     }
 
+    /**
+     * 사용자의 팔로워 목록을 검색합니다.
+     *
+     * @param userId - 사용자 ID
+     * @returns 팔로워 목록을 반환합니다.
+     */
     async getUserFollowers(userId: string) {
         const followers = await this.followRepository.find({ following: userId, isCanceled: false }, { follower: 1 }).exec();
         return followers.map((entity) => entity.Mapper().follower as string);

@@ -1,27 +1,23 @@
 import { Body, Controller, HttpCode, HttpStatus, Inject, Post, UseGuards, Headers, Delete } from '@nestjs/common';
-import { EncryptedDataDTO } from '../../dto/user/social/encryptedData.dto';
-import { JoinProgressDTO } from '../../dto/user/social/joinProgress.dto';
+import { IEncryptedData, IJoinProgress } from '../../dto/user/social/input-social.dto';
 import { IResponseUserDTO } from '../../dto/user/user/response-user.dto';
 import { controllerErrorHandler } from '../../utils/error/errorHandler';
 import { AuthUser } from '../user/user.decorator';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { JwtSocialAuthGuard } from './guards/jwtSocial-auth.guard';
-import { AppleService, AppleServiceToken } from './service/apple.service';
-import { AuthService, AuthServiceToken } from './service/auth.service';
-import { GoogleService, GoogleServiceToken } from './service/google.service';
-import { KakaoService, KakaoServiceToken } from './service/kakao.service';
+import { AuthCommonService, AuthCommonServiceToken } from './service/authCommon.service';
+import { AuthSocialService, AuthSocialServiceToken } from './service/authSocial.service';
+import { AuthTokenService, AuthTokenServiceToken } from './service/authToken.service';
 
 @Controller('/auth')
 export class AuthController {
     constructor(
-        @Inject(AuthServiceToken)
-        private readonly authService: AuthService,
-        @Inject(KakaoServiceToken)
-        private readonly kakaoService: KakaoService,
-        @Inject(GoogleServiceToken)
-        private readonly googleService: GoogleService,
-        @Inject(AppleServiceToken)
-        private readonly appleService: AppleService,
+        @Inject(AuthTokenServiceToken)
+        private readonly authTokenService: AuthTokenService,
+        @Inject(AuthCommonServiceToken)
+        private readonly authCommonService: AuthCommonService,
+        @Inject(AuthSocialServiceToken)
+        private readonly authSocialService: AuthSocialService,
     ) {}
 
     /**
@@ -33,7 +29,7 @@ export class AuthController {
     @HttpCode(HttpStatus.OK)
     async authToken() {
         try {
-            return this.authService.getAuthTokenAndPublicKey();
+            return this.authTokenService.getAuthTokenAndPublicKey();
         } catch (error) {
             controllerErrorHandler(error);
         }
@@ -42,9 +38,9 @@ export class AuthController {
     @Post('social/kakao')
     @HttpCode(HttpStatus.CREATED)
     @UseGuards(JwtSocialAuthGuard)
-    async socialKakao(@Body() dto: EncryptedDataDTO) {
+    async socialKakao(@Body() dto: IEncryptedData) {
         try {
-            return this.kakaoService.kakaoSignIn(dto);
+            return this.authSocialService.kakaoSignIn(dto);
         } catch (error) {
             controllerErrorHandler(error);
         }
@@ -56,7 +52,7 @@ export class AuthController {
         try {
             const refreshToken = authorizationHeader.split('Bearer ')[1];
 
-            return this.authService.verifyRefreshToken(refreshToken);
+            return this.authCommonService.verifyRefreshToken(refreshToken);
         } catch (error) {
             controllerErrorHandler(error);
         }
@@ -65,9 +61,9 @@ export class AuthController {
     @Post('social/join-progress')
     @HttpCode(HttpStatus.OK)
     @UseGuards(JwtSocialAuthGuard)
-    async updateJoinProgress(@Body() dto: JoinProgressDTO) {
+    async handleJoinProgress(@Body() dto: IJoinProgress) {
         try {
-            return this.authService.updateJoinProgress(dto);
+            return this.authCommonService.handleJoinProgress(dto);
         } catch (error) {
             controllerErrorHandler(error);
         }
@@ -89,7 +85,7 @@ export class AuthController {
     @UseGuards(JwtAuthGuard)
     async signOut(@AuthUser() user: IResponseUserDTO) {
         try {
-            await this.authService.signOut(user.id);
+            return this.authCommonService.signOut(user.id);
         } catch (error) {
             controllerErrorHandler(error);
         }

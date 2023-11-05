@@ -75,6 +75,13 @@ export class UserController {
         }
     }
 
+    @Get('me/profile')
+    @HttpCode(HttpStatus.OK)
+    @UseGuards(JwtAuthGuard)
+    async getMyProfile(@AuthUser() user: IResponseUserDTO) {
+        return user;
+    }
+
     @Get('follower/list')
     @HttpCode(HttpStatus.OK)
     @UseGuards(JwtAuthGuard)

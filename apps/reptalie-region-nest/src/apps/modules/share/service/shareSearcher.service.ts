@@ -266,6 +266,12 @@ export class ShareSearcherService {
      *
      */
 
+    /**
+     * 게시물 정보를 조회하고 반환합니다.
+     *
+     * @param option PostOption 객체로 게시물의 생성, 업데이트 또는 삭제 여부를 결정합니다.
+     * @returns 게시물 정보 객체를 반환합니다.
+     */
     async getPostInfo(option: PostOption) {
         if (option.create) {
             const { id, contents } = option.create.post;
@@ -296,6 +302,12 @@ export class ShareSearcherService {
         }
     }
 
+    /**
+     * 댓글 정보를 조회하고 반환합니다.
+     *
+     * @param option CommentOption 객체로 게시물의 생성, 업데이트 또는 삭제 여부를 결정합니다.
+     * @returns 댓글 정보 객체를 반환합니다.
+     */
     async getCommentInfo(option: CommentOption) {
         if (option.create) {
             const { id, contents } = option.create.comment;
@@ -326,6 +338,12 @@ export class ShareSearcherService {
         }
     }
 
+    /**
+     * 대댓글 정보를 조회하고 반환합니다.
+     *
+     * @param option CommentReplyOption 객체로 게시물의 생성, 업데이트 또는 삭제 여부를 결정합니다.
+     * @returns 대댓글 정보 객체를 반환합니다.
+     */
     async getCommentReplyInfo(option: CommentReplyOption) {
         if (option.create) {
             const { id, contents } = option.create.commentReply;
@@ -358,6 +376,13 @@ export class ShareSearcherService {
         }
     }
 
+    /**
+     * 게시물 좋아요 상태를 조회하고 반환합니다.
+     *
+     * @param postId 게시물 ID
+     * @param userId 사용자 ID
+     * @returns 게시물 좋아요 상태 및 게시물 작성자의 닉네임 정보를 반환합니다.
+     */
     async getLikeStatus(postId: string, userId: string) {
         try {
             const like = await this.shareLikeRepository
@@ -375,11 +400,24 @@ export class ShareSearcherService {
         }
     }
 
+    /**
+     * 지정된 사용자와 게시물에 대한 좋아요 상태가 존재하는지 확인하고 반환합니다.
+     *
+     * @param userId 사용자 ID
+     * @param postId 게시물 ID
+     * @returns 좋아요 상태 여부 (존재하는 경우 true, 없는 경우 false, 알 수 없는 경우 undefined)
+     */
     async isExistsLike(userId: string, postId: string): Promise<boolean | undefined> {
         const like = await this.shareLikeRepository.findOne({ userId, postId }).exec();
         return like ? (like.isCanceled ? false : true) : undefined;
     }
 
+    /**
+     * 지정된 게시물 ID를 기반으로 게시물을 검색하고 반환합니다.
+     *
+     * @param postId 게시물 ID
+     * @returns 검색된 게시물 정보를 반환합니다.
+     */
     async findPost(postId: string) {
         try {
             const post = await this.sharePostRepository
@@ -397,6 +435,12 @@ export class ShareSearcherService {
         }
     }
 
+    /**
+     * 지정된 댓글 ID를 기반으로 댓글을 검색하고 반환합니다.
+     *
+     * @param commentId 댓글 ID
+     * @returns 검색된 댓글 정보를 반환합니다.
+     */
     async findComment(commentId: string) {
         try {
             const comment = await this.shareCommentRepository.findOne({ _id: commentId, isDeleted: false }).exec();
@@ -411,22 +455,52 @@ export class ShareSearcherService {
         }
     }
 
+    /**
+     * 지정된 사용자 ID에 대한 게시물 수를 반환합니다.
+     *
+     * @param userId 사용자 ID
+     * @returns 게시물 수를 반환합니다.
+     */
     async getPostCount(userId: string): Promise<number> {
         return this.sharePostRepository.countDocuments({ userId, isDeleted: false }).exec();
     }
 
+    /**
+     * 지정된 게시물 ID에 대한 좋아요 수를 반환합니다.
+     *
+     * @param postId 게시물 ID
+     * @returns 좋아요 수를 반환합니다.
+     */
     async getLikeCount(postId: string): Promise<number> {
         return this.shareLikeRepository.countDocuments({ postId, isCanceled: false }).exec();
     }
 
+    /**
+     * 지정된 게시물 ID에 대한 댓글 수를 반환합니다.
+     *
+     * @param postId 게시물 ID
+     * @returns 댓글 수를 반환합니다.
+     */
     async getCommentCount(postId: string): Promise<number> {
         return this.shareCommentRepository.countDocuments({ postId, isDeleted: false }).exec();
     }
 
+    /**
+     * 지정된 댓글 ID에 대한 답글 수를 반환합니다.
+     *
+     * @param commentId 댓글 ID
+     * @returns 답글 수를 반환합니다.
+     */
     async getCommentReplyCount(commentId: string): Promise<number> {
         return this.shareCommentReplyRepository.countDocuments({ commentId, isDeleted: false }).exec();
     }
 
+    /**
+     * 지정된 게시물 ID에 대한 댓글 ID 목록을 반환합니다.
+     *
+     * @param postId 게시물 ID
+     * @returns 댓글 ID 목록를 반환합니다.
+     */
     async getCommentIds(postId: string): Promise<string[]> {
         const comments = await this.shareCommentRepository.find({ postId, isDeleted: false }, { _id: 1 }).exec();
         return comments.map((entity) => entity.Mapper().id as string);

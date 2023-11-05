@@ -7,7 +7,6 @@ import {
 } from '@nestjs/common';
 import mongoose, { ClientSession } from 'mongoose';
 import { ImageType } from '../../../dto/image/input-image.dto';
-import { InputUserDTO } from '../../../dto/user/user/input-user.dto';
 import { serviceErrorHandler } from '../../../utils/error/errorHandler';
 import { randomWords } from '../../../utils/randomNickname/randomWords';
 import { ImageWriterService, ImageWriterServiceToken } from '../../image/service/imageWriter.service';
@@ -32,20 +31,38 @@ export class UserWriterService {
         private readonly imageWriterService: ImageWriterService,
     ) {}
 
+    /**
+     * 새로운 사용자를 생성하고 필요한 작업을 수행합니다.
+     *
+     * @param session MongoDB 클라이언트 세션
+     * @returns 생성된 사용자 객체를 반환합니다.
+     */
     async createUser(session: ClientSession) {
-        const dto: InputUserDTO = {
-            nickname: await this.generateAvailableNickname(),
-            imageId: String(new mongoose.Types.ObjectId()),
-        };
-
-        const user = await this.userRepository.createUser(dto, session);
+        const nickname = await this.generateAvailableNickname();
         const imageKeys = ['3d16d2c1-d2c4-4b8b-a496-3ef1c9ef45d6.png'];
-        const image = await this.imageWriterService.createImage(user.id as string, imageKeys, ImageType.Profile, session);
-        await this.userUpdaterService.updateUserImageId(user.id as string, image[0].id as string, session);
+
+        const user = await this.userRepository.createUser(
+            { nickname, imageId: String(new mongoose.Types.ObjectId()) },
+            session,
+        );
+
+        if (!user) {
+            throw new InternalServerErrorException('Failed to save user.');
+        }
+
+        const [image] = await this.imageWriterService.createImage(user.id as string, imageKeys, ImageType.Profile, session);
+        await this.userUpdaterService.updateImageId(user.id as string, image.id as string, session);
 
         return user;
     }
 
+    /**
+     * 팔로우 관계를 생성합니다.
+     *
+     * @param following 팔로우하는 사용자의 ID
+     * @param follower 팔로우하는 사용자의 ID
+     * @returns 생성된 팔로우 관계 정보를 반환합니다.
+     */
     async createFollow(following: string, follower: string) {
         if (following === follower) {
             throw new BadRequestException('Following and follower cannot be the same user.');
@@ -67,19 +84,30 @@ export class UserWriterService {
         }
     }
 
+    /**
+     * 이용 가능한 닉네임을 생성합니다.
+     *
+     * @returns 생성된 닉네임을 반환합니다.
+     */
     async generateAvailableNickname(): Promise<string> {
         for (let i = 0; i < 15; i++) {
             const baseNickname = this.generateRandomNickname();
             const nicknameToCheck = i < 5 ? baseNickname : `${baseNickname}${i - 5}`;
 
-            const isDuplicate = (await this.userSearcherService.isDuplicateNickname(nicknameToCheck)).isDuplicate;
-            if (!isDuplicate) {
+            const isDuplicate = await this.userSearcherService.isDuplicateNickname(nicknameToCheck);
+            if (!isDuplicate.isDuplicate) {
                 return nicknameToCheck;
             }
         }
+
         throw new UnprocessableEntityException('Too many requests to generate a nickname.');
     }
 
+    /**
+     * 무작위 닉네임을 생성합니다.
+     *
+     * @returns 생성된 닉네임을 반환합니다.
+     */
     private generateRandomNickname(): string {
         const { adverbs, adjectives, nouns } = randomWords;
 

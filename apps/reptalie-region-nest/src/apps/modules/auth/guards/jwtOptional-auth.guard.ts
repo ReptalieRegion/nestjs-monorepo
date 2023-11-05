@@ -3,13 +3,13 @@ import { AuthGuard } from '@nestjs/passport';
 import { Request } from 'express';
 
 import { UserSearcherService, UserSearcherServiceToken } from '../../user/service/userSearcher.service';
-import { AuthService, AuthServiceToken } from '../service/auth.service';
+import { AuthTokenService, AuthTokenServiceToken } from '../service/authToken.service';
 
 @Injectable()
 export class JwtOptionalAuthGuard extends AuthGuard('jwt') {
     constructor(
-        @Inject(AuthServiceToken)
-        private readonly authService: AuthService,
+        @Inject(AuthTokenServiceToken)
+        private readonly authTokenService: AuthTokenService,
         @Inject(UserSearcherServiceToken)
         private readonly userSearcherService: UserSearcherService,
     ) {
@@ -34,6 +34,6 @@ export class JwtOptionalAuthGuard extends AuthGuard('jwt') {
 
     private validateRequest(request: Request) {
         const accessToken = request.headers.authorization?.split('Bearer ')[1] as string;
-        return this.authService.verifyAccessToken(accessToken);
+        return this.authTokenService.verifyAccessToken(accessToken);
     }
 }

@@ -4,12 +4,10 @@ import { CustomJwtModule, MongooseModuleSocial } from '../../utils/customModules
 import { UserModule } from '../user/user.module';
 import { AuthController } from './auth.controller';
 import {
-    AuthServiceProvider,
-    PBKDF2ServiceProvider,
-    AppleServiceProvider,
-    GoogleServiceProvider,
-    KakaoServiceProvider,
-    CryptoServiceProvider,
+    AuthCommonServiceProvider,
+    AuthEncryptServiceProvider,
+    AuthSocialServiceProvider,
+    AuthTokenServiceProvider,
 } from './auth.provider';
 import { SocialRepository } from './repository/social.repository';
 
@@ -18,20 +16,11 @@ import { SocialRepository } from './repository/social.repository';
     controllers: [AuthController],
     providers: [
         SocialRepository,
-        PBKDF2ServiceProvider,
-        CryptoServiceProvider,
-        AuthServiceProvider,
-        AppleServiceProvider,
-        GoogleServiceProvider,
-        KakaoServiceProvider,
+        AuthCommonServiceProvider,
+        AuthEncryptServiceProvider,
+        AuthSocialServiceProvider,
+        AuthTokenServiceProvider,
     ],
-    exports: [
-        PBKDF2ServiceProvider,
-        CryptoServiceProvider,
-        AuthServiceProvider,
-        AppleServiceProvider,
-        GoogleServiceProvider,
-        KakaoServiceProvider,
-    ],
+    exports: [AuthCommonServiceProvider, AuthEncryptServiceProvider, AuthSocialServiceProvider, AuthTokenServiceProvider],
 })
 export class AuthModule {}

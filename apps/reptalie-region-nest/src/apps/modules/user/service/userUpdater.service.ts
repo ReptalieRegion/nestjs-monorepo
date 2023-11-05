@@ -16,7 +16,14 @@ export class UserUpdaterService {
         private readonly userSearcherService: UserSearcherService,
     ) {}
 
-    async updateUserImageId(_id: string, imageId: string, session: ClientSession) {
+    /**
+     * 사용자의 이미지 ID를 업데이트합니다.
+     *
+     * @param _id - 사용자 ID
+     * @param imageId - 새로운 이미지 ID
+     * @param session - MongoDB 클라이언트 세션
+     */
+    async updateImageId(_id: string, imageId: string, session: ClientSession) {
         const result = await this.userRepository.updateOne({ _id }, { $set: { imageId } }, { session }).exec();
 
         if (result.modifiedCount === 0) {
@@ -24,6 +31,13 @@ export class UserUpdaterService {
         }
     }
 
+    /**
+     * 사용자의 닉네임을 업데이트합니다.
+     *
+     * @param nickname - 새로운 닉네임
+     * @param userId - 사용자 ID
+     * @param session - MongoDB 클라이언트 세션
+     */
     async updateNickname(nickname: string, userId: string, session: ClientSession) {
         const result = await this.userRepository.updateOne({ _id: userId }, { $set: { nickname } }, { session }).exec();
 
@@ -32,6 +46,13 @@ export class UserUpdaterService {
         }
     }
 
+    /**
+     * 팔로우 상태를 토글합니다.
+     *
+     * @param following - 팔로우 대상 사용자 ID
+     * @param follower - 팔로우를 요청한 사용자 ID
+     * @returns 팔로우 상태를 업데이트한 결과를 반환합니다.
+     */
     async toggleFollow(following: string, follower: string) {
         if (following === follower) {
             throw new BadRequestException('Following and follower cannot be the same user.');

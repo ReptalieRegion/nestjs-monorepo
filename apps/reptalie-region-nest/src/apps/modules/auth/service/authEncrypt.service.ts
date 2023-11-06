@@ -1,8 +1,10 @@
 import * as crypto from 'crypto';
 import { pbkdf2Sync, randomBytes } from 'crypto';
-import * as fs from 'fs';
-import path from 'path';
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
+
+// 추후 키관리 관련 확정 후 변경 예정
+// import * as fs from 'fs';
+// import path from 'path';
 
 interface IPBKDF2EncryptedData {
     salt: string;
@@ -18,11 +20,12 @@ export class AuthEncryptService {
     private publicKeyPath: string;
 
     constructor() {
-        const keyRoot = path.join(__dirname, '../../../key');
-        this.keyRoot = keyRoot;
-        this.privateKeyPath = path.join(keyRoot, 'private_key.pem');
-        this.publicKeyPath = path.join(keyRoot, 'public_key.pem');
-        this.initializeKeys();
+        // 추후 키관리 관련 확정 후 변경 예정
+        // const keyRoot = path.join(__dirname, '../../../key');
+        // this.keyRoot = keyRoot;
+        // this.privateKeyPath = path.join(keyRoot, 'private_key.pem');
+        // this.publicKeyPath = path.join(keyRoot, 'public_key.pem');
+        // this.initializeKeys();
     }
 
     /**
@@ -31,7 +34,8 @@ export class AuthEncryptService {
      * @returns 공개 키 문자열을 반환합니다.
      */
     getPublicKey(): string {
-        const publicKey = fs.readFileSync(this.publicKeyPath, 'utf8');
+        const { PUBLIC_SECRET_KEY } = process.env;
+        const publicKey = PUBLIC_SECRET_KEY as string;
 
         return publicKey;
     }
@@ -43,7 +47,9 @@ export class AuthEncryptService {
      * @returns 암호화된 데이터를 반환합니다.
      */
     encryptCrypto(plaintext: string): string {
-        const publicKey = fs.readFileSync(this.publicKeyPath, 'utf8');
+        const { PUBLIC_SECRET_KEY } = process.env;
+
+        const publicKey = PUBLIC_SECRET_KEY as string;
         const buffer = Buffer.from(plaintext, 'utf8');
         const encryptedData = crypto.publicEncrypt(publicKey, buffer).toString('base64');
 
@@ -58,7 +64,9 @@ export class AuthEncryptService {
      */
     decryptCrypto(encryptedData: string): string {
         try {
-            const privateKey = fs.readFileSync(this.privateKeyPath, 'utf8');
+            const { PRIVATE_SECRET_KEY } = process.env;
+
+            const privateKey = PRIVATE_SECRET_KEY as string;
             const buffer = Buffer.from(encryptedData, 'base64');
             const decryptedData = crypto.privateDecrypt(
                 {
@@ -100,7 +108,7 @@ export class AuthEncryptService {
 
     /**
      * 주어진 평문, salt 키 및 암호화된 데이터를 사용하여 암호화된 데이터를 검증합니다.
-     * 
+     *
      * @param plaintext - 검증할 평문
      * @param salt - 암호화할때 사용된 salt 키
      * @param encryptedData - 암호화된 데이터
@@ -123,32 +131,33 @@ export class AuthEncryptService {
         return encryptedData === hashedPlaintext;
     }
 
-    private initializeKeys() {
-        if (fs.existsSync(this.privateKeyPath) && fs.existsSync(this.publicKeyPath)) {
-            return;
-        }
+    // 추후 키관리 관련 확정 후 변경 예정
+    // private initializeKeys() {
+    //     if (fs.existsSync(this.privateKeyPath) && fs.existsSync(this.publicKeyPath)) {
+    //         return;
+    //     }
 
-        const { publicKey, privateKey } = crypto.generateKeyPairSync('rsa', {
-            modulusLength: 2048,
-            publicKeyEncoding: {
-                type: 'spki',
-                format: 'pem',
-            },
-            privateKeyEncoding: {
-                type: 'pkcs8',
-                format: 'pem',
-                cipher: 'aes-256-cbc',
-                passphrase: process.env.CRYPTO_SECRET_KEY,
-            },
-        });
+    //     const { publicKey, privateKey } = crypto.generateKeyPairSync('rsa', {
+    //         modulusLength: 2048,
+    //         publicKeyEncoding: {
+    //             type: 'spki',
+    //             format: 'pem',
+    //         },
+    //         privateKeyEncoding: {
+    //             type: 'pkcs8',
+    //             format: 'pem',
+    //             cipher: 'aes-256-cbc',
+    //             passphrase: process.env.CRYPTO_SECRET_KEY,
+    //         },
+    //     });
 
-        fs.mkdir(this.keyRoot, (error) => {
-            if (error) {
-                console.log(error);
-            } else {
-                fs.writeFileSync(this.privateKeyPath, privateKey);
-                fs.writeFileSync(this.publicKeyPath, publicKey);
-            }
-        });
-    }
+    //     fs.mkdir(this.keyRoot, (error) => {
+    //         if (error) {
+    //             console.log(error);
+    //         } else {
+    //             fs.writeFileSync(this.privateKeyPath, privateKey);
+    //             fs.writeFileSync(this.publicKeyPath, publicKey);
+    //         }
+    //     });
+    // }
 }

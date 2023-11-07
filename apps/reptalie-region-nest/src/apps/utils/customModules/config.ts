@@ -28,6 +28,7 @@ const configs = () => {
         AWS_BUCKET: env.AWS_BUCKET,
         AWS_IMAGE_BASEURL: env.AWS_IMAGE_BASEURL,
         REDIS_URI: env.REDIS_URI,
+        GOOGLE_CLIENT_ID: env.GOOGLE_CLIENT_ID,
     };
 };
 

@@ -36,6 +36,7 @@
         "class-transformer": "^0.5.1",
         "class-validator": "^0.14.0",
         "cookie-parser": "^1.4.6",
+        "google-auth-library": "^9.2.0",
         "jsonwebtoken": "^9.0.0",
         "mime-types": "^2.1.35",
         "mongoose": "^7.1.1",

@@ -57,6 +57,18 @@ export class AuthController {
         }
     }
 
+    @Post('social/google')
+    @HttpCode(HttpStatus.CREATED)
+    async socialGoogle(@Headers('authorization') authorizationHeader: string) {
+        try {
+            const idToken = authorizationHeader.split('Bearer ')[1];
+
+            return this.authSocialService.googleSignIn(idToken);
+        } catch (error) {
+            controllerErrorHandler(error);
+        }
+    }
+
     @Post('refresh')
     @HttpCode(HttpStatus.OK)
     async verifyRefreshToken(@Headers('authorization') authorizationHeader: string) {

@@ -44,13 +44,13 @@ export class AuthSocialService {
                 .populate({ path: 'userId', select: 'nickname' })
                 .exec();
 
-            let result, token;
+            let result;
 
             if (socialProfile) {
                 const user = Object(socialProfile.userId).Mapper();
 
                 if (socialProfile.joinProgress === JoinProgressType.DONE) {
-                    token = await this.authCommonService.tokenGenerationAndStorage(user.id, session);
+                    const token = await this.authCommonService.tokenGenerationAndStorage(user.id, session);
 
                     result = { type: 'SIGN_IN', accessToken: token.accessToken, refreshToken: token.refreshToken };
                 } else {
@@ -63,6 +63,56 @@ export class AuthSocialService {
                 }
             } else {
                 result = await this.socialSignUp(decryptedData, ProviderType.Kakao, session);
+            }
+
+            await session.commitTransaction();
+            return result;
+        } catch (error) {
+            await session.abortTransaction();
+            throw error;
+        } finally {
+            await session.endSession();
+        }
+    }
+
+    /**
+     * Apple 로부터의 로그인 요청을 처리합니다.
+     *
+     * @param dto - 암호화된 데이터를 포함하는 데이터 전송 객체 (IEncryptedData).
+     * @returns - Apple 로그인에 대한 결과를 반환합니다. 이미 가입한 사용자의 경우 로그인 정보를 제공하고,
+     *            새로운 사용자의 경우 회원가입 정보를 제공합니다.
+     */
+    async appleSignIn(dto: IEncryptedData) {
+        const session: ClientSession = await this.connection.startSession();
+        session.startTransaction();
+
+        try {
+            const decryptedData = this.authEncryptService.decryptCrypto(dto.encryptedData);
+
+            const socialProfile = await this.socialRepository
+                .findOne({ provider: ProviderType.Apple, uniqueId: decryptedData })
+                .populate({ path: 'userId', select: 'nickname' })
+                .exec();
+
+            let result;
+
+            if (socialProfile) {
+                const user = Object(socialProfile.userId).Mapper();
+
+                if (socialProfile.joinProgress === JoinProgressType.DONE) {
+                    const token = await this.authCommonService.tokenGenerationAndStorage(user.id, session);
+
+                    result = { type: 'SIGN_IN', accessToken: token.accessToken, refreshToken: token.refreshToken };
+                } else {
+                    result = {
+                        type: 'SIGN_UP',
+                        joinProgress: socialProfile.joinProgress,
+                        nickname: user.nickname,
+                        userId: user.id,
+                    };
+                }
+            } else {
+                result = await this.socialSignUp(decryptedData, ProviderType.Apple, session);
             }
 
             await session.commitTransaction();

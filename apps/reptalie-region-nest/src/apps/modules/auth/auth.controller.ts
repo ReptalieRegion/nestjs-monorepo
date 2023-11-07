@@ -46,6 +46,17 @@ export class AuthController {
         }
     }
 
+    @Post('social/apple')
+    @HttpCode(HttpStatus.CREATED)
+    @UseGuards(JwtSocialAuthGuard)
+    async socialApple(@Body() dto: IEncryptedData) {
+        try {
+            return this.authSocialService.appleSignIn(dto);
+        } catch (error) {
+            controllerErrorHandler(error);
+        }
+    }
+
     @Post('refresh')
     @HttpCode(HttpStatus.OK)
     async verifyRefreshToken(@Headers('authorization') authorizationHeader: string) {

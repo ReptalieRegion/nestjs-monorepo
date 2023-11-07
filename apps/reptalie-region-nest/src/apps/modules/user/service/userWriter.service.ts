@@ -39,7 +39,7 @@ export class UserWriterService {
      */
     async createUser(session: ClientSession) {
         const nickname = await this.generateAvailableNickname();
-        const imageKeys = ['af403704-4c98-4e3c-a0db-0d3ee48a2bbd.jpeg'];
+        const imageKeys = ['6f433309-a36b-4498-b819-48ace2d19c7f.jpeg'];
 
         const user = await this.userRepository.createUser(
             { nickname, imageId: String(new mongoose.Types.ObjectId()) },

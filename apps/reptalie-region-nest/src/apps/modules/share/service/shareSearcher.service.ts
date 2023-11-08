@@ -261,6 +261,47 @@ export class ShareSearcherService {
     }
 
     /**
+     * 무한 스크롤로 사용자 자신의 게시물을 가져옵니다.
+     *
+     * @param userId - 현재 사용자의 ID입니다.
+     * @param pageParam - 현재 페이지 번호입니다.
+     * @param limitSize - 한 페이지당 가져올 게시물 수입니다.
+     * @returns 가져온 게시물과 다음 페이지 번호를 반환합니다.
+     */
+    async getMyPostsInfiniteScroll(userId: string, pageParam: number, limitSize: number) {
+        const posts = await this.sharePostRepository
+            .find({ userId, isDeleted: false })
+            .sort({ updatedAt: -1, createdAt: -1 })
+            .skip(pageParam * limitSize)
+            .limit(limitSize)
+            .exec();
+
+        const items = await Promise.all(
+            posts.map(async (entity) => {
+                const post = entity.Mapper();
+                const images = post.id && (await this.imageSearcherService.getPostImages(post.id));
+
+                return {
+                    post: {
+                        id: post.id,
+                        contents: post.contents,
+                        images,
+                        isMine: true,
+                        isLike: post.id ? await this.isExistsLike(userId, post?.id) : undefined,
+                        likeCount: post.id && (await this.getLikeCount(post.id)),
+                        commentCount: post.id && (await this.getCommentCount(post.id)),
+                    },
+                };
+            }),
+        );
+
+        const isLastPage = posts.length < limitSize;
+        const nextPage = isLastPage ? undefined : pageParam + 1;
+
+        return { items, nextPage };
+    }
+
+    /**
      *    여러 곳에서 공유되는 함수들 모음
      *
      *

@@ -1,4 +1,5 @@
 import {
+    Body,
     Controller,
     Get,
     HttpCode,
@@ -14,6 +15,7 @@ import {
 } from '@nestjs/common';
 
 import { FilesInterceptor } from '@nestjs/platform-express';
+import { InputUserDTO } from '../../dto/user/user/input-user.dto';
 import { IResponseUserDTO } from '../../dto/user/user/response-user.dto';
 import { controllerErrorHandler } from '../../utils/error/errorHandler';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -79,6 +81,17 @@ export class UserController {
         }
     }
 
+    @Put('fcm-token')
+    @HttpCode(HttpStatus.OK)
+    @UseGuards(JwtAuthGuard)
+    async updateFcmToken(@AuthUser() user: IResponseUserDTO, @Body() dto: InputUserDTO) {
+        try {
+            return this.userUpdaterService.updateFcmToken(user, dto);
+        } catch (error) {
+            controllerErrorHandler(error);
+        }
+    }
+
     /**
      *
      *  Delete
@@ -105,7 +118,11 @@ export class UserController {
     @HttpCode(HttpStatus.OK)
     @UseGuards(JwtAuthGuard)
     async getMyProfile(@AuthUser() user: IResponseUserDTO) {
-        return user;
+        try {
+            return this.userSearcherService.getMyProfile(user);
+        } catch (error) {
+            controllerErrorHandler(error);
+        }
     }
 
     @Get('follower/list')

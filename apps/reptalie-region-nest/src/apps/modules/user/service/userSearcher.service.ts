@@ -83,6 +83,24 @@ export class UserSearcherService {
     }
 
     /**
+     * 사용자 자신의 정보를 검색합니다.
+     *
+     * @param user - 요청하는 사용자 정보
+     * @returns 사용자 프로필 정보를 반환합니다.
+     */
+    async getMyProfile(user: IResponseUserDTO) {
+        const followCount = await this.getFollowCount(user.id);
+
+        return {
+            user: {
+                ...user,
+                followerCount: followCount.follower,
+                followingCount: followCount.following,
+            },
+        };
+    }
+
+    /**
      * 사용자의 팔로워 목록을 페이지별로 무한 스크롤을 통해 검색합니다.
      *
      * @param userId - 현재 사용자의 ID

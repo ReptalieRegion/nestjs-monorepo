@@ -2,6 +2,7 @@ import { BadRequestException, Inject, Injectable, InternalServerErrorException }
 import { InjectConnection } from '@nestjs/mongoose';
 import mongoose, { ClientSession } from 'mongoose';
 import { ImageType } from '../../../dto/image/input-image.dto';
+import { InputUserDTO } from '../../../dto/user/user/input-user.dto';
 import { IResponseUserDTO } from '../../../dto/user/user/response-user.dto';
 import { ImageDeleterService, ImageDeleterServiceToken } from '../../image/service/imageDeleter.service';
 import { ImageS3HandlerService, ImageS3HandlerServiceToken } from '../../image/service/imageS3Handler.service';
@@ -59,6 +60,23 @@ export class UserUpdaterService {
         if (result.modifiedCount === 0) {
             throw new InternalServerErrorException('Failed to update user nickname.');
         }
+    }
+
+    /**
+     * 사용자의 FCM( Firebase Cloud Messaging) 토큰을 업데이트하는 메서드입니다.
+     *
+     * @param user - 업데이트할 사용자의 정보를 포함한 객체
+     * @param dto - 새로운 FCM 토큰 정보를 포함한 DTO
+     * @returns 업데이트 작업의 결과를 나타내는 객체를 반환합니다.
+     */
+    async updateFcmToken(user: IResponseUserDTO, dto: InputUserDTO) {
+        const result = await this.userRepository.updateOne({ _id: user.id }, { $set: { fcmToken: dto.fcmToken } }).exec();
+
+        if (result.modifiedCount === 0) {
+            throw new InternalServerErrorException('Failed to update user fcmToken.');
+        }
+
+        return { message: 'Success' };
     }
 
     /**

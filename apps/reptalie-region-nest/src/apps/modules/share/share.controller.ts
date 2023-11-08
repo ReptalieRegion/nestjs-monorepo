@@ -261,4 +261,15 @@ export class ShareController {
             controllerErrorHandler(error);
         }
     }
+
+    @Get('posts/list/me')
+    @HttpCode(HttpStatus.OK)
+    @UseGuards(JwtAuthGuard)
+    async getMyPostsInfiniteScroll(@AuthUser() user: IResponseUserDTO, @Query('pageParam') pageParam: number) {
+        try {
+            return this.shareSearcherService.getMyPostsInfiniteScroll(user.id, pageParam, 12);
+        } catch (error) {
+            controllerErrorHandler(error);
+        }
+    }
 }

@@ -23,6 +23,9 @@ export class User {
     @Prop({ type: SchemaTypes.String, default: 'defaultValue' })
     address: string;
 
+    @Prop({ type: SchemaTypes.String, default: 'defaultValue' })
+    fcmToken: string;
+
     @Prop({ ref: 'Image', type: SchemaTypes.ObjectId })
     imageId: Image;
 }
@@ -37,6 +40,7 @@ userSchema.methods = {
             'nickname',
             'phone',
             'address',
+            'fcmToken',
             'imageId',
             'createdAt',
             'updatedAt',

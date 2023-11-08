@@ -19,5 +19,9 @@ export class InputUserDTO {
 
     @IsString()
     @IsOptional()
+    readonly fcmToken?: string;
+
+    @IsString()
+    @IsOptional()
     readonly imageId: string;
 }

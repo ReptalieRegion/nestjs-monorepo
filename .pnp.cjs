@@ -4694,6 +4694,40 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "linkType": "HARD"\
         }]\
       ]],\
+      ["@nestjs/axios", [\
+        ["npm:3.0.1", {\
+          "packageLocation": "./.yarn/cache/@nestjs-axios-npm-3.0.1-3d83d90d90-01cebc64ef.zip/node_modules/@nestjs/axios/",\
+          "packageDependencies": [\
+            ["@nestjs/axios", "npm:3.0.1"]\
+          ],\
+          "linkType": "SOFT"\
+        }],\
+        ["virtual:4193bf06da2ec84559cd057c0b05b7b506ca9e325d38300a6a4ebc0278e1b48cf2ad44e18e2976b41e0318d7e02f72a97edb0a4ccd702e3dc4f399b1d6655dd8#npm:3.0.1", {\
+          "packageLocation": "./.yarn/__virtual__/@nestjs-axios-virtual-1f3521b1bf/0/cache/@nestjs-axios-npm-3.0.1-3d83d90d90-01cebc64ef.zip/node_modules/@nestjs/axios/",\
+          "packageDependencies": [\
+            ["@nestjs/axios", "virtual:4193bf06da2ec84559cd057c0b05b7b506ca9e325d38300a6a4ebc0278e1b48cf2ad44e18e2976b41e0318d7e02f72a97edb0a4ccd702e3dc4f399b1d6655dd8#npm:3.0.1"],\
+            ["@nestjs/common", "virtual:4193bf06da2ec84559cd057c0b05b7b506ca9e325d38300a6a4ebc0278e1b48cf2ad44e18e2976b41e0318d7e02f72a97edb0a4ccd702e3dc4f399b1d6655dd8#npm:9.4.3"],\
+            ["@types/axios", null],\
+            ["@types/nestjs__common", null],\
+            ["@types/reflect-metadata", null],\
+            ["@types/rxjs", null],\
+            ["axios", "npm:1.6.1"],\
+            ["reflect-metadata", "npm:0.1.13"],\
+            ["rxjs", "npm:7.8.1"]\
+          ],\
+          "packagePeers": [\
+            "@nestjs/common",\
+            "@types/axios",\
+            "@types/nestjs__common",\
+            "@types/reflect-metadata",\
+            "@types/rxjs",\
+            "axios",\
+            "reflect-metadata",\
+            "rxjs"\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
       ["@nestjs/cache-manager", [\
         ["npm:1.0.0", {\
           "packageLocation": "./.yarn/cache/@nestjs-cache-manager-npm-1.0.0-03dce83de3-fbdc88dbdd.zip/node_modules/@nestjs/cache-manager/",\
@@ -5433,6 +5467,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageDependencies": [\
             ["@reptalie-region-nest/server", "workspace:apps/reptalie-region-nest"],\
             ["@aws-sdk/client-s3", "npm:3.350.0"],\
+            ["@nestjs/axios", "virtual:4193bf06da2ec84559cd057c0b05b7b506ca9e325d38300a6a4ebc0278e1b48cf2ad44e18e2976b41e0318d7e02f72a97edb0a4ccd702e3dc4f399b1d6655dd8#npm:3.0.1"],\
             ["@nestjs/cache-manager", "virtual:4193bf06da2ec84559cd057c0b05b7b506ca9e325d38300a6a4ebc0278e1b48cf2ad44e18e2976b41e0318d7e02f72a97edb0a4ccd702e3dc4f399b1d6655dd8#npm:1.0.0"],\
             ["@nestjs/cli", "npm:9.5.0"],\
             ["@nestjs/common", "virtual:4193bf06da2ec84559cd057c0b05b7b506ca9e325d38300a6a4ebc0278e1b48cf2ad44e18e2976b41e0318d7e02f72a97edb0a4ccd702e3dc4f399b1d6655dd8#npm:9.4.3"],\
@@ -5458,6 +5493,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@types/uuid", "npm:9.0.2"],\
             ["@typescript-eslint/eslint-plugin", "virtual:4193bf06da2ec84559cd057c0b05b7b506ca9e325d38300a6a4ebc0278e1b48cf2ad44e18e2976b41e0318d7e02f72a97edb0a4ccd702e3dc4f399b1d6655dd8#npm:5.59.11"],\
             ["@typescript-eslint/parser", "virtual:4193bf06da2ec84559cd057c0b05b7b506ca9e325d38300a6a4ebc0278e1b48cf2ad44e18e2976b41e0318d7e02f72a97edb0a4ccd702e3dc4f399b1d6655dd8#npm:5.59.11"],\
+            ["axios", "npm:1.6.1"],\
             ["bson", "npm:5.3.0"],\
             ["cache-manager", "npm:5.2.2"],\
             ["cache-manager-redis-yet", "npm:4.1.1"],\
@@ -7683,6 +7719,18 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./.yarn/cache/axe-core-npm-4.7.2-678c3cf6c4-5d86fa0f45.zip/node_modules/axe-core/",\
           "packageDependencies": [\
             ["axe-core", "npm:4.7.2"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["axios", [\
+        ["npm:1.6.1", {\
+          "packageLocation": "./.yarn/cache/axios-npm-1.6.1-ffaff76449-573f03f59b.zip/node_modules/axios/",\
+          "packageDependencies": [\
+            ["axios", "npm:1.6.1"],\
+            ["follow-redirects", "virtual:ffaff76449f02e83712a7d24e03c564489516739c78ebeffb0fbcdb3893ad9a0e48504f9acfa70fe6f16debe9c8dabde3679d63bf648278ea98a5ff38cf77a9e#npm:1.15.3"],\
+            ["form-data", "npm:4.0.0"],\
+            ["proxy-from-env", "npm:1.1.0"]\
           ],\
           "linkType": "HARD"\
         }]\
@@ -10560,6 +10608,28 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./.yarn/cache/flatted-npm-3.2.7-0da10b7c56-427633049d.zip/node_modules/flatted/",\
           "packageDependencies": [\
             ["flatted", "npm:3.2.7"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["follow-redirects", [\
+        ["npm:1.15.3", {\
+          "packageLocation": "./.yarn/cache/follow-redirects-npm-1.15.3-ca69c47b72-584da22ec5.zip/node_modules/follow-redirects/",\
+          "packageDependencies": [\
+            ["follow-redirects", "npm:1.15.3"]\
+          ],\
+          "linkType": "SOFT"\
+        }],\
+        ["virtual:ffaff76449f02e83712a7d24e03c564489516739c78ebeffb0fbcdb3893ad9a0e48504f9acfa70fe6f16debe9c8dabde3679d63bf648278ea98a5ff38cf77a9e#npm:1.15.3", {\
+          "packageLocation": "./.yarn/__virtual__/follow-redirects-virtual-64034f7132/0/cache/follow-redirects-npm-1.15.3-ca69c47b72-584da22ec5.zip/node_modules/follow-redirects/",\
+          "packageDependencies": [\
+            ["follow-redirects", "virtual:ffaff76449f02e83712a7d24e03c564489516739c78ebeffb0fbcdb3893ad9a0e48504f9acfa70fe6f16debe9c8dabde3679d63bf648278ea98a5ff38cf77a9e#npm:1.15.3"],\
+            ["@types/debug", null],\
+            ["debug", null]\
+          ],\
+          "packagePeers": [\
+            "@types/debug",\
+            "debug"\
           ],\
           "linkType": "HARD"\
         }]\
@@ -14574,6 +14644,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["proxy-addr", "npm:2.0.7"],\
             ["forwarded", "npm:0.2.0"],\
             ["ipaddr.js", "npm:1.9.1"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["proxy-from-env", [\
+        ["npm:1.1.0", {\
+          "packageLocation": "./.yarn/cache/proxy-from-env-npm-1.1.0-c13d07f26b-ed7fcc2ba0.zip/node_modules/proxy-from-env/",\
+          "packageDependencies": [\
+            ["proxy-from-env", "npm:1.1.0"]\
           ],\
           "linkType": "HARD"\
         }]\

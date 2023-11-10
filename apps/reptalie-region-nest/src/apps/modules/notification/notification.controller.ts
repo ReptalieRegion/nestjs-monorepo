@@ -1,6 +1,7 @@
 import { Controller, Post, Inject, Body } from '@nestjs/common';
 
 import { PushNotificationService, PushNotificationServiceToken } from '../notification/service/push-notification.service';
+import { BaseMessage } from './types';
 
 @Controller('notification')
 export class NotificationController {
@@ -10,36 +11,20 @@ export class NotificationController {
     ) {}
 
     @Post('push/send')
-    async send(@Body() body: { type: 'send'; token: string } | { type: 'sendMulticast'; tokens: string[] }) {
-        /** 임시 데이터 */
-        const temp = {
-            data: {
-                notifee: {
-                    title: '진짜 가니??',
-                    body: '해치웠나?',
-                },
-            },
-            notification: {
-                title: '진짜 가니??',
-                body: '해치웠나?',
-            },
-            apns: {
-                payload: {
-                    aps: {
-                        contentAvailable: true,
-                        mutableContent: true,
-                    },
-                },
-            },
-        };
+    async send(
+        @Body()
+        body: ({ type: 'send'; token: string } & BaseMessage) | ({ type: 'sendMulticast'; tokens: string[] } & BaseMessage),
+    ) {
+        if (body.type === 'send') {
+            const { token, type, ...message } = body;
+            this.pushNotificationService.sendMessage({ token, ...message });
+            return;
+        }
 
-        switch (body.type) {
-            case 'send':
-                this.pushNotificationService.sendMessage({ token: body.token, ...temp });
-                return;
-            case 'sendMulticast':
-                this.pushNotificationService.sendMessage({ tokens: body.tokens, ...temp });
-                return;
+        if (body.type === 'sendMulticast') {
+            const { tokens, type, ...message } = body;
+            this.pushNotificationService.sendMessage({ tokens: tokens, ...message });
+            return;
         }
     }
 }

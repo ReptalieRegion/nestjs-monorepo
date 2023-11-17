@@ -20,7 +20,7 @@ export class User {
     @Prop({ index: true, type: SchemaTypes.String, default: 'defaultValue' })
     phone: string;
 
-    @Prop({ type: SchemaTypes.String, default: 'defaultValue' })
+    @Prop({ index: true, type: SchemaTypes.String, default: 'defaultValue' })
     address: string;
 
     @Prop({ type: SchemaTypes.String, default: 'defaultValue' })

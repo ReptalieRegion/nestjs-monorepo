@@ -1,9 +1,24 @@
-import { Provider } from '@nestjs/common';
-import { PushNotificationService, PushNotificationServiceToken } from './service/push-notification.service';
+import { NotificationAgreeService, NotificationAgreeServiceToken } from './service/notificationAgree.service';
+import { NotificationLogService, NotificationLogServiceToken } from './service/notificationLog.service';
+import { NotificationPushService, NotificationPushServiceToken } from './service/notificationPush.service';
+import { NotificationTemplateService, NotificationTemplateServiceToken } from './service/notificationTemplate.service';
 
-const PushNotificationServiceProvider: Provider = {
-    provide: PushNotificationServiceToken,
-    useClass: PushNotificationService,
+export const NotificationPushServiceProvider = {
+    provide: NotificationPushServiceToken,
+    useClass: NotificationPushService,
 };
 
-export { PushNotificationServiceProvider };
+export const NotificationTemplateServiceProvider = {
+    provide: NotificationTemplateServiceToken,
+    useClass: NotificationTemplateService,
+};
+
+export const NotificationLogServiceProvider = {
+    provide: NotificationLogServiceToken,
+    useClass: NotificationLogService,
+};
+
+export const NotificationAgreeServiceProvider = {
+    provide: NotificationAgreeServiceToken,
+    useClass: NotificationAgreeService,
+};

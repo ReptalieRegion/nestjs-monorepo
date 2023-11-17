@@ -3,11 +3,11 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import type { FCMMessage, FCMMulticastMessage, Notifee } from '../types';
 
-export const PushNotificationServiceToken = 'PushNotificationToken';
+export const NotificationPushServiceToken = 'NotificationPushServiceToken';
 
 @Injectable()
-export class PushNotificationService {
-    constructor(private readonly http: HttpService, private configService: ConfigService) {}
+export class NotificationPushService {
+    constructor(private readonly http: HttpService, private readonly configService: ConfigService) {}
 
     async sendMessage(message: FCMMessage | FCMMulticastMessage) {
         const notifee = this._notifeeDataStringify(message.data);

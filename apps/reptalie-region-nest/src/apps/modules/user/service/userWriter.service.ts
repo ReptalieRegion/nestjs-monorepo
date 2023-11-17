@@ -8,7 +8,7 @@ import {
 import mongoose, { ClientSession } from 'mongoose';
 import { ImageType } from '../../../dto/image/input-image.dto';
 import { serviceErrorHandler } from '../../../utils/error/errorHandler';
-import { randomWords } from '../../../utils/randomNickname/randomWords';
+import { randomWords } from '../../../utils/randomWords/randomWords';
 import { ImageWriterService, ImageWriterServiceToken } from '../../image/service/imageWriter.service';
 import { FollowRepository } from '../repository/follow.repository';
 import { UserRepository } from '../repository/user.repository';

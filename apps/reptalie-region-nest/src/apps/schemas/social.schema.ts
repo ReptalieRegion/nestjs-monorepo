@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 
 import mongoose, { Document, SchemaTypes } from 'mongoose';
-import { JoinProgressType, ProviderType } from '../dto/user/social/input-social.dto';
+import { JoinProgressType, SocialProvierType } from '../dto/user/social/input-social.dto';
 import { IResponseSocialDTO } from '../dto/user/social/response-social.dto';
 import { getCurrentDate } from '../utils/time/time';
 import { User } from './user.schema';
@@ -15,8 +15,8 @@ export class Social {
     @Prop({ required: true, index: true, ref: 'User', type: SchemaTypes.ObjectId })
     userId: User;
 
-    @Prop({ required: true, enum: ProviderType })
-    provider: ProviderType;
+    @Prop({ required: true, enum: SocialProvierType })
+    provider: SocialProvierType;
 
     @Prop({ required: true, type: SchemaTypes.String })
     uniqueId: string;
@@ -60,7 +60,7 @@ socialSchema.methods = {
                     [field]: value.toHexString(),
                 };
             }
-            
+
             return {
                 ...prev,
                 [field]: value,

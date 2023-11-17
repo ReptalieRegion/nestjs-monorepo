@@ -11,10 +11,10 @@ export interface FollowDocument extends Follow, Document {
 
 @Schema({ versionKey: false, timestamps: { currentTime: getCurrentDate } })
 export class Follow {
-    @Prop({ ref: 'User', type: SchemaTypes.ObjectId })
+    @Prop({ index: true, ref: 'User', type: SchemaTypes.ObjectId })
     following: User;
 
-    @Prop({ ref: 'User', type: SchemaTypes.ObjectId })
+    @Prop({ index: true, ref: 'User', type: SchemaTypes.ObjectId })
     follower: User;
 
     @Prop({ required: true, type: SchemaTypes.String })

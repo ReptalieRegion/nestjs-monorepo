@@ -11,18 +11,17 @@ export interface SharePostDocument extends SharePost, Document {
 
 @Schema({ versionKey: false, timestamps: { currentTime: getCurrentDate } })
 export class SharePost {
+    @Prop({ index: true, ref: 'User', type: SchemaTypes.ObjectId })
+    userId: User;
+
     @Prop({ required: true, type: SchemaTypes.String })
     contents: string;
-
-    @Prop({ ref: 'User', type: SchemaTypes.ObjectId })
-    userId: User;
 
     @Prop({ default: false, type: SchemaTypes.Boolean })
     isDeleted: boolean;
 }
 
 const SharePostSchema = SchemaFactory.createForClass(SharePost);
-SharePostSchema.index({ userId: 1 });
 SharePostSchema.methods = {
     Mapper(): Partial<IResponseSharePostDTO> {
         const fields: Array<keyof IResponseSharePostDTO> = ['id', 'contents', 'userId', 'isDeleted', 'createdAt', 'updatedAt'];

@@ -23,13 +23,13 @@ import {
 
 @Module({
     imports: [
-        AuthModule,
-        ImageModule,
-        forwardRef(() => UserModule),
         MongooseModuleSharePost,
         MongooseModuleShareComment,
         MongooseModuleShareCommentReply,
         MongooseModuleShareLike,
+        forwardRef(() => AuthModule),
+        forwardRef(() => UserModule),
+        ImageModule,
     ],
     controllers: [ShareController],
     providers: [

@@ -16,11 +16,11 @@ import {
 
 @Module({
     imports: [
+        MongooseModuleUser,
+        MongooseModuleFollow,
         forwardRef(() => ShareModule),
         forwardRef(() => AuthModule),
         ImageModule,
-        MongooseModuleUser,
-        MongooseModuleFollow,
     ],
     controllers: [UserController],
     providers: [

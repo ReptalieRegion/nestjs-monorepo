@@ -15,7 +15,7 @@ export class ShareLike {
     @Prop({ index: true, ref: 'SharePost', type: SchemaTypes.ObjectId })
     postId: SharePost;
 
-    @Prop({ ref: 'User', type: SchemaTypes.ObjectId })
+    @Prop({ index: true, ref: 'User', type: SchemaTypes.ObjectId })
     userId: User;
 
     @Prop({ default: false, type: SchemaTypes.Boolean })

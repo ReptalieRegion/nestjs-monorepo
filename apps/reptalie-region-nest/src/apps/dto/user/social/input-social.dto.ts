@@ -1,6 +1,6 @@
 import { IsString, IsEnum, IsOptional } from 'class-validator';
 
-export enum ProviderType {
+export enum SocialProvierType {
     Kakao = 'kakao',
     Google = 'google',
     Apple = 'apple',
@@ -25,8 +25,8 @@ export class InputSocialDTO {
     @IsString()
     userId: string;
 
-    @IsEnum(ProviderType)
-    provider: ProviderType;
+    @IsEnum(SocialProvierType)
+    provider: SocialProvierType;
 
     @IsString()
     uniqueId: string;

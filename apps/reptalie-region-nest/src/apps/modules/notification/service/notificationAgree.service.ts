@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { InputNotificationAgreeDTO } from '../../../dto/notification/agree/input-notificationAgree.dto';
 import { NotificationAgreeRepository } from '../repository/notificationAgree.repository';
 
@@ -55,5 +55,22 @@ export class NotificationAgreeService {
         if (result.modifiedCount === 0) {
             throw new InternalServerErrorException('Failed to update notification agree.');
         }
+    }
+
+    async getAgreeInfo(userId: string) {
+        const agree = await this.notificationAgreeRepository.findOne({ userId }).exec();
+
+        if (!agree) {
+            throw new NotFoundException('Notification agree information not found for the specified user.');
+        }
+
+        const { comment, like, service, follow } = agree;
+
+        return {
+            isAgreeComment: comment,
+            isAgreePostLike: like,
+            isAgreeService: service,
+            isAgreeFollow: follow,
+        };
     }
 }

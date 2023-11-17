@@ -1,4 +1,4 @@
-import { Controller, Post, Inject, Body, Put, Delete, HttpCode, HttpStatus, UseGuards, Query } from '@nestjs/common';
+import { Controller, Post, Inject, Body, Put, Delete, HttpCode, HttpStatus, UseGuards, Query, Get } from '@nestjs/common';
 import { IAgreeStatusDTO } from '../../dto/notification/agree/input-notificationAgree.dto';
 import { InputNotificationLogDTO, IMessageIdDTO } from '../../dto/notification/log/input-notificationLog.dto';
 import { InputNotificationTemplateDTO } from '../../dto/notification/template/input-notificationTemplate.dto';
@@ -150,8 +150,13 @@ export class NotificationController {
      *
      */
     @Delete('push/template')
-    deleteAgree(@Body() dto: InputNotificationTemplateDTO) {
-        console.log(dto);
+    @HttpCode(HttpStatus.NO_CONTENT)
+    async deleteTemplate(@Body() dto: InputNotificationTemplateDTO) {
+        try {
+            await this.notificationTemplateService.deleteTemplate(dto);
+        } catch (error) {
+            controllerErrorHandler(error);
+        }
     }
 
     /**
@@ -159,4 +164,25 @@ export class NotificationController {
      *  Get
      *
      */
+    @Get('push/log')
+    @HttpCode(HttpStatus.OK)
+    @UseGuards(JwtAuthGuard)
+    async getLogsInfiniteScroll(@AuthUser() user: IResponseUserDTO, @Query('pageParam') pageParam: number) {
+        try {
+            return this.notificationLogService.getLogsInfiniteScroll(user.id, pageParam, 10);
+        } catch (error) {
+            controllerErrorHandler(error);
+        }
+    }
+
+    @Get('push/agree')
+    @HttpCode(HttpStatus.OK)
+    @UseGuards(JwtAuthGuard)
+    async getAgreeInfo(@AuthUser() user: IResponseUserDTO) {
+        try {
+            return this.notificationAgreeService.getAgreeInfo(user.id);
+        } catch (error) {
+            controllerErrorHandler(error);
+        }
+    }
 }

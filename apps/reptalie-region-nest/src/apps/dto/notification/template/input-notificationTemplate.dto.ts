@@ -35,6 +35,7 @@ export class InputNotificationTemplateDTO {
     @IsEnum(TemplateProviderType)
     readonly provider: TemplateProviderType;
 
+    @IsOptional()
     @ValidateNested()
     @Type(() => BasicTemplate)
     readonly template: BasicTemplate;

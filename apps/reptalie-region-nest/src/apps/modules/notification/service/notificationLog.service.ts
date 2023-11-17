@@ -42,4 +42,22 @@ export class NotificationLogService {
             throw new InternalServerErrorException('Failed to update notification log isRead.');
         }
     }
+
+    async getLogsInfiniteScroll(userId: string, pageParam: number, limitSize: number) {
+        const logs = await this.notificationLogRepository
+            .find({ userId }, { messageId: 1, contents: 1, isRead: 1 })
+            .sort({ createdAt: -1 })
+            .skip(pageParam * limitSize)
+            .limit(limitSize)
+            .exec();
+
+        const items = logs.map((entity) => {
+            return { messageId: entity.messageId, contents: entity.contents, isRead: entity.isRead };
+        });
+
+        const isLastPage = logs.length < limitSize;
+        const nextPage = isLastPage ? undefined : pageParam + 1;
+
+        return { items, nextPage };
+    }
 }

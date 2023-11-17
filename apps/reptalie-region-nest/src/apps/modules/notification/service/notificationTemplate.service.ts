@@ -24,4 +24,14 @@ export class NotificationTemplateService {
             throw new InternalServerErrorException('Failed to save notification template.');
         }
     }
+
+    async deleteTemplate(dto: InputNotificationTemplateDTO) {
+        const result = await this.notificationTemplateRepository
+            .deleteOne({ type: dto.type, provider: dto.provider, version: dto.version })
+            .exec();
+
+        if (result.deletedCount === 0) {
+            throw new InternalServerErrorException('Failed to delete notification template.');
+        }
+    }
 }

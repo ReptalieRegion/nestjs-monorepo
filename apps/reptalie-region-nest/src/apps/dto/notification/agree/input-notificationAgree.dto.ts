@@ -1,6 +1,6 @@
 import { IsBoolean, IsString } from 'class-validator';
 
-export interface IAgreeStatus {
+export interface IAgreeStatusDTO {
     isAgree: boolean;
 }
 
@@ -13,9 +13,6 @@ export class InputNotificationAgreeDTO {
 
     @IsBoolean()
     readonly like: boolean;
-
-    @IsBoolean()
-    readonly post: boolean;
 
     @IsBoolean()
     readonly follow: boolean;

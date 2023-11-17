@@ -22,4 +22,24 @@ export class NotificationLogService {
             serviceErrorHandler(error, 'Invalid ObjectId for template Id.');
         }
     }
+
+    async updateIsClicked(userId: string, messageId: string) {
+        const result = await this.notificationLogRepository
+            .updateOne({ userId, messageId }, { $set: { isClicked: true } })
+            .exec();
+
+        if (result.modifiedCount === 0) {
+            throw new InternalServerErrorException('Failed to update notification log isClicked.');
+        }
+    }
+
+    async updateIsRead(userId: string) {
+        const result = await this.notificationLogRepository
+            .updateMany({ userId, isRead: false }, { $set: { isRead: true } })
+            .exec();
+
+        if (result.modifiedCount === 0) {
+            throw new InternalServerErrorException('Failed to update notification log isRead.');
+        }
+    }
 }

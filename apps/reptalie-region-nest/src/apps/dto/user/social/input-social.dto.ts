@@ -11,11 +11,11 @@ export enum JoinProgressType {
     REGISTER0 = 'REGISTER0',
 }
 
-export interface IEncryptedData {
+export interface IEncryptedDataDTO {
     encryptedData: string;
 }
 
-export interface IJoinProgress {
+export interface IJoinProgressDTO {
     userId: string;
     joinProgress: JoinProgressType;
     nickname: string;

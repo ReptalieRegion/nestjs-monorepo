@@ -19,7 +19,6 @@ export class NotificationAgreeService {
             comment: isAgree,
             follow: isAgree,
             like: isAgree,
-            post: isAgree,
             service: isAgree,
             userId,
         };
@@ -28,6 +27,33 @@ export class NotificationAgreeService {
 
         if (!agree) {
             throw new InternalServerErrorException('Failed to save notification agree.');
+        }
+    }
+
+    async updateAgree(userId: string, isAgree: boolean, type: string) {
+        let query;
+
+        switch (type) {
+            case '댓글':
+                query = { $set: { comment: isAgree } };
+                break;
+            case '팔로우':
+                query = { $set: { follow: isAgree } };
+                break;
+            case '좋아요':
+                query = { $set: { like: isAgree } };
+                break;
+            case '공지사항':
+                query = { $set: { service: isAgree } };
+                break;
+            default:
+                throw new BadRequestException('Invalid data for the specified type.');
+        }
+
+        const result = await this.notificationAgreeRepository.updateOne({ userId }, query).exec();
+
+        if (result.modifiedCount === 0) {
+            throw new InternalServerErrorException('Failed to update notification agree.');
         }
     }
 }

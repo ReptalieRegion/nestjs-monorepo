@@ -3,7 +3,6 @@ import { IsEnum, IsNotEmpty, IsNumber, IsOptional, ValidateNested } from 'class-
 
 export enum TemplateType {
     Notice = '공지사항',
-    Post = '게시물',
     Comment = '댓글',
     Like = '좋아요',
     Follow = '팔로우',

@@ -1,6 +1,6 @@
-import { Controller, Post, Inject, Body, Put, Delete, HttpCode, HttpStatus, UseGuards } from '@nestjs/common';
-import { IAgreeStatus } from '../../dto/notification/agree/input-notificationAgree.dto';
-import { InputNotificationLogDTO } from '../../dto/notification/log/input-notificationLog.dto';
+import { Controller, Post, Inject, Body, Put, Delete, HttpCode, HttpStatus, UseGuards, Query } from '@nestjs/common';
+import { IAgreeStatusDTO } from '../../dto/notification/agree/input-notificationAgree.dto';
+import { InputNotificationLogDTO, IMessageIdDTO } from '../../dto/notification/log/input-notificationLog.dto';
 import { InputNotificationTemplateDTO } from '../../dto/notification/template/input-notificationTemplate.dto';
 import { IResponseUserDTO } from '../../dto/user/user/response-user.dto';
 import { controllerErrorHandler } from '../../utils/error/errorHandler';
@@ -98,7 +98,7 @@ export class NotificationController {
     @Post('push/agree')
     @HttpCode(HttpStatus.NO_CONTENT)
     @UseGuards(JwtAuthGuard)
-    async createAgree(@AuthUser() user: IResponseUserDTO, @Body() dto: IAgreeStatus) {
+    async createAgree(@AuthUser() user: IResponseUserDTO, @Body() dto: IAgreeStatusDTO) {
         try {
             await this.notificationAgreeService.createAgree(user.id, dto.isAgree);
         } catch (error) {
@@ -112,18 +112,36 @@ export class NotificationController {
      *
      */
     @Put('push/read')
-    updateRead(@Body() dto: InputNotificationTemplateDTO) {
-        console.log(dto);
+    @HttpCode(HttpStatus.NO_CONTENT)
+    @UseGuards(JwtAuthGuard)
+    async updateIsRead(@AuthUser() user: IResponseUserDTO) {
+        try {
+            await this.notificationLogService.updateIsRead(user.id);
+        } catch (error) {
+            controllerErrorHandler(error);
+        }
     }
 
     @Put('push/click')
-    updateClick(@Body() dto: InputNotificationTemplateDTO) {
-        console.log(dto);
+    @HttpCode(HttpStatus.NO_CONTENT)
+    @UseGuards(JwtAuthGuard)
+    async updateIsClicked(@AuthUser() user: IResponseUserDTO, @Body() dto: IMessageIdDTO) {
+        try {
+            await this.notificationLogService.updateIsClicked(user.id, dto.messageId);
+        } catch (error) {
+            controllerErrorHandler(error);
+        }
     }
 
     @Put('push/agree')
-    updateAgree(@Body() dto: InputNotificationTemplateDTO) {
-        console.log(dto);
+    @HttpCode(HttpStatus.NO_CONTENT)
+    @UseGuards(JwtAuthGuard)
+    async updateAgree(@AuthUser() user: IResponseUserDTO, @Body() dto: IAgreeStatusDTO, @Query('type') type: string) {
+        try {
+            await this.notificationAgreeService.updateAgree(user.id, dto.isAgree, type);
+        } catch (error) {
+            controllerErrorHandler(error);
+        }
     }
 
     /**
@@ -131,7 +149,7 @@ export class NotificationController {
      *  Delete
      *
      */
-    @Delete('push/agree')
+    @Delete('push/template')
     deleteAgree(@Body() dto: InputNotificationTemplateDTO) {
         console.log(dto);
     }

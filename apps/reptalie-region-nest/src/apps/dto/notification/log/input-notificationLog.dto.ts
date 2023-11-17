@@ -2,6 +2,10 @@ import { Type } from 'class-transformer';
 import { IsString, IsOptional, ValidateNested } from 'class-validator';
 import { BasicTemplate } from '../template/input-notificationTemplate.dto';
 
+export interface IMessageIdDTO {
+    messageId: string;
+}
+
 export class BasicContents extends BasicTemplate {
     @IsOptional()
     readonly image: string;

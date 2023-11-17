@@ -2,7 +2,7 @@ import { BadRequestException, Inject, Injectable, InternalServerErrorException }
 import { InjectConnection } from '@nestjs/mongoose';
 import { OAuth2Client } from 'google-auth-library';
 import mongoose, { ClientSession } from 'mongoose';
-import { JoinProgressType, SocialProvierType, IEncryptedData } from '../../../dto/user/social/input-social.dto';
+import { JoinProgressType, SocialProvierType, IEncryptedDataDTO } from '../../../dto/user/social/input-social.dto';
 import { Social } from '../../../schemas/social.schema';
 import { UserWriterService, UserWriterServiceToken } from '../../user/service/userWriter.service';
 import { SocialRepository } from '../repository/social.repository';
@@ -30,11 +30,11 @@ export class AuthSocialService {
     /**
      * Kakao로부터의 로그인 요청을 처리합니다.
      *
-     * @param dto - 암호화된 데이터를 포함하는 데이터 전송 객체 (IEncryptedData).
+     * @param dto - 암호화된 데이터를 포함하는 데이터 전송 객체 (IEncryptedDataDTO).
      * @returns - Kakao 로그인에 대한 결과를 반환합니다. 이미 가입한 사용자의 경우 로그인 정보를 제공하고,
      *            새로운 사용자의 경우 회원가입 정보를 제공합니다.
      */
-    async kakaoSignIn(dto: IEncryptedData) {
+    async kakaoSignIn(dto: IEncryptedDataDTO) {
         if (!dto.encryptedData) {
             throw new BadRequestException('Missing encrypted data.');
         }
@@ -47,11 +47,11 @@ export class AuthSocialService {
     /**
      * Apple 로부터의 로그인 요청을 처리합니다.
      *
-     * @param dto - 암호화된 데이터를 포함하는 데이터 전송 객체 (IEncryptedData).
+     * @param dto - 암호화된 데이터를 포함하는 데이터 전송 객체 (IEncryptedDataDTO).
      * @returns - Apple 로그인에 대한 결과를 반환합니다. 이미 가입한 사용자의 경우 로그인 정보를 제공하고,
      *            새로운 사용자의 경우 회원가입 정보를 제공합니다.
      */
-    async appleSignIn(dto: IEncryptedData) {
+    async appleSignIn(dto: IEncryptedDataDTO) {
         if (!dto.encryptedData) {
             throw new BadRequestException('Missing encrypted data.');
         }
@@ -64,7 +64,7 @@ export class AuthSocialService {
     /**
      * Google 로부터의 로그인 요청을 처리합니다.
      *
-     * @param dto - 암호화된 데이터를 포함하는 데이터 전송 객체 (IEncryptedData).
+     * @param dto - 암호화된 데이터를 포함하는 데이터 전송 객체 (IEncryptedDataDTO).
      * @returns - Google 로그인에 대한 결과를 반환합니다. 이미 가입한 사용자의 경우 로그인 정보를 제공하고,
      *            새로운 사용자의 경우 회원가입 정보를 제공합니다.
      */

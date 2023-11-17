@@ -21,9 +21,6 @@ export class NotificationAgree {
     like: boolean;
 
     @Prop({ required: true, type: SchemaTypes.Boolean })
-    post: boolean;
-
-    @Prop({ required: true, type: SchemaTypes.Boolean })
     follow: boolean;
 
     @Prop({ required: true, type: SchemaTypes.Boolean })
@@ -38,7 +35,6 @@ NotificationAgreeSchema.methods = {
             'userId',
             'comment',
             'like',
-            'post',
             'follow',
             'service',
             'createdAt',

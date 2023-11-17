@@ -33,6 +33,7 @@ export class NotificationLog {
 }
 
 const NotificationLogSchema = SchemaFactory.createForClass(NotificationLog);
+NotificationLogSchema.index({ userId: 1, messageId: 1 });
 NotificationLogSchema.methods = {
     Mapper(): Partial<IResponseNotificationLogDTO> {
         const fields: Array<keyof IResponseNotificationLogDTO> = [

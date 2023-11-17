@@ -14,7 +14,13 @@ export class NotificationPushService {
         const postData = { ...message, data: notifee };
         const API_GATEWAY_URI = this.configService.get<string>('API_GATEWAY_URI');
         const X_API_KEY = this.configService.get<string>('X_API_KEY');
-        this.http.post(API_GATEWAY_URI + '/notification', postData, {
+        this.http.axiosRef.request({
+            url: API_GATEWAY_URI + '/notification',
+            method: 'POST',
+            data: {
+                groupId: 'PUSH',
+                body: postData,
+            },
             headers: {
                 'x-api-key': X_API_KEY,
             },

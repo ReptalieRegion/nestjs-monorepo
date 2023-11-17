@@ -293,7 +293,7 @@ export interface Notifee {
     };
 }
 
-type BaseMessage = {
+export type BaseMessage = {
     data?: {
         notifee: Notifee;
     };

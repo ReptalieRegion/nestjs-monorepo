@@ -4,7 +4,7 @@ import axios from 'axios';
 import { SLACK_NOTIFICATION_URI, SLACK_USERNAME } from '../constants/notificationSlack.constants';
 import { QueryString } from '../types/notificationSlack.types';
 
-export const NotificationSlackServiceToken = 'NotificationPushServiceToken';
+export const NotificationSlackServiceToken = 'NotificationSlackServiceToken';
 
 @Injectable()
 export class NotificationSlackService {

@@ -7,7 +7,7 @@ import { DEEP_LINK_LIST, DEEP_LINK_PREFIX, DEFAULT_FCM_MESSAGE } from '../consta
 import { NotificationLogRepository } from '../repository/notificationLog.repository';
 import { NotificationTemplateRepository } from '../repository/notificationTemplate.repository';
 import { NotificationPushData, NotificationPushParams } from '../types/notificationPush.types';
-import { NotificationSlackService } from './notificationSlack.service';
+import { NotificationSlackService, NotificationSlackServiceToken } from './notificationSlack.service';
 
 export const NotificationPushServiceToken = 'NotificationPushServiceToken';
 
@@ -20,7 +20,9 @@ export class NotificationPushService {
         @Inject(FirebaseMessagingServiceToken)
         private readonly firebaseAdminService: FirebaseMessagingService,
 
+        @Inject(NotificationSlackServiceToken)
         private readonly notificationSlackService: NotificationSlackService,
+
         private readonly notificationLogRepository: NotificationLogRepository,
         private readonly notificationTemplateRepository: NotificationTemplateRepository,
     ) {}

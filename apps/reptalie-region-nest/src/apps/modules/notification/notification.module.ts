@@ -19,7 +19,6 @@ import {
 import { NotificationAgreeRepository } from './repository/notificationAgree.repository';
 import { NotificationLogRepository } from './repository/notificationLog.repository';
 import { NotificationTemplateRepository } from './repository/notificationTemplate.repository';
-import { NotificationSlackService } from './service/notificationSlack.service';
 
 @Module({
     imports: [
@@ -35,7 +34,6 @@ import { NotificationSlackService } from './service/notificationSlack.service';
         NotificationAgreeRepository,
         NotificationLogRepository,
         NotificationTemplateRepository,
-        NotificationSlackService,
         FirebaseMessagingServiceProvider,
         NotificationSlackServiceProvider,
         NotificationPushServiceProvider,

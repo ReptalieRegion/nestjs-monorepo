@@ -102,6 +102,7 @@ export class ShareWriterService {
          * @example
          * 푸시 알림 전송 예시
          */
+        console.log('=====start=====');
         Promise.all([
             this.imageSearcherService.getPostImages(comment.postId),
             this.imageSearcherService.getProfileImage(user.id),
@@ -109,6 +110,7 @@ export class ShareWriterService {
             .then(([postImage, userImage]) => {
                 const postThumbnail = postImage[0].src;
                 const userThumbnail = userImage.src;
+                console.log(postThumbnail, userThumbnail);
                 this.notificationPushService.sendMessage(user.fcmToken, {
                     type: TemplateType.Comment,
                     userId: user.id,

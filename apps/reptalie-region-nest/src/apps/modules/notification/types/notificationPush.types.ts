@@ -1,3 +1,6 @@
+import * as admin from 'firebase-admin';
+import { TemplateTitleType, TemplateType } from '../../../dto/notification/template/input-notificationTemplate.dto';
+
 enum AndroidLaunchActivityFlag {
     NO_HISTORY = 0,
     SINGLE_TOP = 1,
@@ -293,109 +296,70 @@ export interface Notifee {
     };
 }
 
-export type BaseMessage = {
-    data?: {
-        notifee: Notifee;
-    };
-    notification?: {
-        title?: string;
-        body?: string;
-        imageUrl?: string;
-    };
-    android?: {
-        collapseKey?: string;
-        priority?: 'high' | 'normal';
-        ttl?: number;
-        restrictedPackageName?: string;
-        data?: {
-            [key: string]: string;
-        };
-        notification?: {
-            title?: string;
-            body?: string;
-            icon?: string;
-            color?: string;
-            sound?: string;
-            tag?: string;
-            imageUrl?: string;
-            clickAction?: string;
-            bodyLocKey?: string;
-            bodyLocArgs?: string[];
-            titleLocKey?: string;
-            titleLocArgs?: string[];
-            channelId?: string;
-            ticker?: string;
-            sticky?: boolean;
-            eventTimestamp?: Date;
-            localOnly?: boolean;
-            priority?: 'min' | 'low' | 'default' | 'high' | 'max';
-            vibrateTimingsMillis?: number[];
-            defaultVibrateTimings?: boolean;
-            defaultSound?: boolean;
-            lightSettings?: {
-                color: string;
-                lightOnDurationMillis: number;
-                lightOffDurationMillis: number;
-            };
-            defaultLightSettings?: boolean;
-            visibility?: 'private' | 'public' | 'secret';
-            notificationCount?: number;
-        };
-        fcmOptions?: {
-            analyticsLabel?: string;
-        };
-    };
-    apns?: {
-        headers?: {
-            [key: string]: string;
-        };
-        payload?: {
-            aps: {
-                alert?:
-                    | string
-                    | {
-                          title?: string;
-                          subtitle?: string;
-                          body?: string;
-                          locKey?: string;
-                          locArgs?: string[];
-                          titleLocKey?: string;
-                          titleLocArgs?: string[];
-                          subtitleLocKey?: string;
-                          subtitleLocArgs?: string[];
-                          actionLocKey?: string;
-                          launchImage?: string;
-                      };
-                badge?: number;
-                sound?:
-                    | string
-                    | {
-                          critical?: boolean;
-                          name: string;
-                          volume?: number;
-                      };
-                contentAvailable?: boolean;
-                mutableContent?: boolean;
-                category?: string;
-                threadId?: string;
-                [customData: string]: unknown;
-            };
-            [customData: string]: unknown;
-        };
-        fcmOptions?: {
-            analyticsLabel?: string;
-            imageUrl?: string;
-        };
-    };
-    fcmOptions?: {
-        analyticsLabel?: string;
-    };
+type NotificationData = {
+    title: TemplateTitleType;
+    body: string;
+    link: string;
 };
 
-export interface FCMMessage extends BaseMessage {
-    token: string;
+export interface FCMMessage
+    extends Omit<admin.messaging.TokenMessage, 'data'>,
+        Omit<admin.messaging.ConditionMessage, 'data'>,
+        Omit<admin.messaging.TopicMessage, 'data'> {
+    data: NotificationData;
 }
 
-export interface FCMMulticastMessage extends BaseMessage {
-    tokens: string[];
+export interface FCMMulticastMessage extends Omit<admin.messaging.MulticastMessage, 'data'> {
+    data: NotificationData;
 }
+
+interface NotificationBase {
+    userId: string;
+}
+
+interface NotificationComment extends NotificationBase {
+    type: TemplateType.Comment;
+    postId: string;
+    postThumbnail: string;
+    userThumbnail: string;
+    articleParams: {
+        댓글생성한유저: string;
+    };
+}
+
+interface NotificationFollow extends NotificationBase {
+    type: TemplateType.Follow;
+    userThumbnail: string;
+    articleParams: {
+        팔로우한유저: string;
+    };
+}
+
+interface NotificationLike extends NotificationBase {
+    type: TemplateType.Like;
+    postId: string;
+    userThumbnail: string;
+    postThumbnail: string;
+    articleParams: {
+        좋아요한유저: string;
+    };
+}
+
+interface NotificationNotice extends NotificationBase {
+    type: TemplateType.Notice;
+}
+
+export type NotificationPushParams =
+    | NotificationComment
+    | NotificationFollow
+    | NotificationLike
+    | NotificationLike
+    | NotificationNotice;
+
+export type NotificationPushData = {
+    title: TemplateTitleType;
+    body: string;
+    link: string;
+    crawlPushId: string;
+    templateId: string;
+};

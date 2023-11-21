@@ -18,6 +18,7 @@ export enum TemplateTitleType {
     Share = '일상공유',
     User = '회원',
     Service = '서비스',
+    Default = '크롤',
 }
 
 export class BasicTemplate {

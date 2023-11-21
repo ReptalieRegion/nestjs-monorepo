@@ -1,4 +1,3 @@
-import { HttpModule } from '@nestjs/axios';
 import { Module, forwardRef } from '@nestjs/common';
 import {
     MongooseModuleNotificationAgree,
@@ -6,6 +5,8 @@ import {
     MongooseModuleNotificationTemplate,
 } from '../../utils/customModules';
 import { AuthModule } from '../auth/auth.module';
+import { FirebaseModule } from '../firebase/firebase.module';
+import { FirebaseMessagingServiceProvider } from '../firebase/firebase.providers';
 import { UserModule } from '../user/user.module';
 import { NotificationController } from './notification.controller';
 import {
@@ -23,8 +24,8 @@ import { NotificationTemplateRepository } from './repository/notificationTemplat
         MongooseModuleNotificationAgree,
         MongooseModuleNotificationLog,
         MongooseModuleNotificationTemplate,
-        HttpModule,
         forwardRef(() => AuthModule),
+        FirebaseModule,
         UserModule,
     ],
     controllers: [NotificationController],
@@ -32,6 +33,7 @@ import { NotificationTemplateRepository } from './repository/notificationTemplat
         NotificationAgreeRepository,
         NotificationLogRepository,
         NotificationTemplateRepository,
+        FirebaseMessagingServiceProvider,
         NotificationPushServiceProvider,
         NotificationAgreeServiceProvider,
         NotificationLogServiceProvider,

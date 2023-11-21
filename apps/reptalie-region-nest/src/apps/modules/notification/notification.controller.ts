@@ -1,6 +1,6 @@
-import { Controller, Post, Inject, Body, Put, Delete, HttpCode, HttpStatus, UseGuards, Query, Get } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Inject, Post, Put, Query, UseGuards } from '@nestjs/common';
 import { IAgreeStatusDTO } from '../../dto/notification/agree/input-notificationAgree.dto';
-import { InputNotificationLogDTO, IMessageIdDTO } from '../../dto/notification/log/input-notificationLog.dto';
+import { IMessageIdDTO, InputNotificationLogDTO } from '../../dto/notification/log/input-notificationLog.dto';
 import { InputNotificationTemplateDTO } from '../../dto/notification/template/input-notificationTemplate.dto';
 import { IResponseUserDTO } from '../../dto/user/user/response-user.dto';
 import { controllerErrorHandler } from '../../utils/error/errorHandler';
@@ -10,7 +10,7 @@ import { NotificationAgreeService, NotificationAgreeServiceToken } from './servi
 import { NotificationLogService, NotificationLogServiceToken } from './service/notificationLog.service';
 import { NotificationPushService, NotificationPushServiceToken } from './service/notificationPush.service';
 import { NotificationTemplateService, NotificationTemplateServiceToken } from './service/notificationTemplate.service';
-import { BaseMessage } from './types';
+import { FCMMessage, FCMMulticastMessage, NotificationPushParams } from './types/notificationPush.types';
 
 @Controller('notification')
 export class NotificationController {
@@ -26,21 +26,15 @@ export class NotificationController {
     ) {}
 
     @Post('push/send')
-    async send(
-        @Body()
-        body: ({ type: 'send'; token: string } & BaseMessage) | ({ type: 'sendMulticast'; tokens: string[] } & BaseMessage),
-    ) {
-        if (body.type === 'send') {
-            const { token, type, ...message } = body;
-            this.notificationPushService.sendMessage({ token, ...message });
-            return;
-        }
+    async send(@Body() body: FCMMessage & { pushParams: NotificationPushParams }) {
+        const { pushParams, ...message } = body;
+        this.notificationPushService.sendMessage(pushParams, { ...message });
+    }
 
-        if (body.type === 'sendMulticast') {
-            const { tokens, type, ...message } = body;
-            this.notificationPushService.sendMessage({ tokens: tokens, ...message });
-            return;
-        }
+    @Post('push/sendMulticast')
+    async sendMulticast(@Body() body: FCMMulticastMessage & { pushParams: NotificationPushParams }) {
+        const { pushParams, ...message } = body;
+        this.notificationPushService.sendMulticastMessage(pushParams, { ...message });
     }
 
     // 정규 표현식을 사용하여 변수 추출

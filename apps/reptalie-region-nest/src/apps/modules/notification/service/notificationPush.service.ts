@@ -7,6 +7,7 @@ import { DEEP_LINK_LIST, DEEP_LINK_PREFIX, DEFAULT_FCM_MESSAGE } from '../consta
 import { NotificationLogRepository } from '../repository/notificationLog.repository';
 import { NotificationTemplateRepository } from '../repository/notificationTemplate.repository';
 import { NotificationPushData, NotificationPushParams } from '../types/notificationPush.types';
+import { NotificationSlackService } from './notificationSlack.service';
 
 export const NotificationPushServiceToken = 'NotificationPushServiceToken';
 
@@ -19,6 +20,7 @@ export class NotificationPushService {
         @Inject(FirebaseMessagingServiceToken)
         private readonly firebaseAdminService: FirebaseMessagingService,
 
+        private readonly notificationSlackService: NotificationSlackService,
         private readonly notificationLogRepository: NotificationLogRepository,
         private readonly notificationTemplateRepository: NotificationTemplateRepository,
     ) {}
@@ -27,25 +29,19 @@ export class NotificationPushService {
      * 단일 푸시 알림
      */
     async sendMessage(token: string | undefined, pushParams: NotificationPushParams) {
-        console.log(token);
         if (!token) {
             return;
         }
 
         this._dataGenerator(pushParams).then(({ data, log }) => {
-            console.log(data);
             this.firebaseAdminService
                 .send({
                     token,
                     data,
                     ...DEFAULT_FCM_MESSAGE.ios({}),
                 })
-                .then(() => {
-                    this.notificationLogRepository.createLog(log);
-                })
-                .catch(() => {
-                    this.userDeleterService.fcmTokenDelete(pushParams.userId);
-                });
+                .then(() => this._successPush(log))
+                .catch(() => this._failPush(pushParams.userId));
         });
     }
 
@@ -64,13 +60,19 @@ export class NotificationPushService {
                     data,
                     ...DEFAULT_FCM_MESSAGE.ios({}),
                 })
-                .then(() => {
-                    this.notificationLogRepository.createLog(log);
-                })
-                .catch(() => {
-                    this.userDeleterService.fcmTokenDelete(pushParams.userId);
-                });
+                .then(() => this._successPush(log))
+                .catch(() => this._failPush(pushParams.userId));
         });
+    }
+
+    private _successPush(log: InputNotificationLogDTO) {
+        this.notificationLogRepository.createLog(log);
+        this.notificationSlackService.send('**[푸시알림 보내기]** 성공');
+    }
+
+    private _failPush(userId: string) {
+        this.userDeleterService.fcmTokenDelete(userId);
+        this.notificationSlackService.send('**[푸시알림 보내기]** 실패', '푸시알림-에러-dev');
     }
 
     private async _dataGenerator(pushParams: NotificationPushParams): Promise<{

@@ -13,11 +13,13 @@ import {
     NotificationAgreeServiceProvider,
     NotificationLogServiceProvider,
     NotificationPushServiceProvider,
+    NotificationSlackServiceProvider,
     NotificationTemplateServiceProvider,
 } from './notification.providers';
 import { NotificationAgreeRepository } from './repository/notificationAgree.repository';
 import { NotificationLogRepository } from './repository/notificationLog.repository';
 import { NotificationTemplateRepository } from './repository/notificationTemplate.repository';
+import { NotificationSlackService } from './service/notificationSlack.service';
 
 @Module({
     imports: [
@@ -33,7 +35,9 @@ import { NotificationTemplateRepository } from './repository/notificationTemplat
         NotificationAgreeRepository,
         NotificationLogRepository,
         NotificationTemplateRepository,
+        NotificationSlackService,
         FirebaseMessagingServiceProvider,
+        NotificationSlackServiceProvider,
         NotificationPushServiceProvider,
         NotificationAgreeServiceProvider,
         NotificationLogServiceProvider,
@@ -43,6 +47,7 @@ import { NotificationTemplateRepository } from './repository/notificationTemplat
         NotificationTemplateRepository,
         NotificationLogRepository,
         FirebaseMessagingServiceProvider,
+        NotificationSlackServiceProvider,
         NotificationPushServiceProvider,
         NotificationAgreeServiceProvider,
         NotificationLogServiceProvider,

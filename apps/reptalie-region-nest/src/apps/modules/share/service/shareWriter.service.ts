@@ -110,7 +110,6 @@ export class ShareWriterService {
             .then(([postImage, userImage]) => {
                 const postThumbnail = postImage[0].src;
                 const userThumbnail = userImage.src;
-                console.log(postThumbnail, userThumbnail);
                 this.notificationPushService.sendMessage(user.fcmToken, {
                     type: TemplateType.Comment,
                     userId: user.id,

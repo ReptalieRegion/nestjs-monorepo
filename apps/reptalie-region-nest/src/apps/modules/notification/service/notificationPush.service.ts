@@ -27,11 +27,13 @@ export class NotificationPushService {
      * 단일 푸시 알림
      */
     async sendMessage(token: string | undefined, pushParams: NotificationPushParams) {
+        console.log(token);
         if (!token) {
             return;
         }
 
         this._dataGenerator(pushParams).then(({ data, log }) => {
+            console.log(data);
             this.firebaseAdminService
                 .send({
                     token,

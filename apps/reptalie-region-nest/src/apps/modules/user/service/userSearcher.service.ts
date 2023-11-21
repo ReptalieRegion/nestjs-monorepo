@@ -217,6 +217,18 @@ export class UserSearcherService {
 
         const isFollow = currentUserId ? await this.isExistsFollow(currentUserId, userInfo.id) : undefined;
 
+        if (targetUserId) {
+            return {
+                id: userInfo.id,
+                nickname: userInfo.nickname,
+                profile: {
+                    src: `${process.env.AWS_IMAGE_BASEURL}${userInfo.imageId.imageKey}`,
+                },
+                isFollow,
+                fcmToken: userInfo.fcmToken,
+            };
+        }
+
         return {
             id: userInfo.id,
             nickname: userInfo.nickname,

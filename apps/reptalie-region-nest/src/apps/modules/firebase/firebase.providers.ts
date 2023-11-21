@@ -4,12 +4,13 @@ import admin from 'firebase-admin';
 import { FirebaseMessagingService, FirebaseMessagingServiceToken } from './service/firebase-messaging.service';
 
 const createUseFactory = (configService: ConfigService, Service: typeof FirebaseMessagingService) => {
+    const privateKey = configService.get<string>('PRIVATE_KEY') ?? '';
     const app =
         admin.apps.length === 0
             ? admin.initializeApp({
                   credential: admin.credential.cert({
                       projectId: configService.get<string>('PROJECT_ID'),
-                      privateKey: configService.get<string>('PRIVATE_KEY'),
+                      privateKey: privateKey[0] === '-' ? privateKey : JSON.parse(privateKey),
                       clientEmail: configService.get<string>('CLIENT_EMAIL'),
                   }),
               })

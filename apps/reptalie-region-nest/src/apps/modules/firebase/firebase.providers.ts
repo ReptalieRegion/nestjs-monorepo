@@ -10,7 +10,7 @@ const createUseFactory = (configService: ConfigService, Service: typeof Firebase
             ? admin.initializeApp({
                   credential: admin.credential.cert({
                       projectId: configService.get<string>('PROJECT_ID'),
-                      privateKey: privateKey[0] === '-' ? privateKey : JSON.parse(privateKey),
+                      privateKey: privateKey.replace(/\\n/g, '\n'),
                       clientEmail: configService.get<string>('CLIENT_EMAIL'),
                   }),
               })

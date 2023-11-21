@@ -10,9 +10,9 @@ import { FirebaseMessagingServiceProvider } from '../firebase/firebase.providers
 import { UserModule } from '../user/user.module';
 import { NotificationController } from './notification.controller';
 import {
-    NotificationPushServiceProvider,
     NotificationAgreeServiceProvider,
     NotificationLogServiceProvider,
+    NotificationPushServiceProvider,
     NotificationTemplateServiceProvider,
 } from './notification.providers';
 import { NotificationAgreeRepository } from './repository/notificationAgree.repository';
@@ -24,9 +24,9 @@ import { NotificationTemplateRepository } from './repository/notificationTemplat
         MongooseModuleNotificationAgree,
         MongooseModuleNotificationLog,
         MongooseModuleNotificationTemplate,
-        forwardRef(() => AuthModule),
         FirebaseModule,
-        UserModule,
+        forwardRef(() => AuthModule),
+        forwardRef(() => UserModule),
     ],
     controllers: [NotificationController],
     providers: [
@@ -40,6 +40,9 @@ import { NotificationTemplateRepository } from './repository/notificationTemplat
         NotificationTemplateServiceProvider,
     ],
     exports: [
+        NotificationTemplateRepository,
+        NotificationLogRepository,
+        FirebaseMessagingServiceProvider,
         NotificationPushServiceProvider,
         NotificationAgreeServiceProvider,
         NotificationLogServiceProvider,

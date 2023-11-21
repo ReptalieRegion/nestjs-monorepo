@@ -162,6 +162,125 @@ interface AndroidMessagingStyle {
     group?: boolean;
 }
 
+export type NotifeeAndroid = {
+    actions?: Array<{
+        pressAction: {
+            id: string;
+            launchActivity?: string;
+            launchActivityFlags?: AndroidLaunchActivityFlag[];
+            mainComponent?: string;
+        };
+        title: string;
+        icon?: string;
+        input?:
+            | true
+            | {
+                  allowFreeFormInput?: boolean;
+                  allowGeneratedReplies?: boolean;
+                  choices?: string[];
+                  editableChoices?: boolean;
+                  placeholder?: string;
+              };
+    }>;
+    asForegroundService?: boolean;
+    lightUpScreen?: boolean;
+    autoCancel?: boolean;
+    badgeCount?: number;
+    badgeIconType?: AndroidBadgeIconType;
+    category?: AndroidCategory;
+    channelId?: string;
+    color?: AndroidColor | string;
+    colorized?: boolean;
+    chronometerDirection?: 'up' | 'down';
+    defaults?: AndroidDefaults[];
+    groupId?: string;
+    groupAlertBehavior?: AndroidGroupAlertBehavior;
+    groupSummary?: boolean;
+    inputHistory?: string[];
+    largeIcon?: string | number | object;
+    circularLargeIcon?: boolean;
+    lights?: [AndroidColor | string, number, number];
+    localOnly?: boolean;
+    ongoing?: boolean;
+    loopSound?: boolean;
+    flags?: AndroidFlags[];
+    onlyAlertOnce?: boolean;
+    pressAction?: {
+        id: string;
+        launchActivity?: string;
+        launchActivityFlags?: AndroidLaunchActivityFlag[];
+        mainComponent?: string;
+    };
+    fullScreenAction?: {
+        id: string;
+        launchActivity?: string;
+        launchActivityFlags?: AndroidLaunchActivityFlag[];
+        mainComponent?: string;
+    };
+    importance?: AndroidImportance;
+    progress?: {
+        max?: number;
+        current?: number;
+        indeterminate?: boolean;
+    };
+    showTimestamp?: boolean;
+    smallIcon?: string;
+    smallIconLevel?: number;
+    sortKey?: string;
+    style?: AndroidBigPictureStyle | AndroidBigTextStyle | AndroidInboxStyle | AndroidMessagingStyle;
+    ticker?: string;
+    timeoutAfter?: number;
+    showChronometer?: boolean;
+    vibrationPattern?: number[];
+    visibility?: AndroidVisibility;
+    tag?: string;
+    timestamp?: number;
+    sound?: string;
+};
+
+export type NotifeeIOS = {
+    attachments?: Array<{
+        id?: string;
+        url: string;
+        typeHint?: string;
+        thumbnailHidden?: boolean;
+        thumbnailClippingRect?: {
+            x: number;
+            y: number;
+            width: number;
+            height: number;
+        };
+        thumbnailTime?: number;
+    }>;
+    badgeCount?: number | null;
+    categoryId?: string;
+    launchImageName?: string;
+    sound?: string;
+    interruptionLevel?: 'active' | 'critical' | 'passive' | 'timeSensitive';
+    critical?: boolean;
+    criticalVolume?: number;
+    threadId?: string;
+    summaryArgument?: string;
+    summaryArgumentCount?: number;
+    targetContentId?: string;
+    foregroundPresentationOptions?: {
+        alert?: boolean;
+        sound?: boolean;
+        badge?: boolean;
+        banner?: boolean;
+        list?: boolean;
+    };
+    communicationInfo?: {
+        conversationId: string;
+        body?: string;
+        sender: {
+            id: string;
+            displayName: string;
+            avatar?: string;
+        };
+    };
+};
+
 export interface Notifee {
     id?: string;
     title?: string | undefined;
@@ -170,123 +289,8 @@ export interface Notifee {
     data?: {
         [key: string]: string | object | number;
     };
-    android?: {
-        actions?: Array<{
-            pressAction: {
-                id: string;
-                launchActivity?: string;
-                launchActivityFlags?: AndroidLaunchActivityFlag[];
-                mainComponent?: string;
-            };
-            title: string;
-            icon?: string;
-            input?:
-                | true
-                | {
-                      allowFreeFormInput?: boolean;
-                      allowGeneratedReplies?: boolean;
-                      choices?: string[];
-                      editableChoices?: boolean;
-                      placeholder?: string;
-                  };
-        }>;
-        asForegroundService?: boolean;
-        lightUpScreen?: boolean;
-        autoCancel?: boolean;
-        badgeCount?: number;
-        badgeIconType?: AndroidBadgeIconType;
-        category?: AndroidCategory;
-        channelId?: string;
-        color?: AndroidColor | string;
-        colorized?: boolean;
-        chronometerDirection?: 'up' | 'down';
-        defaults?: AndroidDefaults[];
-        groupId?: string;
-        groupAlertBehavior?: AndroidGroupAlertBehavior;
-        groupSummary?: boolean;
-        inputHistory?: string[];
-        largeIcon?: string | number | object;
-        circularLargeIcon?: boolean;
-        lights?: [AndroidColor | string, number, number];
-        localOnly?: boolean;
-        ongoing?: boolean;
-        loopSound?: boolean;
-        flags?: AndroidFlags[];
-        onlyAlertOnce?: boolean;
-        pressAction?: {
-            id: string;
-            launchActivity?: string;
-            launchActivityFlags?: AndroidLaunchActivityFlag[];
-            mainComponent?: string;
-        };
-        fullScreenAction?: {
-            id: string;
-            launchActivity?: string;
-            launchActivityFlags?: AndroidLaunchActivityFlag[];
-            mainComponent?: string;
-        };
-        importance?: AndroidImportance;
-        progress?: {
-            max?: number;
-            current?: number;
-            indeterminate?: boolean;
-        };
-        showTimestamp?: boolean;
-        smallIcon?: string;
-        smallIconLevel?: number;
-        sortKey?: string;
-        style?: AndroidBigPictureStyle | AndroidBigTextStyle | AndroidInboxStyle | AndroidMessagingStyle;
-        ticker?: string;
-        timeoutAfter?: number;
-        showChronometer?: boolean;
-        vibrationPattern?: number[];
-        visibility?: AndroidVisibility;
-        tag?: string;
-        timestamp?: number;
-        sound?: string;
-    };
-    ios?: {
-        attachments?: Array<{
-            id?: string;
-            url: string;
-            typeHint?: string;
-            thumbnailHidden?: boolean;
-            thumbnailClippingRect?: {
-                x: number;
-                y: number;
-                width: number;
-                height: number;
-            };
-            thumbnailTime?: number;
-        }>;
-        badgeCount?: number | null;
-        categoryId?: string;
-        launchImageName?: string;
-        sound?: string;
-        interruptionLevel?: 'active' | 'critical' | 'passive' | 'timeSensitive';
-        critical?: boolean;
-        criticalVolume?: number;
-        threadId?: string;
-        summaryArgument?: string;
-        summaryArgumentCount?: number;
-        targetContentId?: string;
-        foregroundPresentationOptions?: {
-            alert?: boolean;
-            sound?: boolean;
-            badge?: boolean;
-            banner?: boolean;
-            list?: boolean;
-        };
-        communicationInfo?: {
-            conversationId: string;
-            body?: string;
-            sender: {
-                id: string;
-                displayName: string;
-                avatar?: string;
-            };
-        };
-    };
+    android?: NotifeeAndroid;
+    ios?: NotifeeIOS;
 
     readonly remote?: {
         messageId: string;
@@ -315,6 +319,9 @@ export interface FCMMulticastMessage extends Omit<admin.messaging.MulticastMessa
 
 interface NotificationBase {
     userId: string;
+    articleParams: {
+        [key: string]: string;
+    };
 }
 
 interface NotificationComment extends NotificationBase {
@@ -322,17 +329,11 @@ interface NotificationComment extends NotificationBase {
     postId: string;
     postThumbnail: string;
     userThumbnail: string;
-    articleParams: {
-        댓글생성한유저: string;
-    };
 }
 
 interface NotificationFollow extends NotificationBase {
     type: TemplateType.Follow;
     userThumbnail: string;
-    articleParams: {
-        팔로우한유저: string;
-    };
 }
 
 interface NotificationLike extends NotificationBase {
@@ -340,9 +341,6 @@ interface NotificationLike extends NotificationBase {
     postId: string;
     userThumbnail: string;
     postThumbnail: string;
-    articleParams: {
-        좋아요한유저: string;
-    };
 }
 
 interface NotificationNotice extends NotificationBase {
@@ -359,7 +357,5 @@ export type NotificationPushParams =
 export type NotificationPushData = {
     title: TemplateTitleType;
     body: string;
-    link: string;
-    crawlPushId: string;
-    templateId: string;
+    link?: string;
 };

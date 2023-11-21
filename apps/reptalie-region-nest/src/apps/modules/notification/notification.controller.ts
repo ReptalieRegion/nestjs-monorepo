@@ -10,7 +10,7 @@ import { NotificationAgreeService, NotificationAgreeServiceToken } from './servi
 import { NotificationLogService, NotificationLogServiceToken } from './service/notificationLog.service';
 import { NotificationPushService, NotificationPushServiceToken } from './service/notificationPush.service';
 import { NotificationTemplateService, NotificationTemplateServiceToken } from './service/notificationTemplate.service';
-import { FCMMessage, FCMMulticastMessage, NotificationPushParams } from './types/notificationPush.types';
+import { NotificationPushParams } from './types/notificationPush.types';
 
 @Controller('notification')
 export class NotificationController {
@@ -26,15 +26,13 @@ export class NotificationController {
     ) {}
 
     @Post('push/send')
-    async send(@Body() body: FCMMessage & { pushParams: NotificationPushParams }) {
-        const { pushParams, ...message } = body;
-        this.notificationPushService.sendMessage(pushParams, { ...message });
+    async send(@Body() body: { token: string | undefined; pushParams: NotificationPushParams }) {
+        this.notificationPushService.sendMessage(body.token, body.pushParams);
     }
 
     @Post('push/sendMulticast')
-    async sendMulticast(@Body() body: FCMMulticastMessage & { pushParams: NotificationPushParams }) {
-        const { pushParams, ...message } = body;
-        this.notificationPushService.sendMulticastMessage(pushParams, { ...message });
+    async sendMulticast(@Body() body: { tokens: string[] | undefined; pushParams: NotificationPushParams }) {
+        this.notificationPushService.sendMulticastMessage(body.tokens, body.pushParams);
     }
 
     // 정규 표현식을 사용하여 변수 추출

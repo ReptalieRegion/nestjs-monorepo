@@ -6,8 +6,10 @@ import { getCurrentDate } from '../utils/time/time';
 import { SharePost } from './sharePost.schema';
 import { User } from './user.schema';
 
+type ShareCommentMapperField = IResponseShareCommentDTO;
+
 export interface ShareCommentDocument extends ShareComment, Document {
-    Mapper(): Partial<IResponseShareCommentDTO>;
+    Mapper(): ShareCommentMapperField;
 }
 
 @Schema({ versionKey: false, timestamps: { currentTime: getCurrentDate } })
@@ -28,8 +30,8 @@ export class ShareComment {
 const ShareCommentSchema = SchemaFactory.createForClass(ShareComment);
 ShareCommentSchema.index({ userId: 1, _id: 1 });
 ShareCommentSchema.methods = {
-    Mapper(): Partial<IResponseShareCommentDTO> {
-        const fields: Array<keyof IResponseShareCommentDTO> = [
+    Mapper() {
+        const fields: Array<keyof ShareCommentMapperField> = [
             'id',
             'postId',
             'userId',

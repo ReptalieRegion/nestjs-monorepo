@@ -3,20 +3,22 @@ import { ContentType, InputNotificationLogDTO } from '../../../dto/notification/
 import { TemplateProviderType, TemplateType } from '../../../dto/notification/template/input-notificationTemplate.dto';
 import { FirebaseMessagingService, FirebaseMessagingServiceToken } from '../../firebase/service/firebase-messaging.service';
 import { UserDeleterService, UserDeleterServiceToken } from '../../user/service/userDeleter.service';
-import { DEEP_LINK_LIST, DEEP_LINK_PREFIX } from '../constants/notificationPush.constants';
+import { DEEP_LINK_LIST, DEEP_LINK_PREFIX, DEFAULT_FCM_MESSAGE } from '../constants/notificationPush.constants';
 import { NotificationLogRepository } from '../repository/notificationLog.repository';
 import { NotificationTemplateRepository } from '../repository/notificationTemplate.repository';
-import { FCMMessage, FCMMulticastMessage, NotificationPushData, NotificationPushParams } from '../types/notificationPush.types';
+import { NotificationPushData, NotificationPushParams } from '../types/notificationPush.types';
 
 export const NotificationPushServiceToken = 'NotificationPushServiceToken';
 
 @Injectable()
 export class NotificationPushService {
     constructor(
-        @Inject(FirebaseMessagingServiceToken)
-        private readonly firebaseAdminService: FirebaseMessagingService,
         @Inject(UserDeleterServiceToken)
         private readonly userDeleterService: UserDeleterService,
+
+        @Inject(FirebaseMessagingServiceToken)
+        private readonly firebaseAdminService: FirebaseMessagingService,
+
         private readonly notificationLogRepository: NotificationLogRepository,
         private readonly notificationTemplateRepository: NotificationTemplateRepository,
     ) {}
@@ -24,13 +26,20 @@ export class NotificationPushService {
     /**
      * 단일 푸시 알림
      */
-    async sendMessage(pushParams: NotificationPushParams, message: FCMMessage) {
-        this._dataStringify({ data: message.data, pushParams }).then((data) => {
+    async sendMessage(token: string | undefined, pushParams: NotificationPushParams) {
+        if (!token) {
+            return;
+        }
+
+        this._dataGenerator(pushParams).then(({ data, log }) => {
             this.firebaseAdminService
-                .send({ ...message, data })
+                .send({
+                    token,
+                    data,
+                    ...DEFAULT_FCM_MESSAGE.ios({}),
+                })
                 .then(() => {
-                    const logData = this._createPushLogDTO({ data, pushParams });
-                    this.notificationLogRepository.createLog(logData);
+                    this.notificationLogRepository.createLog(log);
                 })
                 .catch(() => {
                     this.userDeleterService.fcmTokenDelete(pushParams.userId);
@@ -41,13 +50,20 @@ export class NotificationPushService {
     /**
      * 다중 푸시 알림
      */
-    async sendMulticastMessage(pushParams: NotificationPushParams, message: FCMMulticastMessage) {
-        this._dataStringify({ data: message.data, pushParams }).then((data) => {
+    async sendMulticastMessage(tokens: string[] | undefined, pushParams: NotificationPushParams) {
+        if (!tokens) {
+            return;
+        }
+
+        this._dataGenerator(pushParams).then(({ data, log }) => {
             this.firebaseAdminService
-                .sendMulticast({ ...message, data })
+                .sendMulticast({
+                    tokens,
+                    data,
+                    ...DEFAULT_FCM_MESSAGE.ios({}),
+                })
                 .then(() => {
-                    const logData = this._createPushLogDTO({ data, pushParams });
-                    this.notificationLogRepository.createLog(logData);
+                    this.notificationLogRepository.createLog(log);
                 })
                 .catch(() => {
                     this.userDeleterService.fcmTokenDelete(pushParams.userId);
@@ -55,93 +71,94 @@ export class NotificationPushService {
         });
     }
 
-    /**
-     *
-     * @param logDto InputNotificationLogDTO
-     * @description 푸시알림 로그 생성
-     */
-    private _createPushLogDTO({
-        data,
-        pushParams,
-    }: {
+    private async _dataGenerator(pushParams: NotificationPushParams): Promise<{
         data: NotificationPushData;
-        pushParams: NotificationPushParams;
-    }): InputNotificationLogDTO {
-        const defaultLogData = {
-            userId: pushParams.userId,
-            templateId: data.templateId,
-            messageId: data.crawlPushId,
+        log: InputNotificationLogDTO;
+    }> {
+        const { article, id, title } = await this._createTemplateArticle(pushParams.type);
+        const baseData = {
+            data: {
+                title,
+                body: article,
+            },
+            log: {
+                userId: pushParams.userId,
+                templateId: id,
+            },
         };
-
         switch (pushParams.type) {
-            case TemplateType.Comment:
-            case TemplateType.Like:
-                return {
-                    ...defaultLogData,
-                    contents: {
-                        type: ContentType.SharePost,
-                        title: data.title,
-                        article: data.body,
-                        deepLink: data.link,
-                        profileThumbnail: pushParams.userThumbnail,
-                        postThumbnail: pushParams.postThumbnail,
-                    },
-                };
             case TemplateType.Notice:
                 return {
-                    ...defaultLogData,
-                    contents: {
-                        type: ContentType.Profile,
-                        title: data.title,
-                        article: data.body,
-                        deepLink: data.link,
+                    data: {
+                        ...baseData.data,
+                    },
+                    log: {
+                        ...baseData.log,
+                        messageId: this._createUniqueId(),
+                        contents: {
+                            type: ContentType.Notice,
+                            article,
+                            title,
+                            deepLink: DEEP_LINK_PREFIX + DEEP_LINK_LIST.notice,
+                        },
+                    },
+                };
+            case TemplateType.Comment:
+                return {
+                    data: {
+                        ...baseData.data,
+                    },
+                    log: {
+                        ...baseData.log,
+                        messageId: this._createUniqueId(),
+                        contents: {
+                            type: ContentType.SharePost,
+                            article,
+                            title,
+                            deepLink: DEEP_LINK_PREFIX + DEEP_LINK_LIST.sharePostDetail(pushParams.postId, 'comment'),
+                            postThumbnail: pushParams.postThumbnail,
+                            profileThumbnail: pushParams.userThumbnail,
+                        },
+                    },
+                };
+            case TemplateType.Like:
+                return {
+                    data: {
+                        ...baseData.data,
+                    },
+                    log: {
+                        ...baseData.log,
+                        messageId: this._createUniqueId(),
+                        contents: {
+                            type: ContentType.SharePost,
+                            article,
+                            title,
+                            deepLink: DEEP_LINK_PREFIX + DEEP_LINK_LIST.sharePostDetail(pushParams.postId, 'like'),
+                            postThumbnail: pushParams.postThumbnail,
+                            profileThumbnail: pushParams.userThumbnail,
+                        },
                     },
                 };
             case TemplateType.Follow:
                 return {
-                    ...defaultLogData,
-                    contents: {
-                        type: ContentType.Profile,
-                        title: data.title,
-                        article: data.body,
-                        deepLink: data.link,
-                        profileThumbnail: pushParams.userThumbnail,
+                    data: {
+                        ...baseData.data,
+                    },
+                    log: {
+                        ...baseData.log,
+                        messageId: this._createUniqueId(),
+                        contents: {
+                            type: ContentType.Profile,
+                            article,
+                            title,
+                            deepLink: DEEP_LINK_PREFIX + DEEP_LINK_LIST.sharePostUser(pushParams.userId),
+                            profileThumbnail: pushParams.userThumbnail,
+                        },
                     },
                 };
             default:
-                throw new Error('Not Template InvalidType');
+                throw new Error('Not Found TemplateType');
         }
-    }
-
-    /**
-     *
-     * @param param0
-     * {
-     *  data: FCMMessage의 data | FCMMulticastMessage의 data
-     *  pushParams: 푸시 알림마다 각각 다른 매개변수
-     * }
-     * @returns Firebase messing의 data에 담을 변수 { [key: string]: string }
-     */
-    private async _dataStringify({
-        data,
-        pushParams,
-    }: (Pick<FCMMessage, 'data'> | Pick<FCMMulticastMessage, 'data'>) & { pushParams: NotificationPushParams }) {
-        const deepLink = this._getDeepLink(pushParams);
-        const link = deepLink ? DEEP_LINK_PREFIX + deepLink : undefined;
-        const { article, id, title } = await this._createTemplateArticle(pushParams.type);
-        return Object.assign(
-            {},
-            {
-                ...data,
-                title,
-                body: article,
-            },
-            {
-                link,
-                crawlPushId: this._createUniqueId(),
-                templateId: id,
-            },
-        );
     }
 
     /**
@@ -151,26 +168,6 @@ export class NotificationPushService {
     private _createUniqueId() {
         const date = new Date();
         return `${date.getTime()}-${Math.floor(Math.random() * 999)}`;
-    }
-
-    /**
-     *
-     * @param pushParams 푸시 알림마다 각각 다른 매개변수
-     * @description 클라이언트에서 푸시알림 클릭 시, 페이지 전환을 위한 link 생성
-     * @returns string
-     */
-    private _getDeepLink(pushParams: NotificationPushParams) {
-        switch (pushParams.type) {
-            case TemplateType.Comment:
-                return DEEP_LINK_LIST.sharePostDetail(pushParams.postId, 'comment');
-            case TemplateType.Like:
-                return DEEP_LINK_LIST.sharePostDetail(pushParams.postId, 'like');
-            case TemplateType.Follow:
-                return DEEP_LINK_LIST.sharePostUser(pushParams.articleParams.팔로우한유저);
-            case TemplateType.Notice:
-            default:
-                return undefined;
-        }
     }
 
     /**

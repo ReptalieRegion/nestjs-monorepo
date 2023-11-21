@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import admin from 'firebase-admin';
 import { FirebaseMessagingService, FirebaseMessagingServiceToken } from './service/firebase-messaging.service';
 
-const createUseFactory = (configService: ConfigService) => {
+const createUseFactory = (configService: ConfigService, Service: typeof FirebaseMessagingService) => {
     const app =
         admin.apps.length === 0
             ? admin.initializeApp({
@@ -14,14 +14,16 @@ const createUseFactory = (configService: ConfigService) => {
                   }),
               })
             : admin.apps[0];
+
     if (app === null) {
         throw new Error('[Firebase] no init');
     }
-    return new FirebaseMessagingService(app);
+
+    return new Service(app);
 };
 
 export const FirebaseMessagingServiceProvider: Provider = {
     provide: FirebaseMessagingServiceToken,
     inject: [ConfigService],
-    useFactory: createUseFactory,
+    useFactory: (configService) => createUseFactory(configService, FirebaseMessagingService),
 };

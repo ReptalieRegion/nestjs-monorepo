@@ -4,6 +4,7 @@ import { BasicTemplate } from '../template/input-notificationTemplate.dto';
 export enum ContentType {
     Profile = '프로필이미지',
     SharePost = '일상공유이미지',
+    Notice = '공지사항',
 }
 
 export interface IMessageIdDTO {
@@ -11,27 +12,35 @@ export interface IMessageIdDTO {
 }
 
 class BasicContents extends BasicTemplate {
-    @IsEnum(ContentType)
-    readonly type: ContentType;
-
     @IsString()
     readonly deepLink: string;
 }
 
 class ProfileContent extends BasicContents {
+    @IsEnum(ContentType)
+    readonly type: ContentType.Profile;
+
     @IsString()
     readonly profileThumbnail: string;
 }
 
 class SharePostContent extends BasicContents {
-    @IsString()
-    readonly profileThumbnail?: string;
+    @IsEnum(ContentType)
+    readonly type: ContentType.SharePost;
 
     @IsString()
-    readonly postThumbnail?: string;
+    readonly profileThumbnail: string;
+
+    @IsString()
+    readonly postThumbnail: string;
 }
 
-export type PushLogContents = ProfileContent | SharePostContent;
+class NoticeContent extends BasicContents {
+    @IsEnum(ContentType)
+    readonly type: ContentType.Notice;
+}
+
+export type PushLogContents = ProfileContent | SharePostContent | NoticeContent;
 
 export class InputNotificationLogDTO {
     @IsOptional()

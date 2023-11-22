@@ -1,8 +1,8 @@
 import { Inject, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectConnection } from '@nestjs/mongoose';
 import mongoose, { ClientSession } from 'mongoose';
-import { TemplateType } from 'src/apps/dto/notification/template/input-notificationTemplate.dto';
 import { ImageType } from '../../../dto/image/input-image.dto';
+import { TemplateType } from '../../../dto/notification/template/input-notificationTemplate.dto';
 import { InputShareCommentDTO } from '../../../dto/share/comment/input-shareComment.dto';
 import { InputShareCommentReplyDTO } from '../../../dto/share/commentReply/input-shareCommentReply.dto';
 import { InputSharePostDTO } from '../../../dto/share/post/input-sharePost.dto';
@@ -109,10 +109,12 @@ export class ShareWriterService {
             .findOne({ _id: comment.postId }, { userId: 1 })
             .exec()
             .then(async (postInfo) => {
-                const post = postInfo?.Mapper();
-                if (!post) {
+                if (!postInfo) {
                     throw new Error('[일상공유] Not Found Post');
                 }
+
+                const post = postInfo.Mapper();
+                const fcmToken = await this.sharePostRepository.getPostOwnerFCMToken(comment.postId);
 
                 const [postImage, userImage] = await Promise.all([
                     this.imageSearcherService.getPostImages(comment.postId),
@@ -132,7 +134,7 @@ export class ShareWriterService {
                     );
                 }
 
-                await this.notificationPushService.sendMessage(user.fcmToken, {
+                await this.notificationPushService.sendMessage(fcmToken, {
                     type: TemplateType.Comment,
                     userId: user.id,
                     postId: comment.postId,

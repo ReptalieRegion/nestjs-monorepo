@@ -69,12 +69,13 @@ export class NotificationPushService {
 
     private _successPush(log: InputNotificationLogDTO) {
         this.notificationLogRepository.createLog(log);
-        this.notificationSlackService.send('**[푸시알림 보내기]** 성공');
+        this.notificationSlackService.send('*[푸시알림 보내기]* 성공');
     }
 
     private _failPush(userId: string) {
         this.userDeleterService.fcmTokenDelete(userId);
-        this.notificationSlackService.send('**[푸시알림 보내기]** 실패', '푸시알림-에러-dev');
+        /** @example 슬랙 사용법 */
+        this.notificationSlackService.send('*[푸시알림 보내기]* 실패', '푸시알림-에러-dev');
     }
 
     private async _dataGenerator(pushParams: NotificationPushParams): Promise<{

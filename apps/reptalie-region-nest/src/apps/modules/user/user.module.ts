@@ -11,7 +11,7 @@ import {
     UserDeleterServiceProvider,
     UserSearcherServiceProvider,
     UserUpdaterServiceProvider,
-    UserWriterServiceProvicer,
+    UserWriterServiceProvider,
 } from './user.providers';
 
 @Module({
@@ -27,10 +27,10 @@ import {
         UserRepository,
         FollowRepository,
         UserSearcherServiceProvider,
-        UserWriterServiceProvicer,
+        UserWriterServiceProvider,
         UserUpdaterServiceProvider,
         UserDeleterServiceProvider,
     ],
-    exports: [UserSearcherServiceProvider, UserWriterServiceProvicer, UserUpdaterServiceProvider, UserDeleterServiceProvider],
+    exports: [UserSearcherServiceProvider, UserWriterServiceProvider, UserUpdaterServiceProvider, UserDeleterServiceProvider],
 })
 export class UserModule {}

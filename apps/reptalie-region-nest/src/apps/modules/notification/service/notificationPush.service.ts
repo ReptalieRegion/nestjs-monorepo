@@ -186,7 +186,7 @@ export class NotificationPushService {
                             type: ContentType.Profile,
                             article,
                             title,
-                            deepLink: DEEP_LINK_PREFIX + DEEP_LINK_LIST.sharePostUser(pushParams.userId),
+                            deepLink: DEEP_LINK_PREFIX + DEEP_LINK_LIST.sharePostUser(pushParams.userNickname),
                             profileThumbnail: pushParams.userThumbnail,
                         },
                     },

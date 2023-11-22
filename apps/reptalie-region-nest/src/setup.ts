@@ -29,6 +29,10 @@ export const setup = (app: NestExpressApplication) => {
     app.use(passport.initialize());
 
     try {
+        if (process.env.IS_DEPLOY !== 'true') {
+            return;
+        }
+
         const SLACK_TOKEN = process.env.SLACK_TOKEN;
         if (SLACK_TOKEN === undefined) {
             return;

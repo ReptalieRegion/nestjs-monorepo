@@ -122,7 +122,7 @@ export class ShareWriterService {
                 const postThumbnail = postImage[0].src;
                 const userThumbnail = userImage.src;
 
-                if (postThumbnail || userThumbnail) {
+                if (!postThumbnail || !userThumbnail) {
                     throw new Error(
                         '[CRAWL] Not Found postThumbnail or userThumbnail\n' +
                             `postThumbnail: ${postThumbnail}\n` +

@@ -1,14 +1,17 @@
-import { Injectable, Inject, InternalServerErrorException } from '@nestjs/common';
+import { Inject, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectConnection } from '@nestjs/mongoose';
 import mongoose, { ClientSession } from 'mongoose';
+import { TemplateType } from 'src/apps/dto/notification/template/input-notificationTemplate.dto';
 import { ImageType } from '../../../dto/image/input-image.dto';
 import { InputShareCommentDTO } from '../../../dto/share/comment/input-shareComment.dto';
 import { InputShareCommentReplyDTO } from '../../../dto/share/commentReply/input-shareCommentReply.dto';
 import { InputSharePostDTO } from '../../../dto/share/post/input-sharePost.dto';
 import { IResponseUserDTO } from '../../../dto/user/user/response-user.dto';
 import { serviceErrorHandler } from '../../../utils/error/errorHandler';
-import { ImageS3HandlerServiceToken, ImageS3HandlerService } from '../../image/service/imageS3Handler.service';
-import { ImageWriterServiceToken, ImageWriterService } from '../../image/service/imageWriter.service';
+import { ImageS3HandlerService, ImageS3HandlerServiceToken } from '../../image/service/imageS3Handler.service';
+import { ImageSearcherService, ImageSearcherServiceToken } from '../../image/service/imageSearcher.service';
+import { ImageWriterService, ImageWriterServiceToken } from '../../image/service/imageWriter.service';
+import { NotificationPushService, NotificationPushServiceToken } from '../../notification/service/notificationPush.service';
 import { ShareCommentRepository } from '../repository/shareComment.repository';
 import { ShareCommentReplyRepository } from '../repository/shareCommentReply.repository';
 import { ShareLikeRepository } from '../repository/shareLike.repository';
@@ -32,8 +35,13 @@ export class ShareWriterService {
         private readonly imageS3HandlerService: ImageS3HandlerService,
         @Inject(ImageWriterServiceToken)
         private readonly imageWriterService: ImageWriterService,
+        @Inject(ImageSearcherServiceToken)
+        private readonly imageSearcherService: ImageSearcherService,
+
         @Inject(ShareSearcherServiceToken)
         private readonly shareSearcherService: ShareSearcherService,
+        @Inject(NotificationPushServiceToken)
+        private readonly notificationPushService: NotificationPushService,
     ) {}
 
     /**
@@ -89,6 +97,33 @@ export class ShareWriterService {
         }
 
         const commentInfo = await this.shareSearcherService.getCommentInfo({ create: { comment } });
+
+        /**
+         * @example
+         * 푸시 알림 전송 예시
+         */
+        console.log('=====start=====');
+        Promise.all([
+            this.imageSearcherService.getPostImages(comment.postId),
+            this.imageSearcherService.getProfileImage(user.id),
+        ])
+            .then(([postImage, userImage]) => {
+                const postThumbnail = postImage[0].src;
+                const userThumbnail = userImage.src;
+                this.notificationPushService.sendMessage(user.fcmToken, {
+                    type: TemplateType.Comment,
+                    userId: user.id,
+                    postId: comment.postId,
+                    postThumbnail,
+                    userThumbnail,
+                    articleParams: {
+                        댓글생성한유저: user.nickname,
+                    },
+                });
+            })
+            .catch((error) => {
+                console.error(error);
+            });
 
         return { post: { id: comment.postId, comment: { ...commentInfo, user } } };
     }

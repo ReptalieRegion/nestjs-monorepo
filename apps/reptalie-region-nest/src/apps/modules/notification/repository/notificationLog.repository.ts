@@ -13,7 +13,7 @@ export class NotificationLogRepository extends BaseRepository<NotificationLogDoc
     }
 
     async createLog(dto: InputNotificationLogDTO) {
-        const log = new this.notificationLogModel(dto);
+        const log = new this.notificationLogModel({ ...dto, userId: dto.userId });
         const savedLog = await log.save();
         return savedLog.Mapper();
     }

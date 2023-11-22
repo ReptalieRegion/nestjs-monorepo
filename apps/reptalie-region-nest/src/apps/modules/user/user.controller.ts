@@ -1,6 +1,7 @@
 import {
     Body,
     Controller,
+    Delete,
     Get,
     HttpCode,
     HttpStatus,
@@ -19,6 +20,7 @@ import { IResponseUserDTO } from '../../dto/user/user/response-user.dto';
 import { controllerErrorHandler } from '../../utils/error/errorHandler';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { JwtOptionalAuthGuard } from '../auth/guards/jwtOptional-auth.guard';
+import { UserDeleterService, UserDeleterServiceToken } from './service/userDeleter.service';
 import { UserSearcherService, UserSearcherServiceToken } from './service/userSearcher.service';
 import { UserUpdaterService, UserUpdaterServiceToken } from './service/userUpdater.service';
 import { UserWriterService, UserWriterServiceToken } from './service/userWriter.service';
@@ -33,6 +35,8 @@ export class UserController {
         private readonly userWriterService: UserWriterService,
         @Inject(UserUpdaterServiceToken)
         private readonly userUpdaterService: UserUpdaterService,
+        @Inject(UserDeleterServiceToken)
+        private readonly userDeleterService: UserDeleterService,
     ) {}
 
     /**
@@ -96,6 +100,16 @@ export class UserController {
      *  Delete
      *
      */
+    @Delete('fcm-token')
+    @HttpCode(HttpStatus.NO_CONTENT)
+    @UseGuards(JwtAuthGuard)
+    async deleteFcmToken(@AuthUser() user: IResponseUserDTO) {
+        try {
+            this.userDeleterService.fcmTokenDelete(user.id);
+        } catch (error) {
+            controllerErrorHandler(error);
+        }
+    }
 
     /**
      *

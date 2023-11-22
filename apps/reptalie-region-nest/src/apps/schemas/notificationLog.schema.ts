@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 
 import mongoose, { Document, SchemaTypes } from 'mongoose';
-import { BasicContents } from '../dto/notification/log/input-notificationLog.dto';
+import { PushLogContents } from '../dto/notification/log/input-notificationLog.dto';
 import { IResponseNotificationLogDTO } from '../dto/notification/log/response-notificationLog.dto';
 import { getCurrentDate } from '../utils/time/time';
 import { NotificationTemplate } from './notificationTemplate.schema';
@@ -23,7 +23,7 @@ export class NotificationLog {
     messageId: string;
 
     @Prop({ required: true, type: SchemaTypes.Mixed })
-    contents: BasicContents;
+    contents: PushLogContents;
 
     @Prop({ default: false, type: SchemaTypes.Boolean })
     isRead: boolean;

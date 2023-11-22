@@ -13,7 +13,8 @@
     "editor.formatOnSave": true,
     "editor.rulers": [120],
     "editor.codeActionsOnSave": {
-        "source.fixAll.eslint": true
+        "source.fixAll.eslint": true,
+        "source.organizeImports": true
     },
     "material-icon-theme.folders.associations": {
         "dockers": "Docker",

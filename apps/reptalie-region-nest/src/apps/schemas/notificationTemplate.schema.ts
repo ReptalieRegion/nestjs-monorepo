@@ -6,7 +6,7 @@ import { IResponseNotificationTemplateDTO } from '../dto/notification/template/r
 import { getCurrentDate } from '../utils/time/time';
 
 export interface NotificationTemplateDocument extends NotificationTemplate, Document {
-    Mapper(): Partial<IResponseNotificationTemplateDTO>;
+    Mapper(): IResponseNotificationTemplateDTO;
 }
 
 @Schema({ versionKey: false, timestamps: { currentTime: getCurrentDate, createdAt: true, updatedAt: false } })
@@ -27,7 +27,7 @@ export class NotificationTemplate {
 const NotificationTemplateSchema = SchemaFactory.createForClass(NotificationTemplate);
 NotificationTemplateSchema.index({ type: 1, provider: 1 });
 NotificationTemplateSchema.methods = {
-    Mapper(): Partial<IResponseNotificationTemplateDTO> {
+    Mapper(): IResponseNotificationTemplateDTO {
         const fields: Array<keyof IResponseNotificationTemplateDTO> = [
             'id',
             'type',
@@ -52,7 +52,7 @@ NotificationTemplateSchema.methods = {
                 ...prev,
                 [field]: value,
             };
-        }, {});
+        }, {}) as IResponseNotificationTemplateDTO;
 
         return viewFields;
     },

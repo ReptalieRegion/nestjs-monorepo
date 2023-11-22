@@ -1,13 +1,15 @@
 import { Module, forwardRef } from '@nestjs/common';
 import {
-    MongooseModuleSharePost,
     MongooseModuleShareComment,
     MongooseModuleShareCommentReply,
     MongooseModuleShareLike,
+    MongooseModuleSharePost,
 } from '../../utils/customModules';
 
 import { AuthModule } from '../auth/auth.module';
 import { ImageModule } from '../image/image.module';
+import { NotificationModule } from '../notification/notification.module';
+import { NotificationPushServiceProvider } from '../notification/notification.providers';
 import { UserModule } from '../user/user.module';
 import { ShareCommentRepository } from './repository/shareComment.repository';
 import { ShareCommentReplyRepository } from './repository/shareCommentReply.repository';
@@ -15,10 +17,10 @@ import { ShareLikeRepository } from './repository/shareLike.repository';
 import { SharePostRepository } from './repository/sharePost.repository';
 import { ShareController } from './share.controller';
 import {
-    ShareWriterServiceProvider,
+    ShareDeleterServiceProvider,
     ShareSearcherServiceProvider,
     ShareUpdaterServiceProvider,
-    ShareDeleterServiceProvider,
+    ShareWriterServiceProvider,
 } from './share.providers';
 
 @Module({
@@ -29,6 +31,7 @@ import {
         MongooseModuleShareLike,
         forwardRef(() => AuthModule),
         forwardRef(() => UserModule),
+        forwardRef(() => NotificationModule),
         ImageModule,
     ],
     controllers: [ShareController],
@@ -41,6 +44,7 @@ import {
         ShareSearcherServiceProvider,
         ShareUpdaterServiceProvider,
         ShareDeleterServiceProvider,
+        NotificationPushServiceProvider,
     ],
     exports: [
         ShareWriterServiceProvider,

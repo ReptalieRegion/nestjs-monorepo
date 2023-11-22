@@ -23,6 +23,10 @@ export class NotificationLogService {
         }
     }
 
+    async checkAllRead(userId: string) {
+        return this.notificationLogRepository.readAllCheckLog(userId);
+    }
+
     async updateIsClicked(userId: string, messageId: string) {
         const result = await this.notificationLogRepository
             .updateOne({ userId, messageId }, { $set: { isClicked: true } })

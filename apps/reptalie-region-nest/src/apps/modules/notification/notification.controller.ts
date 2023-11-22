@@ -177,4 +177,15 @@ export class NotificationController {
             controllerErrorHandler(error);
         }
     }
+
+    @Get('push/read-check')
+    @HttpCode(HttpStatus.OK)
+    @UseGuards(JwtAuthGuard)
+    async getReadAllCheck(@AuthUser() user: IResponseUserDTO) {
+        try {
+            return this.notificationLogService.checkAllRead(user.id);
+        } catch (error) {
+            controllerErrorHandler(error);
+        }
+    }
 }

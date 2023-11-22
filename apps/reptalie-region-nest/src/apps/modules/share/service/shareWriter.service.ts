@@ -12,6 +12,7 @@ import { ImageS3HandlerService, ImageS3HandlerServiceToken } from '../../image/s
 import { ImageSearcherService, ImageSearcherServiceToken } from '../../image/service/imageSearcher.service';
 import { ImageWriterService, ImageWriterServiceToken } from '../../image/service/imageWriter.service';
 import { NotificationPushService, NotificationPushServiceToken } from '../../notification/service/notificationPush.service';
+import { NotificationSlackService, NotificationSlackServiceToken } from '../../notification/service/notificationSlack.service';
 import { ShareCommentRepository } from '../repository/shareComment.repository';
 import { ShareCommentReplyRepository } from '../repository/shareCommentReply.repository';
 import { ShareLikeRepository } from '../repository/shareLike.repository';
@@ -42,6 +43,8 @@ export class ShareWriterService {
         private readonly shareSearcherService: ShareSearcherService,
         @Inject(NotificationPushServiceToken)
         private readonly notificationPushService: NotificationPushService,
+        @Inject(NotificationSlackServiceToken)
+        private readonly notificationSlackService: NotificationSlackService,
     ) {}
 
     /**
@@ -102,15 +105,34 @@ export class ShareWriterService {
          * @example
          * 푸시 알림 전송 예시
          */
-        console.log('=====start=====');
-        Promise.all([
-            this.imageSearcherService.getPostImages(comment.postId),
-            this.imageSearcherService.getProfileImage(user.id),
-        ])
-            .then(([postImage, userImage]) => {
+        this.sharePostRepository
+            .findOne({ _id: comment.postId }, { userId: 1 })
+            .exec()
+            .then(async (postInfo) => {
+                const post = postInfo?.Mapper();
+                if (!post) {
+                    throw new Error('[일상공유] Not Found Post');
+                }
+
+                const [postImage, userImage] = await Promise.all([
+                    this.imageSearcherService.getPostImages(comment.postId),
+                    this.imageSearcherService.getProfileImage(post.userId),
+                ]);
+
                 const postThumbnail = postImage[0].src;
                 const userThumbnail = userImage.src;
-                this.notificationPushService.sendMessage(user.fcmToken, {
+
+                if (postThumbnail || userThumbnail) {
+                    throw new Error(
+                        '[CRAWL] Not Found postThumbnail or userThumbnail\n' +
+                            `postThumbnail: ${postThumbnail}\n` +
+                            `userThumbnail: ${userThumbnail}\n` +
+                            `postId: ${comment.postId}\n` +
+                            `userId: ${user.id}`,
+                    );
+                }
+
+                await this.notificationPushService.sendMessage(user.fcmToken, {
                     type: TemplateType.Comment,
                     userId: user.id,
                     postId: comment.postId,
@@ -121,8 +143,8 @@ export class ShareWriterService {
                     },
                 });
             })
-            .catch((error) => {
-                console.error(error);
+            .catch((error: Error) => {
+                this.notificationSlackService.send(`*[푸시 알림]* 이미지 찾기 실패\n${error.message}`, '푸시알림-에러-dev');
             });
 
         return { post: { id: comment.postId, comment: { ...commentInfo, user } } };

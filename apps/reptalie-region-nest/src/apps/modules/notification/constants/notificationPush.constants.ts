@@ -20,7 +20,7 @@ export const DEFAULT_NOTIFEE_OPTION_IOS = {
 };
 
 export const DEFAULT_FCM_MESSAGE = {
-    ios: (notifeeOptions: NotifeeIOS) => ({
+    ios: (ios: NotifeeIOS) => ({
         apns: {
             payload: {
                 aps: {
@@ -37,13 +37,8 @@ export const DEFAULT_FCM_MESSAGE = {
                             banner: true,
                             list: true,
                         },
-                        attachments: [
-                            {
-                                url: 'https://reptalie-region.s3.ap-northeast-2.amazonaws.com/c925604c-9369-4e00-8e0b-c563e2ce7578.jpeg',
-                            },
-                        ],
+                        ...ios,
                     },
-                    ...notifeeOptions,
                 },
             },
         },

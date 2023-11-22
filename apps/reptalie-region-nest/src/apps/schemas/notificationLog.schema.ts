@@ -8,6 +8,7 @@ import { NotificationTemplate } from './notificationTemplate.schema';
 import { User } from './user.schema';
 
 export interface NotificationLogDocument extends NotificationLog, Document {
+    createdAt: Date;
     Mapper(): Partial<IResponseNotificationLogDTO>;
 }
 

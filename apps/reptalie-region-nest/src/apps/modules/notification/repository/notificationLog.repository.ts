@@ -20,6 +20,6 @@ export class NotificationLogRepository extends BaseRepository<NotificationLogDoc
 
     async readAllCheckLog(userId: string) {
         const readCount = await this.notificationLogModel.countDocuments({ userId, isRead: false });
-        return readCount > 0;
+        return readCount === 0;
     }
 }

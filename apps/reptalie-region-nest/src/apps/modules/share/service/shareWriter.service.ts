@@ -112,13 +112,11 @@ export class ShareWriterService {
                 if (!postInfo) {
                     throw new Error('[일상공유] Not Found Post');
                 }
-
-                const post = postInfo.Mapper();
                 const fcmToken = await this.sharePostRepository.getPostOwnerFCMToken(comment.postId);
 
                 const [postImage, userImage] = await Promise.all([
                     this.imageSearcherService.getPostImages(comment.postId),
-                    this.imageSearcherService.getProfileImage(post.userId),
+                    this.imageSearcherService.getProfileImage(user.id),
                 ]);
 
                 const postThumbnail = postImage[0].src;

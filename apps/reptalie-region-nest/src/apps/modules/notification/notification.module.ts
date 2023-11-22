@@ -6,7 +6,6 @@ import {
 } from '../../utils/customModules';
 import { AuthModule } from '../auth/auth.module';
 import { FirebaseModule } from '../firebase/firebase.module';
-import { FirebaseMessagingServiceProvider } from '../firebase/firebase.providers';
 import { UserModule } from '../user/user.module';
 import { NotificationController } from './notification.controller';
 import {
@@ -34,7 +33,6 @@ import { NotificationTemplateRepository } from './repository/notificationTemplat
         NotificationAgreeRepository,
         NotificationLogRepository,
         NotificationTemplateRepository,
-        FirebaseMessagingServiceProvider,
         NotificationSlackServiceProvider,
         NotificationPushServiceProvider,
         NotificationAgreeServiceProvider,
@@ -42,9 +40,6 @@ import { NotificationTemplateRepository } from './repository/notificationTemplat
         NotificationTemplateServiceProvider,
     ],
     exports: [
-        NotificationTemplateRepository,
-        NotificationLogRepository,
-        FirebaseMessagingServiceProvider,
         NotificationSlackServiceProvider,
         NotificationPushServiceProvider,
         NotificationAgreeServiceProvider,

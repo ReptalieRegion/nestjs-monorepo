@@ -351,7 +351,6 @@ export type NotificationPushParams =
     | NotificationComment
     | NotificationFollow
     | NotificationLike
-    | NotificationLike
     | NotificationNotice;
 
 export type NotificationPushData = {

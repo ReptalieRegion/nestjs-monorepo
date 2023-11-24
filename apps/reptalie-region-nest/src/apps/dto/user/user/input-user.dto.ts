@@ -6,6 +6,7 @@ export class InputUserDTO {
     readonly name?: string;
 
     @IsString()
+    @IsOptional()
     readonly nickname: string;
 
     @IsString()

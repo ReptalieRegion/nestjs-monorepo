@@ -20,7 +20,7 @@ export const DEFAULT_NOTIFEE_OPTION_IOS = {
 };
 
 export const DEFAULT_FCM_MESSAGE = {
-    ios: (ios: NotifeeIOS) => ({
+    ios: (ios?: NotifeeIOS) => ({
         apns: {
             payload: {
                 aps: {

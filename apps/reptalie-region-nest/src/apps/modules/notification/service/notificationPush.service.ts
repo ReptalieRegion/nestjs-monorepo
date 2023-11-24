@@ -37,9 +37,6 @@ export class NotificationPushService {
         }
 
         this._dataGenerator(pushParams).then(({ data, ios, log }) => {
-            DEFAULT_FCM_MESSAGE.ios(ios).apns.payload.notifee_options.ios.attachments?.forEach((a) => {
-                console.log(a);
-            });
             this.firebaseAdminService
                 .send({
                     token,
@@ -85,7 +82,7 @@ export class NotificationPushService {
 
     private async _dataGenerator(pushParams: NotificationPushParams): Promise<{
         data: NotificationPushData;
-        ios: NotifeeIOS;
+        ios?: NotifeeIOS;
         log: InputNotificationLogDTO;
     }> {
         const { article, id, title } = await this._createTemplateArticle(pushParams.type);
@@ -99,13 +96,14 @@ export class NotificationPushService {
                 templateId: id,
             },
         };
+
         switch (pushParams.type) {
             case TemplateType.Notice:
                 return {
                     data: {
                         ...baseData.data,
+                        link: DEEP_LINK_PREFIX + DEEP_LINK_LIST.notice,
                     },
-                    ios: {},
                     log: {
                         ...baseData.log,
                         messageId: this._createUniqueId(),
@@ -121,6 +119,7 @@ export class NotificationPushService {
                 return {
                     data: {
                         ...baseData.data,
+                        link: DEEP_LINK_PREFIX + DEEP_LINK_LIST.sharePostDetail(pushParams.postId, 'comment'),
                     },
                     ios: {
                         attachments: [
@@ -146,6 +145,7 @@ export class NotificationPushService {
                 return {
                     data: {
                         ...baseData.data,
+                        link: DEEP_LINK_PREFIX + DEEP_LINK_LIST.sharePostDetail(pushParams.postId, 'like'),
                     },
                     ios: {
                         attachments: [
@@ -171,6 +171,7 @@ export class NotificationPushService {
                 return {
                     data: {
                         ...baseData.data,
+                        link: DEEP_LINK_PREFIX + DEEP_LINK_LIST.sharePostUser(pushParams.userNickname),
                     },
                     ios: {
                         attachments: [

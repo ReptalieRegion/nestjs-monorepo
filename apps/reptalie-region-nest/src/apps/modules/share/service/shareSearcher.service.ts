@@ -83,8 +83,12 @@ export class ShareSearcherService {
         return { items, nextPage };
     }
 
+    /**
+     *
+     * 특정 게시글 조회 로직
+     */
     async getPost(currentUserId: string, postId: string) {
-        const entity = await this.sharePostRepository.findOne({ _id: postId, userId: currentUserId }).exec();
+        const entity = await this.sharePostRepository.findOne({ _id: postId }).exec();
 
         if (!entity) {
             throw new NotFoundException('Not Found Post');

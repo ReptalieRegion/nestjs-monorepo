@@ -113,8 +113,12 @@ export class ShareWriterService {
             .findOne({ _id: comment.postId }, { userId: 1 })
             .exec()
             .then(async (postInfo) => {
+                if (postInfo?.Mapper().userId === user.id) {
+                    return;
+                }
+
                 if (!postInfo) {
-                    throw new Error('[일상공유] Not Found Post');
+                    throw new Error('[Comment Create] Not Found Post');
                 }
 
                 const isPushAgree = await this.notificationAgreeService.isPushAgree(TemplateType.Comment);

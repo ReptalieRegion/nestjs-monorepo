@@ -11,6 +11,7 @@ import { serviceErrorHandler } from '../../../utils/error/errorHandler';
 import { ImageS3HandlerService, ImageS3HandlerServiceToken } from '../../image/service/imageS3Handler.service';
 import { ImageSearcherService, ImageSearcherServiceToken } from '../../image/service/imageSearcher.service';
 import { ImageWriterService, ImageWriterServiceToken } from '../../image/service/imageWriter.service';
+import { NotificationAgreeService } from '../../notification/service/notificationAgree.service';
 import { NotificationPushService, NotificationPushServiceToken } from '../../notification/service/notificationPush.service';
 import { NotificationSlackService, NotificationSlackServiceToken } from '../../notification/service/notificationSlack.service';
 import { ShareCommentRepository } from '../repository/shareComment.repository';
@@ -41,6 +42,9 @@ export class ShareWriterService {
 
         @Inject(ShareSearcherServiceToken)
         private readonly shareSearcherService: ShareSearcherService,
+
+        @Inject(NotificationPushServiceToken)
+        private readonly notificationAgreeService: NotificationAgreeService,
         @Inject(NotificationPushServiceToken)
         private readonly notificationPushService: NotificationPushService,
         @Inject(NotificationSlackServiceToken)
@@ -112,6 +116,12 @@ export class ShareWriterService {
                 if (!postInfo) {
                     throw new Error('[일상공유] Not Found Post');
                 }
+
+                const isPushAgree = await this.notificationAgreeService.isPushAgree(TemplateType.Comment);
+                if (!isPushAgree) {
+                    return;
+                }
+
                 const fcmToken = await this.sharePostRepository.getPostOwnerFCMToken(comment.postId);
 
                 const [postImage, userImage] = await Promise.all([

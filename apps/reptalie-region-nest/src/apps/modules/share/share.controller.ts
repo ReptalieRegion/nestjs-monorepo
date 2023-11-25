@@ -1,18 +1,18 @@
 import {
-    Controller,
-    Post,
-    UseInterceptors,
-    UploadedFiles,
     Body,
-    Inject,
-    HttpStatus,
-    UseGuards,
-    Put,
-    Param,
+    Controller,
     Delete,
     Get,
-    Query,
     HttpCode,
+    HttpStatus,
+    Inject,
+    Param,
+    Post,
+    Put,
+    Query,
+    UploadedFiles,
+    UseGuards,
+    UseInterceptors,
 } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { InputShareCommentDTO } from '../../dto/share/comment/input-shareComment.dto';
@@ -197,6 +197,17 @@ export class ShareController {
     async getPostsInfiniteScroll(@AuthUser() user: IResponseUserDTO, @Query('pageParam') pageParam: number) {
         try {
             return this.shareSearcherService.getPostsInfiniteScroll(user?.id, pageParam, 10);
+        } catch (error) {
+            controllerErrorHandler(error);
+        }
+    }
+
+    @Get('posts/:id')
+    @HttpCode(HttpStatus.OK)
+    @UseGuards(JwtOptionalAuthGuard)
+    async getPost(@AuthUser() user: IResponseUserDTO, @Param('id') postId: string) {
+        try {
+            return this.shareSearcherService.getPost(user.id, postId);
         } catch (error) {
             controllerErrorHandler(error);
         }

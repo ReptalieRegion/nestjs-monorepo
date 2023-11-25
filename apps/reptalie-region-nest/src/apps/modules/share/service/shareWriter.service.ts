@@ -1,8 +1,8 @@
 import { Inject, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectConnection } from '@nestjs/mongoose';
 import mongoose, { ClientSession } from 'mongoose';
-import { TemplateType } from 'src/apps/dto/notification/template/input-notificationTemplate.dto';
 import { ImageType } from '../../../dto/image/input-image.dto';
+import { TemplateType } from '../../../dto/notification/template/input-notificationTemplate.dto';
 import { InputShareCommentDTO } from '../../../dto/share/comment/input-shareComment.dto';
 import { InputShareCommentReplyDTO } from '../../../dto/share/commentReply/input-shareCommentReply.dto';
 import { InputSharePostDTO } from '../../../dto/share/post/input-sharePost.dto';
@@ -11,7 +11,9 @@ import { serviceErrorHandler } from '../../../utils/error/errorHandler';
 import { ImageS3HandlerService, ImageS3HandlerServiceToken } from '../../image/service/imageS3Handler.service';
 import { ImageSearcherService, ImageSearcherServiceToken } from '../../image/service/imageSearcher.service';
 import { ImageWriterService, ImageWriterServiceToken } from '../../image/service/imageWriter.service';
+import { NotificationAgreeService } from '../../notification/service/notificationAgree.service';
 import { NotificationPushService, NotificationPushServiceToken } from '../../notification/service/notificationPush.service';
+import { NotificationSlackService, NotificationSlackServiceToken } from '../../notification/service/notificationSlack.service';
 import { ShareCommentRepository } from '../repository/shareComment.repository';
 import { ShareCommentReplyRepository } from '../repository/shareCommentReply.repository';
 import { ShareLikeRepository } from '../repository/shareLike.repository';
@@ -40,8 +42,13 @@ export class ShareWriterService {
 
         @Inject(ShareSearcherServiceToken)
         private readonly shareSearcherService: ShareSearcherService,
+
+        @Inject(NotificationPushServiceToken)
+        private readonly notificationAgreeService: NotificationAgreeService,
         @Inject(NotificationPushServiceToken)
         private readonly notificationPushService: NotificationPushService,
+        @Inject(NotificationSlackServiceToken)
+        private readonly notificationSlackService: NotificationSlackService,
     ) {}
 
     /**
@@ -102,15 +109,44 @@ export class ShareWriterService {
          * @example
          * 푸시 알림 전송 예시
          */
-        console.log('=====start=====');
-        Promise.all([
-            this.imageSearcherService.getPostImages(comment.postId),
-            this.imageSearcherService.getProfileImage(user.id),
-        ])
-            .then(([postImage, userImage]) => {
+        this.sharePostRepository
+            .findOne({ _id: comment.postId }, { userId: 1 })
+            .exec()
+            .then(async (postInfo) => {
+                if (postInfo?.Mapper().userId === user.id) {
+                    return;
+                }
+
+                if (!postInfo) {
+                    throw new Error('[Comment Create] Not Found Post');
+                }
+
+                const isPushAgree = await this.notificationAgreeService.isPushAgree(TemplateType.Comment);
+                if (!isPushAgree) {
+                    return;
+                }
+
+                const fcmToken = await this.sharePostRepository.getPostOwnerFCMToken(comment.postId);
+
+                const [postImage, userImage] = await Promise.all([
+                    this.imageSearcherService.getPostImages(comment.postId),
+                    this.imageSearcherService.getProfileImage(user.id),
+                ]);
+
                 const postThumbnail = postImage[0].src;
                 const userThumbnail = userImage.src;
-                this.notificationPushService.sendMessage(user.fcmToken, {
+
+                if (!postThumbnail || !userThumbnail) {
+                    throw new Error(
+                        '[CRAWL] Not Found postThumbnail or userThumbnail\n' +
+                            `postThumbnail: ${postThumbnail}\n` +
+                            `userThumbnail: ${userThumbnail}\n` +
+                            `postId: ${comment.postId}\n` +
+                            `userId: ${user.id}`,
+                    );
+                }
+
+                await this.notificationPushService.sendMessage(fcmToken, {
                     type: TemplateType.Comment,
                     userId: user.id,
                     postId: comment.postId,
@@ -121,8 +157,8 @@ export class ShareWriterService {
                     },
                 });
             })
-            .catch((error) => {
-                console.error(error);
+            .catch((error: Error) => {
+                this.notificationSlackService.send(`*[푸시 알림]* 이미지 찾기 실패\n${error.message}`, '푸시알림-에러-dev');
             });
 
         return { post: { id: comment.postId, comment: { ...commentInfo, user } } };

@@ -23,6 +23,11 @@ export class NotificationLogService {
         }
     }
 
+    async checkAllRead(userId: string) {
+        const isReadAllLog = await this.notificationLogRepository.readAllCheckLog(userId);
+        return { isReadAllLog };
+    }
+
     async updateIsClicked(userId: string, messageId: string) {
         const result = await this.notificationLogRepository
             .updateOne({ userId, messageId }, { $set: { isClicked: true } })
@@ -45,14 +50,19 @@ export class NotificationLogService {
 
     async getLogsInfiniteScroll(userId: string, pageParam: number, limitSize: number) {
         const logs = await this.notificationLogRepository
-            .find({ userId }, { messageId: 1, contents: 1, isRead: 1 })
+            .find({ userId }, { messageId: 1, contents: 1, isRead: 1, createdAt: 1 })
             .sort({ createdAt: -1 })
             .skip(pageParam * limitSize)
             .limit(limitSize)
             .exec();
 
         const items = logs.map((entity) => {
-            return { messageId: entity.messageId, contents: entity.contents, isRead: entity.isRead };
+            return {
+                messageId: entity.messageId,
+                contents: entity.contents,
+                isRead: entity.isRead,
+                createdAt: entity.createdAt,
+            };
         });
 
         const isLastPage = logs.length < limitSize;

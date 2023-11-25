@@ -15,7 +15,7 @@ import {
     UseInterceptors,
 } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
-import { InputUserDTO } from '../../dto/user/user/input-user.dto';
+import { fcmTokenDTO } from '../../dto/user/user/fcm-token.dto';
 import { IResponseUserDTO } from '../../dto/user/user/response-user.dto';
 import { controllerErrorHandler } from '../../utils/error/errorHandler';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -87,7 +87,7 @@ export class UserController {
     @Put('fcm-token')
     @HttpCode(HttpStatus.OK)
     @UseGuards(JwtAuthGuard)
-    async updateFcmToken(@AuthUser() user: IResponseUserDTO, @Body() dto: InputUserDTO) {
+    async updateFcmToken(@AuthUser() user: IResponseUserDTO, @Body() dto: fcmTokenDTO) {
         try {
             return this.userUpdaterService.updateFcmToken(user, dto);
         } catch (error) {

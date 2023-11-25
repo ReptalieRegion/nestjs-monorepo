@@ -1,4 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
+import * as admin from 'firebase-admin';
 import { ContentType, InputNotificationLogDTO } from '../../../dto/notification/log/input-notificationLog.dto';
 import { TemplateProviderType, TemplateType } from '../../../dto/notification/template/input-notificationTemplate.dto';
 import { FirebaseMessagingService, FirebaseMessagingServiceToken } from '../../firebase/service/firebase-messaging.service';
@@ -6,7 +7,7 @@ import { UserDeleterService, UserDeleterServiceToken } from '../../user/service/
 import { DEEP_LINK_LIST, DEEP_LINK_PREFIX, DEFAULT_FCM_MESSAGE } from '../constants/notificationPush.constants';
 import { NotificationLogRepository } from '../repository/notificationLog.repository';
 import { NotificationTemplateRepository } from '../repository/notificationTemplate.repository';
-import { NotificationPushData, NotificationPushParams } from '../types/notificationPush.types';
+import { NotifeeIOS, NotificationPushData, NotificationPushParams } from '../types/notificationPush.types';
 import { NotificationSlackService, NotificationSlackServiceToken } from './notificationSlack.service';
 
 export const NotificationPushServiceToken = 'NotificationPushServiceToken';
@@ -35,15 +36,15 @@ export class NotificationPushService {
             return;
         }
 
-        this._dataGenerator(pushParams).then(({ data, log }) => {
+        this._dataGenerator(pushParams).then(({ data, ios, log }) => {
             this.firebaseAdminService
                 .send({
                     token,
                     data,
-                    ...DEFAULT_FCM_MESSAGE.ios({}),
+                    ...DEFAULT_FCM_MESSAGE.ios(ios),
                 })
                 .then(() => this._successPush(log))
-                .catch(() => this._failPush(pushParams.userId));
+                .catch((error) => this._failPush(pushParams.userId, error));
         });
     }
 
@@ -55,30 +56,33 @@ export class NotificationPushService {
             return;
         }
 
-        this._dataGenerator(pushParams).then(({ data, log }) => {
+        this._dataGenerator(pushParams).then(({ data, ios, log }) => {
             this.firebaseAdminService
                 .sendMulticast({
                     tokens,
                     data,
-                    ...DEFAULT_FCM_MESSAGE.ios({}),
+                    ...DEFAULT_FCM_MESSAGE.ios(ios),
                 })
                 .then(() => this._successPush(log))
-                .catch(() => this._failPush(pushParams.userId));
+                .catch((error) => this._failPush(pushParams.userId, error));
         });
     }
 
     private _successPush(log: InputNotificationLogDTO) {
         this.notificationLogRepository.createLog(log);
-        this.notificationSlackService.send('**[푸시알림 보내기]** 성공');
+
+        this.notificationSlackService.send('*[푸시알림 보내기]* 성공');
     }
 
-    private _failPush(userId: string) {
+    private _failPush(userId: string, error: admin.FirebaseError) {
+        console.log(error);
         this.userDeleterService.fcmTokenDelete(userId);
-        this.notificationSlackService.send('**[푸시알림 보내기]** 실패', '푸시알림-에러-dev');
+        this.notificationSlackService.send('*[푸시알림 보내기]* 실패', '푸시알림-에러-dev');
     }
 
     private async _dataGenerator(pushParams: NotificationPushParams): Promise<{
         data: NotificationPushData;
+        ios?: NotifeeIOS;
         log: InputNotificationLogDTO;
     }> {
         const { article, id, title } = await this._createTemplateArticle(pushParams.type);
@@ -92,11 +96,13 @@ export class NotificationPushService {
                 templateId: id,
             },
         };
+
         switch (pushParams.type) {
             case TemplateType.Notice:
                 return {
                     data: {
                         ...baseData.data,
+                        link: DEEP_LINK_PREFIX + DEEP_LINK_LIST.notice,
                     },
                     log: {
                         ...baseData.log,
@@ -113,6 +119,14 @@ export class NotificationPushService {
                 return {
                     data: {
                         ...baseData.data,
+                        link: DEEP_LINK_PREFIX + DEEP_LINK_LIST.sharePostDetail(pushParams.postId, 'comment'),
+                    },
+                    ios: {
+                        attachments: [
+                            {
+                                url: pushParams.postThumbnail,
+                            },
+                        ],
                     },
                     log: {
                         ...baseData.log,
@@ -131,6 +145,14 @@ export class NotificationPushService {
                 return {
                     data: {
                         ...baseData.data,
+                        link: DEEP_LINK_PREFIX + DEEP_LINK_LIST.sharePostDetail(pushParams.postId, 'like'),
+                    },
+                    ios: {
+                        attachments: [
+                            {
+                                url: pushParams.postThumbnail,
+                            },
+                        ],
                     },
                     log: {
                         ...baseData.log,
@@ -149,6 +171,14 @@ export class NotificationPushService {
                 return {
                     data: {
                         ...baseData.data,
+                        link: DEEP_LINK_PREFIX + DEEP_LINK_LIST.sharePostUser(pushParams.userNickname),
+                    },
+                    ios: {
+                        attachments: [
+                            {
+                                url: pushParams.userThumbnail,
+                            },
+                        ],
                     },
                     log: {
                         ...baseData.log,
@@ -157,7 +187,7 @@ export class NotificationPushService {
                             type: ContentType.Profile,
                             article,
                             title,
-                            deepLink: DEEP_LINK_PREFIX + DEEP_LINK_LIST.sharePostUser(pushParams.userId),
+                            deepLink: DEEP_LINK_PREFIX + DEEP_LINK_LIST.sharePostUser(pushParams.userNickname),
                             profileThumbnail: pushParams.userThumbnail,
                         },
                     },

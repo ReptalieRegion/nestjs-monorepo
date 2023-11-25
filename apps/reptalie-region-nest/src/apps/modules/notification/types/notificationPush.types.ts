@@ -333,6 +333,7 @@ interface NotificationComment extends NotificationBase {
 
 interface NotificationFollow extends NotificationBase {
     type: TemplateType.Follow;
+    userNickname: string;
     userThumbnail: string;
 }
 
@@ -347,11 +348,7 @@ interface NotificationNotice extends NotificationBase {
     type: TemplateType.Notice;
 }
 
-export type NotificationPushParams =
-    | NotificationComment
-    | NotificationFollow
-    | NotificationLike
-    | NotificationNotice;
+export type NotificationPushParams = NotificationComment | NotificationFollow | NotificationLike | NotificationNotice;
 
 export type NotificationPushData = {
     title: TemplateTitleType;

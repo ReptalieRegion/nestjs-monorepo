@@ -15,8 +15,8 @@ export class NotificationTemplateService {
             .limit(1)
             .exec();
 
-        const mapTempalte = isExistsTemplate?.Mapper();
-        const version = mapTempalte?.version ? mapTempalte.version + 1 : 1;
+        const mapTemplate = isExistsTemplate?.Mapper();
+        const version = mapTemplate?.version ? mapTemplate.version + 1 : 1;
 
         const template = await this.notificationTemplateRepository.createTemplate(dto, version);
 

@@ -1,5 +1,6 @@
 import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { InputNotificationAgreeDTO } from '../../../dto/notification/agree/input-notificationAgree.dto';
+import { TemplateType } from '../../../dto/notification/template/input-notificationTemplate.dto';
 import { NotificationAgreeRepository } from '../repository/notificationAgree.repository';
 
 export const NotificationAgreeServiceToken = 'NotificationAgreeServiceToken';
@@ -72,5 +73,28 @@ export class NotificationAgreeService {
             isAgreeService: service,
             isAgreeFollow: follow,
         };
+    }
+
+    async isPushAgree(type: TemplateType) {
+        let isPushAgree = false;
+
+        switch (type) {
+            case TemplateType.Notice:
+                isPushAgree = Boolean(await this.notificationAgreeRepository.findOne({ service: true }));
+                break;
+            case TemplateType.Comment:
+                isPushAgree = Boolean(await this.notificationAgreeRepository.findOne({ comment: true }));
+                break;
+            case TemplateType.Like:
+                isPushAgree = Boolean(await this.notificationAgreeRepository.findOne({ like: true }));
+                break;
+            case TemplateType.Follow:
+                isPushAgree = Boolean(await this.notificationAgreeRepository.findOne({ follow: true }));
+                break;
+            default:
+                throw new Error('[isPushAgree] Wrong Type');
+        }
+
+        return isPushAgree;
     }
 }

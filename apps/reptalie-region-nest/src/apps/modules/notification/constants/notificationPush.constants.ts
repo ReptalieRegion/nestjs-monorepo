@@ -1,3 +1,4 @@
+import { AndroidConfig } from 'firebase-admin/lib/messaging/messaging-api';
 import { NotifeeIOS } from '../types/notificationPush.types';
 
 export const DEEP_LINK_PREFIX = 'sharePost://';
@@ -43,8 +44,10 @@ export const DEFAULT_FCM_MESSAGE = {
             },
         },
     }),
-    android: (android?: { imageUrl: string }) => ({
+    android: (android?: { imageUrl: string }): AndroidConfig => ({
         priority: 'high',
-        ...android,
+        data: {
+            ...android,
+        },
     }),
 };

@@ -42,7 +42,7 @@ export class NotificationPushService {
                     token,
                     data,
                     ...DEFAULT_FCM_MESSAGE.ios(ios),
-                    ...DEFAULT_FCM_MESSAGE.android(android),
+                    android: DEFAULT_FCM_MESSAGE.android(android),
                 })
                 .then(() => this._successPush(log))
                 .catch((error) => this._failPush(pushParams.userId, error));
@@ -63,7 +63,7 @@ export class NotificationPushService {
                     tokens,
                     data,
                     ...DEFAULT_FCM_MESSAGE.ios(ios),
-                    ...DEFAULT_FCM_MESSAGE.android(android),
+                    android: DEFAULT_FCM_MESSAGE.android(android),
                 })
                 .then(() => this._successPush(log))
                 .catch((error) => this._failPush(pushParams.userId, error));
@@ -77,9 +77,8 @@ export class NotificationPushService {
     }
 
     private _failPush(userId: string, error: admin.FirebaseError) {
-        console.log(error);
         this.userDeleterService.fcmTokenDelete(userId);
-        this.notificationSlackService.send('*[푸시알림 보내기]* 실패', '푸시알림-에러-dev');
+        this.notificationSlackService.send(`*[푸시알림 보내기]* 실패\n${error.message}`, '푸시알림-에러-dev');
     }
 
     private async _dataGenerator(pushParams: NotificationPushParams): Promise<{

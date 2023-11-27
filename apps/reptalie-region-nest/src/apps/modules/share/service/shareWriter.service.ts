@@ -6,7 +6,7 @@ import { TemplateType } from '../../../dto/notification/template/input-notificat
 import { InputShareCommentDTO } from '../../../dto/share/comment/input-shareComment.dto';
 import { InputShareCommentReplyDTO } from '../../../dto/share/commentReply/input-shareCommentReply.dto';
 import { InputSharePostDTO } from '../../../dto/share/post/input-sharePost.dto';
-import { IResponseUserDTO } from '../../../dto/user/user/response-user.dto';
+import { IUserProfileDTO } from '../../../dto/user/user/response-user.dto';
 import { serviceErrorHandler } from '../../../utils/error/errorHandler';
 import { ImageS3HandlerService, ImageS3HandlerServiceToken } from '../../image/service/imageS3Handler.service';
 import { ImageSearcherService, ImageSearcherServiceToken } from '../../image/service/imageSearcher.service';
@@ -59,7 +59,7 @@ export class ShareWriterService {
      * @param files - 게시물과 연결될 이미지 파일들의 배열입니다.
      * @returns 생성된 게시물과 사용자 정보를 반환합니다.
      */
-    async createPostWithImages(user: IResponseUserDTO, dto: InputSharePostDTO, files: Express.Multer.File[]) {
+    async createPostWithImages(user: IUserProfileDTO, dto: InputSharePostDTO, files: Express.Multer.File[]) {
         const session: ClientSession = await this.connection.startSession();
         session.startTransaction();
 
@@ -95,11 +95,11 @@ export class ShareWriterService {
      * @param dto - 댓글의 세부 정보를 담고 있는 데이터 전송 객체입니다.
      * @returns 생성된 댓글과 사용자 정보를 반환합니다.
      */
-    async createComment(user: IResponseUserDTO, dto: InputShareCommentDTO) {
-        await this.shareSearcherService.findPost(dto.postId);
+    async createComment(user: IUserProfileDTO, dto: InputShareCommentDTO) {
+        const post = await this.shareSearcherService.findPost(dto.postId);
 
         const comment = await this.shareCommentRepository.createComment(user.id, dto);
-        if (!comment.id) {
+        if (!comment) {
             throw new InternalServerErrorException('Failed to save share comment.');
         }
 
@@ -109,32 +109,21 @@ export class ShareWriterService {
          * @example
          * 푸시 알림 전송 예시
          */
-        this.sharePostRepository
-            .findOne({ _id: comment.postId }, { userId: 1 })
-            .exec()
-            .then(async (postInfo) => {
-                if (postInfo?.Mapper().userId === user.id) {
+        Promise.all([
+            this.notificationAgreeService.isPushAgree(TemplateType.Comment, post?.userId.id),
+            this.imageSearcherService.getPostImages(comment.postId),
+        ])
+            .then(async ([isPushAgree, postImage]) => {
+                if (post?.userId.id === user.id) {
                     return;
                 }
 
-                if (!postInfo) {
-                    throw new Error('[Comment Create] Not Found Post');
-                }
-
-                const isPushAgree = await this.notificationAgreeService.isPushAgree(TemplateType.Comment);
                 if (!isPushAgree) {
                     return;
                 }
 
-                const fcmToken = await this.sharePostRepository.getPostOwnerFCMToken(comment.postId);
-
-                const [postImage, userImage] = await Promise.all([
-                    this.imageSearcherService.getPostImages(comment.postId),
-                    this.imageSearcherService.getProfileImage(user.id),
-                ]);
-
                 const postThumbnail = postImage[0].src;
-                const userThumbnail = userImage.src;
+                const userThumbnail = user.profile.src;
 
                 if (!postThumbnail || !userThumbnail) {
                     throw new Error(
@@ -142,13 +131,13 @@ export class ShareWriterService {
                             `postThumbnail: ${postThumbnail}\n` +
                             `userThumbnail: ${userThumbnail}\n` +
                             `postId: ${comment.postId}\n` +
-                            `userId: ${user.id}`,
+                            `userId: ${post?.userId.id}`,
                     );
                 }
 
-                await this.notificationPushService.sendMessage(fcmToken, {
+                await this.notificationPushService.sendMessage(user.fcmToken, {
                     type: TemplateType.Comment,
-                    userId: user.id,
+                    userId: post?.userId.id,
                     postId: comment.postId,
                     postThumbnail,
                     userThumbnail,
@@ -157,7 +146,7 @@ export class ShareWriterService {
                     },
                 });
             })
-            .catch((error: Error) => {
+            .catch((error) => {
                 this.notificationSlackService.send(`*[푸시 알림]* 이미지 찾기 실패\n${error.message}`, '푸시알림-에러-dev');
             });
 
@@ -171,7 +160,7 @@ export class ShareWriterService {
      * @param dto - 댓글에 대한 답글의 세부 정보를 담고 있는 데이터 전송 객체입니다.
      * @returns 생성된 댓글에 대한 답글과 사용자 정보를 반환합니다.
      */
-    async createCommentReply(user: IResponseUserDTO, dto: InputShareCommentReplyDTO) {
+    async createCommentReply(user: IUserProfileDTO, dto: InputShareCommentReplyDTO) {
         const comment = await this.shareSearcherService.findComment(dto.commentId);
 
         const commentReply = await this.shareCommentReplyRepository.createCommentReply(user.id, dto);

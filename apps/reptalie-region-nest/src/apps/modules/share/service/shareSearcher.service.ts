@@ -492,7 +492,7 @@ export class ShareSearcherService {
         try {
             const post = await this.sharePostRepository
                 .findOne({ _id: postId, isDeleted: false })
-                .populate({ path: 'userId', select: 'nickname -_id' })
+                .populate({ path: 'userId', select: 'nickname fcmToken' })
                 .exec();
 
             if (!post) {

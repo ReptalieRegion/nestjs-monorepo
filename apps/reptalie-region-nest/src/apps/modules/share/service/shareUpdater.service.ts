@@ -4,7 +4,7 @@ import mongoose, { ClientSession } from 'mongoose';
 import { InputShareCommentDTO } from '../../../dto/share/comment/input-shareComment.dto';
 import { InputShareCommentReplyDTO } from '../../../dto/share/commentReply/input-shareCommentReply.dto';
 import { InputSharePostDTO } from '../../../dto/share/post/input-sharePost.dto';
-import { IResponseUserDTO } from '../../../dto/user/user/response-user.dto';
+import { IUserProfileDTO } from '../../../dto/user/user/response-user.dto';
 import { serviceErrorHandler } from '../../../utils/error/errorHandler';
 import { ImageDeleterService, ImageDeleterServiceToken } from '../../image/service/imageDeleter.service';
 import { ShareCommentRepository } from '../repository/shareComment.repository';
@@ -40,7 +40,7 @@ export class ShareUpdaterService {
      * @param dto - 게시물의 업데이트 정보를 담고 있는 데이터 전송 객체입니다.
      * @returns 업데이트된 게시물 정보를 반환합니다.
      */
-    async updatePost(user: IResponseUserDTO, postId: string, dto: InputSharePostDTO) {
+    async updatePost(user: IUserProfileDTO, postId: string, dto: InputSharePostDTO) {
         const session: ClientSession = await this.connection.startSession();
         session.startTransaction();
 
@@ -84,7 +84,7 @@ export class ShareUpdaterService {
      * @param dto - 댓글의 업데이트 정보를 담고 있는 데이터 전송 객체입니다.
      * @returns 업데이트된 댓글 정보를 반환합니다.
      */
-    async updateComment(user: IResponseUserDTO, commentId: string, dto: InputShareCommentDTO) {
+    async updateComment(user: IUserProfileDTO, commentId: string, dto: InputShareCommentDTO) {
         try {
             const result = await this.shareCommentRepository
                 .updateOne({ _id: commentId, userId: user.id, isDeleted: false }, { $set: { contents: dto.contents } })

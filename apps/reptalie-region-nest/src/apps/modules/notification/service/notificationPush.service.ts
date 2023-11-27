@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import * as admin from 'firebase-admin';
 import { ContentType, InputNotificationLogDTO } from '../../../dto/notification/log/input-notificationLog.dto';
 import { TemplateProviderType, TemplateType } from '../../../dto/notification/template/input-notificationTemplate.dto';
@@ -87,7 +87,9 @@ export class NotificationPushService {
         android?: { imageUrl: string };
         log: InputNotificationLogDTO;
     }> {
-        const { article, id, title } = await this._createTemplateArticle(pushParams.type);
+        const { article, id, title } = await this._createTemplateArticle(pushParams);
+        console.log(article, id, title);
+
         const baseData = {
             data: {
                 title,
@@ -217,25 +219,28 @@ export class NotificationPushService {
         return `${date.getTime()}-${Math.floor(Math.random() * 999)}`;
     }
 
-    /**
-     * TODO
-     * template를 조회해와서 article에 변수를 주입해서 메시지 생성하는 코드 작성해야함
-     */
-    private async _createTemplateArticle(type: TemplateType) {
+    private async _createTemplateArticle(pushParams: NotificationPushParams) {
         const templateInfo = await this.notificationTemplateRepository
-            .find({ type, provider: TemplateProviderType.PUSH })
-            .sort({ version: -1 });
+            .findOne({ type: pushParams.type, provider: TemplateProviderType.PUSH })
+            .sort({ version: -1 })
+            .exec();
 
-        if (templateInfo.length < 1) {
-            throw new Error('Not Found Template');
+        if (!templateInfo) {
+            throw new NotFoundException('Not Found Template');
         }
 
         const {
             id,
             template: { article, title },
-        } = templateInfo[0];
-        // 변수 변경하는 로직 추가할 부분
+        } = templateInfo;
 
-        return { id, title, article };
+        const variables = article.match(/\${(.*?)}/g)?.map((match) => match.replace('${', '').replace('}', '')) || [];
+
+        const replacedArticle = variables.reduce(
+            (acc, variable) => acc.replace(`\${${variable}}`, pushParams.articleParams[variable]),
+            article,
+        );
+
+        return { id, title, article: replacedArticle };
     }
 }

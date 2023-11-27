@@ -75,24 +75,26 @@ export class NotificationAgreeService {
         };
     }
 
-    async isPushAgree(type: TemplateType) {
-        let isPushAgree = false;
+    async isPushAgree(type: TemplateType, userId: string) {
+        let isPushAgree;
+
+        const isAgree = await this.getAgreeInfo(userId);
 
         switch (type) {
             case TemplateType.Notice:
-                isPushAgree = Boolean(await this.notificationAgreeRepository.findOne({ service: true }));
+                isPushAgree = isAgree.isAgreeService;
                 break;
             case TemplateType.Comment:
-                isPushAgree = Boolean(await this.notificationAgreeRepository.findOne({ comment: true }));
+                isPushAgree = isAgree.isAgreeComment;
                 break;
             case TemplateType.Like:
-                isPushAgree = Boolean(await this.notificationAgreeRepository.findOne({ like: true }));
+                isPushAgree = isAgree.isAgreePostLike;
                 break;
             case TemplateType.Follow:
-                isPushAgree = Boolean(await this.notificationAgreeRepository.findOne({ follow: true }));
+                isPushAgree = isAgree.isAgreeFollow;
                 break;
             default:
-                throw new Error('[isPushAgree] Wrong Type');
+                throw new BadRequestException('Invalid data for the specified type.');
         }
 
         return isPushAgree;

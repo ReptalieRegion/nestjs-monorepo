@@ -12,7 +12,6 @@ export class NotificationTemplateService {
         const isExistsTemplate = await this.notificationTemplateRepository
             .findOne({ type: dto.type, provider: dto.provider })
             .sort({ version: -1 })
-            .limit(1)
             .exec();
 
         const mapTemplate = isExistsTemplate?.Mapper();

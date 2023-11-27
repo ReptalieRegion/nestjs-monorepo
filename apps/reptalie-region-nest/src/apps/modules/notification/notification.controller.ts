@@ -2,7 +2,7 @@ import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Inject, Post, Put,
 import { IAgreeStatusDTO } from '../../dto/notification/agree/input-notificationAgree.dto';
 import { IMessageIdDTO, InputNotificationLogDTO } from '../../dto/notification/log/input-notificationLog.dto';
 import { InputNotificationTemplateDTO } from '../../dto/notification/template/input-notificationTemplate.dto';
-import { IResponseUserDTO } from '../../dto/user/user/response-user.dto';
+import { IUserProfileDTO } from '../../dto/user/user/response-user.dto';
 import { controllerErrorHandler } from '../../utils/error/errorHandler';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { AuthUser } from '../user/user.decorator';
@@ -35,22 +35,6 @@ export class NotificationController {
         this.notificationPushService.sendMulticastMessage(body.tokens, body.pushParams);
     }
 
-    // 정규 표현식을 사용하여 변수 추출
-    // const matchResult = dto.template.article.match(/\${(.*?)}/g);
-    // console.log(matchResult);
-
-    // // 추출된 변수 리스트
-    // const variables = matchResult ? matchResult.map((match) => match.replace('${', '').replace('}', '')) : [];
-    // console.log(variables);
-
-    // // 각 변수에 대한 값을 가져와서 대체
-    // const replacedArticle = variables.reduce((article, variable) => {
-
-    //     return article.replace(`\${${variable}}`, 'sm');
-    // }, dto.template.article);
-
-    // console.log(replacedArticle);
-
     /**
      *
      *  Post
@@ -79,7 +63,7 @@ export class NotificationController {
     @Post('push/log')
     @HttpCode(HttpStatus.CREATED)
     @UseGuards(JwtAuthGuard)
-    async createLog(@AuthUser() user: IResponseUserDTO, @Body() dto: InputNotificationLogDTO) {
+    async createLog(@AuthUser() user: IUserProfileDTO, @Body() dto: InputNotificationLogDTO) {
         try {
             return this.notificationLogService.createLog(user.id, dto);
         } catch (error) {
@@ -90,7 +74,7 @@ export class NotificationController {
     @Post('push/agree')
     @HttpCode(HttpStatus.NO_CONTENT)
     @UseGuards(JwtAuthGuard)
-    async createAgree(@AuthUser() user: IResponseUserDTO, @Body() dto: IAgreeStatusDTO) {
+    async createAgree(@AuthUser() user: IUserProfileDTO, @Body() dto: IAgreeStatusDTO) {
         try {
             await this.notificationAgreeService.createAgree(user.id, dto.isAgree);
         } catch (error) {
@@ -106,7 +90,7 @@ export class NotificationController {
     @Put('push/read')
     @HttpCode(HttpStatus.NO_CONTENT)
     @UseGuards(JwtAuthGuard)
-    async updateIsRead(@AuthUser() user: IResponseUserDTO) {
+    async updateIsRead(@AuthUser() user: IUserProfileDTO) {
         try {
             await this.notificationLogService.updateIsRead(user.id);
         } catch (error) {
@@ -117,7 +101,7 @@ export class NotificationController {
     @Put('push/click')
     @HttpCode(HttpStatus.NO_CONTENT)
     @UseGuards(JwtAuthGuard)
-    async updateIsClicked(@AuthUser() user: IResponseUserDTO, @Body() dto: IMessageIdDTO) {
+    async updateIsClicked(@AuthUser() user: IUserProfileDTO, @Body() dto: IMessageIdDTO) {
         try {
             await this.notificationLogService.updateIsClicked(user.id, dto.messageId);
         } catch (error) {
@@ -128,7 +112,7 @@ export class NotificationController {
     @Put('push/agree')
     @HttpCode(HttpStatus.NO_CONTENT)
     @UseGuards(JwtAuthGuard)
-    async updateAgree(@AuthUser() user: IResponseUserDTO, @Body() dto: IAgreeStatusDTO, @Query('type') type: string) {
+    async updateAgree(@AuthUser() user: IUserProfileDTO, @Body() dto: IAgreeStatusDTO, @Query('type') type: string) {
         try {
             await this.notificationAgreeService.updateAgree(user.id, dto.isAgree, type);
         } catch (error) {
@@ -159,7 +143,7 @@ export class NotificationController {
     @Get('push/log')
     @HttpCode(HttpStatus.OK)
     @UseGuards(JwtAuthGuard)
-    async getLogsInfiniteScroll(@AuthUser() user: IResponseUserDTO, @Query('pageParam') pageParam: number) {
+    async getLogsInfiniteScroll(@AuthUser() user: IUserProfileDTO, @Query('pageParam') pageParam: number) {
         try {
             return this.notificationLogService.getLogsInfiniteScroll(user.id, pageParam, 10);
         } catch (error) {
@@ -170,7 +154,7 @@ export class NotificationController {
     @Get('push/agree')
     @HttpCode(HttpStatus.OK)
     @UseGuards(JwtAuthGuard)
-    async getAgreeInfo(@AuthUser() user: IResponseUserDTO) {
+    async getAgreeInfo(@AuthUser() user: IUserProfileDTO) {
         try {
             return this.notificationAgreeService.getAgreeInfo(user.id);
         } catch (error) {
@@ -181,7 +165,7 @@ export class NotificationController {
     @Get('push/read-check')
     @HttpCode(HttpStatus.OK)
     @UseGuards(JwtAuthGuard)
-    async getReadAllCheck(@AuthUser() user: IResponseUserDTO) {
+    async getReadAllCheck(@AuthUser() user: IUserProfileDTO) {
         try {
             return this.notificationLogService.checkAllRead(user.id);
         } catch (error) {

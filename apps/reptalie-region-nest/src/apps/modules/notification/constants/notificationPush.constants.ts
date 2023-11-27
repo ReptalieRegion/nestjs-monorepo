@@ -1,7 +1,7 @@
 import { AndroidConfig } from 'firebase-admin/lib/messaging/messaging-api';
 import { NotifeeIOS } from '../types/notificationPush.types';
 
-export const DEEP_LINK_PREFIX = 'sharePost://';
+export const DEEP_LINK_PREFIX = 'crawl://';
 
 export const DEEP_LINK_LIST = {
     notice: 'notice',

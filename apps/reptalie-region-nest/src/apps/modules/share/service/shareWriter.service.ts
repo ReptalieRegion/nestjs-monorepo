@@ -106,8 +106,7 @@ export class ShareWriterService {
         const commentInfo = await this.shareSearcherService.getCommentInfo({ create: { comment } });
 
         /**
-         * @example
-         * 푸시 알림 전송 예시
+         * 푸시 알림 전송
          */
         Promise.all([
             this.notificationAgreeService.isPushAgree(TemplateType.Comment, post?.userId.id),
@@ -184,14 +183,58 @@ export class ShareWriterService {
      * @param postId - 좋아요를 생성할 게시물의 ID입니다.
      * @returns 생성된 좋아요 정보를 반환합니다.
      */
-    async createLike(userId: string, postId: string) {
+    async createLike(user: IUserProfileDTO, postId: string) {
         try {
             const post = await this.shareSearcherService.findPost(postId);
 
-            const like = await this.shareLikeRepository.createLike({ userId, postId });
+            const like = await this.shareLikeRepository.createLike({ userId: user.id, postId });
             if (!like) {
                 throw new InternalServerErrorException('Failed to save share like.');
             }
+
+            /**
+             * 푸시 알림 전송
+             */
+            Promise.all([
+                this.notificationAgreeService.isPushAgree(TemplateType.Like, post?.userId.id),
+                this.imageSearcherService.getPostImages(post?.id as string),
+            ])
+                .then(async ([isPushAgree, postImage]) => {
+                    if (post?.userId.id === user.id) {
+                        return;
+                    }
+
+                    if (!isPushAgree) {
+                        return;
+                    }
+
+                    const postThumbnail = postImage[0].src;
+                    const userThumbnail = user.profile.src;
+
+                    if (!postThumbnail || !userThumbnail) {
+                        throw new Error(
+                            '[CRAWL] Not Found postThumbnail or userThumbnail\n' +
+                                `postThumbnail: ${postThumbnail}\n` +
+                                `userThumbnail: ${userThumbnail}\n` +
+                                `postId: ${post?.id}\n` +
+                                `userId: ${post?.userId.id}`,
+                        );
+                    }
+
+                    await this.notificationPushService.sendMessage(post?.userId.fcmToken, {
+                        type: TemplateType.Like,
+                        userId: post?.userId.id,
+                        postId: post?.id as string,
+                        postThumbnail,
+                        userThumbnail,
+                        articleParams: {
+                            좋아요한유저: user.nickname,
+                        },
+                    });
+                })
+                .catch((error) => {
+                    this.notificationSlackService.send(`*[푸시 알림]* 이미지 찾기 실패\n${error.message}`, '푸시알림-에러-dev');
+                });
 
             return { post: { id: like.postId, user: { nickname: post?.userId.nickname } } };
         } catch (error) {

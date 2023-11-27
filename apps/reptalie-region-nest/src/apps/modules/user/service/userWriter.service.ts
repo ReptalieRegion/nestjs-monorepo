@@ -7,9 +7,14 @@ import {
 } from '@nestjs/common';
 import mongoose, { ClientSession } from 'mongoose';
 import { ImageType } from '../../../dto/image/input-image.dto';
+import { TemplateType } from '../../../dto/notification/template/input-notificationTemplate.dto';
+import { IUserProfileDTO } from '../../../dto/user/user/response-user.dto';
 import { serviceErrorHandler } from '../../../utils/error/errorHandler';
 import { randomWords } from '../../../utils/randomWords/randomWords';
 import { ImageWriterService, ImageWriterServiceToken } from '../../image/service/imageWriter.service';
+import { NotificationAgreeService, NotificationAgreeServiceToken } from '../../notification/service/notificationAgree.service';
+import { NotificationPushService, NotificationPushServiceToken } from '../../notification/service/notificationPush.service';
+import { NotificationSlackService, NotificationSlackServiceToken } from '../../notification/service/notificationSlack.service';
 import { FollowRepository } from '../repository/follow.repository';
 import { UserRepository } from '../repository/user.repository';
 import { UserSearcherService, UserSearcherServiceToken } from './userSearcher.service';
@@ -29,6 +34,13 @@ export class UserWriterService {
         private readonly userUpdaterService: UserUpdaterService,
         @Inject(ImageWriterServiceToken)
         private readonly imageWriterService: ImageWriterService,
+
+        @Inject(NotificationAgreeServiceToken)
+        private readonly notificationAgreeService: NotificationAgreeService,
+        @Inject(NotificationPushServiceToken)
+        private readonly notificationPushService: NotificationPushService,
+        @Inject(NotificationSlackServiceToken)
+        private readonly notificationSlackService: NotificationSlackService,
     ) {}
 
     /**
@@ -63,8 +75,8 @@ export class UserWriterService {
      * @param follower 팔로우하는 사용자의 ID
      * @returns 생성된 팔로우 관계 정보를 반환합니다.
      */
-    async createFollow(following: string, follower: string) {
-        if (following === follower) {
+    async createFollow(following: IUserProfileDTO, follower: string) {
+        if (following.id === follower) {
             throw new BadRequestException('Following and follower cannot be the same user.');
         }
 
@@ -72,11 +84,44 @@ export class UserWriterService {
             const followerInfo = await this.userSearcherService.findUserId(follower);
             const followerNickname = followerInfo?.nickname as string;
 
-            const follow = await this.followRepository.createFollow({ following, follower, followerNickname });
+            const follow = await this.followRepository.createFollow({ following: following.id, follower, followerNickname });
 
             if (!follow) {
                 throw new InternalServerErrorException('Failed to save follow.');
             }
+
+            /**
+             * 푸시 알림 전송
+             */
+            Promise.all([this.notificationAgreeService.isPushAgree(TemplateType.Follow, follower)])
+                .then(async ([isPushAgree]) => {
+                    if (!isPushAgree) {
+                        return;
+                    }
+
+                    const userThumbnail = following.profile.src;
+
+                    if (!userThumbnail) {
+                        throw new Error(
+                            '[CRAWL] Not Found postThumbnail or userThumbnail\n' +
+                                `userThumbnail: ${userThumbnail}\n` +
+                                `userId: ${follower}`,
+                        );
+                    }
+
+                    await this.notificationPushService.sendMessage(followerInfo?.fcmToken, {
+                        type: TemplateType.Follow,
+                        userId: follower,
+                        userNickname: following.nickname,
+                        userThumbnail,
+                        articleParams: {
+                            팔로우한회원: following.nickname,
+                        },
+                    });
+                })
+                .catch((error) => {
+                    this.notificationSlackService.send(`*[푸시 알림]* 이미지 찾기 실패\n${error.message}`, '푸시알림-에러-dev');
+                });
 
             return { user: { nickname: follow.followerNickname } };
         } catch (error) {

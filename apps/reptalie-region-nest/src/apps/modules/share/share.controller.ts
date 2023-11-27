@@ -89,7 +89,7 @@ export class ShareController {
     @UseGuards(JwtAuthGuard)
     async createLike(@AuthUser() user: IUserProfileDTO, @Param('id') postId: string) {
         try {
-            return this.shareWriterService.createLike(user.id, postId);
+            return this.shareWriterService.createLike(user, postId);
         } catch (error) {
             controllerErrorHandler(error);
         }

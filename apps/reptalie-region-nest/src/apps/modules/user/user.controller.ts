@@ -50,7 +50,7 @@ export class UserController {
     @UseGuards(JwtAuthGuard)
     async createFollow(@AuthUser() user: IUserProfileDTO, @Param('id') follower: string) {
         try {
-            return this.userWriterService.createFollow(user.id, follower);
+            return this.userWriterService.createFollow(user, follower);
         } catch (error) {
             controllerErrorHandler(error);
         }

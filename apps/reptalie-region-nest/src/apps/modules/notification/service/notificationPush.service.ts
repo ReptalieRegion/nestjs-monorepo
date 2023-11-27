@@ -36,17 +36,17 @@ export class NotificationPushService {
             return;
         }
 
-        this._dataGenerator(pushParams).then(({ data, ios, log, android }) => {
-            this.firebaseAdminService
-                .send({
-                    token,
-                    data,
-                    ...DEFAULT_FCM_MESSAGE.ios(ios),
-                    android: DEFAULT_FCM_MESSAGE.android(android),
-                })
-                .then(() => this._successPush(log))
-                .catch((error) => this._failPush(pushParams.userId, error));
-        });
+        const { data, ios, log, android } = await this._dataGenerator(pushParams);
+
+        this.firebaseAdminService
+            .send({
+                token,
+                data,
+                ...DEFAULT_FCM_MESSAGE.ios(ios),
+                android: DEFAULT_FCM_MESSAGE.android(android),
+            })
+            .then(() => this._successPush(log))
+            .catch((error) => this._failPush(pushParams.userId, error));
     }
 
     /**
@@ -57,22 +57,21 @@ export class NotificationPushService {
             return;
         }
 
-        this._dataGenerator(pushParams).then(({ data, ios, log, android }) => {
-            this.firebaseAdminService
-                .sendMulticast({
-                    tokens,
-                    data,
-                    ...DEFAULT_FCM_MESSAGE.ios(ios),
-                    android: DEFAULT_FCM_MESSAGE.android(android),
-                })
-                .then(() => this._successPush(log))
-                .catch((error) => this._failPush(pushParams.userId, error));
-        });
+        const { data, ios, log, android } = await this._dataGenerator(pushParams);
+
+        this.firebaseAdminService
+            .sendMulticast({
+                tokens,
+                data,
+                ...DEFAULT_FCM_MESSAGE.ios(ios),
+                android: DEFAULT_FCM_MESSAGE.android(android),
+            })
+            .then(() => this._successPush(log))
+            .catch((error) => this._failPush(pushParams.userId, error));
     }
 
     private _successPush(log: InputNotificationLogDTO) {
         this.notificationLogRepository.createLog(log);
-
         this.notificationSlackService.send('*[푸시알림 보내기]* 성공');
     }
 

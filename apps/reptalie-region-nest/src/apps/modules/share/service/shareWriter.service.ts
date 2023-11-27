@@ -135,7 +135,7 @@ export class ShareWriterService {
                     );
                 }
 
-                await this.notificationPushService.sendMessage(user.fcmToken, {
+                await this.notificationPushService.sendMessage(post?.userId.fcmToken, {
                     type: TemplateType.Comment,
                     userId: post?.userId.id,
                     postId: comment.postId,

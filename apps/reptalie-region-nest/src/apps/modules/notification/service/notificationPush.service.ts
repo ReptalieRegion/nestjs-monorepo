@@ -36,12 +36,13 @@ export class NotificationPushService {
             return;
         }
 
-        this._dataGenerator(pushParams).then(({ data, ios, log }) => {
+        this._dataGenerator(pushParams).then(({ data, ios, log, android }) => {
             this.firebaseAdminService
                 .send({
                     token,
                     data,
                     ...DEFAULT_FCM_MESSAGE.ios(ios),
+                    ...DEFAULT_FCM_MESSAGE.android(android),
                 })
                 .then(() => this._successPush(log))
                 .catch((error) => this._failPush(pushParams.userId, error));
@@ -56,12 +57,13 @@ export class NotificationPushService {
             return;
         }
 
-        this._dataGenerator(pushParams).then(({ data, ios, log }) => {
+        this._dataGenerator(pushParams).then(({ data, ios, log, android }) => {
             this.firebaseAdminService
                 .sendMulticast({
                     tokens,
                     data,
                     ...DEFAULT_FCM_MESSAGE.ios(ios),
+                    ...DEFAULT_FCM_MESSAGE.android(android),
                 })
                 .then(() => this._successPush(log))
                 .catch((error) => this._failPush(pushParams.userId, error));
@@ -83,6 +85,7 @@ export class NotificationPushService {
     private async _dataGenerator(pushParams: NotificationPushParams): Promise<{
         data: NotificationPushData;
         ios?: NotifeeIOS;
+        android?: { imageUrl: string };
         log: InputNotificationLogDTO;
     }> {
         const { article, id, title } = await this._createTemplateArticle(pushParams.type);
@@ -128,6 +131,9 @@ export class NotificationPushService {
                             },
                         ],
                     },
+                    android: {
+                        imageUrl: pushParams.postThumbnail,
+                    },
                     log: {
                         ...baseData.log,
                         messageId: this._createUniqueId(),
@@ -154,6 +160,9 @@ export class NotificationPushService {
                             },
                         ],
                     },
+                    android: {
+                        imageUrl: pushParams.postThumbnail,
+                    },
                     log: {
                         ...baseData.log,
                         messageId: this._createUniqueId(),
@@ -179,6 +188,9 @@ export class NotificationPushService {
                                 url: pushParams.userThumbnail,
                             },
                         ],
+                    },
+                    android: {
+                        imageUrl: pushParams.userThumbnail,
                     },
                     log: {
                         ...baseData.log,

@@ -43,7 +43,8 @@ export const DEFAULT_FCM_MESSAGE = {
             },
         },
     }),
-    android: () => ({
+    android: (android?: { imageUrl: string }) => ({
         priority: 'high',
+        ...android,
     }),
 };

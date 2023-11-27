@@ -49,7 +49,7 @@ export class ShareController {
     @Post('post')
     @HttpCode(HttpStatus.CREATED)
     @UseGuards(JwtAuthGuard)
-    @UseInterceptors(FilesInterceptor('files', 5))
+    @UseInterceptors(FilesInterceptor('files', 5, { limits: { fieldSize: 25 * 1024 * 1024 } }))
     async createPostWithImages(
         @AuthUser() user: IResponseUserDTO,
         @UploadedFiles() files: Express.Multer.File[],

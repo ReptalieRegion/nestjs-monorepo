@@ -11,19 +11,19 @@ export class ImageWriterService {
     constructor(private readonly imageRepository: ImageRepository) {}
 
     /**
-     * 이미지를 생성하고 반환합니다.
-     * @param typeId - 이미지가 연결될 엔터티의 ID
-     * @param imageKeys - 이미지 키 배열
-     * @param type - 이미지의 종류
-     * @param session - MongoDB 클라이언트 세션
-     * @returns 생성된 이미지 객체
-     * @throws BadRequestException 이미지 생성 실패 시
+     * 이미지를 생성합니다.
+     *
+     * @param typeId - 이미지의 타입 ID입니다.
+     * @param imageKeys - 생성할 이미지의 키 목록입니다.
+     * @param type - 이미지의 타입입니다.
+     * @param session - 현재 세션입니다.
+     * @returns 생성된 이미지 정보를 반환합니다.
      */
     async createImage(typeId: string, imageKeys: string[], type: ImageType, session: ClientSession) {
         const images = imageKeys.map((value) => ({
             imageKey: value,
-            type: type,
-            typeId: typeId,
+            type,
+            typeId,
             createdAt: getCurrentDate(),
             updatedAt: getCurrentDate(),
         }));

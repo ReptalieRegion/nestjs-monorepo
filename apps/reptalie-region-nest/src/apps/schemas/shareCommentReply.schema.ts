@@ -7,13 +7,12 @@ import { ShareComment } from './shareComment.schema';
 import { User } from './user.schema';
 
 export interface ShareCommentReplyDocument extends ShareCommentReply, Document {
-    view(): Partial<IResponseShareCommentReplyDTO>;
     Mapper(): Partial<IResponseShareCommentReplyDTO>;
 }
 
 @Schema({ versionKey: false, timestamps: { currentTime: getCurrentDate } })
 export class ShareCommentReply {
-    @Prop({ index: true, ref: 'shareComment', type: SchemaTypes.ObjectId })
+    @Prop({ index: true, ref: 'ShareComment', type: SchemaTypes.ObjectId })
     commentId: ShareComment;
 
     @Prop({ index: true, ref: 'User', type: SchemaTypes.ObjectId })
@@ -29,28 +28,6 @@ export class ShareCommentReply {
 const ShareCommentReplySchema = SchemaFactory.createForClass(ShareCommentReply);
 ShareCommentReplySchema.index({ _id: 1, userId: 1 });
 ShareCommentReplySchema.methods = {
-    view(): Partial<IResponseShareCommentReplyDTO> {
-        const fields: Array<keyof IResponseShareCommentReplyDTO> = [
-            'id',
-            'commentId',
-            'userId',
-            'contents',
-            'isDeleted',
-            'createdAt',
-            'updatedAt',
-        ];
-
-        const viewFields = fields.reduce(
-            (prev, field) => ({
-                ...prev,
-                [field]: this.get(field),
-            }),
-            {},
-        );
-
-        return viewFields;
-    },
-
     Mapper(): Partial<IResponseShareCommentReplyDTO> {
         const fields: Array<keyof IResponseShareCommentReplyDTO> = [
             'id',

@@ -4,6 +4,8 @@ import mongoose, { ClientSession } from 'mongoose';
 import { InputShareCommentDTO } from '../../../dto/share/comment/input-shareComment.dto';
 import { InputShareCommentReplyDTO } from '../../../dto/share/commentReply/input-shareCommentReply.dto';
 import { InputSharePostDTO } from '../../../dto/share/post/input-sharePost.dto';
+import { IUserProfileDTO } from '../../../dto/user/user/response-user.dto';
+import { serviceErrorHandler } from '../../../utils/error/errorHandler';
 import { ImageDeleterService, ImageDeleterServiceToken } from '../../image/service/imageDeleter.service';
 import { ShareCommentRepository } from '../repository/shareComment.repository';
 import { ShareCommentReplyRepository } from '../repository/shareCommentReply.repository';
@@ -30,75 +32,118 @@ export class ShareUpdaterService {
         private readonly imageDeleterService: ImageDeleterService,
     ) {}
 
-    async incrementReplyCount(id: string, session: ClientSession) {
-        const result = await this.shareCommentRepository.incrementReplyCountById(id, session);
-        if (result === 0) {
-            throw new InternalServerErrorException('Failed to increment reply count for the comment.');
-        }
-    }
-
-    async decrementReplyCount(id: string, session: ClientSession) {
-        const result = await this.shareCommentRepository.decrementReplyCountById(id, session);
-        if (result === 0) {
-            throw new InternalServerErrorException('Failed to decrement reply count for the comment.');
-        }
-    }
-
-    async toggleLike(userId: string, postId: string) {
-        const like = await this.shareSearcherService.getLikeInfo(postId, userId);
-
-        const result = await this.shareLikeRepository.updateLike(like.id, like.isCanceled);
-        if (result === 0) {
-            throw new InternalServerErrorException('Failed to toggle the like status.');
-        }
-    }
-
-    async updatePost(userId: string, postId: string, inputSharePostDTO: InputSharePostDTO) {
+    /**
+     * 게시물을 업데이트합니다.
+     *
+     * @param user - 게시물을 업데이트하는 사용자입니다.
+     * @param postId - 업데이트할 게시물의 ID입니다.
+     * @param dto - 게시물의 업데이트 정보를 담고 있는 데이터 전송 객체입니다.
+     * @returns 업데이트된 게시물 정보를 반환합니다.
+     */
+    async updatePost(user: IUserProfileDTO, postId: string, dto: InputSharePostDTO) {
         const session: ClientSession = await this.connection.startSession();
         session.startTransaction();
 
         try {
-            await this.shareSearcherService.isExistsPostWithUserId(postId, userId);
+            const result = await this.sharePostRepository
+                .updateOne(
+                    { _id: postId, userId: user.id, isDeleted: false },
+                    { $set: { contents: dto.contents } },
+                    { session },
+                )
+                .exec();
 
-            const updateResult = await this.sharePostRepository.updatePost(postId, userId, inputSharePostDTO.contents, session);
-
-            if (updateResult === 0) {
-                throw new InternalServerErrorException('Failed to update post.');
+            if (result.modifiedCount === 0) {
+                throw new InternalServerErrorException('Failed to update share post.');
             }
 
-            if (inputSharePostDTO.deletefiles) {
-                await this.imageDeleterService.deleteImageByImageKeys(inputSharePostDTO.deletefiles, postId, session);
+            if (dto.remainingImages) {
+                const baseUrl = `${process.env.AWS_IMAGE_BASEURL}`;
+                const deletefiles = dto.remainingImages.map((value) => value.slice(baseUrl.length));
+
+                await this.imageDeleterService.deleteImageByImageKeys(deletefiles, postId, session);
             }
 
             await session.commitTransaction();
+
+            const postInfo = await this.shareSearcherService.getPostInfo({ update: { postId } });
+            return { post: { ...postInfo, user } };
         } catch (error) {
             await session.abortTransaction();
-            throw error;
+            serviceErrorHandler(error, 'Invalid ObjectId for share post Id.');
         } finally {
             await session.endSession();
         }
     }
 
-    async updateComment(userId: string, commentId: string, inputShareCommentDTO: InputShareCommentDTO) {
-        await this.shareSearcherService.isExistsCommentWithUserId(commentId, userId);
+    /**
+     * 댓글을 업데이트합니다.
+     *
+     * @param user - 댓글을 업데이트하는 사용자입니다.
+     * @param commentId - 업데이트할 댓글의 ID입니다.
+     * @param dto - 댓글의 업데이트 정보를 담고 있는 데이터 전송 객체입니다.
+     * @returns 업데이트된 댓글 정보를 반환합니다.
+     */
+    async updateComment(user: IUserProfileDTO, commentId: string, dto: InputShareCommentDTO) {
+        try {
+            const result = await this.shareCommentRepository
+                .updateOne({ _id: commentId, userId: user.id, isDeleted: false }, { $set: { contents: dto.contents } })
+                .exec();
 
-        const updateResult = await this.shareCommentRepository.updateComment(commentId, userId, inputShareCommentDTO.contents);
-        if (updateResult === 0) {
-            throw new InternalServerErrorException('Failed to update comment.');
+            if (result.modifiedCount === 0) {
+                throw new InternalServerErrorException('Failed to update share comment.');
+            }
+        } catch (error) {
+            serviceErrorHandler(error, 'Invalid ObjectId for share comment Id.');
         }
+
+        const commentInfo = await this.shareSearcherService.getCommentInfo({ update: { commentId } });
+        return { post: { ...commentInfo, user: { nickname: user.nickname } } };
     }
 
-    async updateCommentReply(userId: string, commentReplyId: string, inputShareCommentReplyDTO: InputShareCommentReplyDTO) {
-        await this.shareSearcherService.isExistsCommentReplyWithUserId(commentReplyId, userId);
+    /**
+     * 댓글에 대한 답글을 업데이트합니다.
+     *
+     * @param userId - 답글을 업데이트하는 사용자의 ID입니다.
+     * @param commentReplyId - 업데이트할 답글의 ID입니다.
+     * @param dto - 답글의 업데이트 정보를 담고 있는 데이터 전송 객체입니다.
+     * @returns 업데이트된 답글 정보를 반환합니다.
+     */
+    async updateCommentReply(userId: string, commentReplyId: string, dto: InputShareCommentReplyDTO) {
+        try {
+            const result = await this.shareCommnetReplyRepository
+                .updateOne({ _id: commentReplyId, userId, isDeleted: false }, { $set: { contents: dto.contents } })
+                .exec();
 
-        const updateResult = await this.shareCommnetReplyRepository.updateCommentReply(
-            commentReplyId,
-            userId,
-            inputShareCommentReplyDTO.contents,
-        );
-
-        if (updateResult === 0) {
-            throw new InternalServerErrorException('Failed to update commentReply.');
+            if (result.modifiedCount === 0) {
+                throw new InternalServerErrorException('Failed to update share comment reply.');
+            }
+        } catch (error) {
+            serviceErrorHandler(error, 'Invalid ObjectId for share comment reply Id.');
         }
+
+        const commentReplyInfo = await this.shareSearcherService.getCommentReplyInfo({ update: { commentReplyId } });
+        return { comment: { ...commentReplyInfo } };
+    }
+
+    /**
+     * 게시물에 대한 좋아요 상태를 전환합니다.
+     *
+     * @param userId - 좋아요 상태를 전환하는 사용자의 ID입니다.
+     * @param postId - 좋아요 상태를 전환할 게시물의 ID입니다.
+     * @returns 전환된 좋아요 상태를 반환합니다.
+     */
+    async toggleLike(userId: string, postId: string) {
+        const likeStatus = await this.shareSearcherService.getLikeStatus(postId, userId);
+
+        const result = await this.shareLikeRepository
+            .updateOne({ _id: likeStatus?.id }, { $set: { isCanceled: !likeStatus?.isCanceled } })
+            .exec();
+
+        if (result.modifiedCount === 0) {
+            throw new InternalServerErrorException('Failed to toggle the share like status.');
+        }
+
+        return { post: { id: likeStatus?.postId.id, user: { nickname: likeStatus?.postId.userId.nickname } } };
     }
 }

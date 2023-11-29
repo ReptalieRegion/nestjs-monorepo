@@ -1,5 +1,8 @@
 import { Inject, Injectable, NotFoundException, forwardRef } from '@nestjs/common';
-import { handleBSONAndCastError } from '../../../utils/error/errorHandler';
+import { IResponseShareCommentDTO } from '../../../dto/share/comment/response-shareCommnet.dto';
+import { IResponseShareCommentReplyDTO } from '../../../dto/share/commentReply/response-shareCommentReply.dto';
+import { IResponseSharePostDTO } from '../../../dto/share/post/response-sharePost.dto';
+import { serviceErrorHandler } from '../../../utils/error/errorHandler';
 import { ImageSearcherService, ImageSearcherServiceToken } from '../../image/service/imageSearcher.service';
 import { UserSearcherService, UserSearcherServiceToken } from '../../user/service/userSearcher.service';
 import { ShareCommentRepository } from '../repository/shareComment.repository';
@@ -8,6 +11,24 @@ import { ShareLikeRepository } from '../repository/shareLike.repository';
 import { SharePostRepository } from '../repository/sharePost.repository';
 
 export const ShareSearcherServiceToken = 'ShareSearcherServiceToken';
+
+interface PostOption {
+    create?: { post: Partial<IResponseSharePostDTO>; imageKeys: string[] };
+    update?: { postId: string };
+    delete?: { postId: string };
+}
+
+interface CommentOption {
+    create?: { comment: Partial<IResponseShareCommentDTO> };
+    update?: { commentId: string };
+    delete?: { commentId: string };
+}
+
+interface CommentReplyOption {
+    create?: { commentReply: Partial<IResponseShareCommentReplyDTO> };
+    update?: { commentReplyId: string };
+    delete?: { commentReplyId: string };
+}
 
 @Injectable()
 export class ShareSearcherService {
@@ -23,238 +44,535 @@ export class ShareSearcherService {
         private readonly userSearcherService: UserSearcherService,
     ) {}
 
-    async isExistsPost(postId: string) {
-        try {
-            const post = await this.sharePostRepository.findPost(postId);
-
-            if (!post) {
-                throw new NotFoundException('Post not found for the specified user and post id.');
-            }
-
-            return post;
-        } catch (error) {
-            handleBSONAndCastError(error, 'SharePostId Invalid ObjectId');
-        }
-    }
-
-    async isExistsPostWithUserId(postId: string, userId: string) {
-        try {
-            const post = await this.sharePostRepository.findPostWithUserId(postId, userId);
-
-            if (!post) {
-                throw new NotFoundException('Post not found for the specified user and post id.');
-            }
-
-            return post;
-        } catch (error) {
-            handleBSONAndCastError(error, 'SharePostId Invalid ObjectId');
-        }
-    }
-    async isExistsComment(commentId: string) {
-        try {
-            const comment = await this.shareCommentRepository.findComment(commentId);
-
-            if (!comment) {
-                throw new NotFoundException('Comment not found for the specified user and comment id.');
-            }
-
-            return comment;
-        } catch (error) {
-            handleBSONAndCastError(error, 'ShareCommentId Invalid ObjectId');
-        }
-    }
-
-    async isExistsCommentWithUserId(commentId: string, userId: string) {
-        try {
-            const comment = await this.shareCommentRepository.findCommentWithUserId(commentId, userId);
-
-            if (!comment) {
-                throw new NotFoundException('Comment not found for the specified user and comment id.');
-            }
-
-            return comment;
-        } catch (error) {
-            handleBSONAndCastError(error, 'ShareCommentId Invalid ObjectId');
-        }
-    }
-
-    async isExistsCommentReplyWithUserId(commentReplyId: string, userId: string) {
-        try {
-            const commentReply = await this.shareCommentReplyRepository.findCommentReplyWithUserId(commentReplyId, userId);
-
-            if (!commentReply) {
-                throw new NotFoundException('CommentReply not found for the specified user and commentReply id.');
-            }
-
-            return commentReply;
-        } catch (error) {
-            handleBSONAndCastError(error, 'ShareCommentReplyId Invalid ObjectId');
-        }
-    }
-
-    async getLikeInfo(postId: string, userId: string) {
-        await this.isExistsPostWithUserId(postId, userId);
-
-        const like = await this.shareLikeRepository.findLikeByIsCanceled(userId, postId);
-
-        if (!like || !like?.id || like?.isCanceled === undefined) {
-            throw new NotFoundException('Like status not found for the specified user and post.');
-        }
-
-        return { id: like.id, isCanceled: like.isCanceled };
-    }
-
-    async findCommentIdsByPostId(postId: string) {
-        try {
-            const comment = await this.shareCommentRepository.findCommentIdsByPostId(postId);
-
-            if (!comment) {
-                throw new NotFoundException('Comment not found for the specified post id.');
-            }
-
-            return comment.map((entity) => entity.id as string);
-        } catch (error) {
-            handleBSONAndCastError(error, 'postId Invalid ObjectId');
-        }
-    }
-
-    async getUserPostCount(userId: string) {
-        return this.sharePostRepository.countDocuments({ userId: userId }).exec();
-    }
-
-    async getPostLikeCount(postId: string) {
-        return this.shareLikeRepository.countDocuments({ postId: postId, isCanceled: false }).exec();
-    }
-
-    async getPostCommentCount(postId: string) {
-        return this.shareCommentRepository.countDocuments({ postId: postId, isDeleted: false }).exec();
-    }
-
-    async getPostsInfiniteScroll(userId: string, pageParams: number) {
-        const followers = userId ? await this.userSearcherService.getUserFollowers(userId) : undefined;
-
-        const posts =
-            followers !== undefined
-                ? await this.sharePostRepository.findFollowersPosts(followers, pageParams, 10)
-                : await this.sharePostRepository.findAllPosts(pageParams, 10);
+    /**
+     *
+     *  추후 게시글 조회 로직 수정해야함
+     */
+    async getPostsInfiniteScroll(currentUserId: string, pageParam: number, limitSize: number) {
+        const posts = await this.sharePostRepository
+            .find({ isDeleted: false })
+            .sort({ updatedAt: -1, createdAt: -1 })
+            .skip(pageParam * limitSize)
+            .limit(limitSize)
+            .exec();
 
         const items = await Promise.all(
-            posts.posts.map(async (entity) => {
-                const profileImage =
-                    entity.userId.id && (await this.imageSearcherService.getUserProfileImage(entity.userId.id));
-                const postImages = entity.id && (await this.imageSearcherService.getPostImages(entity.id));
+            posts.map(async (entity) => {
+                const post = Object(entity).Mapper();
+                const userInfo = await this.userSearcherService.getUserInfo({ targetUserId: post.userId, currentUserId });
+                const images = post.id && (await this.imageSearcherService.getPostImages(post.id));
 
                 return {
-                    user: {
-                        id: entity.userId.id,
-                        nickname: entity.userId.nickname,
-                        profile: profileImage,
-                        isFollow: userId ? await this.userSearcherService.isExistsFollow(userId, entity.userId.id) : false,
-                    },
                     post: {
-                        id: entity.id,
-                        contents: entity.contents,
-                        images: postImages,
-                        isMine: userId ? userId === entity.userId.id : false,
-                        isLike: userId && entity.id ? await this.shareLikeRepository.findLikeCheck(userId, entity.id) : false,
-                        likeCount: entity.id && (await this.getPostLikeCount(entity.id)),
-                        commentCount: entity.id && (await this.getPostCommentCount(entity.id)),
+                        id: post.id,
+                        contents: post.contents,
+                        images,
+                        isMine: currentUserId ? currentUserId === userInfo.id : false,
+                        isLike: currentUserId && post.id ? await this.isExistsLike(currentUserId, post.id) : undefined,
+                        likeCount: post.id && (await this.getLikeCount(post.id)),
+                        commentCount: post.id && (await this.getCommentCount(post.id)),
+                        user: { ...userInfo },
                     },
                 };
             }),
         );
 
-        const nextPage = posts.isLastPage ? undefined : posts.pageParams;
+        const isLastPage = posts.length < limitSize;
+        const nextPage = isLastPage ? undefined : pageParam + 1;
 
-        return { items: items, nextPage: nextPage };
+        return { items, nextPage };
     }
 
-    async getUserPostsInfiniteScroll(currentUserId: string, targetUserId: string, pageParams: number) {
-        const posts = await this.sharePostRepository.findUserPostsForInfiniteScroll(targetUserId, pageParams, 10);
+    /**
+     *
+     * 특정 게시글 조회 로직
+     */
+    async getPost(currentUserId: string, postId: string) {
+        const entity = await this.sharePostRepository.findOne({ _id: postId, isDeleted: false }).exec();
+
+        if (!entity) {
+            throw new NotFoundException('Not Found Post');
+        }
+
+        const post = entity.Mapper();
+        const userInfo = await this.userSearcherService.getUserInfo({ targetUserId: post.userId, currentUserId });
+        const images = post.id && (await this.imageSearcherService.getPostImages(post.id));
+
+        return {
+            post: {
+                id: post.id,
+                contents: post.contents,
+                images,
+                isMine: currentUserId ? currentUserId === userInfo.id : false,
+                isLike: currentUserId && post.id ? await this.isExistsLike(currentUserId, post.id) : undefined,
+                likeCount: post.id && (await this.getLikeCount(post.id)),
+                commentCount: post.id && (await this.getCommentCount(post.id)),
+                user: { ...userInfo },
+            },
+        };
+    }
+
+    /**
+     * 무한 스크롤로 사용자 게시물을 가져옵니다.
+     *
+     * @param currentUserId - 현재 사용자의 ID입니다.
+     * @param targetNickname - 게시물을 가져올 대상 사용자의 별명입니다.
+     * @param pageParam - 현재 페이지 번호입니다.
+     * @param limitSize - 한 페이지당 가져올 게시물 수입니다.
+     * @returns 가져온 게시물과 다음 페이지 번호를 반환합니다.
+     */
+    async getUserPostsInfiniteScroll(currentUserId: string, targetNickname: string, pageParam: number, limitSize: number) {
+        const targetUserId = (await this.userSearcherService.findNickname(targetNickname)).id;
+
+        const posts = await this.sharePostRepository
+            .find({ userId: targetUserId, isDeleted: false })
+            .sort({ updatedAt: -1, createdAt: -1 })
+            .skip(pageParam * limitSize)
+            .limit(limitSize)
+            .exec();
+
         const isMine = currentUserId ? currentUserId === targetUserId : false;
-
         const items = await Promise.all(
-            posts.posts.map(async (entity) => {
-                const postImages = entity.id && (await this.imageSearcherService.getPostImages(entity.id));
+            posts.map(async (entity) => {
+                const post = entity.Mapper();
+                const images = post.id && (await this.imageSearcherService.getPostImages(post.id));
 
                 return {
-                    id: entity.id,
-                    contents: entity.contents,
-                    images: postImages,
-                    isMine: isMine,
-                    isLike:
-                        currentUserId && entity.id
-                            ? await this.shareLikeRepository.findLikeCheck(currentUserId, entity.id)
-                            : false,
-                    likeCount: entity.id && (await this.getPostLikeCount(entity.id)),
-                    commentCount: entity.id && (await this.getPostCommentCount(entity.id)),
+                    post: {
+                        id: post.id,
+                        contents: post.contents,
+                        images,
+                        isMine,
+                        isLike: currentUserId && post.id ? await this.isExistsLike(currentUserId, post?.id) : undefined,
+                        likeCount: post.id && (await this.getLikeCount(post.id)),
+                        commentCount: post.id && (await this.getCommentCount(post.id)),
+                    },
                 };
             }),
         );
 
-        const nextPage = posts.isLastPage ? undefined : posts.pageParams;
+        const isLastPage = posts.length < limitSize;
+        const nextPage = isLastPage ? undefined : pageParam + 1;
 
-        return { items: items, nextPage: nextPage };
+        return { items, nextPage };
     }
 
-    async getCommentsInfiniteScroll(userId: string, postId: string, pageParams: number) {
-        const comments = await this.shareCommentRepository.findCommentsForInfiniteScroll(postId, pageParams, 10);
+    /**
+     * 게시물의 댓글을 무한 스크롤로 가져옵니다.
+     *
+     * @param userId - 현재 사용자의 ID입니다.
+     * @param postId - 게시물의 ID입니다.
+     * @param pageParam - 현재 페이지 번호입니다.
+     * @param limitSize - 한 페이지당 가져올 댓글 수입니다.
+     * @returns 가져온 댓글과 다음 페이지 번호를 반환합니다.
+     */
+    async getCommentsInfiniteScroll(userId: string, postId: string, pageParam: number, limitSize: number) {
+        const comments = await this.shareCommentRepository
+            .find({ postId, isDeleted: false })
+            .populate({
+                path: 'userId',
+                select: 'nickname imageId',
+                populate: { path: 'imageId', model: 'Image', select: 'imageKey -_id' },
+            })
+            .sort({ updatedAt: -1, createdAt: -1 })
+            .skip(pageParam * limitSize)
+            .limit(limitSize)
+            .exec();
 
         const items = await Promise.all(
-            comments.comments.map(async (entity) => {
-                const profile = entity.userId.id && (await this.imageSearcherService.getUserProfileImage(entity.userId.id));
+            comments.map(async (entity) => {
+                const comment = entity.Mapper();
+                const userInfo = await this.userSearcherService.getUserInfo({ user: entity.userId });
 
                 return {
-                    user: {
-                        id: entity.userId.id,
-                        profile: profile,
-                        nickname: entity.userId.nickname,
-                    },
                     comment: {
-                        id: entity.id,
-                        contents: entity.contents,
-                        replyCount: entity.replyCount,
-                        isMine: userId ? entity.userId.id === userId : false,
-                        isModified: entity.createdAt?.getTime() !== entity.updatedAt?.getTime(),
+                        id: comment.id,
+                        contents: comment.contents,
+                        replyCount: comment.id && (await this.getCommentReplyCount(comment.id)),
+                        isMine: userId ? userInfo.id === userId : false,
+                        isModified: comment.createdAt?.getTime() !== comment.updatedAt?.getTime(),
+                        user: { ...userInfo },
                     },
                 };
             }),
         );
 
-        const nextPage = comments.isLastPage ? undefined : comments.pageParams;
+        const isLastPage = comments.length < limitSize;
+        const nextPage = isLastPage ? undefined : pageParam + 1;
 
-        return { items: items, nextPage: nextPage };
+        return { items, nextPage };
     }
 
-    async getCommentRepliesInfiniteScroll(userId: string, commentId: string, pageParams: number) {
-        const commentReplies = await this.shareCommentReplyRepository.findCommentRepliesForInfiniteScroll(
-            commentId,
-            pageParams,
-            10,
-        );
+    /**
+     * 댓글에 대한 답글을 무한 스크롤로 가져옵니다.
+     *
+     * @param userId - 현재 사용자의 ID입니다.
+     * @param commentId - 댓글의 ID입니다.
+     * @param pageParam - 현재 페이지 번호입니다.
+     * @param limitSize - 한 페이지당 가져올 답글 수입니다.
+     * @returns 가져온 답글과 다음 페이지 번호를 반환합니다.
+     */
+    async getCommentRepliesInfiniteScroll(userId: string, commentId: string, pageParam: number, limitSize: number) {
+        const commentReplies = await this.shareCommentReplyRepository
+            .find({ commentId, isDeleted: false })
+            .populate({
+                path: 'userId',
+                select: 'nickname imageId',
+                populate: { path: 'imageId', model: 'Image', select: 'imageKey -_id' },
+            })
+            .sort({ updatedAt: -1, createdAt: -1 })
+            .skip(pageParam * limitSize)
+            .limit(limitSize)
+            .exec();
 
         const items = await Promise.all(
-            commentReplies.commentReplies.map(async (entity) => {
-                const profile = entity.userId.id && (await this.imageSearcherService.getUserProfileImage(entity.userId.id));
+            commentReplies.map(async (entity) => {
+                const cmmentReply = entity.Mapper();
+                const userInfo = await this.userSearcherService.getUserInfo({ user: entity.userId });
 
                 return {
-                    user: {
-                        id: entity.userId.id,
-                        profile: profile,
-                        nickname: entity.userId.nickname,
-                    },
-                    comment: {
-                        id: entity.id,
-                        contents: entity.contents,
-                        isMine: userId ? entity.userId.id === userId : false,
-                        isModified: entity.createdAt?.getTime() !== entity.updatedAt?.getTime(),
+                    commentReply: {
+                        id: cmmentReply.id,
+                        contents: cmmentReply.contents,
+                        isMine: userId ? userInfo.id === userId : false,
+                        isModified: cmmentReply.createdAt?.getTime() !== cmmentReply.updatedAt?.getTime(),
+                        user: { ...userInfo },
                     },
                 };
             }),
         );
 
-        const nextPage = commentReplies.isLastPage ? undefined : commentReplies.pageParams;
+        const isLastPage = commentReplies.length < limitSize;
+        const nextPage = isLastPage ? undefined : pageParam + 1;
 
-        return { items: items, nextPage: nextPage };
+        return { items, nextPage };
+    }
+
+    /**
+     * 게시물에 대한 좋아요를 무한 스크롤로 가져옵니다.
+     *
+     * @param userId - 현재 사용자의 ID입니다.
+     * @param postId - 게시물의 ID입니다.
+     * @param pageParam - 현재 페이지 번호입니다.
+     * @param limitSize - 한 페이지당 가져올 좋아요 수입니다.
+     * @returns 가져온 좋아요 정보와 다음 페이지 번호를 반환합니다.
+     */
+    async getLikeListForPostInfiniteScroll(userId: string, postId: string, pageParam: number, limitSize: number) {
+        try {
+            const likes = await this.shareLikeRepository
+                .find({ postId, isCanceled: false }, { userId: 1 })
+                .populate({
+                    path: 'userId',
+                    select: 'nickname imageId',
+                    populate: { path: 'imageId', model: 'Image', select: 'imageKey -_id' },
+                })
+                .skip(pageParam * limitSize)
+                .limit(limitSize)
+                .exec();
+
+            const currentUserId = userId ? userId : undefined;
+
+            const items = await Promise.all(
+                likes.map(async (entity) => {
+                    const userInfo = await this.userSearcherService.getUserInfo({ user: entity.userId, currentUserId });
+
+                    return { user: { ...userInfo } };
+                }),
+            );
+
+            const isLastPage = likes.length < limitSize;
+            const nextPage = isLastPage ? undefined : pageParam + 1;
+
+            return { items, nextPage };
+        } catch (error) {
+            serviceErrorHandler(error, 'Invalid ObjectId for user Id');
+        }
+    }
+
+    /**
+     * 무한 스크롤로 사용자 자신의 게시물을 가져옵니다.
+     *
+     * @param userId - 현재 사용자의 ID입니다.
+     * @param pageParam - 현재 페이지 번호입니다.
+     * @param limitSize - 한 페이지당 가져올 게시물 수입니다.
+     * @returns 가져온 게시물과 다음 페이지 번호를 반환합니다.
+     */
+    async getMyPostsInfiniteScroll(userId: string, pageParam: number, limitSize: number) {
+        const posts = await this.sharePostRepository
+            .find({ userId, isDeleted: false })
+            .sort({ updatedAt: -1, createdAt: -1 })
+            .skip(pageParam * limitSize)
+            .limit(limitSize)
+            .exec();
+
+        const items = await Promise.all(
+            posts.map(async (entity) => {
+                const post = entity.Mapper();
+                const images = post.id && (await this.imageSearcherService.getPostImages(post.id));
+
+                return {
+                    post: {
+                        id: post.id,
+                        contents: post.contents,
+                        images,
+                        isMine: true,
+                        isLike: post.id ? await this.isExistsLike(userId, post?.id) : undefined,
+                        likeCount: post.id && (await this.getLikeCount(post.id)),
+                        commentCount: post.id && (await this.getCommentCount(post.id)),
+                    },
+                };
+            }),
+        );
+
+        const isLastPage = posts.length < limitSize;
+        const nextPage = isLastPage ? undefined : pageParam + 1;
+
+        return { items, nextPage };
+    }
+
+    /**
+     *    여러 곳에서 공유되는 함수들 모음
+     *
+     *
+     */
+
+    /**
+     * 게시물 정보를 조회하고 반환합니다.
+     *
+     * @param option PostOption 객체로 게시물의 생성, 업데이트 또는 삭제 여부를 결정합니다.
+     * @returns 게시물 정보 객체를 반환합니다.
+     */
+    async getPostInfo(option: PostOption) {
+        if (option.create) {
+            const { id, contents } = option.create.post;
+            const images = option.create.imageKeys.map((value) => ({ src: `${process.env.AWS_IMAGE_BASEURL}${value}` }));
+
+            return { id, contents, images, isMine: true, isLike: undefined, likeCount: 0, commentCount: 0 };
+        } else if (option.update) {
+            const id = option.update.postId;
+            const post = await this.sharePostRepository.findOne({ _id: id, isDeleted: false }).exec();
+            const mappedPost = post?.Mapper();
+            const [images, isLike, likeCount, commentCount] = await Promise.all([
+                mappedPost?.id && this.imageSearcherService.getPostImages(mappedPost.id),
+                mappedPost?.userId && mappedPost?.id ? this.isExistsLike(mappedPost.userId, mappedPost.id) : undefined,
+                mappedPost?.id && this.getLikeCount(mappedPost.id),
+                mappedPost?.id && this.getCommentCount(mappedPost.id),
+            ]);
+
+            return { id, contents: mappedPost?.contents, images, isMine: true, isLike, likeCount, commentCount };
+        } else if (option.delete) {
+            const _id = option.delete.postId;
+            const post = await this.sharePostRepository
+                .findOne({ _id })
+                .populate({ path: 'userId', select: 'nickname' })
+                .exec();
+            const mappedPost = { ...post?.Mapper(), userId: post?.userId };
+
+            return { post: { id: mappedPost?.id, user: { nickname: mappedPost?.userId?.nickname } } };
+        }
+    }
+
+    /**
+     * 댓글 정보를 조회하고 반환합니다.
+     *
+     * @param option CommentOption 객체로 게시물의 생성, 업데이트 또는 삭제 여부를 결정합니다.
+     * @returns 댓글 정보 객체를 반환합니다.
+     */
+    async getCommentInfo(option: CommentOption) {
+        if (option.create) {
+            const { id, contents } = option.create.comment;
+
+            return { id, contents, replyCount: 0, isMine: true, isModified: false };
+        } else if (option.update) {
+            const _id = option.update.commentId;
+            const comment = await this.shareCommentRepository.findOne({ _id, isDeleted: false }).exec();
+            const mappedComment = comment?.Mapper();
+
+            return { id: mappedComment?.postId, comment: { id: mappedComment?.id, contents: mappedComment?.contents } };
+        } else if (option.delete) {
+            const _id = option.delete.commentId;
+            const comment = await this.shareCommentRepository
+                .findOne({ _id })
+                .populate({ path: 'postId', populate: { path: 'userId', select: 'nickname -_id' } })
+                .exec();
+
+            const mappedComment = { ...comment?.Mapper(), postId: { ...Object(comment?.postId).Mapper() } };
+
+            return {
+                post: {
+                    id: mappedComment.postId.id,
+                    comment: { id: mappedComment.id },
+                    user: { nickname: mappedComment.postId.userId.nickname },
+                },
+            };
+        }
+    }
+
+    /**
+     * 대댓글 정보를 조회하고 반환합니다.
+     *
+     * @param option CommentReplyOption 객체로 게시물의 생성, 업데이트 또는 삭제 여부를 결정합니다.
+     * @returns 대댓글 정보 객체를 반환합니다.
+     */
+    async getCommentReplyInfo(option: CommentReplyOption) {
+        if (option.create) {
+            const { id, contents } = option.create.commentReply;
+
+            return { id, contents, isMine: true, isModified: false };
+        } else if (option.update) {
+            const _id = option.update.commentReplyId;
+            const commentReply = await this.shareCommentReplyRepository.findOne({ _id, isDeleted: false }).exec();
+            const mappedCommentReply = commentReply?.Mapper();
+
+            return {
+                id: mappedCommentReply?.commentId,
+                commentReply: { id: mappedCommentReply?.id, contents: mappedCommentReply?.contents },
+            };
+        } else if (option.delete) {
+            const _id = option.delete.commentReplyId;
+            const commentReply = await this.shareCommentReplyRepository
+                .findOne({ _id })
+                .populate({ path: 'commentId', select: 'postId' })
+                .exec();
+
+            const mappedCommentReply = { ...commentReply?.Mapper(), commentId: Object(commentReply?.commentId).Mapper() };
+
+            return {
+                post: {
+                    id: mappedCommentReply.commentId.postId,
+                    comment: { id: mappedCommentReply.commentId.id, commentReply: { id: mappedCommentReply?.id } },
+                },
+            };
+        }
+    }
+
+    /**
+     * 게시물 좋아요 상태를 조회하고 반환합니다.
+     *
+     * @param postId 게시물 ID
+     * @param userId 사용자 ID
+     * @returns 게시물 좋아요 상태 및 게시물 작성자의 닉네임 정보를 반환합니다.
+     */
+    async getLikeStatus(postId: string, userId: string) {
+        try {
+            const like = await this.shareLikeRepository
+                .findOne({ userId, postId })
+                .populate({ path: 'postId', select: 'userId', populate: { path: 'userId', select: 'nickname -_id' } })
+                .exec();
+
+            if (!like) {
+                throw new NotFoundException('Not found for the specified share like status.');
+            }
+
+            return { ...like.Mapper(), postId: Object(like.postId).Mapper() };
+        } catch (error) {
+            serviceErrorHandler(error, 'Invalid ObjectId for share post Id.');
+        }
+    }
+
+    /**
+     * 지정된 사용자와 게시물에 대한 좋아요 상태가 존재하는지 확인하고 반환합니다.
+     *
+     * @param userId 사용자 ID
+     * @param postId 게시물 ID
+     * @returns 좋아요 상태 여부 (존재하는 경우 true, 없는 경우 false, 알 수 없는 경우 undefined)
+     */
+    async isExistsLike(userId: string, postId: string): Promise<boolean | undefined> {
+        const like = await this.shareLikeRepository.findOne({ userId, postId }).exec();
+        return like ? (like.isCanceled ? false : true) : undefined;
+    }
+
+    /**
+     * 지정된 게시물 ID를 기반으로 게시물을 검색하고 반환합니다.
+     *
+     * @param postId 게시물 ID
+     * @returns 검색된 게시물 정보를 반환합니다.
+     */
+    async findPost(postId: string) {
+        try {
+            const post = await this.sharePostRepository
+                .findOne({ _id: postId, isDeleted: false })
+                .populate({ path: 'userId', select: 'nickname fcmToken' })
+                .exec();
+
+            if (!post) {
+                throw new NotFoundException('Not found for the specified share Post Id.');
+            }
+
+            return { ...post.Mapper(), userId: Object(post.userId).Mapper() };
+        } catch (error) {
+            serviceErrorHandler(error, 'Invalid ObjectId for share post Id.');
+        }
+    }
+
+    /**
+     * 지정된 댓글 ID를 기반으로 댓글을 검색하고 반환합니다.
+     *
+     * @param commentId 댓글 ID
+     * @returns 검색된 댓글 정보를 반환합니다.
+     */
+    async findComment(commentId: string) {
+        try {
+            const comment = await this.shareCommentRepository.findOne({ _id: commentId, isDeleted: false }).exec();
+
+            if (!comment) {
+                throw new NotFoundException('Not found for the specified share comment Id.');
+            }
+
+            return comment.Mapper();
+        } catch (error) {
+            serviceErrorHandler(error, 'Invalid ObjectId for share comment Id .');
+        }
+    }
+
+    /**
+     * 지정된 사용자 ID에 대한 게시물 수를 반환합니다.
+     *
+     * @param userId 사용자 ID
+     * @returns 게시물 수를 반환합니다.
+     */
+    async getPostCount(userId: string): Promise<number> {
+        return this.sharePostRepository.countDocuments({ userId, isDeleted: false }).exec();
+    }
+
+    /**
+     * 지정된 게시물 ID에 대한 좋아요 수를 반환합니다.
+     *
+     * @param postId 게시물 ID
+     * @returns 좋아요 수를 반환합니다.
+     */
+    async getLikeCount(postId: string): Promise<number> {
+        return this.shareLikeRepository.countDocuments({ postId, isCanceled: false }).exec();
+    }
+
+    /**
+     * 지정된 게시물 ID에 대한 댓글 수를 반환합니다.
+     *
+     * @param postId 게시물 ID
+     * @returns 댓글 수를 반환합니다.
+     */
+    async getCommentCount(postId: string): Promise<number> {
+        return this.shareCommentRepository.countDocuments({ postId, isDeleted: false }).exec();
+    }
+
+    /**
+     * 지정된 댓글 ID에 대한 답글 수를 반환합니다.
+     *
+     * @param commentId 댓글 ID
+     * @returns 답글 수를 반환합니다.
+     */
+    async getCommentReplyCount(commentId: string): Promise<number> {
+        return this.shareCommentReplyRepository.countDocuments({ commentId, isDeleted: false }).exec();
+    }
+
+    /**
+     * 지정된 게시물 ID에 대한 댓글 ID 목록을 반환합니다.
+     *
+     * @param postId 게시물 ID
+     * @returns 댓글 ID 목록를 반환합니다.
+     */
+    async getCommentIds(postId: string): Promise<string[]> {
+        const comments = await this.shareCommentRepository.find({ postId, isDeleted: false }, { _id: 1 }).exec();
+        return comments.map((entity) => entity.Mapper().id as string);
     }
 }

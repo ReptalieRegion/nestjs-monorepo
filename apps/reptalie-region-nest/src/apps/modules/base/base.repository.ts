@@ -1,16 +1,19 @@
 import {
-    Model,
+    Aggregate,
+    AggregateOptions,
     AnyKeys,
-    SaveOptions,
     FilterQuery,
+    HydratedDocument,
+    Model,
+    ObjectId,
+    PipelineStage,
     ProjectionType,
     QueryOptions,
-    HydratedDocument,
     QueryWithHelpers,
-    UpdateWithAggregationPipeline,
+    SaveOptions,
     UpdateQuery,
+    UpdateWithAggregationPipeline,
     UpdateWriteOpResult,
-    ObjectId,
 } from 'mongoose';
 
 /**
@@ -102,5 +105,9 @@ export abstract class BaseRepository<T> {
     // count 관련
     countDocuments(filter?: FilterQuery<T>, options?: QueryOptions<T>): QueryWithHelpers<number, HydratedDocument<T>> {
         return this.model.countDocuments(filter, options);
+    }
+
+    aggregate<R = unknown>(pipeline?: PipelineStage[], options?: AggregateOptions): Aggregate<R[]> {
+        return this.model.aggregate(pipeline, options);
     }
 }

@@ -6,7 +6,6 @@ import { IResponseImageDTO } from '../dto/image/response-image.dto';
 import { getCurrentDate } from '../utils/time/time';
 
 export interface ImageDocument extends Image, Document {
-    view(): Partial<IResponseImageDTO>;
     Mapper(): Partial<IResponseImageDTO>;
 }
 
@@ -29,28 +28,6 @@ const ImageSchema = SchemaFactory.createForClass(Image);
 ImageSchema.index({ type: 1, typeId: 1 });
 ImageSchema.index({ imageKey: 1, typeId: 1 });
 ImageSchema.methods = {
-    view(): Partial<IResponseImageDTO> {
-        const fields: Array<keyof IResponseImageDTO> = [
-            'id',
-            'imageKey',
-            'type',
-            'typeId',
-            'isDeleted',
-            'createdAt',
-            'updatedAt',
-        ];
-
-        const viewFields = fields.reduce(
-            (prev, field) => ({
-                ...prev,
-                [field]: this.get(field),
-            }),
-            {},
-        );
-
-        return viewFields;
-    },
-
     Mapper(): Partial<IResponseImageDTO> {
         const fields: Array<keyof IResponseImageDTO> = [
             'id',

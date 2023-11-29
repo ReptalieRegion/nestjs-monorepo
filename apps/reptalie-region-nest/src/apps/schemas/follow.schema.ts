@@ -1,21 +1,20 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 
 import mongoose, { Document, SchemaTypes } from 'mongoose';
-import { IResponseFollowDTO } from '../dto/follow/response-follow.dto';
+import { IResponseFollowDTO } from '../dto/user/follow/response-follow.dto';
 import { getCurrentDate } from '../utils/time/time';
 import { User } from './user.schema';
 
 export interface FollowDocument extends Follow, Document {
-    view(): Partial<IResponseFollowDTO>;
     Mapper(): Partial<IResponseFollowDTO>;
 }
 
 @Schema({ versionKey: false, timestamps: { currentTime: getCurrentDate } })
 export class Follow {
-    @Prop({ ref: 'User', type: SchemaTypes.ObjectId })
+    @Prop({ index: true, ref: 'User', type: SchemaTypes.ObjectId })
     following: User;
 
-    @Prop({ ref: 'User', type: SchemaTypes.ObjectId })
+    @Prop({ index: true, ref: 'User', type: SchemaTypes.ObjectId })
     follower: User;
 
     @Prop({ required: true, type: SchemaTypes.String })
@@ -26,30 +25,8 @@ export class Follow {
 }
 
 const FollowSchema = SchemaFactory.createForClass(Follow);
-FollowSchema.index({ following: 1, follower: 1 });
+FollowSchema.index({ following: 1, follower: 1 }, { unique: true });
 FollowSchema.methods = {
-    view(): Partial<IResponseFollowDTO> {
-        const fields: Array<keyof IResponseFollowDTO> = [
-            'id',
-            'following',
-            'follower',
-            'followerNickname',
-            'isCanceled',
-            'createdAt',
-            'updatedAt',
-        ];
-
-        const viewFields = fields.reduce(
-            (prev, field) => ({
-                ...prev,
-                [field]: this.get(field),
-            }),
-            {},
-        );
-
-        return viewFields;
-    },
-
     Mapper(): Partial<IResponseFollowDTO> {
         const fields: Array<keyof IResponseFollowDTO> = [
             'id',

@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { ObjectId } from 'bson';
-import { Model, ClientSession } from 'mongoose';
+import { ClientSession, Model } from 'mongoose';
 
 import { InputSharePostDTO } from '../../../dto/share/post/input-sharePost.dto';
-import { SharePostDocument, SharePost } from '../../../schemas/sharePost.schema';
+import { SharePost, SharePostDocument } from '../../../schemas/sharePost.schema';
 import { BaseRepository } from '../../base/base.repository';
 
 @Injectable()
@@ -19,90 +19,33 @@ export class SharePostRepository extends BaseRepository<SharePostDocument> {
         return savedSharePost.Mapper();
     }
 
-    async findPost(postId: string) {
-        const sharePost = await this.sharePostModel.findOne({ _id: new ObjectId(postId), isDeleted: false }, { _id: 1 }).exec();
-        return sharePost?.Mapper();
-    }
+    async getPostOwnerFCMToken(postId: string) {
+        const fcmTokenArray = await this.sharePostModel.aggregate<{ fcmToken: string[] }>([
+            {
+                $match: {
+                    _id: new ObjectId(postId),
+                },
+            },
+            {
+                $lookup: {
+                    from: 'users',
+                    localField: 'userId',
+                    foreignField: '_id',
+                    as: 'user',
+                },
+            },
+            {
+                $project: {
+                    fcmToken: '$user.fcmToken',
+                },
+            },
+        ]);
+        console.log(fcmTokenArray);
 
-    async findPostWithUserId(postId: string, userId: string) {
-        const sharePost = await this.sharePostModel
-            .findOne({ _id: new ObjectId(postId), userId: new ObjectId(userId), isDeleted: false }, { _id: 1 })
-            .exec();
-        return sharePost?.Mapper();
-    }
+        if (fcmTokenArray.length < 1 || fcmTokenArray[0].fcmToken.length < 1) {
+            throw new Error('[GetPostOwnerFCMToken] Not Found');
+        }
 
-    async updatePost(postId: string, userId: string, contents: string, session: ClientSession) {
-        const response = await this.sharePostModel
-            .updateOne(
-                { _id: new ObjectId(postId), userId: new ObjectId(userId), isDeleted: false },
-                { $set: { contents } },
-                { session },
-            )
-            .exec();
-        return response.modifiedCount;
-    }
-
-    async deletePost(postId: string, userId: string, session: ClientSession) {
-        const response = await this.sharePostModel
-            .updateOne(
-                { _id: new ObjectId(postId), userId: new ObjectId(userId), isDeleted: false },
-                { $set: { isDeleted: true } },
-                { session },
-            )
-            .exec();
-        return response.modifiedCount;
-    }
-
-    async findUserPostsForInfiniteScroll(targetUserId: string, pageParams: number, limitSize: number) {
-        const posts = await this.sharePostModel
-            .find({ userId: new ObjectId(targetUserId), isDeleted: false })
-            .sort({ createdAt: -1 })
-            .skip(pageParams * limitSize)
-            .limit(limitSize)
-            .exec();
-
-        const isLastPage = posts.length < limitSize;
-
-        return {
-            posts: posts.map((entity) => entity.Mapper()),
-            isLastPage: isLastPage,
-            pageParams: pageParams + 1,
-        };
-    }
-
-    async findFollowersPosts(followers: string[], pageParams: number, limitSize: number) {
-        const posts = await this.sharePostModel
-            .find({ $or: [{ userId: { $in: followers } }, { userId: { $nin: followers } }], isDeleted: false })
-            .populate({ path: 'userId', select: '_id nickname' })
-            .sort({ updatedAt: -1, createdAt: -1 })
-            .skip((pageParams * limitSize) / 2)
-            .limit(limitSize)
-            .exec();
-
-        const isLastPage = posts.length < limitSize;
-
-        return {
-            posts: posts.map((entity) => ({ ...entity.Mapper(), userId: entity.userId.Mapper() })),
-            isLastPage: isLastPage,
-            pageParams: pageParams + 1,
-        };
-    }
-
-    async findAllPosts(pageParams: number, limitSize: number) {
-        const posts = await this.sharePostModel
-            .find({ isDeleted: false })
-            .populate({ path: 'userId', select: '_id nickname' })
-            .sort({ updatedAt: -1, createdAt: -1 })
-            .skip((pageParams * limitSize) / 2)
-            .limit(limitSize)
-            .exec();
-
-        const isLastPage = posts.length < limitSize;
-
-        return {
-            posts: posts.map((entity) => ({ ...entity.Mapper(), userId: entity.userId.Mapper() })),
-            isLastPage: isLastPage,
-            pageParams: pageParams + 1,
-        };
+        return fcmTokenArray[0].fcmToken[0];
     }
 }

@@ -37,7 +37,12 @@ export class ImageS3HandlerService {
         this.s3 = new S3Client(awsConfig);
     }
 
-    // 이미지 삭제
+    /**
+     * Amazon S3에서 주어진 키 배열에 해당하는 이미지를 삭제합니다.
+     *
+     * @param keys 삭제할 이미지의 키 배열
+     * @returns 삭제 결과 객체 배열을 반환합니다.
+     */
     async deleteImagesFromS3(keys: string[]) {
         if (keys.length === 0) {
             return;
@@ -79,12 +84,17 @@ export class ImageS3HandlerService {
         return deleteResults;
     }
 
-    // 이미지 업로드
+    /**
+     * 주어진 파일들을 Amazon S3 (Simple Storage Service)에 업로드합니다.
+     *
+     * @param files Express 파일 객체의 배열, 업로드할 파일들
+     * @returns 업로드된 이미지의 고유한 키 배열을 반환합니다.
+     */
     async uploadToS3(files: Express.Multer.File[]) {
         if (files.length === 0) {
             throw new BadRequestException('No files were uploaded.');
         }
-        
+
         const imageKeys: string[] = [];
 
         for (const file of files) {
@@ -124,6 +134,12 @@ export class ImageS3HandlerService {
         return imageKeys;
     }
 
+    /**
+     * 주어진 S3 객체 파라미터로 S3 버킷에서 객체(이미지)가 존재하는지 확인합니다.
+     *
+     * @param params S3 객체(이미지)를 확인하기 위한 파라미터
+     * @returns S3 버킷에 객체(이미지)가 존재하면 true를 반환하고, 그렇지 않으면 false를 반환합니다.
+     */
     private async checkS3ObjectExists(params: IS3ObjectParams) {
         try {
             await this.s3.send(new HeadObjectCommand(params));

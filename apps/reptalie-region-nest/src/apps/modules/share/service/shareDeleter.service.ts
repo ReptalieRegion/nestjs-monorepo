@@ -2,12 +2,13 @@ import { Inject, Injectable, InternalServerErrorException } from '@nestjs/common
 import { InjectConnection } from '@nestjs/mongoose';
 import mongoose, { ClientSession } from 'mongoose';
 import { ImageType } from '../../../dto/image/input-image.dto';
+import { serviceErrorHandler } from '../../../utils/error/errorHandler';
 import { ImageDeleterService, ImageDeleterServiceToken } from '../../image/service/imageDeleter.service';
 import { ShareCommentRepository } from '../repository/shareComment.repository';
 import { ShareCommentReplyRepository } from '../repository/shareCommentReply.repository';
+import { ShareLikeRepository } from '../repository/shareLike.repository';
 import { SharePostRepository } from '../repository/sharePost.repository';
 import { ShareSearcherService, ShareSearcherServiceToken } from './shareSearcher.service';
-import { ShareUpdaterService, ShareUpdaterServiceToken } from './shareUpdater.service';
 
 export const ShareDeleterServiceToken = 'ShareDeleterServiceToken';
 
@@ -20,104 +21,151 @@ export class ShareDeleterService {
         private readonly sharePostRepository: SharePostRepository,
         private readonly shareCommentRepository: ShareCommentRepository,
         private readonly shareCommentReplyRepository: ShareCommentReplyRepository,
+        private readonly shareLikeRepository: ShareLikeRepository,
 
         @Inject(ShareSearcherServiceToken)
         private readonly shareSearcherService: ShareSearcherService,
-        @Inject(ShareUpdaterServiceToken)
-        private readonly shareUpdaterService: ShareUpdaterService,
         @Inject(ImageDeleterServiceToken)
         private readonly imageDeleterService: ImageDeleterService,
     ) {}
 
+    /**
+     * 게시물을 삭제합니다.
+     *
+     * @param userId - 현재 사용자의 ID입니다.
+     * @param postId - 삭제할 게시물의 ID입니다.
+     * @returns 삭제된 게시물 정보를 반환합니다.
+     */
     async deletePost(userId: string, postId: string) {
         const session: ClientSession = await this.connection.startSession();
         session.startTransaction();
 
         try {
-            await this.shareSearcherService.isExistsPostWithUserId(postId, userId);
+            const result = await this.sharePostRepository
+                .updateOne({ _id: postId, userId, isDeleted: false }, { $set: { isDeleted: true } }, { session })
+                .exec();
 
-            const deletePostResult = await this.sharePostRepository.deletePost(postId, userId, session);
-            if (deletePostResult === 0) {
-                throw new InternalServerErrorException('Failed to delete SharePost.');
+            if (result.modifiedCount === 0) {
+                throw new InternalServerErrorException('Failed to delete share post.');
             }
 
-            await this.imageDeleterService.deleteImageByTypeId(ImageType.Share, postId, session);
+            await Promise.all([
+                this.imageDeleterService.deleteImageByTypeId(ImageType.Share, postId, session),
+                this.deleteLike(postId, session),
+            ]);
 
-            const commentIds = await this.shareSearcherService.findCommentIdsByPostId(postId);
+            const commentIds = await this.shareSearcherService.getCommentIds(postId);
 
-            const deleteCommentResult = await this.shareCommentRepository.deleteManyShareComment(postId, session);
-            if (deleteCommentResult === 0) {
-                throw new InternalServerErrorException('Failed to delete ShareComment.');
-            }
-            if (commentIds) {
-                const deleteCommentReplyResult = await this.shareCommentReplyRepository.deleteManyCommentReplyByCommentIds(
-                    commentIds,
-                    session,
-                );
-                if (deleteCommentReplyResult === 0) {
-                    throw new InternalServerErrorException('Failed to delete ShareCommentReply.');
+            if (commentIds.length) {
+                const commentResult = await this.shareCommentRepository
+                    .updateMany({ postId, isDeleted: false }, { $set: { isDeleted: true } }, { session })
+                    .exec();
+
+                if (commentResult.modifiedCount === 0) {
+                    throw new InternalServerErrorException('Failed to delete share comment.');
                 }
+
+                await this.shareCommentReplyRepository
+                    .updateMany(
+                        { commentId: { $in: commentIds }, isDeleted: false },
+                        { $set: { isDeleted: true } },
+                        { session },
+                    )
+                    .exec();
             }
 
             await session.commitTransaction();
-            return { post: { id: postId }, user: { id: userId } };
+            return this.shareSearcherService.getPostInfo({ delete: { postId } });
         } catch (error) {
             await session.abortTransaction();
-            throw error;
+            serviceErrorHandler(error, 'Invalid ObjectId for share post Id.');
         } finally {
             await session.endSession();
         }
     }
 
+    /**
+     * 댓글을 삭제합니다.
+     *
+     * @param userId - 현재 사용자의 ID입니다.
+     * @param commentId - 삭제할 댓글의 ID입니다.
+     * @returns 삭제된 댓글 정보를 반환합니다.
+     */
     async deleteComment(userId: string, commentId: string) {
         const session: ClientSession = await this.connection.startSession();
         session.startTransaction();
 
         try {
-            const comment = await this.shareSearcherService.isExistsCommentWithUserId(commentId, userId);
+            const result = await this.shareCommentRepository
+                .updateOne({ _id: commentId, userId, isDeleted: false }, { $set: { isDeleted: true } }, { session })
+                .exec();
 
-            const deleteResult = await this.shareCommentRepository.deleteComment(commentId, userId, session);
-            if (deleteResult === 0) {
-                throw new InternalServerErrorException('Failed to delete ShareComment.');
+            if (result.modifiedCount === 0) {
+                throw new InternalServerErrorException('Failed to delete share comment.');
             }
 
-            if (comment?.replyCount) {
-                await this.shareCommentReplyRepository.deleteManyCommentReply(commentId, session);
+            const isReplyCount = await this.shareSearcherService.getCommentReplyCount(commentId);
+
+            if (isReplyCount) {
+                const replyResult = await this.shareCommentReplyRepository
+                    .updateMany({ commentId, isDeleted: false }, { $set: { isDeleted: true } }, { session })
+                    .exec();
+
+                if (replyResult.modifiedCount === 0) {
+                    throw new InternalServerErrorException('Failed to delete share comment reply.');
+                }
             }
 
             await session.commitTransaction();
-            return { post: { id: comment?.postId }, comment: { id: commentId } };
+            return this.shareSearcherService.getCommentInfo({ delete: { commentId } });
         } catch (error) {
             await session.abortTransaction();
-            throw error;
+            serviceErrorHandler(error, 'Invalid ObjectId for share comment Id.');
         } finally {
             await session.endSession();
         }
     }
 
+    /**
+     * 댓글 답글을 삭제합니다.
+     *
+     * @param userId - 현재 사용자의 ID입니다.
+     * @param commentReplyId - 삭제할 댓글 답글의 ID입니다.
+     * @returns 삭제된 댓글 답글 정보를 반환합니다.
+     */
     async deleteCommentReply(userId: string, commentReplyId: string) {
-        const session: ClientSession = await this.connection.startSession();
-        session.startTransaction();
-
         try {
-            const commentReply = await this.shareSearcherService.isExistsCommentReplyWithUserId(commentReplyId, userId);
+            const result = await this.shareCommentReplyRepository
+                .updateOne({ _id: commentReplyId, userId, isDeleted: false }, { $set: { isDeleted: true } })
+                .exec();
 
-            const deleteResult = await this.shareCommentReplyRepository.deleteCommentReply(commentReplyId, userId, session);
-            if (deleteResult === 0) {
-                throw new InternalServerErrorException('Failed to delete ShareCommentReply.');
+            if (result.modifiedCount === 0) {
+                throw new InternalServerErrorException('Failed to delete share comment reply.');
             }
-
-            if (commentReply?.commentId) {
-                await this.shareUpdaterService.decrementReplyCount(commentReply?.commentId, session);
-            }
-
-            await session.commitTransaction();
-            return { comment: { id: commentReply?.commentId }, commentReply: { id: commentReplyId } };
         } catch (error) {
-            await session.abortTransaction();
-            throw error;
-        } finally {
-            await session.endSession();
+            serviceErrorHandler(error, 'Invalid ObjectId for share comment reply Id.');
+        }
+
+        return this.shareSearcherService.getCommentReplyInfo({ delete: { commentReplyId } });
+    }
+
+    /**
+     * 게시물에 대한 좋아요 정보를 삭제합니다.
+     *
+     * @param postId - 게시물의 ID입니다.
+     * @param session - 현재 세션입니다.
+     */
+    async deleteLike(postId: string, session: ClientSession) {
+        const isLikeCount = await this.shareSearcherService.getLikeCount(postId);
+
+        if (isLikeCount) {
+            const result = await this.shareLikeRepository
+                .updateMany({ postId, isCanceled: false }, { $set: { isCanceled: true } }, { session })
+                .exec();
+
+            if (result.modifiedCount === 0) {
+                throw new InternalServerErrorException('Failed to delete share like.');
+            }
         }
     }
 }

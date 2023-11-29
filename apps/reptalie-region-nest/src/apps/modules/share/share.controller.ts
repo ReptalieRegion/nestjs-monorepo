@@ -1,23 +1,24 @@
 import {
-    Controller,
-    Post,
-    UseInterceptors,
-    UploadedFiles,
     Body,
-    Inject,
-    HttpStatus,
-    UseGuards,
-    Put,
-    Param,
+    Controller,
     Delete,
     Get,
+    HttpCode,
+    HttpStatus,
+    Inject,
+    Param,
+    Post,
+    Put,
     Query,
+    UploadedFiles,
+    UseGuards,
+    UseInterceptors,
 } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { InputShareCommentDTO } from '../../dto/share/comment/input-shareComment.dto';
 import { InputShareCommentReplyDTO } from '../../dto/share/commentReply/input-shareCommentReply.dto';
 import { InputSharePostDTO } from '../../dto/share/post/input-sharePost.dto';
-import { IResponseUserDTO } from '../../dto/user/response-user.dto';
+import { IUserProfileDTO } from '../../dto/user/user/response-user.dto';
 import { controllerErrorHandler } from '../../utils/error/errorHandler';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { JwtOptionalAuthGuard } from '../auth/guards/jwtOptional-auth.guard';
@@ -40,203 +41,244 @@ export class ShareController {
         private readonly shareSearcherService: ShareSearcherService,
     ) {}
 
+    /**
+     *
+     *  Post
+     *
+     */
     @Post('post')
+    @HttpCode(HttpStatus.CREATED)
     @UseGuards(JwtAuthGuard)
-    @UseInterceptors(FilesInterceptor('files', 5))
+    @UseInterceptors(FilesInterceptor('files', 5, { limits: { fieldSize: 25 * 1024 * 1024 } }))
     async createPostWithImages(
-        @AuthUser() user: IResponseUserDTO,
-        @UploadedFiles()
-        files: Express.Multer.File[],
-        @Body() inputSharePostDTO: InputSharePostDTO,
+        @AuthUser() user: IUserProfileDTO,
+        @UploadedFiles() files: Express.Multer.File[],
+        @Body() dto: InputSharePostDTO,
     ) {
         try {
-            await this.shareWriterService.createPostWithImages(user.id, inputSharePostDTO, files);
-            return { statusCode: HttpStatus.CREATED, message: 'SharePost created successfully' };
+            return this.shareWriterService.createPostWithImages(user, dto, files);
         } catch (error) {
             controllerErrorHandler(error);
         }
     }
 
     @Post('comment')
+    @HttpCode(HttpStatus.CREATED)
     @UseGuards(JwtAuthGuard)
-    async createComment(@AuthUser() user: IResponseUserDTO, @Body() inputShareCommentDTO: InputShareCommentDTO) {
+    async createComment(@AuthUser() user: IUserProfileDTO, @Body() dto: InputShareCommentDTO) {
         try {
-            await this.shareWriterService.createComment(user.id, inputShareCommentDTO);
-            return { statusCode: HttpStatus.CREATED, message: 'ShareComment created successfully' };
+            return this.shareWriterService.createComment(user, dto);
         } catch (error) {
             controllerErrorHandler(error);
         }
     }
 
     @Post('comment-reply')
+    @HttpCode(HttpStatus.CREATED)
     @UseGuards(JwtAuthGuard)
-    async createCommentReply(@AuthUser() user: IResponseUserDTO, @Body() inputShareCommentReplyDTO: InputShareCommentReplyDTO) {
+    async createCommentReply(@AuthUser() user: IUserProfileDTO, @Body() dto: InputShareCommentReplyDTO) {
         try {
-            await this.shareWriterService.createCommentReply(user.id, inputShareCommentReplyDTO);
-            return { statusCode: HttpStatus.CREATED, message: 'ShareCommentReply created successfully' };
+            return this.shareWriterService.createCommentReply(user, dto);
         } catch (error) {
             controllerErrorHandler(error);
         }
     }
 
     @Post('posts/:id/like')
+    @HttpCode(HttpStatus.CREATED)
     @UseGuards(JwtAuthGuard)
-    async createLike(@AuthUser() user: IResponseUserDTO, @Param('id') postId: string) {
+    async createLike(@AuthUser() user: IUserProfileDTO, @Param('id') postId: string) {
         try {
-            await this.shareWriterService.createLike(user.id, postId);
-            return { statusCode: HttpStatus.CREATED, message: 'ShareLike created successfully' };
+            return this.shareWriterService.createLike(user, postId);
         } catch (error) {
             controllerErrorHandler(error);
         }
     }
 
-    @Put('posts/:id/like')
-    @UseGuards(JwtAuthGuard)
-    async toggleLike(@AuthUser() user: IResponseUserDTO, @Param('id') postId: string) {
-        try {
-            await this.shareUpdaterService.toggleLike(user.id, postId);
-            return { statusCode: HttpStatus.OK, message: 'ShareLike toggled successfully' };
-        } catch (error) {
-            controllerErrorHandler(error);
-        }
-    }
-
+    /**
+     *
+     *  Put
+     *
+     */
     @Put('posts/:id')
+    @HttpCode(HttpStatus.OK)
     @UseGuards(JwtAuthGuard)
-    async updatePost(
-        @AuthUser() user: IResponseUserDTO,
-        @Param('id') postId: string,
-        @Body() inputSharePostDTO: InputSharePostDTO,
-    ) {
+    async updatePost(@AuthUser() user: IUserProfileDTO, @Param('id') postId: string, @Body() dto: InputSharePostDTO) {
         try {
-            await this.shareUpdaterService.updatePost(user.id, postId, inputSharePostDTO);
-            return { statusCode: HttpStatus.OK, message: 'SharePost updated successfully' };
+            return this.shareUpdaterService.updatePost(user, postId, dto);
         } catch (error) {
             controllerErrorHandler(error);
         }
     }
 
     @Put('comments/:id')
+    @HttpCode(HttpStatus.OK)
     @UseGuards(JwtAuthGuard)
-    async updateComment(
-        @AuthUser() user: IResponseUserDTO,
-        @Param('id') commentId: string,
-        @Body() inputShareCommentDTO: InputShareCommentDTO,
-    ) {
+    async updateComment(@AuthUser() user: IUserProfileDTO, @Param('id') commentId: string, @Body() dto: InputShareCommentDTO) {
         try {
-            await this.shareUpdaterService.updateComment(user.id, commentId, inputShareCommentDTO);
-            return { statusCode: HttpStatus.OK, message: 'ShareComment updated successfully' };
+            return this.shareUpdaterService.updateComment(user, commentId, dto);
         } catch (error) {
             controllerErrorHandler(error);
         }
     }
 
     @Put('comment-replies/:id')
+    @HttpCode(HttpStatus.OK)
     @UseGuards(JwtAuthGuard)
     async updateCommentReply(
-        @AuthUser() user: IResponseUserDTO,
+        @AuthUser() user: IUserProfileDTO,
         @Param('id') commentReplyId: string,
-        @Body() inputShareCommentReplyDTO: InputShareCommentReplyDTO,
+        @Body() dto: InputShareCommentReplyDTO,
     ) {
         try {
-            await this.shareUpdaterService.updateCommentReply(user.id, commentReplyId, inputShareCommentReplyDTO);
-            return { statusCode: HttpStatus.OK, message: 'ShareCommentReply updated successfully' };
+            return this.shareUpdaterService.updateCommentReply(user.id, commentReplyId, dto);
         } catch (error) {
             controllerErrorHandler(error);
         }
     }
 
-    @Delete('posts/:id')
+    @Put('posts/:id/like')
+    @HttpCode(HttpStatus.OK)
     @UseGuards(JwtAuthGuard)
-    async deletePost(@AuthUser() user: IResponseUserDTO, @Param('id') postId: string) {
+    async toggleLike(@AuthUser() user: IUserProfileDTO, @Param('id') postId: string) {
         try {
-            const post = await this.shareDeleterService.deletePost(user.id, postId);
-            return { statusCode: HttpStatus.OK, response: post };
+            return this.shareUpdaterService.toggleLike(user.id, postId);
+        } catch (error) {
+            controllerErrorHandler(error);
+        }
+    }
+
+    /**
+     *
+     *  Delete
+     *
+     */
+    @Delete('posts/:id')
+    @HttpCode(HttpStatus.OK)
+    @UseGuards(JwtAuthGuard)
+    async deletePost(@AuthUser() user: IUserProfileDTO, @Param('id') postId: string) {
+        try {
+            return this.shareDeleterService.deletePost(user.id, postId);
         } catch (error) {
             controllerErrorHandler(error);
         }
     }
 
     @Delete('comments/:id')
+    @HttpCode(HttpStatus.OK)
     @UseGuards(JwtAuthGuard)
-    async deleteComment(@AuthUser() user: IResponseUserDTO, @Param('id') commentId: string) {
+    async deleteComment(@AuthUser() user: IUserProfileDTO, @Param('id') commentId: string) {
         try {
-            const comment = await this.shareDeleterService.deleteComment(user.id, commentId);
-            return { statusCode: HttpStatus.OK, response: comment };
+            return this.shareDeleterService.deleteComment(user.id, commentId);
         } catch (error) {
             controllerErrorHandler(error);
         }
     }
 
     @Delete('comment-replies/:id')
+    @HttpCode(HttpStatus.OK)
     @UseGuards(JwtAuthGuard)
-    async deleteCommentReply(@AuthUser() user: IResponseUserDTO, @Param('id') commentReplyId: string) {
+    async deleteCommentReply(@AuthUser() user: IUserProfileDTO, @Param('id') commentReplyId: string) {
         try {
-            const commentReply = await this.shareDeleterService.deleteCommentReply(user.id, commentReplyId);
-            return { statusCode: HttpStatus.OK, response: commentReply };
+            return this.shareDeleterService.deleteCommentReply(user.id, commentReplyId);
         } catch (error) {
             controllerErrorHandler(error);
         }
     }
 
+    /**
+     *
+     *  Get
+     *
+     */
     @Get('posts/list')
+    @HttpCode(HttpStatus.OK)
     @UseGuards(JwtOptionalAuthGuard)
-    async getPostsInfiniteScroll(
-        @AuthUser() user: IResponseUserDTO,
-        @Query('pageParams') pageParams: number,
-    ) {
+    async getPostsInfiniteScroll(@AuthUser() user: IUserProfileDTO, @Query('pageParam') pageParam: number) {
         try {
-            const posts = await this.shareSearcherService.getPostsInfiniteScroll(user?.id, pageParams);
-            return { statusCode: HttpStatus.OK, response: posts };
+            return this.shareSearcherService.getPostsInfiniteScroll(user?.id, pageParam, 10);
         } catch (error) {
             controllerErrorHandler(error);
         }
     }
 
-    @Get('posts/list/users/:id')
+    @Get('posts/:id')
+    @HttpCode(HttpStatus.OK)
+    @UseGuards(JwtOptionalAuthGuard)
+    async getPost(@AuthUser() user: IUserProfileDTO, @Param('id') postId: string) {
+        try {
+            return this.shareSearcherService.getPost(user.id, postId);
+        } catch (error) {
+            controllerErrorHandler(error);
+        }
+    }
+
+    @Get('posts/list/users/:nickname')
+    @HttpCode(HttpStatus.OK)
     @UseGuards(JwtOptionalAuthGuard)
     async getUserPostsInfiniteScroll(
-        @AuthUser() user: IResponseUserDTO,
-        @Param('id') targetUserId: string,
-        @Query('pageParams') pageParams: number,
+        @AuthUser() user: IUserProfileDTO,
+        @Param('nickname') targetNickname: string,
+        @Query('pageParam') pageParam: number,
     ) {
         try {
-            const posts = await this.shareSearcherService.getUserPostsInfiniteScroll(user?.id, targetUserId, pageParams);
-            return { statusCode: HttpStatus.OK, response: posts };
+            return this.shareSearcherService.getUserPostsInfiniteScroll(user?.id, targetNickname, pageParam, 12);
         } catch (error) {
             controllerErrorHandler(error);
         }
     }
 
     @Get('posts/:id/comments/list')
+    @HttpCode(HttpStatus.OK)
     @UseGuards(JwtOptionalAuthGuard)
     async getCommentsInfiniteScroll(
-        @AuthUser() user: IResponseUserDTO,
+        @AuthUser() user: IUserProfileDTO,
         @Param('id') postId: string,
-        @Query('pageParams') pageParams: number,
+        @Query('pageParam') pageParam: number,
     ) {
         try {
-            const comments = await this.shareSearcherService.getCommentsInfiniteScroll(user?.id, postId, pageParams);
-            return { statusCode: HttpStatus.OK, response: comments };
+            return this.shareSearcherService.getCommentsInfiniteScroll(user?.id, postId, pageParam, 10);
         } catch (error) {
             controllerErrorHandler(error);
         }
     }
 
     @Get('comments/:id/replies/list')
+    @HttpCode(HttpStatus.OK)
     @UseGuards(JwtOptionalAuthGuard)
     async getCommentRepliesInfiniteScroll(
-        @AuthUser() user: IResponseUserDTO,
+        @AuthUser() user: IUserProfileDTO,
         @Param('id') commentId: string,
-        @Query('pageParams') pageParams: number,
+        @Query('pageParam') pageParam: number,
     ) {
         try {
-            const commentReplies = await this.shareSearcherService.getCommentRepliesInfiniteScroll(
-                user?.id,
-                commentId,
-                pageParams,
-            );
-            return { statusCode: HttpStatus.OK, response: commentReplies };
+            return this.shareSearcherService.getCommentRepliesInfiniteScroll(user?.id, commentId, pageParam, 10);
+        } catch (error) {
+            controllerErrorHandler(error);
+        }
+    }
+
+    @Get('posts/:id/like/list')
+    @HttpCode(HttpStatus.OK)
+    @UseGuards(JwtOptionalAuthGuard)
+    async getLikeListForPostInfiniteScroll(
+        @AuthUser() user: IUserProfileDTO,
+        @Param('id') postId: string,
+        @Query('pageParam') pageParam: number,
+    ) {
+        try {
+            return this.shareSearcherService.getLikeListForPostInfiniteScroll(user?.id, postId, pageParam, 10);
+        } catch (error) {
+            controllerErrorHandler(error);
+        }
+    }
+
+    @Get('posts/list/me')
+    @HttpCode(HttpStatus.OK)
+    @UseGuards(JwtAuthGuard)
+    async getMyPostsInfiniteScroll(@AuthUser() user: IUserProfileDTO, @Query('pageParam') pageParam: number) {
+        try {
+            return this.shareSearcherService.getMyPostsInfiniteScroll(user.id, pageParam, 12);
         } catch (error) {
             controllerErrorHandler(error);
         }

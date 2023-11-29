@@ -3,6 +3,7 @@
     "packageManager": "yarn@3.6.0",
     "private": true,
     "scripts": {
+        "server": "yarn workspace @reptalie-region-nest/server",
         "dev:client": "yarn workspace @reptalie-region-next/web run dev",
         "build:client": "yarn workspace @reptalie-region-next/web run build",
         "start:client": "yarn workspace @reptalie-region-next/web run start",

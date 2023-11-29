@@ -2,13 +2,15 @@ import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import mongoose from 'mongoose';
 
 import { LoggerMiddleware } from './middlwares/logger.middleware';
+import { AuthModule } from './modules/auth/auth.module';
+import { NotificationModule } from './modules/notification/notification.module';
 import { ShareModule } from './modules/share/share.module';
 import { UserModule } from './modules/user/user.module';
 import { CustomConfigModule } from './utils/customModules/config';
 import { CustomMongooseModule } from './utils/customModules/mongoose';
 
 @Module({
-    imports: [ShareModule, UserModule, CustomConfigModule, CustomMongooseModule],
+    imports: [ShareModule, AuthModule, UserModule, NotificationModule, CustomConfigModule, CustomMongooseModule],
     controllers: [],
     providers: [],
 })

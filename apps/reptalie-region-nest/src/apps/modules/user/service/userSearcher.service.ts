@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { IResponseUserDTO } from '../../../dto/user/user/response-user.dto';
+import { IUserProfileDTO } from '../../../dto/user/user/response-user.dto';
 import { User } from '../../../schemas/user.schema';
 import { serviceErrorHandler } from '../../../utils/error/errorHandler';
 import { FollowRepository } from '../repository/follow.repository';
@@ -67,7 +67,7 @@ export class UserSearcherService {
      * @param user - 요청하는 사용자 정보 (선택 사항)
      * @returns 사용자 프로필 정보를 반환합니다.
      */
-    async getProfile(nickname: string, user?: IResponseUserDTO) {
+    async getProfile(nickname: string, user?: IUserProfileDTO) {
         const userInfo = await this.getUserInfo({ nickname, currentUserId: user?.id });
         const followCount = await this.getFollowCount(userInfo?.id);
         const isMine = user?.nickname === nickname;
@@ -88,7 +88,7 @@ export class UserSearcherService {
      * @param user - 요청하는 사용자 정보
      * @returns 사용자 프로필 정보를 반환합니다.
      */
-    async getMyProfile(user: IResponseUserDTO) {
+    async getMyProfile(user: IUserProfileDTO) {
         const followCount = await this.getFollowCount(user.id);
 
         return {
@@ -216,6 +216,7 @@ export class UserSearcherService {
         }
 
         const isFollow = currentUserId ? await this.isExistsFollow(currentUserId, userInfo.id) : undefined;
+        const fcmToken = targetUserId ? userInfo.fcmToken : undefined;
 
         return {
             id: userInfo.id,
@@ -224,6 +225,7 @@ export class UserSearcherService {
                 src: `${process.env.AWS_IMAGE_BASEURL}${userInfo.imageId.imageKey}`,
             },
             isFollow,
+            fcmToken,
         };
     }
 

@@ -8,7 +8,7 @@ export const UserSearcherServiceProvider = {
     useClass: UserSearcherService,
 };
 
-export const UserWriterServiceProvicer = {
+export const UserWriterServiceProvider = {
     provide: UserWriterServiceToken,
     useClass: UserWriterService,
 };

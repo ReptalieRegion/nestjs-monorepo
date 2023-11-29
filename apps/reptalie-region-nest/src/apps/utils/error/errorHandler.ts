@@ -19,7 +19,8 @@ export const controllerErrorHandler = (caughtError: unknown) => {
 
 export const serviceErrorHandler = (caughtError: unknown, message: string) => {
     const error = caughtError as Error;
-    if (error instanceof BSONError || error.name === 'CastError') {
+
+    if (error instanceof BSONError || error.name === 'CastError' || error.message.includes('Cast to ObjectId failed')) {
         throw new UnprocessableEntityException(message);
     }
 

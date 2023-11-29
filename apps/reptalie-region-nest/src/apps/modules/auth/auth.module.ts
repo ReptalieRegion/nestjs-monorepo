@@ -1,4 +1,4 @@
-import { Module, forwardRef } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { PassportModule } from '@nestjs/passport';
 import { CustomJwtModule, MongooseModuleSocial } from '../../utils/customModules';
 import { UserModule } from '../user/user.module';
@@ -12,7 +12,7 @@ import {
 import { SocialRepository } from './repository/social.repository';
 
 @Module({
-    imports: [MongooseModuleSocial, CustomJwtModule, PassportModule, forwardRef(() => UserModule)],
+    imports: [MongooseModuleSocial, CustomJwtModule, PassportModule, UserModule],
     controllers: [AuthController],
     providers: [
         SocialRepository,

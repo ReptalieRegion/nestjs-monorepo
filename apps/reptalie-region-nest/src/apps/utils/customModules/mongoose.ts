@@ -1,6 +1,9 @@
 import { MongooseModule } from '@nestjs/mongoose';
 import { Follow, FollowSchema } from '../../schemas/follow.schema';
 import { Image, ImageSchema } from '../../schemas/image.schema';
+import { NotificationAgree, NotificationAgreeSchema } from '../../schemas/notificationAgree.schema';
+import { NotificationLog, NotificationLogSchema } from '../../schemas/notificationLog.schema';
+import { NotificationTemplate, NotificationTemplateSchema } from '../../schemas/notificationTemplate.schema';
 import { ShareComment, ShareCommentSchema } from '../../schemas/shareComment.schema';
 import { ShareCommentReply, ShareCommentReplySchema } from '../../schemas/shareCommentReply.schema';
 import { ShareLike, ShareLikeSchema } from '../../schemas/shareLike.schema';
@@ -34,3 +37,16 @@ export const MongooseModuleShareLike = MongooseModule.forFeature([{ name: ShareL
 
 // image 관련 모듈
 export const MongooseModuleImage = MongooseModule.forFeature([{ name: Image.name, schema: ImageSchema }]);
+
+// notification 관련 모듈
+export const MongooseModuleNotificationTemplate = MongooseModule.forFeature([
+    { name: NotificationTemplate.name, schema: NotificationTemplateSchema },
+]);
+
+export const MongooseModuleNotificationLog = MongooseModule.forFeature([
+    { name: NotificationLog.name, schema: NotificationLogSchema },
+]);
+
+export const MongooseModuleNotificationAgree = MongooseModule.forFeature([
+    { name: NotificationAgree.name, schema: NotificationAgreeSchema },
+]);

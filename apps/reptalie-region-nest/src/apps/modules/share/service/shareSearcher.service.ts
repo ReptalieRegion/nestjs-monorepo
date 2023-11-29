@@ -84,6 +84,35 @@ export class ShareSearcherService {
     }
 
     /**
+     *
+     * 특정 게시글 조회 로직
+     */
+    async getPost(currentUserId: string, postId: string) {
+        const entity = await this.sharePostRepository.findOne({ _id: postId, isDeleted: false }).exec();
+
+        if (!entity) {
+            throw new NotFoundException('Not Found Post');
+        }
+
+        const post = entity.Mapper();
+        const userInfo = await this.userSearcherService.getUserInfo({ targetUserId: post.userId, currentUserId });
+        const images = post.id && (await this.imageSearcherService.getPostImages(post.id));
+
+        return {
+            post: {
+                id: post.id,
+                contents: post.contents,
+                images,
+                isMine: currentUserId ? currentUserId === userInfo.id : false,
+                isLike: currentUserId && post.id ? await this.isExistsLike(currentUserId, post.id) : undefined,
+                likeCount: post.id && (await this.getLikeCount(post.id)),
+                commentCount: post.id && (await this.getCommentCount(post.id)),
+                user: { ...userInfo },
+            },
+        };
+    }
+
+    /**
      * 무한 스크롤로 사용자 게시물을 가져옵니다.
      *
      * @param currentUserId - 현재 사용자의 ID입니다.
@@ -463,7 +492,7 @@ export class ShareSearcherService {
         try {
             const post = await this.sharePostRepository
                 .findOne({ _id: postId, isDeleted: false })
-                .populate({ path: 'userId', select: 'nickname -_id' })
+                .populate({ path: 'userId', select: 'nickname fcmToken' })
                 .exec();
 
             if (!post) {

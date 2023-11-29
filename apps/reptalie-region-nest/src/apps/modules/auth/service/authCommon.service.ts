@@ -1,7 +1,7 @@
 import { BadRequestException, ForbiddenException, Inject, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectConnection } from '@nestjs/mongoose';
 import mongoose, { ClientSession } from 'mongoose';
-import { JoinProgressType, IJoinProgress } from '../../../dto/user/social/input-social.dto';
+import { JoinProgressType, IJoinProgressDTO } from '../../../dto/user/social/input-social.dto';
 import { UserUpdaterService, UserUpdaterServiceToken } from '../../user/service/userUpdater.service';
 import { SocialRepository } from '../repository/social.repository';
 import { AuthEncryptService, AuthEncryptServiceToken } from './authEncrypt.service';
@@ -28,10 +28,10 @@ export class AuthCommonService {
     /**
      * 사용자의 가입 진행 상태 처리를 수행합니다.
      *
-     * @param dto - 가입 진행 상태를 나타내는 데이터 전송 객체 (IJoinProgress).
+     * @param dto - 가입 진행 상태를 나타내는 데이터 전송 객체 (IJoinProgressDTO).
      * @returns - 사용자의 가입 진행 상태가 업데이트된 후, 결과를 반환합니다.
      */
-    async handleJoinProgress(dto: IJoinProgress) {
+    async handleJoinProgress(dto: IJoinProgressDTO) {
         const session: ClientSession = await this.connection.startSession();
         session.startTransaction();
 

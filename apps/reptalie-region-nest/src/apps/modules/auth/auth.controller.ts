@@ -1,6 +1,6 @@
-import { Body, Controller, HttpCode, HttpStatus, Inject, Post, UseGuards, Headers, Delete } from '@nestjs/common';
-import { IEncryptedData, IJoinProgress } from '../../dto/user/social/input-social.dto';
-import { IResponseUserDTO } from '../../dto/user/user/response-user.dto';
+import { Body, Controller, Delete, Headers, HttpCode, HttpStatus, Inject, Post, UseGuards } from '@nestjs/common';
+import { IEncryptedDataDTO, IJoinProgressDTO } from '../../dto/user/social/input-social.dto';
+import { IUserProfileDTO } from '../../dto/user/user/response-user.dto';
 import { controllerErrorHandler } from '../../utils/error/errorHandler';
 import { AuthUser } from '../user/user.decorator';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
@@ -38,7 +38,7 @@ export class AuthController {
     @Post('social/kakao')
     @HttpCode(HttpStatus.CREATED)
     @UseGuards(JwtSocialAuthGuard)
-    async socialKakao(@Body() dto: IEncryptedData) {
+    async socialKakao(@Body() dto: IEncryptedDataDTO) {
         try {
             return this.authSocialService.kakaoSignIn(dto);
         } catch (error) {
@@ -49,7 +49,7 @@ export class AuthController {
     @Post('social/apple')
     @HttpCode(HttpStatus.CREATED)
     @UseGuards(JwtSocialAuthGuard)
-    async socialApple(@Body() dto: IEncryptedData) {
+    async socialApple(@Body() dto: IEncryptedDataDTO) {
         try {
             return this.authSocialService.appleSignIn(dto);
         } catch (error) {
@@ -84,7 +84,7 @@ export class AuthController {
     @Post('social/join-progress')
     @HttpCode(HttpStatus.OK)
     @UseGuards(JwtSocialAuthGuard)
-    async handleJoinProgress(@Body() dto: IJoinProgress) {
+    async handleJoinProgress(@Body() dto: IJoinProgressDTO) {
         try {
             return this.authCommonService.handleJoinProgress(dto);
         } catch (error) {
@@ -106,7 +106,7 @@ export class AuthController {
     @Delete('sign-out')
     @HttpCode(HttpStatus.OK)
     @UseGuards(JwtAuthGuard)
-    async signOut(@AuthUser() user: IResponseUserDTO) {
+    async signOut(@AuthUser() user: IUserProfileDTO) {
         try {
             return this.authCommonService.signOut(user.id);
         } catch (error) {

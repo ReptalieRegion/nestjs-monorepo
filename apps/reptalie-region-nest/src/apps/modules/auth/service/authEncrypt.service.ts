@@ -15,9 +15,9 @@ export const AuthEncryptServiceToken = 'AuthEncryptServiceToken';
 
 @Injectable()
 export class AuthEncryptService {
-    private keyRoot: string;
-    private privateKeyPath: string;
-    private publicKeyPath: string;
+    // private keyRoot: string;
+    // private privateKeyPath: string;
+    // private publicKeyPath: string;
 
     constructor() {
         // 추후 키관리 관련 확정 후 변경 예정

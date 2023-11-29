@@ -1,6 +1,7 @@
 import {
     Body,
     Controller,
+    Delete,
     Get,
     HttpCode,
     HttpStatus,
@@ -13,13 +14,13 @@ import {
     UseGuards,
     UseInterceptors,
 } from '@nestjs/common';
-
 import { FilesInterceptor } from '@nestjs/platform-express';
-import { InputUserDTO } from '../../dto/user/user/input-user.dto';
-import { IResponseUserDTO } from '../../dto/user/user/response-user.dto';
+import { fcmTokenDTO } from '../../dto/user/user/fcm-token.dto';
+import { IUserProfileDTO } from '../../dto/user/user/response-user.dto';
 import { controllerErrorHandler } from '../../utils/error/errorHandler';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { JwtOptionalAuthGuard } from '../auth/guards/jwtOptional-auth.guard';
+import { UserDeleterService, UserDeleterServiceToken } from './service/userDeleter.service';
 import { UserSearcherService, UserSearcherServiceToken } from './service/userSearcher.service';
 import { UserUpdaterService, UserUpdaterServiceToken } from './service/userUpdater.service';
 import { UserWriterService, UserWriterServiceToken } from './service/userWriter.service';
@@ -34,6 +35,8 @@ export class UserController {
         private readonly userWriterService: UserWriterService,
         @Inject(UserUpdaterServiceToken)
         private readonly userUpdaterService: UserUpdaterService,
+        @Inject(UserDeleterServiceToken)
+        private readonly userDeleterService: UserDeleterService,
     ) {}
 
     /**
@@ -45,9 +48,9 @@ export class UserController {
     @Post(':id/follow')
     @HttpCode(HttpStatus.CREATED)
     @UseGuards(JwtAuthGuard)
-    async createFollow(@AuthUser() user: IResponseUserDTO, @Param('id') follower: string) {
+    async createFollow(@AuthUser() user: IUserProfileDTO, @Param('id') follower: string) {
         try {
-            return this.userWriterService.createFollow(user.id, follower);
+            return this.userWriterService.createFollow(user, follower);
         } catch (error) {
             controllerErrorHandler(error);
         }
@@ -61,7 +64,7 @@ export class UserController {
     @Put(':id/follow')
     @HttpCode(HttpStatus.OK)
     @UseGuards(JwtAuthGuard)
-    async toggleFollow(@AuthUser() user: IResponseUserDTO, @Param('id') follower: string) {
+    async toggleFollow(@AuthUser() user: IUserProfileDTO, @Param('id') follower: string) {
         try {
             return this.userUpdaterService.toggleFollow(user.id, follower);
         } catch (error) {
@@ -73,7 +76,7 @@ export class UserController {
     @HttpCode(HttpStatus.OK)
     @UseGuards(JwtAuthGuard)
     @UseInterceptors(FilesInterceptor('files'))
-    async updateMyProfile(@AuthUser() user: IResponseUserDTO, @UploadedFiles() files: Express.Multer.File[]) {
+    async updateMyProfile(@AuthUser() user: IUserProfileDTO, @UploadedFiles() files: Express.Multer.File[]) {
         try {
             return this.userUpdaterService.updateMyProfileImage(user, files);
         } catch (error) {
@@ -84,7 +87,7 @@ export class UserController {
     @Put('fcm-token')
     @HttpCode(HttpStatus.OK)
     @UseGuards(JwtAuthGuard)
-    async updateFcmToken(@AuthUser() user: IResponseUserDTO, @Body() dto: InputUserDTO) {
+    async updateFcmToken(@AuthUser() user: IUserProfileDTO, @Body() dto: fcmTokenDTO) {
         try {
             return this.userUpdaterService.updateFcmToken(user, dto);
         } catch (error) {
@@ -97,6 +100,16 @@ export class UserController {
      *  Delete
      *
      */
+    @Delete('fcm-token')
+    @HttpCode(HttpStatus.NO_CONTENT)
+    @UseGuards(JwtAuthGuard)
+    async deleteFcmToken(@AuthUser() user: IUserProfileDTO) {
+        try {
+            this.userDeleterService.fcmTokenDelete(user.id);
+        } catch (error) {
+            controllerErrorHandler(error);
+        }
+    }
 
     /**
      *
@@ -106,7 +119,7 @@ export class UserController {
     @Get('profile')
     @HttpCode(HttpStatus.OK)
     @UseGuards(JwtOptionalAuthGuard)
-    async getUserProfile(@AuthUser() user: IResponseUserDTO, @Query('nickname') nickname: string) {
+    async getUserProfile(@AuthUser() user: IUserProfileDTO, @Query('nickname') nickname: string) {
         try {
             return this.userSearcherService.getProfile(nickname, user);
         } catch (error) {
@@ -117,7 +130,7 @@ export class UserController {
     @Get('me/profile')
     @HttpCode(HttpStatus.OK)
     @UseGuards(JwtAuthGuard)
-    async getMyProfile(@AuthUser() user: IResponseUserDTO) {
+    async getMyProfile(@AuthUser() user: IUserProfileDTO) {
         try {
             return this.userSearcherService.getMyProfile(user);
         } catch (error) {
@@ -129,7 +142,7 @@ export class UserController {
     @HttpCode(HttpStatus.OK)
     @UseGuards(JwtAuthGuard)
     async getFollowersInfiniteScroll(
-        @AuthUser() user: IResponseUserDTO,
+        @AuthUser() user: IUserProfileDTO,
         @Query('search') search: string,
         @Query('pageParam') pageParam: number,
     ) {
@@ -144,7 +157,7 @@ export class UserController {
     @HttpCode(HttpStatus.OK)
     @UseGuards(JwtOptionalAuthGuard)
     async getUserFollowersInfiniteScroll(
-        @AuthUser() user: IResponseUserDTO,
+        @AuthUser() user: IUserProfileDTO,
         @Param('id') targetUserId: string,
         @Query('pageParam') pageParam: number,
     ) {
@@ -159,7 +172,7 @@ export class UserController {
     @HttpCode(HttpStatus.OK)
     @UseGuards(JwtOptionalAuthGuard)
     async getUserFollowingsInfiniteScroll(
-        @AuthUser() user: IResponseUserDTO,
+        @AuthUser() user: IUserProfileDTO,
         @Param('id') targetUserId: string,
         @Query('pageParam') pageParam: number,
     ) {

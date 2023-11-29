@@ -352,7 +352,7 @@ a {
 }
 
 .third-section__image_wrapper {
-    height: 1072px;
+    height: 1272px;
 }
 
 .third-section_image_container {
@@ -404,7 +404,7 @@ a {
 .fourth-section__image {
     width: 1000px;
     position: absolute;
-    left: calc(50% - 600px);
+    left: calc(50% - 500px);
     bottom: 200px;
 }
 

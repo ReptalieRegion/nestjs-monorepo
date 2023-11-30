@@ -1,6 +1,8 @@
 import { MongooseModule } from '@nestjs/mongoose';
+import { DiaryEntity, DiaryEntitySchema } from '../../schemas/diaryEntity.schema';
 import { Follow, FollowSchema } from '../../schemas/follow.schema';
 import { Image, ImageSchema } from '../../schemas/image.schema';
+import { MetaData, MetaDataSchema } from '../../schemas/metaData.schema';
 import { NotificationAgree, NotificationAgreeSchema } from '../../schemas/notificationAgree.schema';
 import { NotificationLog, NotificationLogSchema } from '../../schemas/notificationLog.schema';
 import { NotificationTemplate, NotificationTemplateSchema } from '../../schemas/notificationTemplate.schema';
@@ -50,3 +52,9 @@ export const MongooseModuleNotificationLog = MongooseModule.forFeature([
 export const MongooseModuleNotificationAgree = MongooseModule.forFeature([
     { name: NotificationAgree.name, schema: NotificationAgreeSchema },
 ]);
+
+// diary 관련 모듈
+export const MongooseModuleDiaryEntity = MongooseModule.forFeature([{ name: DiaryEntity.name, schema: DiaryEntitySchema }]);
+
+// metadata 관련 모듈
+export const MongooseModuleMetaData = MongooseModule.forFeature([{ name: MetaData.name, schema: MetaDataSchema }]);

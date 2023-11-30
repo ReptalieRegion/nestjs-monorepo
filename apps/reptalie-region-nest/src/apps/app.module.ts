@@ -3,6 +3,8 @@ import mongoose from 'mongoose';
 
 import { LoggerMiddleware } from './middlwares/logger.middleware';
 import { AuthModule } from './modules/auth/auth.module';
+import { DiaryModule } from './modules/diary/diary.module';
+import { MetaDataModule } from './modules/metadata/metaData.module';
 import { NotificationModule } from './modules/notification/notification.module';
 import { ShareModule } from './modules/share/share.module';
 import { UserModule } from './modules/user/user.module';
@@ -10,7 +12,16 @@ import { CustomConfigModule } from './utils/customModules/config';
 import { CustomMongooseModule } from './utils/customModules/mongoose';
 
 @Module({
-    imports: [ShareModule, AuthModule, UserModule, NotificationModule, CustomConfigModule, CustomMongooseModule],
+    imports: [
+        UserModule,
+        AuthModule,
+        ShareModule,
+        NotificationModule,
+        DiaryModule,
+        MetaDataModule,
+        CustomConfigModule,
+        CustomMongooseModule,
+    ],
     controllers: [],
     providers: [],
 })

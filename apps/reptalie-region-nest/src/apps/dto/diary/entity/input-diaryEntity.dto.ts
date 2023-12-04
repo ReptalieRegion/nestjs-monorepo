@@ -1,5 +1,5 @@
 import { Type } from 'class-transformer';
-import { IsArray, IsEnum, IsNumber, IsOptional, IsString, ValidateNested } from 'class-validator';
+import { IsArray, IsDecimal, IsEnum, IsOptional, IsString, ValidateNested } from 'class-validator';
 
 export enum DiaryEntityGenderType {
     Male = 'Male',
@@ -27,7 +27,7 @@ export class BasicWeight {
     readonly date: Date;
 
     @IsOptional()
-    @IsNumber()
+    @IsDecimal()
     readonly weight: number;
 }
 

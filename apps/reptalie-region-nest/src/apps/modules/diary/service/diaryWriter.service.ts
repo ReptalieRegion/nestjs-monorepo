@@ -84,8 +84,6 @@ export class DiaryWriterService {
                 )
                 .exec();
 
-            console.log(result);
-
             if (result.modifiedCount === 0) {
                 throw new InternalServerErrorException('Failed to save diary entity weight.');
             }

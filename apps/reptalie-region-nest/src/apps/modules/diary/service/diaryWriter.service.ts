@@ -7,6 +7,7 @@ import { IUserProfileDTO } from '../../../dto/user/user/response-user.dto';
 import { serviceErrorHandler } from '../../../utils/error/errorHandler';
 import { ImageS3HandlerService, ImageS3HandlerServiceToken } from '../../image/service/imageS3Handler.service';
 import { ImageWriterService, ImageWriterServiceToken } from '../../image/service/imageWriter.service';
+import { NotificationSlackService, NotificationSlackServiceToken } from '../../notification/service/notificationSlack.service';
 import { DiaryEntityRepository } from '../repository/diaryEntity.repository';
 import { DiaryUpdaterService, DiaryUpdaterServiceToken } from './diaryUpdater.service';
 
@@ -27,6 +28,8 @@ export class DiaryWriterService {
 
         @Inject(DiaryUpdaterServiceToken)
         private readonly diaryUpdaterService: DiaryUpdaterService,
+        @Inject(NotificationSlackServiceToken)
+        private readonly notificationSlackService: NotificationSlackService,
     ) {}
 
     /**
@@ -61,6 +64,9 @@ export class DiaryWriterService {
 
             return entity;
         } catch (error) {
+            const caughtError = error as Error;
+            this.notificationSlackService.send(`*[푸시 알림]* 개체 생성 실패\n${caughtError.message}`, '푸시알림-에러-dev');
+
             await this.imageS3HandlerService.deleteImagesFromS3(imageKeys);
             await session.abortTransaction();
             throw error;
@@ -79,7 +85,7 @@ export class DiaryWriterService {
                 .exec();
 
             console.log(result);
-            
+
             if (result.modifiedCount === 0) {
                 throw new InternalServerErrorException('Failed to save diary entity weight.');
             }

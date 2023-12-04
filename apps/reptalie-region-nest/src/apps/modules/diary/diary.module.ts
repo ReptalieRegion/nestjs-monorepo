@@ -2,6 +2,7 @@ import { Module, forwardRef } from '@nestjs/common';
 import { MongooseModuleDiaryEntity } from '../../utils/customModules';
 import { AuthModule } from '../auth/auth.module';
 import { ImageModule } from '../image/image.module';
+import { NotificationModule } from '../notification/notification.module';
 import { UserModule } from '../user/user.module';
 import { DiaryController } from './diary.controller';
 import {
@@ -13,7 +14,13 @@ import {
 import { DiaryEntityRepository } from './repository/diaryEntity.repository';
 
 @Module({
-    imports: [MongooseModuleDiaryEntity, forwardRef(() => AuthModule), forwardRef(() => UserModule), ImageModule],
+    imports: [
+        MongooseModuleDiaryEntity,
+        forwardRef(() => AuthModule),
+        forwardRef(() => UserModule),
+        ImageModule,
+        NotificationModule,
+    ],
     controllers: [DiaryController],
     providers: [
         DiaryEntityRepository,

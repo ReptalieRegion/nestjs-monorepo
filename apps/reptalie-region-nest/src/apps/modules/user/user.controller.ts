@@ -44,7 +44,6 @@ export class UserController {
      *  Post
      *
      */
-
     @Post(':id/follow')
     @HttpCode(HttpStatus.CREATED)
     @UseGuards(JwtAuthGuard)
@@ -66,7 +65,7 @@ export class UserController {
     @UseGuards(JwtAuthGuard)
     async toggleFollow(@AuthUser() user: IUserProfileDTO, @Param('id') follower: string) {
         try {
-            return this.userUpdaterService.toggleFollow(user.id, follower);
+            return this.userUpdaterService.toggleFollow(user?.id, follower);
         } catch (error) {
             controllerErrorHandler(error);
         }
@@ -105,7 +104,7 @@ export class UserController {
     @UseGuards(JwtAuthGuard)
     async deleteFcmToken(@AuthUser() user: IUserProfileDTO) {
         try {
-            this.userDeleterService.fcmTokenDelete(user.id);
+            this.userDeleterService.fcmTokenDelete(user?.id);
         } catch (error) {
             controllerErrorHandler(error);
         }
@@ -147,7 +146,7 @@ export class UserController {
         @Query('pageParam') pageParam: number,
     ) {
         try {
-            return this.userSearcherService.getFollowersInfiniteScroll(user.id, search, pageParam, 10);
+            return this.userSearcherService.getFollowersInfiniteScroll(user?.id, search, pageParam, 10);
         } catch (error) {
             controllerErrorHandler(error);
         }

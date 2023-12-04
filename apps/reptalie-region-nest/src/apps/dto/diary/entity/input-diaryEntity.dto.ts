@@ -1,5 +1,5 @@
 import { Type } from 'class-transformer';
-import { IsArray, IsDate, IsEnum, IsString, ValidateNested } from 'class-validator';
+import { IsEnum, IsOptional, IsString, ValidateNested } from 'class-validator';
 
 export enum DiaryEntityGenderType {
     Male = 'Male',
@@ -9,27 +9,36 @@ export enum DiaryEntityGenderType {
 
 export class BasicVariety {
     @IsString()
-    readonly mainCategory: string;
+    readonly classification: string;
+    
+    @IsString()
+    readonly species: string;
 
     @IsString()
-    readonly subCategory: string;
+    readonly detailedSpecies: string;
 
     @IsString()
     readonly morph: string;
 }
 
 export class BasicWeight {
-    @IsDate()
+    @IsString()
     readonly date: Date;
 
     @IsString()
     readonly weight: string;
 }
 
+export interface IUpdateEntityDTO {
+    readonly name: string;
+}
+
 export class InputDiaryEntityDTO {
+    @IsOptional()
     @IsString()
     readonly userId: string;
 
+    @IsOptional()
     @IsString()
     readonly imageId: string;
 
@@ -43,11 +52,10 @@ export class InputDiaryEntityDTO {
     @Type(() => BasicVariety)
     readonly variety: BasicVariety;
 
-    @IsDate()
+    @IsString()
     readonly hatching: Date;
 
-    @IsArray()
     @ValidateNested()
     @Type(() => BasicWeight)
-    readonly weight: BasicWeight[];
+    readonly weight: BasicWeight;
 }

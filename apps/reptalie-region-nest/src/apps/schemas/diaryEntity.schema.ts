@@ -33,6 +33,9 @@ export class DiaryEntity {
 
     @Prop({ required: true, type: [SchemaTypes.Mixed] })
     weight: BasicWeight[];
+
+    @Prop({ default: false, type: SchemaTypes.Boolean })
+    isDeleted: boolean;
 }
 
 const DiaryEntitySchema = SchemaFactory.createForClass(DiaryEntity);
@@ -47,6 +50,7 @@ DiaryEntitySchema.methods = {
             'variety',
             'hatching',
             'weight',
+            'isDeleted',
             'createdAt',
             'updatedAt',
         ];

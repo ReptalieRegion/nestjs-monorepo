@@ -122,13 +122,14 @@ export class UserSearcherService {
                 .limit(limitSize)
                 .exec();
 
-            const currentUserId = userId ? userId : undefined;
-
             const items = await Promise.all(
                 followers.map(async (entity) => {
+                    const isMine = userId && Object(entity.following)._id.toHexString() === userId;
+                    const currentUserId = isMine ? undefined : userId;
+
                     const userInfo = await this.getUserInfo({ user: entity.following, currentUserId });
 
-                    return { user: { ...userInfo } };
+                    return { user: { ...userInfo, isMine } };
                 }),
             );
 
@@ -163,13 +164,14 @@ export class UserSearcherService {
                 .limit(limitSize)
                 .exec();
 
-            const currentUserId = userId ? userId : undefined;
-
             const items = await Promise.all(
                 followings.map(async (entity) => {
+                    const isMine = userId && Object(entity.follower)._id.toHexString() === userId;
+                    const currentUserId = isMine ? undefined : userId;
+
                     const userInfo = await this.getUserInfo({ user: entity.follower, currentUserId });
 
-                    return { user: { ...userInfo } };
+                    return { user: { ...userInfo, isMine } };
                 }),
             );
 

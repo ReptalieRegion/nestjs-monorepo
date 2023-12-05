@@ -1,5 +1,6 @@
 import { MongooseModule } from '@nestjs/mongoose';
 import { DiaryEntity, DiaryEntitySchema } from '../../schemas/diaryEntity.schema';
+import { DiaryWeight, DiaryWeightSchema } from '../../schemas/diaryWeight.schema';
 import { Follow, FollowSchema } from '../../schemas/follow.schema';
 import { Image, ImageSchema } from '../../schemas/image.schema';
 import { MetaData, MetaDataSchema } from '../../schemas/metaData.schema';
@@ -55,6 +56,8 @@ export const MongooseModuleNotificationAgree = MongooseModule.forFeature([
 
 // diary 관련 모듈
 export const MongooseModuleDiaryEntity = MongooseModule.forFeature([{ name: DiaryEntity.name, schema: DiaryEntitySchema }]);
+
+export const MongooseModuleDiaryWeight = MongooseModule.forFeature([{ name: DiaryWeight.name, schema: DiaryWeightSchema }]);
 
 // metadata 관련 모듈
 export const MongooseModuleMetaData = MongooseModule.forFeature([{ name: MetaData.name, schema: MetaDataSchema }]);

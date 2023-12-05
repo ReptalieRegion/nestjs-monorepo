@@ -32,9 +32,12 @@ export class DiarySearcherService {
                     id: diary.id,
                     name: diary.name,
                     gender: diary.gender,
-                    variety: diary.variety,
+                    variety: {
+                        ...diary.variety,
+                        morph: typeof diary.variety?.morph === 'string' ? [diary.variety?.morph] : diary.variety?.morph,
+                    },
                     hatching: diary.hatching,
-                    weight: diary.weight,
+                    weightUnit: diary.weightUnit,
                     image: { src: `${process.env.AWS_IMAGE_BASEURL}${Object(diary.imageId).imageKey}` },
                 },
             };

@@ -1,10 +1,9 @@
-import { Inject, Injectable, InternalServerErrorException } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { InjectConnection } from '@nestjs/mongoose';
 import mongoose, { ClientSession } from 'mongoose';
-import { BasicWeight, InputDiaryEntityDTO } from '../../../dto/diary/entity/input-diaryEntity.dto';
+import { InputDiaryEntityDTO } from '../../../dto/diary/entity/input-diaryEntity.dto';
 import { ImageType } from '../../../dto/image/input-image.dto';
 import { IUserProfileDTO } from '../../../dto/user/user/response-user.dto';
-import { serviceErrorHandler } from '../../../utils/error/errorHandler';
 import { ImageS3HandlerService, ImageS3HandlerServiceToken } from '../../image/service/imageS3Handler.service';
 import { ImageWriterService, ImageWriterServiceToken } from '../../image/service/imageWriter.service';
 import { NotificationSlackService, NotificationSlackServiceToken } from '../../notification/service/notificationSlack.service';
@@ -75,22 +74,22 @@ export class DiaryWriterService {
         }
     }
 
-    async createEntityWeight(user: IUserProfileDTO, diaryId: string, dto: BasicWeight) {
-        try {
-            const result = await this.diaryEntityRepository
-                .updateOne(
-                    { _id: diaryId, userId: user.id, isDeleted: false },
-                    { $addToSet: { weight: { date: dto.date, weight: dto.weight } } },
-                )
-                .exec();
+    // async createEntityWeight(user: IUserProfileDTO, diaryId: string, dto: BasicWeight) {
+    //     try {
+    //         const result = await this.diaryEntityRepository
+    //             .updateOne(
+    //                 { _id: diaryId, userId: user.id, isDeleted: false },
+    //                 { $addToSet: { weight: { date: dto.date, weight: dto.weight } } },
+    //             )
+    //             .exec();
 
-            if (result.modifiedCount === 0) {
-                throw new InternalServerErrorException('Failed to save diary entity weight.');
-            }
+    //         if (result.modifiedCount === 0) {
+    //             throw new InternalServerErrorException('Failed to save diary entity weight.');
+    //         }
 
-            return { message: 'Success' };
-        } catch (error) {
-            serviceErrorHandler(error, 'Invalid ObjectId for diary entity Id.');
-        }
-    }
+    //         return { message: 'Success' };
+    //     } catch (error) {
+    //         serviceErrorHandler(error, 'Invalid ObjectId for diary entity Id.');
+    //     }
+    // }
 }

@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 
 import mongoose, { Document, SchemaTypes } from 'mongoose';
-import { BasicVariety, BasicWeight, DiaryEntityGenderType } from '../dto/diary/entity/input-diaryEntity.dto';
+import { BasicVariety, DiaryEntityGenderType, DiaryEntityWeightType } from '../dto/diary/entity/input-diaryEntity.dto';
 import { IResponseDiaryEntityDTO } from '../dto/diary/entity/response-diaryEntity.dto';
 import { getCurrentDate } from '../utils/time/time';
 import { Image } from './image.schema';
@@ -28,11 +28,11 @@ export class DiaryEntity {
     @Prop({ required: true, type: SchemaTypes.Mixed })
     variety: BasicVariety;
 
-    @Prop({ required: true, type: SchemaTypes.Date })
+    @Prop({ type: SchemaTypes.Date })
     hatching: Date;
 
-    @Prop({ required: true, type: [SchemaTypes.Mixed] })
-    weight: BasicWeight[];
+    @Prop({ required: true, enum: DiaryEntityWeightType })
+    weightUnit: DiaryEntityWeightType;
 
     @Prop({ default: false, type: SchemaTypes.Boolean })
     isDeleted: boolean;
@@ -49,7 +49,7 @@ DiaryEntitySchema.methods = {
             'gender',
             'variety',
             'hatching',
-            'weight',
+            'weightUnit',
             'isDeleted',
             'createdAt',
             'updatedAt',

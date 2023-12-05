@@ -1,5 +1,4 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { BasicWeight } from '../../../dto/diary/entity/input-diaryEntity.dto';
 import { IUserProfileDTO } from '../../../dto/user/user/response-user.dto';
 import { serviceErrorHandler } from '../../../utils/error/errorHandler';
 import { DiaryEntityRepository } from '../repository/diaryEntity.repository';
@@ -26,22 +25,22 @@ export class DiaryDeleterService {
         }
     }
 
-    async deleteWeight(user: IUserProfileDTO, diaryId: string, dto: BasicWeight) {
-        try {
-            const result = await this.diaryEntityRepository
-                .updateOne(
-                    { _id: diaryId, userId: user.id, isDeleted: false },
-                    { $pull: { weight: { date: dto.date, weight: dto.weight } } },
-                )
-                .exec();
+    // async deleteWeight(user: IUserProfileDTO, diaryId: string, dto: BasicWeight) {
+    //     try {
+    //         const result = await this.diaryEntityRepository
+    //             .updateOne(
+    //                 { _id: diaryId, userId: user.id, isDeleted: false },
+    //                 { $pull: { weight: { date: dto.date, weight: dto.weight } } },
+    //             )
+    //             .exec();
 
-            if (result.modifiedCount === 0) {
-                throw new InternalServerErrorException('Failed to delete diary entity weight.');
-            }
+    //         if (result.modifiedCount === 0) {
+    //             throw new InternalServerErrorException('Failed to delete diary entity weight.');
+    //         }
 
-            return { message: 'Success' };
-        } catch (error) {
-            serviceErrorHandler(error, 'Invalid ObjectId for diary entity Id.');
-        }
-    }
+    //         return { message: 'Success' };
+    //     } catch (error) {
+    //         serviceErrorHandler(error, 'Invalid ObjectId for diary entity Id.');
+    //     }
+    // }
 }

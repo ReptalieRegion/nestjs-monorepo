@@ -15,7 +15,7 @@ import {
     UseInterceptors,
 } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
-import { BasicWeight, IUpdateEntityDTO, InputDiaryEntityDTO } from '../../dto/diary/entity/input-diaryEntity.dto';
+import { IUpdateEntityDTO, InputDiaryEntityDTO } from '../../dto/diary/entity/input-diaryEntity.dto';
 import { IUserProfileDTO } from '../../dto/user/user/response-user.dto';
 import { controllerErrorHandler } from '../../utils/error/errorHandler';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -62,9 +62,11 @@ export class DiaryController {
     @Post('entity/:diaryId/weight')
     @HttpCode(HttpStatus.CREATED)
     @UseGuards(JwtAuthGuard)
-    async createEntityWeight(@AuthUser() user: IUserProfileDTO, @Param('diaryId') diaryId: string, @Body() dto: BasicWeight) {
+    async createEntityWeight(@AuthUser() user: IUserProfileDTO, @Param('diaryId') diaryId: string) {
         try {
-            return this.diaryWriterService.createEntityWeight(user, diaryId, dto);
+            console.log(user, diaryId);
+
+            // return this.diaryWriterService.createEntityWeight(user, diaryId, dto);
         } catch (error) {
             controllerErrorHandler(error);
         }
@@ -105,9 +107,11 @@ export class DiaryController {
     @Delete('entity/:diaryId/weight')
     @HttpCode(HttpStatus.OK)
     @UseGuards(JwtAuthGuard)
-    async deleteWeight(@AuthUser() user: IUserProfileDTO, @Param('diaryId') diaryId: string, @Body() dto: BasicWeight) {
+    async deleteWeight(@AuthUser() user: IUserProfileDTO, @Param('diaryId') diaryId: string) {
         try {
-            return this.diaryDeleterService.deleteWeight(user, diaryId, dto);
+            console.log(user, diaryId);
+
+            // return this.diaryDeleterService.deleteWeight(user, diaryId, dto);
         } catch (error) {
             controllerErrorHandler(error);
         }

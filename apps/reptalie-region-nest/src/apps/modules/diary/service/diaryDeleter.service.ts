@@ -1,23 +1,30 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { IDeleteWeightDTO } from '../../../dto/diary/weight/input-diaryWeight.dto';
 import { IUserProfileDTO } from '../../../dto/user/user/response-user.dto';
 import { serviceErrorHandler } from '../../../utils/error/errorHandler';
 import { DiaryEntityRepository } from '../repository/diaryEntity.repository';
+import { DiaryWeightRepository } from '../repository/diaryWeight.repository';
 
 export const DiaryDeleterServiceToken = 'DiaryDeleterServiceToken';
 
 @Injectable()
 export class DiaryDeleterService {
-    constructor(private readonly diaryEntityRepository: DiaryEntityRepository) {}
+    constructor(
+        private readonly diaryEntityRepository: DiaryEntityRepository,
+        private readonly diaryWeightRepository: DiaryWeightRepository,
+    ) {}
 
-    async deleteEntity(user: IUserProfileDTO, diaryId: string) {
+    async deleteEntity(user: IUserProfileDTO, entityId: string) {
         try {
-            const result = await this.diaryEntityRepository
-                .updateOne({ _id: diaryId, userId: user.id, isDeleted: false }, { $set: { isDeleted: true } })
+            const entityResult = await this.diaryEntityRepository
+                .updateOne({ userId: user.id, _id: entityId, isDeleted: false }, { $set: { isDeleted: true } })
                 .exec();
 
-            if (result.modifiedCount === 0) {
+            if (entityResult.modifiedCount === 0) {
                 throw new InternalServerErrorException('Failed to delete diary entity.');
             }
+
+            await this.diaryWeightRepository.updateMany({ entityId, isDeleted: false }, { $set: { isDeleted: true } }).exec();
 
             return { message: 'Success' };
         } catch (error) {
@@ -25,22 +32,19 @@ export class DiaryDeleterService {
         }
     }
 
-    // async deleteWeight(user: IUserProfileDTO, diaryId: string, dto: BasicWeight) {
-    //     try {
-    //         const result = await this.diaryEntityRepository
-    //             .updateOne(
-    //                 { _id: diaryId, userId: user.id, isDeleted: false },
-    //                 { $pull: { weight: { date: dto.date, weight: dto.weight } } },
-    //             )
-    //             .exec();
+    async deleteWeight(entityId: string, dto: IDeleteWeightDTO) {
+        try {
+            const result = await this.diaryWeightRepository
+                .updateOne({ entityId, date: dto.date, isDeleted: false }, { $set: { isDeleted: true } })
+                .exec();
 
-    //         if (result.modifiedCount === 0) {
-    //             throw new InternalServerErrorException('Failed to delete diary entity weight.');
-    //         }
+            if (result.modifiedCount === 0) {
+                throw new InternalServerErrorException('Failed to delete diary entity weight.');
+            }
 
-    //         return { message: 'Success' };
-    //     } catch (error) {
-    //         serviceErrorHandler(error, 'Invalid ObjectId for diary entity Id.');
-    //     }
-    // }
+            return { message: 'Success' };
+        } catch (error) {
+            serviceErrorHandler(error, 'Invalid ObjectId for diary entity Id.');
+        }
+    }
 }

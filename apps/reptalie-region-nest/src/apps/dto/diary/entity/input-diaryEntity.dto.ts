@@ -54,6 +54,21 @@ export class InputDiaryEntityDTO {
     readonly weightUnit: DiaryEntityWeightType;
 }
 
-export interface IUpdateEntityDTO {
+export class IUpdateEntityDTO {
+    @IsOptional()
+    @IsString()
     readonly name: string;
+
+    @IsOptional()
+    @IsEnum(DiaryEntityGenderType)
+    readonly gender: DiaryEntityGenderType;
+
+    @IsOptional()
+    @ValidateNested()
+    @Type(() => BasicVariety)
+    readonly variety: BasicVariety;
+
+    @IsOptional()
+    @IsString()
+    readonly hatching: Date;
 }

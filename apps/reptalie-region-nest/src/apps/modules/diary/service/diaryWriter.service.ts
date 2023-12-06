@@ -1,13 +1,16 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Inject, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { InjectConnection } from '@nestjs/mongoose';
 import mongoose, { ClientSession } from 'mongoose';
 import { InputDiaryEntityDTO } from '../../../dto/diary/entity/input-diaryEntity.dto';
+import { InputDiaryWeightDTO } from '../../../dto/diary/weight/input-diaryWeight.dto';
 import { ImageType } from '../../../dto/image/input-image.dto';
 import { IUserProfileDTO } from '../../../dto/user/user/response-user.dto';
+import { serviceErrorHandler } from '../../../utils/error/errorHandler';
 import { ImageS3HandlerService, ImageS3HandlerServiceToken } from '../../image/service/imageS3Handler.service';
 import { ImageWriterService, ImageWriterServiceToken } from '../../image/service/imageWriter.service';
 import { NotificationSlackService, NotificationSlackServiceToken } from '../../notification/service/notificationSlack.service';
 import { DiaryEntityRepository } from '../repository/diaryEntity.repository';
+import { DiaryWeightRepository } from '../repository/diaryWeight.repository';
 import { DiaryUpdaterService, DiaryUpdaterServiceToken } from './diaryUpdater.service';
 
 export const DiaryWriterServiceToken = 'DiaryWriterServiceToken';
@@ -19,6 +22,7 @@ export class DiaryWriterService {
         private readonly connection: mongoose.Connection,
 
         private readonly diaryEntityRepository: DiaryEntityRepository,
+        private readonly diaryWeightRepository: DiaryWeightRepository,
 
         @Inject(ImageS3HandlerServiceToken)
         private readonly imageS3HandlerService: ImageS3HandlerService,
@@ -55,6 +59,10 @@ export class DiaryWriterService {
                 session,
             );
 
+            if (!entity) {
+                throw new InternalServerErrorException('Failed to save diary entity.');
+            }
+
             imageKeys = await this.imageS3HandlerService.uploadToS3(files);
             const [image] = await this.imageWriterService.createImage(entity.id as string, imageKeys, ImageType.Diary, session);
             await this.diaryUpdaterService.updateImageId(entity.id as string, image.id as string, session);
@@ -74,22 +82,36 @@ export class DiaryWriterService {
         }
     }
 
-    // async createEntityWeight(user: IUserProfileDTO, diaryId: string, dto: BasicWeight) {
-    //     try {
-    //         const result = await this.diaryEntityRepository
-    //             .updateOne(
-    //                 { _id: diaryId, userId: user.id, isDeleted: false },
-    //                 { $addToSet: { weight: { date: dto.date, weight: dto.weight } } },
-    //             )
-    //             .exec();
+    async createWeight(user: IUserProfileDTO, entityId: string, dto: InputDiaryWeightDTO) {
+        try {
+            const isExistsEntity = await this.diaryEntityRepository
+                .findOne({ _id: entityId, userId: user.id, isDeleted: false })
+                .exec();
 
-    //         if (result.modifiedCount === 0) {
-    //             throw new InternalServerErrorException('Failed to save diary entity weight.');
-    //         }
+            if (!isExistsEntity) {
+                throw new NotFoundException('Not found for the specified diary entity.');
+            }
 
-    //         return { message: 'Success' };
-    //     } catch (error) {
-    //         serviceErrorHandler(error, 'Invalid ObjectId for diary entity Id.');
-    //     }
-    // }
+            try {
+                const weight = await this.diaryWeightRepository.createWeight({ ...dto, entityId });
+
+                if (!weight) {
+                    throw new InternalServerErrorException('Failed to save diary weight.');
+                }
+            } catch (error) {
+                throw new HttpException(
+                    {
+                        statusCode: HttpStatus.EXPECTATION_FAILED,
+                        message: 'diaryId and date should be unique values.',
+                        error: 'Expectation Failed',
+                    },
+                    HttpStatus.EXPECTATION_FAILED,
+                );
+            }
+
+            return { message: 'Success' };
+        } catch (error) {
+            serviceErrorHandler(error, 'Invalid ObjectId for diary entity Id.');
+        }
+    }
 }

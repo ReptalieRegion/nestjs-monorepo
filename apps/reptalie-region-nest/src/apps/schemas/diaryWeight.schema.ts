@@ -25,6 +25,7 @@ export class DiaryWeight {
 }
 
 const DiaryWeightSchema = SchemaFactory.createForClass(DiaryWeight);
+DiaryWeightSchema.index({ entityId: 1, date: 1 }, { unique: true });
 DiaryWeightSchema.methods = {
     Mapper(): Partial<IResponseDiaryWeightDTO> {
         const fields: Array<keyof IResponseDiaryWeightDTO> = [

@@ -16,6 +16,7 @@ import {
 } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { IUpdateEntityDTO, InputDiaryEntityDTO } from '../../dto/diary/entity/input-diaryEntity.dto';
+import { IDeleteWeightDTO, IUpdateWeightDTO, InputDiaryWeightDTO } from '../../dto/diary/weight/input-diaryWeight.dto';
 import { IUserProfileDTO } from '../../dto/user/user/response-user.dto';
 import { controllerErrorHandler } from '../../utils/error/errorHandler';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -59,14 +60,16 @@ export class DiaryController {
         }
     }
 
-    @Post('entity/:diaryId/weight')
+    @Post('entity/:entityId/weight')
     @HttpCode(HttpStatus.CREATED)
     @UseGuards(JwtAuthGuard)
-    async createEntityWeight(@AuthUser() user: IUserProfileDTO, @Param('diaryId') diaryId: string) {
+    async createWeight(
+        @AuthUser() user: IUserProfileDTO,
+        @Param('entityId') entityId: string,
+        @Body() dto: InputDiaryWeightDTO,
+    ) {
         try {
-            console.log(user, diaryId);
-
-            // return this.diaryWriterService.createEntityWeight(user, diaryId, dto);
+            return this.diaryWriterService.createWeight(user, entityId, dto);
         } catch (error) {
             controllerErrorHandler(error);
         }
@@ -77,12 +80,23 @@ export class DiaryController {
      *  Put
      *
      */
-    @Put('entity/:diaryId')
+    @Put('entity/:entityId')
     @HttpCode(HttpStatus.OK)
     @UseGuards(JwtAuthGuard)
-    async updateEntity(@AuthUser() user: IUserProfileDTO, @Param('diaryId') diaryId: string, @Body() dto: IUpdateEntityDTO) {
+    async updateEntity(@AuthUser() user: IUserProfileDTO, @Param('entityId') entityId: string, @Body() dto: IUpdateEntityDTO) {
         try {
-            return this.diaryUpdaterService.updateEntity(user, diaryId, dto);
+            return this.diaryUpdaterService.updateEntity(user, entityId, dto);
+        } catch (error) {
+            controllerErrorHandler(error);
+        }
+    }
+
+    @Put('entity/weight/:weightId')
+    @HttpCode(HttpStatus.OK)
+    @UseGuards(JwtAuthGuard)
+    async updateWeight(@Param('weightId') weightId: string, @Body() dto: IUpdateWeightDTO) {
+        try {
+            return this.diaryUpdaterService.updateWeight(weightId, dto);
         } catch (error) {
             controllerErrorHandler(error);
         }
@@ -93,25 +107,23 @@ export class DiaryController {
      *  Delete
      *
      */
-    @Delete('entity/:diaryId')
+    @Delete('entity/:entityId')
     @HttpCode(HttpStatus.OK)
     @UseGuards(JwtAuthGuard)
-    async deleteEntity(@AuthUser() user: IUserProfileDTO, @Param('diaryId') diaryId: string) {
+    async deleteEntity(@AuthUser() user: IUserProfileDTO, @Param('entityId') entityId: string) {
         try {
-            return this.diaryDeleterService.deleteEntity(user, diaryId);
+            return this.diaryDeleterService.deleteEntity(user, entityId);
         } catch (error) {
             controllerErrorHandler(error);
         }
     }
 
-    @Delete('entity/:diaryId/weight')
+    @Delete('entity/:entityId/weight')
     @HttpCode(HttpStatus.OK)
     @UseGuards(JwtAuthGuard)
-    async deleteWeight(@AuthUser() user: IUserProfileDTO, @Param('diaryId') diaryId: string) {
+    async deleteWeight(@Param('entityId') entityId: string, @Body() dto: IDeleteWeightDTO) {
         try {
-            console.log(user, diaryId);
-
-            // return this.diaryDeleterService.deleteWeight(user, diaryId, dto);
+            return this.diaryDeleterService.deleteWeight(entityId, dto);
         } catch (error) {
             controllerErrorHandler(error);
         }

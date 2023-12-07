@@ -91,12 +91,12 @@ export class DiaryController {
         }
     }
 
-    @Put('entity/weight/:weightId')
+    @Put('entity/:entityId/weight')
     @HttpCode(HttpStatus.OK)
     @UseGuards(JwtAuthGuard)
-    async updateWeight(@Param('weightId') weightId: string, @Body() dto: IUpdateWeightDTO) {
+    async updateWeight(@Param('entityId') entityId: string, @Body() dto: IUpdateWeightDTO) {
         try {
-            return this.diaryUpdaterService.updateWeight(weightId, dto);
+            return this.diaryUpdaterService.updateWeight(entityId, dto);
         } catch (error) {
             controllerErrorHandler(error);
         }
@@ -140,6 +140,17 @@ export class DiaryController {
     async getEntityInfiniteScroll(@AuthUser() user: IUserProfileDTO, @Query('pageParam') pageParam: number) {
         try {
             return this.diarySearcherService.getEntityInfiniteScroll(user.id, pageParam, 10);
+        } catch (error) {
+            controllerErrorHandler(error);
+        }
+    }
+
+    @Get('entity/:entityId/weight/list')
+    @HttpCode(HttpStatus.OK)
+    @UseGuards(JwtAuthGuard)
+    async getWeightInfiniteScroll(@Param('entityId') entityId: string, @Query('pageParam') pageParam: number) {
+        try {
+            return this.diarySearcherService.getWeightInfiniteScroll(entityId, pageParam, 10);
         } catch (error) {
             controllerErrorHandler(error);
         }

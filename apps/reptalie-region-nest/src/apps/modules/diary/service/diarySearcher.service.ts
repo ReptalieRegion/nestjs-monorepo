@@ -1,11 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { DiaryEntityRepository } from '../repository/diaryEntity.repository';
+import { DiaryWeightRepository } from '../repository/diaryWeight.repository';
 
 export const DiarySearcherServiceToken = 'DiarySearcherServiceToken';
 
 @Injectable()
 export class DiarySearcherService {
-    constructor(private readonly diaryEntityRepository: DiaryEntityRepository) {}
+    constructor(
+        private readonly diaryEntityRepository: DiaryEntityRepository,
+        private readonly diaryWeightRepository: DiaryWeightRepository,
+    ) {}
 
     /**
      * 개체에 대한 정보를 무한 스크롤로 가져옵니다.
@@ -44,6 +48,29 @@ export class DiarySearcherService {
         });
 
         const isLastPage = entities.length < limitSize;
+        const nextPage = isLastPage ? undefined : pageParam + 1;
+
+        return { items, nextPage };
+    }
+
+    async getWeightInfiniteScroll(entityId: string, pageParam: number, limitSize: number) {
+        const weights = await this.diaryWeightRepository
+            .find({ entityId, isDeleted: false })
+            .sort({ createdAt: -1 })
+            .skip(pageParam * limitSize)
+            .limit(limitSize)
+            .exec();
+
+        const items = weights.map((entity) => {
+            const weight = entity.Mapper();
+
+            return {
+                date: weight.date,
+                weight: weight.weight,
+            };
+        });
+
+        const isLastPage = weights.length < limitSize;
         const nextPage = isLastPage ? undefined : pageParam + 1;
 
         return { items, nextPage };

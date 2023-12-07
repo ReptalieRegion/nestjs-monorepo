@@ -13,6 +13,7 @@ export class InputDiaryWeightDTO {
 }
 
 export interface IUpdateWeightDTO {
+    readonly date: Date;
     readonly weight: number;
 }
 

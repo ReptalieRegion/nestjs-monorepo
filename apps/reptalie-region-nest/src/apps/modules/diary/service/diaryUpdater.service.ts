@@ -32,10 +32,10 @@ export class DiaryUpdaterService {
         }
     }
 
-    async updateWeight(weightId: string, dto: IUpdateWeightDTO) {
+    async updateWeight(entityId: string, dto: IUpdateWeightDTO) {
         try {
             const result = await this.diaryWeightRepository
-                .updateOne({ _id: weightId, isDeleted: false }, { $set: { ...dto } })
+                .updateOne({ entityId, date: dto.date, isDeleted: false }, { $set: { weight: dto.weight } })
                 .exec();
 
             if (result.modifiedCount === 0) {

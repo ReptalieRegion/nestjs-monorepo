@@ -57,6 +57,10 @@ export class InputDiaryEntityDTO {
 export class IUpdateEntityDTO {
     @IsOptional()
     @IsString()
+    readonly imageId: string;
+
+    @IsOptional()
+    @IsString()
     readonly name: string;
 
     @IsOptional()

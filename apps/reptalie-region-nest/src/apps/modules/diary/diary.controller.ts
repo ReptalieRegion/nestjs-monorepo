@@ -82,10 +82,16 @@ export class DiaryController {
      */
     @Put('entity/:entityId')
     @HttpCode(HttpStatus.OK)
+    @UseInterceptors(FilesInterceptor('files'))
     @UseGuards(JwtAuthGuard)
-    async updateEntity(@AuthUser() user: IUserProfileDTO, @Param('entityId') entityId: string, @Body() dto: IUpdateEntityDTO) {
+    async updateEntity(
+        @AuthUser() user: IUserProfileDTO,
+        @Param('entityId') entityId: string,
+        @Body() dto: IUpdateEntityDTO,
+        @UploadedFiles() files?: Express.Multer.File[],
+    ) {
         try {
-            return this.diaryUpdaterService.updateEntity(user, entityId, dto);
+            return this.diaryUpdaterService.updateEntity(user, entityId, dto, files);
         } catch (error) {
             controllerErrorHandler(error);
         }

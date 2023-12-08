@@ -56,7 +56,7 @@ export class DiarySearcherService {
     async getWeightInfiniteScroll(entityId: string, pageParam: number, limitSize: number) {
         const weights = await this.diaryWeightRepository
             .find({ entityId, isDeleted: false })
-            .sort({ createdAt: -1 })
+            .sort({ date: -1 })
             .skip(pageParam * limitSize)
             .limit(limitSize)
             .exec();
@@ -66,7 +66,7 @@ export class DiarySearcherService {
 
             return {
                 date: weight.date,
-                weight: weight.weight,
+                weight: weight.weight
             };
         });
 

@@ -1,38 +1,48 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 
 import mongoose, { Document, SchemaTypes } from 'mongoose';
-import { IResponseDiaryWeightDTO } from '../dto/diary/weight/response-diaryWeight.dto';
+import { IResponseDiaryCalendarDTO } from '../dto/diary/calendar/response-diaryCalendar.dto';
+import { DiaryEntityGenderType } from '../dto/diary/entity/input-diaryEntity.dto';
 import { getCurrentDate } from '../utils/time/time';
 import { DiaryEntity } from './diaryEntity.schema';
+import { User } from './user.schema';
 
-export interface DiaryWeightDocument extends DiaryWeight, Document {
-    Mapper(): Partial<IResponseDiaryWeightDTO>;
+export interface DiaryCalendarDocument extends DiaryCalendar, Document {
+    Mapper(): Partial<IResponseDiaryCalendarDTO>;
 }
 
 @Schema({ versionKey: false, timestamps: { currentTime: getCurrentDate } })
-export class DiaryWeight {
-    @Prop({ index: true, ref: 'DiaryEntity', type: SchemaTypes.ObjectId })
+export class DiaryCalendar {
+    @Prop({ index: true, ref: 'User', type: SchemaTypes.ObjectId })
+    userId: User;
+
+    @Prop({ ref: 'DiaryEntity', type: SchemaTypes.ObjectId })
     entityId: DiaryEntity;
+
+    @Prop({ required: true, type: SchemaTypes.String })
+    memo: string;
+
+    @Prop({ required: true, type: [{ type: String, enum: DiaryEntityGenderType }] })
+    markType: DiaryEntityGenderType[];
 
     @Prop({ required: true, type: SchemaTypes.Date })
     date: Date;
-
-    @Prop({ required: true, type: SchemaTypes.Number })
-    weight: number;
 
     @Prop({ default: false, type: SchemaTypes.Boolean })
     isDeleted: boolean;
 }
 
-const DiaryWeightSchema = SchemaFactory.createForClass(DiaryWeight);
-DiaryWeightSchema.index({ entityId: 1, date: 1 }, { unique: true });
-DiaryWeightSchema.methods = {
-    Mapper(): Partial<IResponseDiaryWeightDTO> {
-        const fields: Array<keyof IResponseDiaryWeightDTO> = [
+const DiaryCalendarSchema = SchemaFactory.createForClass(DiaryCalendar);
+DiaryCalendarSchema.index({ entityId: 1, userId: 1 });
+DiaryCalendarSchema.methods = {
+    Mapper(): Partial<IResponseDiaryCalendarDTO> {
+        const fields: Array<keyof IResponseDiaryCalendarDTO> = [
             'id',
+            'userId',
             'entityId',
+            'memo',
+            'markType',
             'date',
-            'weight',
             'isDeleted',
             'createdAt',
             'updatedAt',
@@ -40,7 +50,7 @@ DiaryWeightSchema.methods = {
 
         const viewFields = fields.reduce((prev, field) => {
             const value = this.get(field);
-            
+
             if (value === undefined) {
                 return prev;
             }
@@ -60,4 +70,4 @@ DiaryWeightSchema.methods = {
     },
 };
 
-export { DiaryWeightSchema };
+export { DiaryCalendarSchema };

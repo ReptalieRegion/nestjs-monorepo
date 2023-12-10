@@ -1,5 +1,5 @@
 import { Module, forwardRef } from '@nestjs/common';
-import { MongooseModuleDiaryEntity, MongooseModuleDiaryWeight } from '../../utils/customModules';
+import { MongooseModuleDiaryCalendar, MongooseModuleDiaryEntity, MongooseModuleDiaryWeight } from '../../utils/customModules';
 import { AuthModule } from '../auth/auth.module';
 import { ImageModule } from '../image/image.module';
 import { NotificationModule } from '../notification/notification.module';
@@ -11,6 +11,7 @@ import {
     DiaryUpdaterServiceProvider,
     DiaryWriterServiceProvider,
 } from './diary.provider';
+import { DiaryCalendarRepository } from './repository/diaryCalendar.repository';
 import { DiaryEntityRepository } from './repository/diaryEntity.repository';
 import { DiaryWeightRepository } from './repository/diaryWeight.repository';
 
@@ -18,6 +19,7 @@ import { DiaryWeightRepository } from './repository/diaryWeight.repository';
     imports: [
         MongooseModuleDiaryEntity,
         MongooseModuleDiaryWeight,
+        MongooseModuleDiaryCalendar,
         forwardRef(() => AuthModule),
         forwardRef(() => UserModule),
         ImageModule,
@@ -27,6 +29,7 @@ import { DiaryWeightRepository } from './repository/diaryWeight.repository';
     providers: [
         DiaryEntityRepository,
         DiaryWeightRepository,
+        DiaryCalendarRepository,
         DiaryWriterServiceProvider,
         DiaryDeleterServiceProvider,
         DiaryUpdaterServiceProvider,

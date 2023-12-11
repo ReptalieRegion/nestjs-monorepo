@@ -1,6 +1,7 @@
 import { HttpException, HttpStatus, Inject, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { InjectConnection } from '@nestjs/mongoose';
 import mongoose, { ClientSession } from 'mongoose';
+import { InputDiaryCalendarDTO } from '../../../dto/diary/calendar/input-diaryCalendar.dto';
 import { InputDiaryEntityDTO } from '../../../dto/diary/entity/input-diaryEntity.dto';
 import { InputDiaryWeightDTO } from '../../../dto/diary/weight/input-diaryWeight.dto';
 import { ImageType } from '../../../dto/image/input-image.dto';
@@ -9,6 +10,7 @@ import { serviceErrorHandler } from '../../../utils/error/errorHandler';
 import { ImageS3HandlerService, ImageS3HandlerServiceToken } from '../../image/service/imageS3Handler.service';
 import { ImageWriterService, ImageWriterServiceToken } from '../../image/service/imageWriter.service';
 import { NotificationSlackService, NotificationSlackServiceToken } from '../../notification/service/notificationSlack.service';
+import { DiaryCalendarRepository } from '../repository/diaryCalendar.repository';
 import { DiaryEntityRepository } from '../repository/diaryEntity.repository';
 import { DiaryWeightRepository } from '../repository/diaryWeight.repository';
 import { DiaryUpdaterService, DiaryUpdaterServiceToken } from './diaryUpdater.service';
@@ -23,6 +25,7 @@ export class DiaryWriterService {
 
         private readonly diaryEntityRepository: DiaryEntityRepository,
         private readonly diaryWeightRepository: DiaryWeightRepository,
+        private readonly diaryCalendarRepository: DiaryCalendarRepository,
 
         @Inject(ImageS3HandlerServiceToken)
         private readonly imageS3HandlerService: ImageS3HandlerService,
@@ -113,5 +116,23 @@ export class DiaryWriterService {
         } catch (error) {
             serviceErrorHandler(error, 'Invalid ObjectId for diary entity Id.');
         }
+    }
+
+    async createCalendar(user: IUserProfileDTO, dto: InputDiaryCalendarDTO) {
+        const isExistsEntity = await this.diaryEntityRepository
+            .findOne({ _id: dto.entityId, userId: user.id, isDeleted: false })
+            .exec();
+
+        if (!isExistsEntity) {
+            throw new NotFoundException('Not found for the specified diary entity.');
+        }
+
+        const calendar = await this.diaryCalendarRepository.createCalendar({ ...dto, userId: user.id });
+
+        if (!calendar) {
+            throw new InternalServerErrorException('Failed to save diary calendar.');
+        }
+
+        return { message: 'Success' };
     }
 }

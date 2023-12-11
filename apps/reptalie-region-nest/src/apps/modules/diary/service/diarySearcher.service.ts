@@ -1,4 +1,6 @@
 import { Injectable } from '@nestjs/common';
+import { startAndEndDate } from '../../../utils/time/time';
+import { DiaryCalendarRepository } from '../repository/diaryCalendar.repository';
 import { DiaryEntityRepository } from '../repository/diaryEntity.repository';
 import { DiaryWeightRepository } from '../repository/diaryWeight.repository';
 
@@ -9,6 +11,7 @@ export class DiarySearcherService {
     constructor(
         private readonly diaryEntityRepository: DiaryEntityRepository,
         private readonly diaryWeightRepository: DiaryWeightRepository,
+        private readonly diaryCalendarRepository: DiaryCalendarRepository,
     ) {}
 
     /**
@@ -66,11 +69,47 @@ export class DiarySearcherService {
 
             return {
                 date: weight.date,
-                weight: weight.weight
+                weight: weight.weight,
             };
         });
 
         const isLastPage = weights.length < limitSize;
+        const nextPage = isLastPage ? undefined : pageParam + 1;
+
+        return { items, nextPage };
+    }
+
+    async getCalendarInfiniteScroll(userId: string, date: Date, pageParam: number, limitSize: number) {
+        const { startDate, endDate } = startAndEndDate(date);
+
+        const calendars = await this.diaryCalendarRepository
+            .find({ userId, isDeleted: false, date: { $gte: startDate, $lt: endDate } })
+            .populate({
+                path: 'entityId',
+                select: 'name imageId',
+                populate: { path: 'imageId', model: 'Image', select: 'imageKey -_id' },
+            })
+            .sort({ date: -1 })
+            .skip(pageParam * limitSize)
+            .limit(limitSize)
+            .exec();
+
+        const items = calendars.map((entity) => {
+            const calendar = entity.Mapper();
+            const entityInfo = Object(calendar.entityId).Mapper();
+
+            return {
+                id: calendar.id,
+                entityId: entityInfo.id,
+                name: entityInfo.name,
+                memo: calendar.memo,
+                markType: calendar.markType,
+                date: calendar.date,
+                image: { src: `${process.env.AWS_IMAGE_BASEURL}${entityInfo.imageId.imageKey}` },
+            };
+        });
+
+        const isLastPage = calendars.length < limitSize;
         const nextPage = isLastPage ? undefined : pageParam + 1;
 
         return { items, nextPage };

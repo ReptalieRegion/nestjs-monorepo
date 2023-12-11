@@ -1,13 +1,13 @@
 import { IsEnum, IsOptional, IsString } from 'class-validator';
 
 export enum DiaryCalendarMarkType {
-    '먹이급여' = '먹이급여',
-    '청소' = '청소',
-    '탈피' = '탈피',
-    '메이팅' = '메이팅',
-    '산란' = '산란',
-    '온욕' = '온욕',
-    '배변' = '배변',
+    Meal = '먹이급여',
+    Cleaning = '청소',
+    Molting = '탈피',
+    Mating = '메이팅',
+    LayingEggs = '산란',
+    WarmBath = '온욕',
+    Elimination = '배변',
 }
 
 export class InputDiaryCalendarDTO {
@@ -15,15 +15,25 @@ export class InputDiaryCalendarDTO {
     @IsString()
     readonly userId: string;
 
-    @IsOptional()
     @IsString()
     readonly entityId: string;
 
     @IsString()
     readonly memo: string;
 
-    @IsEnum(DiaryCalendarMarkType)
-    readonly markType: DiaryCalendarMarkType;
+    @IsEnum(DiaryCalendarMarkType, { each: true })
+    readonly markType: DiaryCalendarMarkType[];
+
+    @IsString()
+    readonly date: Date;
+}
+
+export class IUpdateCalendarDTO {
+    @IsString()
+    readonly memo: string;
+
+    @IsEnum(DiaryCalendarMarkType, { each: true })
+    readonly markType: DiaryCalendarMarkType[];
 
     @IsString()
     readonly date: Date;

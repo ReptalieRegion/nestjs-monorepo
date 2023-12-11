@@ -6,6 +6,7 @@ import { ImageType } from '../../../dto/image/input-image.dto';
 import { IUserProfileDTO } from '../../../dto/user/user/response-user.dto';
 import { serviceErrorHandler } from '../../../utils/error/errorHandler';
 import { ImageDeleterService, ImageDeleterServiceToken } from '../../image/service/imageDeleter.service';
+import { DiaryCalendarRepository } from '../repository/diaryCalendar.repository';
 import { DiaryEntityRepository } from '../repository/diaryEntity.repository';
 import { DiaryWeightRepository } from '../repository/diaryWeight.repository';
 
@@ -19,6 +20,7 @@ export class DiaryDeleterService {
 
         private readonly diaryEntityRepository: DiaryEntityRepository,
         private readonly diaryWeightRepository: DiaryWeightRepository,
+        private readonly diaryCalendarRepository: DiaryCalendarRepository,
 
         @Inject(ImageDeleterServiceToken)
         private readonly imageDeleterService: ImageDeleterService,
@@ -66,6 +68,22 @@ export class DiaryDeleterService {
             return { message: 'Success' };
         } catch (error) {
             serviceErrorHandler(error, 'Invalid ObjectId for diary entity Id.');
+        }
+    }
+
+    async deleteCalendar(calendarId: string) {
+        try {
+            const result = await this.diaryCalendarRepository
+                .updateOne({ _id: calendarId, isDeleted: false }, { $set: { isDeleted: true } })
+                .exec();
+
+            if (result.modifiedCount === 0) {
+                throw new InternalServerErrorException('Failed to delete diary entity calendar.');
+            }
+
+            return { message: 'Success' };
+        } catch (error) {
+            serviceErrorHandler(error, 'Invalid ObjectId for diary calendar Id.');
         }
     }
 }

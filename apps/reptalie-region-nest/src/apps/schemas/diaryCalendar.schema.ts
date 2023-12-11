@@ -1,8 +1,8 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 
 import mongoose, { Document, SchemaTypes } from 'mongoose';
+import { DiaryCalendarMarkType } from '../dto/diary/calendar/input-diaryCalendar.dto';
 import { IResponseDiaryCalendarDTO } from '../dto/diary/calendar/response-diaryCalendar.dto';
-import { DiaryEntityGenderType } from '../dto/diary/entity/input-diaryEntity.dto';
 import { getCurrentDate } from '../utils/time/time';
 import { DiaryEntity } from './diaryEntity.schema';
 import { User } from './user.schema';
@@ -22,8 +22,8 @@ export class DiaryCalendar {
     @Prop({ required: true, type: SchemaTypes.String })
     memo: string;
 
-    @Prop({ required: true, type: [{ type: String, enum: DiaryEntityGenderType }] })
-    markType: DiaryEntityGenderType[];
+    @Prop({ required: true, type: [{ type: String, enum: DiaryCalendarMarkType }] })
+    markType: DiaryCalendarMarkType[];
 
     @Prop({ required: true, type: SchemaTypes.Date })
     date: Date;
@@ -33,7 +33,7 @@ export class DiaryCalendar {
 }
 
 const DiaryCalendarSchema = SchemaFactory.createForClass(DiaryCalendar);
-DiaryCalendarSchema.index({ entityId: 1, userId: 1 });
+DiaryCalendarSchema.index({ date: 1, userId: 1 });
 DiaryCalendarSchema.methods = {
     Mapper(): Partial<IResponseDiaryCalendarDTO> {
         const fields: Array<keyof IResponseDiaryCalendarDTO> = [

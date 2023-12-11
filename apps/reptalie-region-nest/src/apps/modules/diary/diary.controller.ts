@@ -15,6 +15,7 @@ import {
     UseInterceptors,
 } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
+import { IUpdateCalendarDTO, InputDiaryCalendarDTO } from '../../dto/diary/calendar/input-diaryCalendar.dto';
 import { IUpdateEntityDTO, InputDiaryEntityDTO } from '../../dto/diary/entity/input-diaryEntity.dto';
 import { IDeleteWeightDTO, IUpdateWeightDTO, InputDiaryWeightDTO } from '../../dto/diary/weight/input-diaryWeight.dto';
 import { IUserProfileDTO } from '../../dto/user/user/response-user.dto';
@@ -55,6 +56,17 @@ export class DiaryController {
     ) {
         try {
             return this.diaryWriterService.createEntity(user, files, dto);
+        } catch (error) {
+            controllerErrorHandler(error);
+        }
+    }
+
+    @Post('calendar')
+    @HttpCode(HttpStatus.CREATED)
+    @UseGuards(JwtAuthGuard)
+    async createCalendar(@AuthUser() user: IUserProfileDTO, @Body() dto: InputDiaryCalendarDTO) {
+        try {
+            return this.diaryWriterService.createCalendar(user, dto);
         } catch (error) {
             controllerErrorHandler(error);
         }
@@ -108,6 +120,17 @@ export class DiaryController {
         }
     }
 
+    @Put('calendar/:calendarId')
+    @HttpCode(HttpStatus.OK)
+    @UseGuards(JwtAuthGuard)
+    async updateCalendar(@Param('calendarId') calendarId: string, @Body() dto: IUpdateCalendarDTO) {
+        try {
+            return this.diaryUpdaterService.updateCalendar(calendarId, dto);
+        } catch (error) {
+            controllerErrorHandler(error);
+        }
+    }
+
     /**
      *
      *  Delete
@@ -135,6 +158,17 @@ export class DiaryController {
         }
     }
 
+    @Delete('calendar/:calendarId')
+    @HttpCode(HttpStatus.OK)
+    @UseGuards(JwtAuthGuard)
+    async deleteCalendar(@Param('calendarId') calendarId: string) {
+        try {
+            return this.diaryDeleterService.deleteCalendar(calendarId);
+        } catch (error) {
+            controllerErrorHandler(error);
+        }
+    }
+
     /**
      *
      *  Get
@@ -157,6 +191,21 @@ export class DiaryController {
     async getWeightInfiniteScroll(@Param('entityId') entityId: string, @Query('pageParam') pageParam: number) {
         try {
             return this.diarySearcherService.getWeightInfiniteScroll(entityId, pageParam, 10);
+        } catch (error) {
+            controllerErrorHandler(error);
+        }
+    }
+
+    @Get('calendar/list')
+    @HttpCode(HttpStatus.OK)
+    @UseGuards(JwtAuthGuard)
+    async getCalendarInfiniteScroll(
+        @AuthUser() user: IUserProfileDTO,
+        @Query('pageParam') pageParam: number,
+        @Query('date') date: Date,
+    ) {
+        try {
+            return this.diarySearcherService.getCalendarInfiniteScroll(user.id, date, pageParam, 10);
         } catch (error) {
             controllerErrorHandler(error);
         }

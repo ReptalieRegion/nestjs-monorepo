@@ -61,17 +61,6 @@ export class DiaryController {
         }
     }
 
-    @Post('calendar')
-    @HttpCode(HttpStatus.CREATED)
-    @UseGuards(JwtAuthGuard)
-    async createCalendar(@AuthUser() user: IUserProfileDTO, @Body() dto: InputDiaryCalendarDTO) {
-        try {
-            return this.diaryWriterService.createCalendar(user, dto);
-        } catch (error) {
-            controllerErrorHandler(error);
-        }
-    }
-
     @Post('entity/:entityId/weight')
     @HttpCode(HttpStatus.CREATED)
     @UseGuards(JwtAuthGuard)
@@ -82,6 +71,17 @@ export class DiaryController {
     ) {
         try {
             return this.diaryWriterService.createWeight(user, entityId, dto);
+        } catch (error) {
+            controllerErrorHandler(error);
+        }
+    }
+
+    @Post('calendar')
+    @HttpCode(HttpStatus.CREATED)
+    @UseGuards(JwtAuthGuard)
+    async createCalendar(@AuthUser() user: IUserProfileDTO, @Body() dto: InputDiaryCalendarDTO) {
+        try {
+            return this.diaryWriterService.createCalendar(user, dto);
         } catch (error) {
             controllerErrorHandler(error);
         }
@@ -199,13 +199,9 @@ export class DiaryController {
     @Get('calendar/list')
     @HttpCode(HttpStatus.OK)
     @UseGuards(JwtAuthGuard)
-    async getCalendarInfiniteScroll(
-        @AuthUser() user: IUserProfileDTO,
-        @Query('pageParam') pageParam: number,
-        @Query('date') date: Date,
-    ) {
+    async getCalendarInfiniteScroll(@AuthUser() user: IUserProfileDTO, @Query('date') date: Date) {
         try {
-            return this.diarySearcherService.getCalendarInfiniteScroll(user.id, date, pageParam, 10);
+            return this.diarySearcherService.getCalendarInfo(user.id, date);
         } catch (error) {
             controllerErrorHandler(error);
         }

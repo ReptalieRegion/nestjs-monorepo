@@ -79,7 +79,7 @@ export class DiarySearcherService {
         return { items, nextPage };
     }
 
-    async getCalendarInfiniteScroll(userId: string, date: Date, pageParam: number, limitSize: number) {
+    async getCalendarInfo(userId: string, date: Date) {
         const { startDate, endDate } = startAndEndDate(date);
 
         const calendars = await this.diaryCalendarRepository
@@ -90,8 +90,6 @@ export class DiarySearcherService {
                 populate: { path: 'imageId', model: 'Image', select: 'imageKey -_id' },
             })
             .sort({ date: -1 })
-            .skip(pageParam * limitSize)
-            .limit(limitSize)
             .exec();
 
         const items = calendars.map((entity) => {
@@ -109,9 +107,6 @@ export class DiarySearcherService {
             };
         });
 
-        const isLastPage = calendars.length < limitSize;
-        const nextPage = isLastPage ? undefined : pageParam + 1;
-
-        return { items, nextPage };
+        return { items };
     }
 }

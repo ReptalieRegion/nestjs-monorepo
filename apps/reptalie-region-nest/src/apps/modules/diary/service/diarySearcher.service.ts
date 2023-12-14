@@ -97,13 +97,17 @@ export class DiarySearcherService {
             const entityInfo = Object(calendar.entityId).Mapper();
 
             return {
-                id: calendar.id,
-                entityId: entityInfo.id,
-                name: entityInfo.name,
-                memo: calendar.memo,
-                markType: calendar.markType,
-                date: calendar.date,
-                image: { src: `${process.env.AWS_IMAGE_BASEURL}${entityInfo.imageId.imageKey}` },
+                calendar: {
+                    id: calendar.id,
+                    memo: calendar.memo,
+                    markType: calendar.markType,
+                    date: calendar.date,
+                },
+                entity: {
+                    id: entityInfo.id,
+                    name: entityInfo.name,
+                    image: { src: `${process.env.AWS_IMAGE_BASEURL}${entityInfo.imageId.imageKey}` },
+                },
             };
         });
 

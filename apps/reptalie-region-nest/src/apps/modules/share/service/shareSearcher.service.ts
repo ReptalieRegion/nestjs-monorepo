@@ -270,13 +270,14 @@ export class ShareSearcherService {
                 .limit(limitSize)
                 .exec();
 
-            const currentUserId = userId ? userId : undefined;
-
             const items = await Promise.all(
                 likes.map(async (entity) => {
+                    const isMine = userId && Object(entity.userId)._id.toHexString() === userId;
+                    const currentUserId = isMine ? undefined : userId;
+                    
                     const userInfo = await this.userSearcherService.getUserInfo({ user: entity.userId, currentUserId });
 
-                    return { user: { ...userInfo } };
+                    return { user: { ...userInfo, isMine } };
                 }),
             );
 

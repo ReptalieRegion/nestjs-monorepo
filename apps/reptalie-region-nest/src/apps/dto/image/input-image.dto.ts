@@ -3,7 +3,7 @@ import { IsString, IsArray, IsEnum } from 'class-validator';
 export enum ImageType {
     Share = 'share',
     Profile = 'profile',
-    Information = 'information',
+    Diary = 'diary',
 }
 
 export class InputImageDTO {

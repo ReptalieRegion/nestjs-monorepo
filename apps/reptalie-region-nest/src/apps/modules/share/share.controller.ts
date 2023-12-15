@@ -267,7 +267,7 @@ export class ShareController {
         @Query('pageParam') pageParam: number,
     ) {
         try {
-            return this.shareSearcherService.getLikeListForPostInfiniteScroll(user?.id, postId, pageParam, 10);
+            return this.shareSearcherService.getLikeListForPostInfiniteScroll(user.id, postId, pageParam, 10);
         } catch (error) {
             controllerErrorHandler(error);
         }

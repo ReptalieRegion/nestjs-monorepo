@@ -96,7 +96,7 @@ export class ShareWriterService {
      * @returns 생성된 댓글과 사용자 정보를 반환합니다.
      */
     async createComment(user: IUserProfileDTO, dto: InputShareCommentDTO) {
-        const post = await this.shareSearcherService.findPost(dto.postId);
+        const post = await this.shareSearcherService.findPostWithUserInfo(dto.postId);
 
         const comment = await this.shareCommentRepository.createComment(user.id, dto);
         if (!comment) {
@@ -185,7 +185,7 @@ export class ShareWriterService {
      */
     async createLike(user: IUserProfileDTO, postId: string) {
         try {
-            const post = await this.shareSearcherService.findPost(postId);
+            const post = await this.shareSearcherService.findPostWithUserInfo(postId);
 
             const like = await this.shareLikeRepository.createLike({ userId: user.id, postId });
             if (!like) {

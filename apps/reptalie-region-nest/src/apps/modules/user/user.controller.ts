@@ -65,7 +65,7 @@ export class UserController {
     @UseGuards(JwtAuthGuard)
     async toggleFollow(@AuthUser() user: IUserProfileDTO, @Param('id') follower: string) {
         try {
-            return this.userUpdaterService.toggleFollow(user?.id, follower);
+            return this.userUpdaterService.toggleFollow(user.id, follower);
         } catch (error) {
             controllerErrorHandler(error);
         }

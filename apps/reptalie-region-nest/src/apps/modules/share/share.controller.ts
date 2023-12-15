@@ -207,7 +207,7 @@ export class ShareController {
     @UseGuards(JwtOptionalAuthGuard)
     async getPost(@AuthUser() user: IUserProfileDTO, @Param('id') postId: string) {
         try {
-            return this.shareSearcherService.getPost(user.id, postId);
+            return this.shareSearcherService.getPost(user?.id, postId);
         } catch (error) {
             controllerErrorHandler(error);
         }
@@ -267,7 +267,7 @@ export class ShareController {
         @Query('pageParam') pageParam: number,
     ) {
         try {
-            return this.shareSearcherService.getLikeListForPostInfiniteScroll(user.id, postId, pageParam, 10);
+            return this.shareSearcherService.getLikeListForPostInfiniteScroll(user?.id, postId, pageParam, 10);
         } catch (error) {
             controllerErrorHandler(error);
         }

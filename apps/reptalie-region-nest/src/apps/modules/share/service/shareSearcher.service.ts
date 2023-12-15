@@ -274,7 +274,7 @@ export class ShareSearcherService {
                 likes.map(async (entity) => {
                     const isMine = userId && Object(entity.userId)._id.toHexString() === userId;
                     const currentUserId = isMine ? undefined : userId;
-                    
+
                     const userInfo = await this.userSearcherService.getUserInfo({ user: entity.userId, currentUserId });
 
                     return { user: { ...userInfo, isMine } };
@@ -489,7 +489,7 @@ export class ShareSearcherService {
      * @param postId 게시물 ID
      * @returns 검색된 게시물 정보를 반환합니다.
      */
-    async findPost(postId: string) {
+    async findPostWithUserInfo(postId: string) {
         try {
             const post = await this.sharePostRepository
                 .findOne({ _id: postId, isDeleted: false })
@@ -503,6 +503,26 @@ export class ShareSearcherService {
             return { ...post.Mapper(), userId: Object(post.userId).Mapper() };
         } catch (error) {
             serviceErrorHandler(error, 'Invalid ObjectId for share post Id.');
+        }
+    }
+
+    /**
+     * 지정된 댓글 ID를 기반으로 댓글을 검색하고 반환합니다.
+     *
+     * @param postId 게시글 ID
+     * @returns 검색된 댓글 정보를 반환합니다.
+     */
+    async findPost(postId: string) {
+        try {
+            const post = await this.sharePostRepository.findOne({ _id: postId, isDeleted: false }).exec();
+
+            if (!post) {
+                throw new NotFoundException('Not found for the specified share comment Id.');
+            }
+
+            return post.Mapper();
+        } catch (error) {
+            serviceErrorHandler(error, 'Invalid ObjectId for share comment Id .');
         }
     }
 
@@ -523,6 +543,26 @@ export class ShareSearcherService {
             return comment.Mapper();
         } catch (error) {
             serviceErrorHandler(error, 'Invalid ObjectId for share comment Id .');
+        }
+    }
+
+    /**
+     * 지정된 대댓글 ID를 기반으로 댓글을 검색하고 반환합니다.
+     *
+     * @param replyId 대댓글 ID
+     * @returns 검색된 대댓글 정보를 반환합니다.
+     */
+    async findCommentReply(replyId: string) {
+        try {
+            const reply = await this.shareCommentReplyRepository.findOne({ _id: replyId, isDeleted: false }).exec();
+
+            if (!reply) {
+                throw new NotFoundException('Not found for the specified share comment reply Id.');
+            }
+
+            return reply.Mapper();
+        } catch (error) {
+            serviceErrorHandler(error, 'Invalid ObjectId for share comment reply Id .');
         }
     }
 

@@ -6,6 +6,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { DiaryModule } from './modules/diary/diary.module';
 import { MetaDataModule } from './modules/metadata/metaData.module';
 import { NotificationModule } from './modules/notification/notification.module';
+import { ReportModule } from './modules/report/report.module';
 import { ShareModule } from './modules/share/share.module';
 import { UserModule } from './modules/user/user.module';
 import { CustomConfigModule } from './utils/customModules/config';
@@ -18,6 +19,7 @@ import { CustomMongooseModule } from './utils/customModules/mongoose';
         ShareModule,
         NotificationModule,
         DiaryModule,
+        ReportModule,
         MetaDataModule,
         CustomConfigModule,
         CustomMongooseModule,

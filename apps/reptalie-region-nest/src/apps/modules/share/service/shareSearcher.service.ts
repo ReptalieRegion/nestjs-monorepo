@@ -1,9 +1,11 @@
 import { Inject, Injectable, NotFoundException, forwardRef } from '@nestjs/common';
+import { ReportType } from '../../../dto/report/input-report.dto';
 import { IResponseShareCommentDTO } from '../../../dto/share/comment/response-shareCommnet.dto';
 import { IResponseShareCommentReplyDTO } from '../../../dto/share/commentReply/response-shareCommentReply.dto';
 import { IResponseSharePostDTO } from '../../../dto/share/post/response-sharePost.dto';
 import { serviceErrorHandler } from '../../../utils/error/errorHandler';
 import { ImageSearcherService, ImageSearcherServiceToken } from '../../image/service/imageSearcher.service';
+import { ReportSearcherService, ReportSearcherServiceToken } from '../../report/service/reportSearcher.service';
 import { UserSearcherService, UserSearcherServiceToken } from '../../user/service/userSearcher.service';
 import { ShareCommentRepository } from '../repository/shareComment.repository';
 import { ShareCommentReplyRepository } from '../repository/shareCommentReply.repository';
@@ -42,6 +44,8 @@ export class ShareSearcherService {
         private readonly imageSearcherService: ImageSearcherService,
         @Inject(forwardRef(() => UserSearcherServiceToken))
         private readonly userSearcherService: UserSearcherService,
+        @Inject(ReportSearcherServiceToken)
+        private readonly reportSearcherService: ReportSearcherService,
     ) {}
 
     /**
@@ -49,8 +53,10 @@ export class ShareSearcherService {
      *  추후 게시글 조회 로직 수정해야함
      */
     async getPostsInfiniteScroll(currentUserId: string, pageParam: number, limitSize: number) {
+        const typeIds = await this.reportSearcherService.findTypeIdList(currentUserId, ReportType.POST);
+
         const posts = await this.sharePostRepository
-            .find({ isDeleted: false })
+            .find({ isDeleted: false, _id: { $ne: typeIds } })
             .sort({ updatedAt: -1, createdAt: -1 })
             .skip(pageParam * limitSize)
             .limit(limitSize)
@@ -167,8 +173,10 @@ export class ShareSearcherService {
      * @returns 가져온 댓글과 다음 페이지 번호를 반환합니다.
      */
     async getCommentsInfiniteScroll(userId: string, postId: string, pageParam: number, limitSize: number) {
+        const typeIds = await this.reportSearcherService.findTypeIdList(userId, ReportType.COMMENT);
+
         const comments = await this.shareCommentRepository
-            .find({ postId, isDeleted: false })
+            .find({ postId, isDeleted: false, _id: { $ne: typeIds } })
             .populate({
                 path: 'userId',
                 select: 'nickname imageId',
@@ -213,8 +221,10 @@ export class ShareSearcherService {
      * @returns 가져온 답글과 다음 페이지 번호를 반환합니다.
      */
     async getCommentRepliesInfiniteScroll(userId: string, commentId: string, pageParam: number, limitSize: number) {
+        const typeIds = await this.reportSearcherService.findTypeIdList(userId, ReportType.COMMENT);
+
         const commentReplies = await this.shareCommentReplyRepository
-            .find({ commentId, isDeleted: false })
+            .find({ commentId, isDeleted: false, _id: { $ne: typeIds } })
             .populate({
                 path: 'userId',
                 select: 'nickname imageId',

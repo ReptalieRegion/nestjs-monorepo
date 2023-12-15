@@ -9,7 +9,7 @@ import { ReportSearcherServiceProvider, ReportWriterServiceProvider } from './re
 import { ReportRepository } from './repository/report.repository';
 
 @Module({
-    imports: [MongooseModuleReport, forwardRef(() => AuthModule), forwardRef(() => UserModule), ShareModule],
+    imports: [MongooseModuleReport, forwardRef(() => AuthModule), forwardRef(() => UserModule), forwardRef(() => ShareModule)],
     controllers: [ReportController],
     providers: [ReportRepository, ReportWriterServiceProvider, ReportSearcherServiceProvider],
     exports: [ReportWriterServiceProvider, ReportSearcherServiceProvider],

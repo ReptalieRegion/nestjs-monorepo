@@ -6,4 +6,8 @@ export const ReportSearcherServiceToken = 'ReportSearcherServiceToken';
 @Injectable()
 export class ReportSearcherService {
     constructor(private readonly reportRepository: ReportRepository) {}
+
+    test() {
+        console.log('test');
+    }
 }

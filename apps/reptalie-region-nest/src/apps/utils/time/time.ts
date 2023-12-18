@@ -12,7 +12,7 @@ export const getCurrentDate = (): Date => {
 
 export const startAndEndDate = (d: Date) => {
     const startDate = new Date(d.getFullYear(), d.getMonth(), 2, -15);
-    const endDate = new Date(d.getFullYear(), d.getMonth() + 1, 1);
+    const endDate = new Date(d.getFullYear(), d.getMonth() + 1, 1, 8, 59, 59, 999);
 
     return { startDate, endDate };
 };

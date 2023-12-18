@@ -81,6 +81,7 @@ export class DiarySearcherService {
 
     async getCalendarInfo(userId: string, date: Date) {
         const { startDate, endDate } = startAndEndDate(date);
+        console.log(startDate, endDate);
 
         const calendars = await this.diaryCalendarRepository
             .find({ userId, isDeleted: false, date: { $gte: startDate, $lt: endDate } })

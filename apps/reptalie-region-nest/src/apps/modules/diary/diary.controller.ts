@@ -199,9 +199,13 @@ export class DiaryController {
     @Get('calendar/list')
     @HttpCode(HttpStatus.OK)
     @UseGuards(JwtAuthGuard)
-    async getCalendarInfiniteScroll(@AuthUser() user: IUserProfileDTO, @Query('date') date: Date) {
+    async getCalendarInfiniteScroll(
+        @AuthUser() user: IUserProfileDTO,
+        @Query('startDate') startDate: Date,
+        @Query('endDate') endDate: Date,
+    ) {
         try {
-            return this.diarySearcherService.getCalendarInfo(user.id, date);
+            return this.diarySearcherService.getCalendarInfo(user.id, startDate, endDate);
         } catch (error) {
             controllerErrorHandler(error);
         }

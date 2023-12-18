@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { startAndEndDate } from '../../../utils/time/time';
 import { DiaryCalendarRepository } from '../repository/diaryCalendar.repository';
 import { DiaryEntityRepository } from '../repository/diaryEntity.repository';
 import { DiaryWeightRepository } from '../repository/diaryWeight.repository';
@@ -79,11 +78,7 @@ export class DiarySearcherService {
         return { items, nextPage };
     }
 
-    async getCalendarInfo(userId: string, date: Date) {
-        const { startDate, endDate } = startAndEndDate(date);
-        console.log(startDate, endDate);
-        console.log(date.toISOString());
-
+    async getCalendarInfo(userId: string, startDate: Date, endDate: Date) {
         const calendars = await this.diaryCalendarRepository
             .find({ userId, isDeleted: false, date: { $gte: startDate, $lt: endDate } })
             .populate({

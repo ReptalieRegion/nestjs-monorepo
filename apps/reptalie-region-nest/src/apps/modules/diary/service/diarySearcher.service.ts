@@ -101,6 +101,9 @@ export class DiarySearcherService {
                     id: calendar.id,
                     memo: calendar.memo,
                     markType: calendar.markType,
+                    gender: entityInfo.gender,
+                    hatching: entityInfo.hatching,
+                    variety: entityInfo.variety,
                     date: calendar.date,
                 },
                 entity: {

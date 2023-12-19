@@ -86,7 +86,7 @@ export class DiarySearcherService {
             .find({ userId, isDeleted: false, date: { $gte: startDate, $lt: endDate } })
             .populate({
                 path: 'entityId',
-                select: 'name imageId',
+                select: 'name imageId gender hatching variety date',
                 populate: { path: 'imageId', model: 'Image', select: 'imageKey -_id' },
             })
             .sort({ date: -1 })
@@ -101,15 +101,15 @@ export class DiarySearcherService {
                     id: calendar.id,
                     memo: calendar.memo,
                     markType: calendar.markType,
-                    gender: entityInfo.gender,
-                    hatching: entityInfo.hatching,
-                    variety: entityInfo.variety,
-                    date: calendar.date,
                 },
                 entity: {
                     id: entityInfo.id,
                     name: entityInfo.name,
                     image: { src: `${process.env.AWS_IMAGE_BASEURL}${entityInfo.imageId.imageKey}` },
+                    gender: entityInfo.gender,
+                    hatching: entityInfo.hatching,
+                    variety: entityInfo.variety,
+                    date: calendar.date,
                 },
             };
         });

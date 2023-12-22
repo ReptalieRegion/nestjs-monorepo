@@ -190,7 +190,7 @@ export class DiaryController {
     @UseGuards(JwtAuthGuard)
     async getWeightInfiniteScroll(@Param('entityId') entityId: string, @Query('pageParam') pageParam: number) {
         try {
-            return this.diarySearcherService.getWeightInfiniteScroll(entityId, pageParam, 10);
+            return this.diarySearcherService.getWeightInfiniteScroll(entityId, pageParam, 7);
         } catch (error) {
             controllerErrorHandler(error);
         }

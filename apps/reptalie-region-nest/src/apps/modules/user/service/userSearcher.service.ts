@@ -111,25 +111,23 @@ export class UserSearcherService {
      */
     async getUserFollowersInfiniteScroll(userId: string, targetUserId: string, pageParam: number, limitSize: number) {
         try {
-            const followers = await this.followRepository
-                .find({ follower: targetUserId, isCanceled: false }, { following: 1 })
-                .populate({
-                    path: 'following',
-                    select: 'nickname imageId',
-                    populate: { path: 'imageId', model: 'Image', select: 'imageKey -_id' },
-                })
-                .skip(pageParam * limitSize)
-                .limit(limitSize)
-                .exec();
+            const followers = await this.followRepository.getAggregatedFollowerList(userId, targetUserId, pageParam, limitSize);
 
             const items = await Promise.all(
                 followers.map(async (entity) => {
-                    const isMine = userId && Object(entity.following)._id.toHexString() === userId;
+                    const isMine = entity.isMine;
                     const currentUserId = isMine ? undefined : userId;
+                    const isFollow = currentUserId ? await this.isExistsFollow(currentUserId, entity.following) : undefined;
 
-                    const userInfo = await this.getUserInfo({ user: entity.following, currentUserId });
-
-                    return { user: { ...userInfo, isMine } };
+                    return {
+                        id: String(entity.following),
+                        nickname: entity.userDetails.nickname,
+                        profile: {
+                            src: `${process.env.AWS_IMAGE_BASEURL}${entity.userImage.imageKey}`,
+                        },
+                        isFollow,
+                        isMine,
+                    };
                 }),
             );
 
@@ -153,25 +151,28 @@ export class UserSearcherService {
      */
     async getUserFollowingsInfiniteScroll(userId: string, targetUserId: string, pageParam: number, limitSize: number) {
         try {
-            const followings = await this.followRepository
-                .find({ following: targetUserId, isCanceled: false }, { follower: 1 })
-                .populate({
-                    path: 'follower',
-                    select: 'nickname imageId',
-                    populate: { path: 'imageId', model: 'Image', select: 'imageKey -_id' },
-                })
-                .skip(pageParam * limitSize)
-                .limit(limitSize)
-                .exec();
+            const followings = await this.followRepository.getAggregatedFollowingList(
+                userId,
+                targetUserId,
+                pageParam,
+                limitSize,
+            );
 
             const items = await Promise.all(
                 followings.map(async (entity) => {
-                    const isMine = userId && Object(entity.follower)._id.toHexString() === userId;
+                    const isMine = entity.isMine;
                     const currentUserId = isMine ? undefined : userId;
+                    const isFollow = currentUserId ? await this.isExistsFollow(currentUserId, entity.follower) : undefined;
 
-                    const userInfo = await this.getUserInfo({ user: entity.follower, currentUserId });
-
-                    return { user: { ...userInfo, isMine } };
+                    return {
+                        id: String(entity.follower),
+                        nickname: entity.userDetails.nickname,
+                        profile: {
+                            src: `${process.env.AWS_IMAGE_BASEURL}${entity.userImage.imageKey}`,
+                        },
+                        isFollow,
+                        isMine,
+                    };
                 }),
             );
 

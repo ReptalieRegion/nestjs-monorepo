@@ -72,6 +72,7 @@ export class ShareSearcherService {
                     post: {
                         id: post.id,
                         contents: post.contents,
+                        createdAt: post.createdAt,
                         images,
                         isMine: currentUserId ? currentUserId === userInfo.id : false,
                         isLike: currentUserId && post.id ? await this.isExistsLike(currentUserId, post.id) : undefined,
@@ -108,6 +109,7 @@ export class ShareSearcherService {
             post: {
                 id: post.id,
                 contents: post.contents,
+                createdAt: post.createdAt,
                 images,
                 isMine: currentUserId ? currentUserId === userInfo.id : false,
                 isLike: currentUserId && post.id ? await this.isExistsLike(currentUserId, post.id) : undefined,
@@ -147,6 +149,7 @@ export class ShareSearcherService {
                     post: {
                         id: post.id,
                         contents: post.contents,
+                        createdAt: post.createdAt,
                         images,
                         isMine,
                         isLike: currentUserId && post.id ? await this.isExistsLike(currentUserId, post?.id) : undefined,
@@ -196,6 +199,7 @@ export class ShareSearcherService {
                     comment: {
                         id: comment.id,
                         contents: comment.contents,
+                        createdAt: comment.createdAt,
                         replyCount: comment.id && (await this.getCommentReplyCount(comment.id)),
                         isMine: userId ? userInfo.id === userId : false,
                         isModified: comment.createdAt?.getTime() !== comment.updatedAt?.getTime(),
@@ -244,6 +248,7 @@ export class ShareSearcherService {
                     commentReply: {
                         id: cmmentReply.id,
                         contents: cmmentReply.contents,
+                        createdAt: cmmentReply.createdAt,
                         isMine: userId ? userInfo.id === userId : false,
                         isModified: cmmentReply.createdAt?.getTime() !== cmmentReply.updatedAt?.getTime(),
                         user: { ...userInfo },
@@ -269,25 +274,25 @@ export class ShareSearcherService {
      */
     async getLikeListForPostInfiniteScroll(userId: string, postId: string, pageParam: number, limitSize: number) {
         try {
-            const likes = await this.shareLikeRepository
-                .find({ postId, isCanceled: false }, { userId: 1 })
-                .populate({
-                    path: 'userId',
-                    select: 'nickname imageId',
-                    populate: { path: 'imageId', model: 'Image', select: 'imageKey -_id' },
-                })
-                .skip(pageParam * limitSize)
-                .limit(limitSize)
-                .exec();
+            const likes = await this.shareLikeRepository.getAggregatedLikeList(postId, userId, pageParam, limitSize);
 
             const items = await Promise.all(
                 likes.map(async (entity) => {
-                    const isMine = userId && Object(entity.userId)._id.toHexString() === userId;
+                    const isMine = entity.isMine;
                     const currentUserId = isMine ? undefined : userId;
+                    const isFollow = currentUserId
+                        ? await this.userSearcherService.isExistsFollow(currentUserId, entity.userId)
+                        : undefined;
 
-                    const userInfo = await this.userSearcherService.getUserInfo({ user: entity.userId, currentUserId });
-
-                    return { user: { ...userInfo, isMine } };
+                    return {
+                        id: String(entity.userId),
+                        nickname: entity.userDetails.nickname,
+                        profile: {
+                            src: `${process.env.AWS_IMAGE_BASEURL}${entity.userImage.imageKey}`,
+                        },
+                        isFollow,
+                        isMine,
+                    };
                 }),
             );
 
@@ -296,7 +301,7 @@ export class ShareSearcherService {
 
             return { items, nextPage };
         } catch (error) {
-            serviceErrorHandler(error, 'Invalid ObjectId for user Id');
+            serviceErrorHandler(error, 'Invalid ObjectId for post Id');
         }
     }
 
@@ -325,6 +330,7 @@ export class ShareSearcherService {
                     post: {
                         id: post.id,
                         contents: post.contents,
+                        createdAt: post.createdAt,
                         images,
                         isMine: true,
                         isLike: post.id ? await this.isExistsLike(userId, post?.id) : undefined,

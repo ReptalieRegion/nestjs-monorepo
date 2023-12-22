@@ -18,12 +18,20 @@ export class ImageDeleterService {
      * @param session - 현재 세션입니다.
      */
     async deleteImageByImageKeys(imageKeys: string[], typeId: string, session: ClientSession) {
-        const result = await this.imageRepository
-            .updateMany({ typeId, imageKey: { $nin: imageKeys }, isDeleted: false }, { $set: { isDeleted: true } }, { session })
-            .exec();
+        const images = await this.imageRepository.find({ typeId, isDeleted: false }).exec();
 
-        if (result.modifiedCount === 0) {
-            throw new NotFoundException('Image not found');
+        if (images.length !== imageKeys.length) {
+            const result = await this.imageRepository
+                .updateMany(
+                    { typeId, imageKey: { $nin: imageKeys }, isDeleted: false },
+                    { $set: { isDeleted: true } },
+                    { session },
+                )
+                .exec();
+
+            if (result.modifiedCount === 0) {
+                throw new NotFoundException('Image not found');
+            }
         }
     }
 

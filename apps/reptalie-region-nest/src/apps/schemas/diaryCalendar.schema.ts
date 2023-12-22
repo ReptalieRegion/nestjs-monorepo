@@ -19,7 +19,7 @@ export class DiaryCalendar {
     @Prop({ ref: 'DiaryEntity', type: SchemaTypes.ObjectId })
     entityId: DiaryEntity;
 
-    @Prop({ required: true, type: SchemaTypes.String })
+    @Prop({ default: '', type: SchemaTypes.String })
     memo: string;
 
     @Prop({ required: true, type: [{ type: String, enum: DiaryCalendarMarkType }] })

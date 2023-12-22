@@ -18,6 +18,7 @@ export class InputDiaryCalendarDTO {
     @IsString()
     readonly entityId: string;
 
+    @IsOptional()
     @IsString()
     readonly memo: string;
 

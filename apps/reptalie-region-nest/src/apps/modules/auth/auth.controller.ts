@@ -120,7 +120,7 @@ export class AuthController {
      *
      */
     @Get('sign-in/check')
-    @UseGuards(JwtSocialAuthGuard)
+    @UseGuards(JwtAuthGuard)
     async signInCheck() {
         return { message: 'success' };
     }

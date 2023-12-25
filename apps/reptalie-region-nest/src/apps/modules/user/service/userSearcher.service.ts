@@ -1,9 +1,10 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { IUserProfileDTO } from '../../../dto/user/user/response-user.dto';
 import { User } from '../../../schemas/user.schema';
 import { serviceErrorHandler } from '../../../utils/error/errorHandler';
 import { FollowRepository } from '../repository/follow.repository';
 import { UserRepository } from '../repository/user.repository';
+import { UserWriterService, UserWriterServiceToken } from './userWriter.service';
 
 export const UserSearcherServiceToken = 'UserSearcherServiceToken';
 
@@ -16,7 +17,13 @@ interface UserOption {
 
 @Injectable()
 export class UserSearcherService {
-    constructor(private readonly userRepository: UserRepository, private readonly followRepository: FollowRepository) {}
+    constructor(
+        private readonly userRepository: UserRepository,
+        private readonly followRepository: FollowRepository,
+
+        @Inject(UserWriterServiceToken)
+        private readonly userWriterService: UserWriterService,
+    ) {}
 
     /**
      * 팔로워 목록을 페이지별로 무한 스크롤을 통해 검색합니다.
@@ -28,12 +35,14 @@ export class UserSearcherService {
      * @returns 팔로워 목록 및 다음 페이지의 존재 여부를 반환합니다.
      */
     async getFollowersInfiniteScroll(following: string, search: string, pageParam: number, limitSize: number) {
+        const initials = this.userWriterService.getInitials(search);
+
         const follow = await this.followRepository
             .find(
                 {
                     following,
                     isCanceled: false,
-                    initials: { $regex: new RegExp(`${search}`, 'i') },
+                    initials: { $regex: new RegExp(`${initials}`, 'i') },
                 },
                 { follower: 1, followerNickname: 1 },
             )

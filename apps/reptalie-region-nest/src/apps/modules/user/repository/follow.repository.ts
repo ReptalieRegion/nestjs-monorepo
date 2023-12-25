@@ -53,6 +53,11 @@ export class FollowRepository extends BaseRepository<FollowDocument> {
                     },
                 },
                 {
+                    $sort: {
+                        isMine: -1,
+                    },
+                },
+                {
                     $project: {
                         following: 1,
                         userDetails: {
@@ -63,11 +68,6 @@ export class FollowRepository extends BaseRepository<FollowDocument> {
                             imageKey: 1,
                         },
                         isMine: 1,
-                    },
-                },
-                {
-                    $sort: {
-                        isMine: -1,
                     },
                 },
                 {
@@ -114,6 +114,11 @@ export class FollowRepository extends BaseRepository<FollowDocument> {
                     },
                 },
                 {
+                    $sort: {
+                        isMine: -1,
+                    },
+                },
+                {
                     $project: {
                         follower: 1,
                         userDetails: {
@@ -124,11 +129,6 @@ export class FollowRepository extends BaseRepository<FollowDocument> {
                             imageKey: 1,
                         },
                         isMine: 1,
-                    },
-                },
-                {
-                    $sort: {
-                        isMine: -1,
                     },
                 },
                 {

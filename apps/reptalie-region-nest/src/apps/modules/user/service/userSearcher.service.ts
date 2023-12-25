@@ -134,6 +134,8 @@ export class UserSearcherService {
             const isLastPage = followers.length < limitSize;
             const nextPage = isLastPage ? undefined : pageParam + 1;
 
+            console.log(items);
+
             return { items, nextPage };
         } catch (error) {
             serviceErrorHandler(error, 'Invalid ObjectId for user Id');
@@ -178,6 +180,8 @@ export class UserSearcherService {
 
             const isLastPage = followings.length < limitSize;
             const nextPage = isLastPage ? undefined : pageParam + 1;
+
+            console.log(items);
 
             return { items, nextPage };
         } catch (error) {

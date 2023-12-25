@@ -53,6 +53,11 @@ export class ShareLikeRepository extends BaseRepository<ShareLikeDocument> {
                     },
                 },
                 {
+                    $sort: {
+                        isMine: -1,
+                    },
+                },
+                {
                     $project: {
                         userId: 1,
                         userDetails: {
@@ -63,11 +68,6 @@ export class ShareLikeRepository extends BaseRepository<ShareLikeDocument> {
                             imageKey: 1,
                         },
                         isMine: 1,
-                    },
-                },
-                {
-                    $sort: {
-                        isMine: -1,
                     },
                 },
                 {

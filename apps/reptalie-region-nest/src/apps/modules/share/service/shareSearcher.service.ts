@@ -299,6 +299,9 @@ export class ShareSearcherService {
             const isLastPage = likes.length < limitSize;
             const nextPage = isLastPage ? undefined : pageParam + 1;
 
+            console.log(items);
+            
+
             return { items, nextPage };
         } catch (error) {
             serviceErrorHandler(error, 'Invalid ObjectId for post Id');

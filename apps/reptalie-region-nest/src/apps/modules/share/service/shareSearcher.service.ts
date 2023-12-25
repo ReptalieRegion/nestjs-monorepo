@@ -1,9 +1,11 @@
 import { Inject, Injectable, NotFoundException, forwardRef } from '@nestjs/common';
+import { ReportType } from '../../../dto/report/input-report.dto';
 import { IResponseShareCommentDTO } from '../../../dto/share/comment/response-shareCommnet.dto';
 import { IResponseShareCommentReplyDTO } from '../../../dto/share/commentReply/response-shareCommentReply.dto';
 import { IResponseSharePostDTO } from '../../../dto/share/post/response-sharePost.dto';
 import { serviceErrorHandler } from '../../../utils/error/errorHandler';
 import { ImageSearcherService, ImageSearcherServiceToken } from '../../image/service/imageSearcher.service';
+import { ReportSearcherService, ReportSearcherServiceToken } from '../../report/service/reportSearcher.service';
 import { UserSearcherService, UserSearcherServiceToken } from '../../user/service/userSearcher.service';
 import { ShareCommentRepository } from '../repository/shareComment.repository';
 import { ShareCommentReplyRepository } from '../repository/shareCommentReply.repository';
@@ -42,6 +44,8 @@ export class ShareSearcherService {
         private readonly imageSearcherService: ImageSearcherService,
         @Inject(forwardRef(() => UserSearcherServiceToken))
         private readonly userSearcherService: UserSearcherService,
+        @Inject(ReportSearcherServiceToken)
+        private readonly reportSearcherService: ReportSearcherService,
     ) {}
 
     /**
@@ -49,8 +53,10 @@ export class ShareSearcherService {
      *  추후 게시글 조회 로직 수정해야함
      */
     async getPostsInfiniteScroll(currentUserId: string, pageParam: number, limitSize: number) {
+        const typeIds = await this.reportSearcherService.findTypeIdList(currentUserId, ReportType.POST);
+
         const posts = await this.sharePostRepository
-            .find({ isDeleted: false })
+            .find({ isDeleted: false, _id: { $ne: typeIds } })
             .sort({ updatedAt: -1, createdAt: -1 })
             .skip(pageParam * limitSize)
             .limit(limitSize)
@@ -66,6 +72,7 @@ export class ShareSearcherService {
                     post: {
                         id: post.id,
                         contents: post.contents,
+                        createdAt: post.createdAt,
                         images,
                         isMine: currentUserId ? currentUserId === userInfo.id : false,
                         isLike: currentUserId && post.id ? await this.isExistsLike(currentUserId, post.id) : undefined,
@@ -102,6 +109,7 @@ export class ShareSearcherService {
             post: {
                 id: post.id,
                 contents: post.contents,
+                createdAt: post.createdAt,
                 images,
                 isMine: currentUserId ? currentUserId === userInfo.id : false,
                 isLike: currentUserId && post.id ? await this.isExistsLike(currentUserId, post.id) : undefined,
@@ -141,6 +149,7 @@ export class ShareSearcherService {
                     post: {
                         id: post.id,
                         contents: post.contents,
+                        createdAt: post.createdAt,
                         images,
                         isMine,
                         isLike: currentUserId && post.id ? await this.isExistsLike(currentUserId, post?.id) : undefined,
@@ -167,8 +176,10 @@ export class ShareSearcherService {
      * @returns 가져온 댓글과 다음 페이지 번호를 반환합니다.
      */
     async getCommentsInfiniteScroll(userId: string, postId: string, pageParam: number, limitSize: number) {
+        const typeIds = await this.reportSearcherService.findTypeIdList(userId, ReportType.COMMENT);
+
         const comments = await this.shareCommentRepository
-            .find({ postId, isDeleted: false })
+            .find({ postId, isDeleted: false, _id: { $ne: typeIds } })
             .populate({
                 path: 'userId',
                 select: 'nickname imageId',
@@ -188,6 +199,7 @@ export class ShareSearcherService {
                     comment: {
                         id: comment.id,
                         contents: comment.contents,
+                        createdAt: comment.createdAt,
                         replyCount: comment.id && (await this.getCommentReplyCount(comment.id)),
                         isMine: userId ? userInfo.id === userId : false,
                         isModified: comment.createdAt?.getTime() !== comment.updatedAt?.getTime(),
@@ -213,8 +225,10 @@ export class ShareSearcherService {
      * @returns 가져온 답글과 다음 페이지 번호를 반환합니다.
      */
     async getCommentRepliesInfiniteScroll(userId: string, commentId: string, pageParam: number, limitSize: number) {
+        const typeIds = await this.reportSearcherService.findTypeIdList(userId, ReportType.COMMENT);
+
         const commentReplies = await this.shareCommentReplyRepository
-            .find({ commentId, isDeleted: false })
+            .find({ commentId, isDeleted: false, _id: { $ne: typeIds } })
             .populate({
                 path: 'userId',
                 select: 'nickname imageId',
@@ -234,6 +248,7 @@ export class ShareSearcherService {
                     commentReply: {
                         id: cmmentReply.id,
                         contents: cmmentReply.contents,
+                        createdAt: cmmentReply.createdAt,
                         isMine: userId ? userInfo.id === userId : false,
                         isModified: cmmentReply.createdAt?.getTime() !== cmmentReply.updatedAt?.getTime(),
                         user: { ...userInfo },
@@ -259,34 +274,37 @@ export class ShareSearcherService {
      */
     async getLikeListForPostInfiniteScroll(userId: string, postId: string, pageParam: number, limitSize: number) {
         try {
-            const likes = await this.shareLikeRepository
-                .find({ postId, isCanceled: false }, { userId: 1 })
-                .populate({
-                    path: 'userId',
-                    select: 'nickname imageId',
-                    populate: { path: 'imageId', model: 'Image', select: 'imageKey -_id' },
-                })
-                .skip(pageParam * limitSize)
-                .limit(limitSize)
-                .exec();
+            const likes = await this.shareLikeRepository.getAggregatedLikeList(postId, userId, pageParam, limitSize);
 
             const items = await Promise.all(
                 likes.map(async (entity) => {
-                    const isMine = userId && Object(entity.userId)._id.toHexString() === userId;
+                    const isMine = entity.isMine;
                     const currentUserId = isMine ? undefined : userId;
+                    const isFollow = currentUserId
+                        ? await this.userSearcherService.isExistsFollow(currentUserId, entity.userId)
+                        : undefined;
 
-                    const userInfo = await this.userSearcherService.getUserInfo({ user: entity.userId, currentUserId });
-
-                    return { user: { ...userInfo, isMine } };
+                    return {
+                        id: String(entity.userId),
+                        nickname: entity.userDetails.nickname,
+                        profile: {
+                            src: `${process.env.AWS_IMAGE_BASEURL}${entity.userImage.imageKey}`,
+                        },
+                        isFollow,
+                        isMine,
+                    };
                 }),
             );
 
             const isLastPage = likes.length < limitSize;
             const nextPage = isLastPage ? undefined : pageParam + 1;
 
+            console.log(items);
+            
+
             return { items, nextPage };
         } catch (error) {
-            serviceErrorHandler(error, 'Invalid ObjectId for user Id');
+            serviceErrorHandler(error, 'Invalid ObjectId for post Id');
         }
     }
 
@@ -315,6 +333,7 @@ export class ShareSearcherService {
                     post: {
                         id: post.id,
                         contents: post.contents,
+                        createdAt: post.createdAt,
                         images,
                         isMine: true,
                         isLike: post.id ? await this.isExistsLike(userId, post?.id) : undefined,

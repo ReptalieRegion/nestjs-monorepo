@@ -1,4 +1,4 @@
-import { Inject, Injectable, InternalServerErrorException } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectConnection } from '@nestjs/mongoose';
 import mongoose, { ClientSession } from 'mongoose';
 import { IUpdateCalendarDTO } from '../../../dto/diary/calendar/input-diaryCalendar.dto';
@@ -47,6 +47,10 @@ export class DiaryUpdaterService {
                 imageKeys = await this.imageS3HandlerService.uploadToS3(files);
                 const [image] = await this.imageWriterService.createImage(entityId, imageKeys, ImageType.Diary, session);
                 dto = { ...dto, imageId: image.id as string };
+            }
+
+            if (!dto.name) {
+                throw new BadRequestException('entity name cannot be empty.');
             }
 
             const result = await this.diaryEntityRepository

@@ -29,6 +29,7 @@ export class Report {
 }
 
 const ReportSchema = SchemaFactory.createForClass(Report);
+ReportSchema.index({ reporter: 1, type: 1 });
 ReportSchema.methods = {
     Mapper(): Partial<IResponseReportDTO> {
         const fields: Array<keyof IResponseReportDTO> = [

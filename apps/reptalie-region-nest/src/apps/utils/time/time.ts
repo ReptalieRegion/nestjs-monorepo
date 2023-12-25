@@ -10,13 +10,6 @@ export const getCurrentDate = (): Date => {
     return new Date(Date.UTC(year, month, today, hours, minutes, seconds, milliseconds));
 };
 
-export const startAndEndDate = (d: Date) => {
-    const startDate = new Date(d.getFullYear(), d.getMonth(), 2, -15);
-    const endDate = new Date(d.getFullYear(), d.getMonth() + 1, 1);
-
-    return { startDate, endDate };
-};
-
 export const addDays = (d: Date, days: number) => {
     const newDate = new Date(d);
     newDate.setDate(newDate.getDate() + days);

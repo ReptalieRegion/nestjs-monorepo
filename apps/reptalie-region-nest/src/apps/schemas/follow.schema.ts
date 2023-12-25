@@ -20,6 +20,9 @@ export class Follow {
     @Prop({ required: true, type: SchemaTypes.String })
     followerNickname: string;
 
+    @Prop({ required: true, type: SchemaTypes.String })
+    initials: string;
+
     @Prop({ default: false, type: SchemaTypes.Boolean })
     isCanceled: boolean;
 }
@@ -33,6 +36,7 @@ FollowSchema.methods = {
             'following',
             'follower',
             'followerNickname',
+            'initials',
             'isCanceled',
             'createdAt',
             'updatedAt',

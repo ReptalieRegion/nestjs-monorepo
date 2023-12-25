@@ -83,8 +83,14 @@ export class UserWriterService {
         try {
             const followerInfo = await this.userSearcherService.findUserId(follower);
             const followerNickname = followerInfo?.nickname as string;
+            const initials = followerInfo?.initials as string;
 
-            const follow = await this.followRepository.createFollow({ following: following.id, follower, followerNickname });
+            const follow = await this.followRepository.createFollow({
+                following: following.id,
+                follower,
+                followerNickname,
+                initials,
+            });
 
             if (!follow) {
                 throw new InternalServerErrorException('Failed to save follow.');
@@ -127,6 +133,14 @@ export class UserWriterService {
         } catch (error) {
             serviceErrorHandler(error, 'following and follower should be unique values.');
         }
+    }
+
+    getInitials(nickname: string): string {
+        return nickname.replace(/[가-힣]/g, (char) => {
+            const charCode = char.charCodeAt(0) - 44032;
+            const initialIndex = Math.floor(charCode / 588);
+            return String.fromCharCode(initialIndex + 4352);
+        });
     }
 
     /**

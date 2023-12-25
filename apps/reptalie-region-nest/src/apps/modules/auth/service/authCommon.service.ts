@@ -1,8 +1,9 @@
 import { BadRequestException, ForbiddenException, Inject, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectConnection } from '@nestjs/mongoose';
 import mongoose, { ClientSession } from 'mongoose';
-import { JoinProgressType, IJoinProgressDTO } from '../../../dto/user/social/input-social.dto';
+import { IJoinProgressDTO, JoinProgressType } from '../../../dto/user/social/input-social.dto';
 import { UserUpdaterService, UserUpdaterServiceToken } from '../../user/service/userUpdater.service';
+import { UserWriterService, UserWriterServiceToken } from '../../user/service/userWriter.service';
 import { SocialRepository } from '../repository/social.repository';
 import { AuthEncryptService, AuthEncryptServiceToken } from './authEncrypt.service';
 import { AuthTokenService, AuthTokenServiceToken } from './authToken.service';
@@ -23,6 +24,8 @@ export class AuthCommonService {
         private readonly authTokenService: AuthTokenService,
         @Inject(UserUpdaterServiceToken)
         private readonly userUpdaterService: UserUpdaterService,
+        @Inject(UserWriterServiceToken)
+        private readonly userWriterService: UserWriterService,
     ) {}
 
     /**
@@ -37,8 +40,9 @@ export class AuthCommonService {
 
         try {
             const { userId, nickname } = dto;
+            const initials = this.userWriterService.getInitials(nickname);
 
-            await this.userUpdaterService.updateNickname(nickname, userId, session);
+            await this.userUpdaterService.updateNickname(nickname, initials, userId, session);
 
             const result = await this.socialRepository
                 .updateOne({ userId }, { $set: { joinProgress: JoinProgressType.DONE } }, { session })

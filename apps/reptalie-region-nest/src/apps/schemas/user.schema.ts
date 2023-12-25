@@ -15,6 +15,9 @@ export class User {
     nickname: string;
 
     @Prop({ trim: true, index: true, type: SchemaTypes.String, default: 'defaultValue' })
+    initials: string;
+
+    @Prop({ trim: true, index: true, type: SchemaTypes.String, default: 'defaultValue' })
     name: string;
 
     @Prop({ index: true, type: SchemaTypes.String, default: 'defaultValue' })
@@ -38,6 +41,7 @@ userSchema.methods = {
             'id',
             'name',
             'nickname',
+            'initials',
             'phone',
             'address',
             'fcmToken',

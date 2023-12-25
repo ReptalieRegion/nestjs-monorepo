@@ -28,7 +28,7 @@ export class AuthSocialService {
     ) {}
 
     /**
-     * Kakao로부터의 로그인 요청을 처리합니다.
+     * Kakao 로부터의 로그인 요청을 처리합니다.
      *
      * @param dto - 암호화된 데이터를 포함하는 데이터 전송 객체 (IEncryptedDataDTO).
      * @returns - Kakao 로그인에 대한 결과를 반환합니다. 이미 가입한 사용자의 경우 로그인 정보를 제공하고,

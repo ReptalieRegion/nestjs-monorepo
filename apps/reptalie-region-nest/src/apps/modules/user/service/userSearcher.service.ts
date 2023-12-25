@@ -33,7 +33,7 @@ export class UserSearcherService {
                 {
                     following,
                     isCanceled: false,
-                    followerNickname: { $regex: new RegExp(`^${search}`, 'i') },
+                    initials: { $regex: new RegExp(`${search}`, 'i') },
                 },
                 { follower: 1, followerNickname: 1 },
             )
@@ -134,8 +134,6 @@ export class UserSearcherService {
             const isLastPage = followers.length < limitSize;
             const nextPage = isLastPage ? undefined : pageParam + 1;
 
-            console.log(items);
-
             return { items, nextPage };
         } catch (error) {
             serviceErrorHandler(error, 'Invalid ObjectId for user Id');
@@ -180,8 +178,6 @@ export class UserSearcherService {
 
             const isLastPage = followings.length < limitSize;
             const nextPage = isLastPage ? undefined : pageParam + 1;
-
-            console.log(items);
 
             return { items, nextPage };
         } catch (error) {

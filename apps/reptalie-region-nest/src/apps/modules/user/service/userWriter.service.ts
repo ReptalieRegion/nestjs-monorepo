@@ -1,16 +1,9 @@
-import {
-    BadRequestException,
-    Inject,
-    Injectable,
-    InternalServerErrorException,
-    UnprocessableEntityException,
-} from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, InternalServerErrorException } from '@nestjs/common';
 import mongoose, { ClientSession } from 'mongoose';
 import { ImageType } from '../../../dto/image/input-image.dto';
 import { TemplateType } from '../../../dto/notification/template/input-notificationTemplate.dto';
 import { IUserProfileDTO } from '../../../dto/user/user/response-user.dto';
 import { serviceErrorHandler } from '../../../utils/error/errorHandler';
-import { randomWords } from '../../../utils/randomWords/randomWords';
 import { ImageWriterService, ImageWriterServiceToken } from '../../image/service/imageWriter.service';
 import { NotificationAgreeService, NotificationAgreeServiceToken } from '../../notification/service/notificationAgree.service';
 import { NotificationPushService, NotificationPushServiceToken } from '../../notification/service/notificationPush.service';
@@ -50,7 +43,7 @@ export class UserWriterService {
      * @returns 생성된 사용자 객체를 반환합니다.
      */
     async createUser(session: ClientSession) {
-        const nickname = await this.generateAvailableNickname();
+        const nickname = await this.userSearcherService.generateAvailableNickname();
         const imageKeys = ['6f433309-a36b-4498-b819-48ace2d19c7f.jpeg'];
 
         const user = await this.userRepository.createUser(
@@ -133,55 +126,5 @@ export class UserWriterService {
         } catch (error) {
             serviceErrorHandler(error, 'following and follower should be unique values.');
         }
-    }
-
-    getInitials(nickname: string): string {
-        return nickname.replace(/[가-힣]/g, (char) => {
-            const charCode = char.charCodeAt(0) - 44032;
-            const initialIndex = Math.floor(charCode / 588);
-            return String.fromCharCode(initialIndex + 4352);
-        });
-    }
-
-    /**
-     * 이용 가능한 닉네임을 생성합니다.
-     *
-     * @returns 생성된 닉네임을 반환합니다.
-     */
-    async generateAvailableNickname(): Promise<string> {
-        for (let i = 0; i < 15; i++) {
-            const baseNickname = this.generateRandomNickname();
-            const nicknameToCheck = i < 5 ? baseNickname : `${baseNickname}${i - 5}`;
-
-            const isDuplicate = await this.userSearcherService.isDuplicateNickname(nicknameToCheck);
-            if (!isDuplicate.isDuplicate) {
-                return nicknameToCheck;
-            }
-        }
-
-        throw new UnprocessableEntityException('Too many requests to generate a nickname.');
-    }
-
-    /**
-     * 무작위 닉네임을 생성합니다.
-     *
-     * @returns 생성된 닉네임을 반환합니다.
-     */
-    private generateRandomNickname(): string {
-        const { adverbs, adjectives, nouns } = randomWords;
-
-        const getRandomWord = (wordList: string[]): string => {
-            const randomIndex = Math.floor(Math.random() * wordList.length);
-            return wordList[randomIndex];
-        };
-
-        const randomAdv = getRandomWord(adverbs);
-        const randomAdj = getRandomWord(adjectives);
-        const randomNoun = getRandomWord(nouns);
-
-        const shortNickname = randomAdj + randomNoun;
-        const longNickname = randomAdv + shortNickname;
-
-        return longNickname.length > 8 ? shortNickname : longNickname;
     }
 }

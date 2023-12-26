@@ -1,10 +1,10 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
 import { IUserProfileDTO } from '../../../dto/user/user/response-user.dto';
 import { User } from '../../../schemas/user.schema';
 import { serviceErrorHandler } from '../../../utils/error/errorHandler';
+import { randomWords } from '../../../utils/randomWords/randomWords';
 import { FollowRepository } from '../repository/follow.repository';
 import { UserRepository } from '../repository/user.repository';
-import { UserWriterService, UserWriterServiceToken } from './userWriter.service';
 
 export const UserSearcherServiceToken = 'UserSearcherServiceToken';
 
@@ -17,13 +17,7 @@ interface UserOption {
 
 @Injectable()
 export class UserSearcherService {
-    constructor(
-        private readonly userRepository: UserRepository,
-        private readonly followRepository: FollowRepository,
-
-        @Inject(UserWriterServiceToken)
-        private readonly userWriterService: UserWriterService,
-    ) {}
+    constructor(private readonly userRepository: UserRepository, private readonly followRepository: FollowRepository) {}
 
     /**
      * 팔로워 목록을 페이지별로 무한 스크롤을 통해 검색합니다.
@@ -35,7 +29,7 @@ export class UserSearcherService {
      * @returns 팔로워 목록 및 다음 페이지의 존재 여부를 반환합니다.
      */
     async getFollowersInfiniteScroll(following: string, search: string, pageParam: number, limitSize: number) {
-        const initials = this.userWriterService.getInitials(search);
+        const initials = this.getInitials(search);
 
         const follow = await this.followRepository
             .find(
@@ -350,5 +344,55 @@ export class UserSearcherService {
     async getUserFollowers(userId: string) {
         const followers = await this.followRepository.find({ following: userId, isCanceled: false }, { follower: 1 }).exec();
         return followers.map((entity) => entity.Mapper().follower as string);
+    }
+
+    getInitials(nickname: string): string {
+        return nickname.replace(/[가-힣]/g, (char) => {
+            const charCode = char.charCodeAt(0) - 44032;
+            const initialIndex = Math.floor(charCode / 588);
+            return String.fromCharCode(initialIndex + 4352);
+        });
+    }
+
+    /**
+     * 이용 가능한 닉네임을 생성합니다.
+     *
+     * @returns 생성된 닉네임을 반환합니다.
+     */
+    async generateAvailableNickname(): Promise<string> {
+        for (let i = 0; i < 15; i++) {
+            const baseNickname = this.generateRandomNickname();
+            const nicknameToCheck = i < 5 ? baseNickname : `${baseNickname}${i - 5}`;
+
+            const isDuplicate = await this.isDuplicateNickname(nicknameToCheck);
+            if (!isDuplicate.isDuplicate) {
+                return nicknameToCheck;
+            }
+        }
+
+        throw new UnprocessableEntityException('Too many requests to generate a nickname.');
+    }
+
+    /**
+     * 무작위 닉네임을 생성합니다.
+     *
+     * @returns 생성된 닉네임을 반환합니다.
+     */
+    private generateRandomNickname(): string {
+        const { adverbs, adjectives, nouns } = randomWords;
+
+        const getRandomWord = (wordList: string[]): string => {
+            const randomIndex = Math.floor(Math.random() * wordList.length);
+            return wordList[randomIndex];
+        };
+
+        const randomAdv = getRandomWord(adverbs);
+        const randomAdj = getRandomWord(adjectives);
+        const randomNoun = getRandomWord(nouns);
+
+        const shortNickname = randomAdj + randomNoun;
+        const longNickname = randomAdv + shortNickname;
+
+        return longNickname.length > 8 ? shortNickname : longNickname;
     }
 }

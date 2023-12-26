@@ -285,13 +285,15 @@ export class ShareSearcherService {
                         : undefined;
 
                     return {
-                        id: String(entity.userId),
-                        nickname: entity.userDetails.nickname,
-                        profile: {
-                            src: `${process.env.AWS_IMAGE_BASEURL}${entity.userImage.imageKey}`,
+                        user: {
+                            id: String(entity.userId),
+                            nickname: entity.userDetails.nickname,
+                            profile: {
+                                src: `${process.env.AWS_IMAGE_BASEURL}${entity.userImage.imageKey}`,
+                            },
+                            isFollow,
+                            isMine,
                         },
-                        isFollow,
-                        isMine,
                     };
                 }),
             );

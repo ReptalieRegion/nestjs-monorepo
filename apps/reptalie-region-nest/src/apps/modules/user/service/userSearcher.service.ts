@@ -129,13 +129,15 @@ export class UserSearcherService {
                     const isFollow = currentUserId ? await this.isExistsFollow(currentUserId, entity.following) : undefined;
 
                     return {
-                        id: String(entity.following),
-                        nickname: entity.userDetails.nickname,
-                        profile: {
-                            src: `${process.env.AWS_IMAGE_BASEURL}${entity.userImage.imageKey}`,
+                        user: {
+                            id: String(entity.following),
+                            nickname: entity.userDetails.nickname,
+                            profile: {
+                                src: `${process.env.AWS_IMAGE_BASEURL}${entity.userImage.imageKey}`,
+                            },
+                            isFollow,
+                            isMine,
                         },
-                        isFollow,
-                        isMine,
                     };
                 }),
             );
@@ -174,13 +176,15 @@ export class UserSearcherService {
                     const isFollow = currentUserId ? await this.isExistsFollow(currentUserId, entity.follower) : undefined;
 
                     return {
-                        id: String(entity.follower),
-                        nickname: entity.userDetails.nickname,
-                        profile: {
-                            src: `${process.env.AWS_IMAGE_BASEURL}${entity.userImage.imageKey}`,
+                        user: {
+                            id: String(entity.follower),
+                            nickname: entity.userDetails.nickname,
+                            profile: {
+                                src: `${process.env.AWS_IMAGE_BASEURL}${entity.userImage.imageKey}`,
+                            },
+                            isFollow,
+                            isMine,
                         },
-                        isFollow,
-                        isMine,
                     };
                 }),
             );

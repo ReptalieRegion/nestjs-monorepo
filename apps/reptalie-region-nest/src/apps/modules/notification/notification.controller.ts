@@ -110,7 +110,7 @@ export class NotificationController {
     }
 
     @Put('push/agree')
-    @HttpCode(HttpStatus.NO_CONTENT)
+    @HttpCode(HttpStatus.CREATED)
     @UseGuards(JwtAuthGuard)
     async updateAgree(@AuthUser() user: IUserProfileDTO, @Body() dto: IAgreeStatusDTO, @Query('type') type: string) {
         try {

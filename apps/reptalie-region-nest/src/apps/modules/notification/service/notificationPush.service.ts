@@ -87,7 +87,6 @@ export class NotificationPushService {
         log: InputNotificationLogDTO;
     }> {
         const { article, id, title } = await this._createTemplateArticle(pushParams);
-        console.log(article, id, title);
 
         const baseData = {
             data: {
@@ -204,6 +203,36 @@ export class NotificationPushService {
                         },
                     },
                 };
+            case TemplateType.Tag:
+                return {
+                    data: {
+                        ...baseData.data,
+                        link: DEEP_LINK_PREFIX + DEEP_LINK_LIST.sharePostDetail(pushParams.postId, 'comment'),
+                    },
+                    ios: {
+                        attachments: [
+                            {
+                                url: pushParams.postThumbnail,
+                            },
+                        ],
+                    },
+                    android: {
+                        imageUrl: pushParams.postThumbnail,
+                    },
+                    log: {
+                        ...baseData.log,
+                        messageId: this._createUniqueId(),
+                        contents: {
+                            type: ContentType.SharePost,
+                            article,
+                            title,
+                            deepLink: DEEP_LINK_PREFIX + DEEP_LINK_LIST.sharePostDetail(pushParams.postId, 'comment'),
+                            postThumbnail: pushParams.postThumbnail,
+                            profileThumbnail: pushParams.userThumbnail,
+                        },
+                    },
+                };
+
             default:
                 throw new Error('Not Found TemplateType');
         }

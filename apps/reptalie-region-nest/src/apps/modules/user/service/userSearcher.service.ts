@@ -309,6 +309,22 @@ export class UserSearcherService {
     }
 
     /**
+     * 닉네임을 검색합니다.
+     *
+     * @param nickname - 검색할 닉네임
+     * @returns 사용자 정보를 반환합니다.
+     */
+    async extractUserInfo(nicknames: string[]) {
+        const users = await this.userRepository.find({ nickname: { $in: nicknames } }, { _id: 1, fcmToken: 1 }).exec();
+
+        if (users.length !== nicknames.length) {
+            throw new NotFoundException('Not found for the specified nickname.');
+        }
+
+        return users.map((entity) => entity.Mapper());
+    }
+
+    /**
      * 팔로우 상태의 존재 여부를 검색합니다.
      *
      * @param following - 팔로우 대상 사용자 ID

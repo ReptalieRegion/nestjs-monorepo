@@ -6,6 +6,7 @@ export enum TemplateType {
     Comment = '댓글',
     Like = '좋아요',
     Follow = '팔로우',
+    Tag = '태그',
 }
 
 export enum TemplateProviderType {

@@ -61,11 +61,13 @@ DiaryCalendarSchema.methods = {
                     [field]: value.toHexString(),
                 };
             }
+
             return {
                 ...prev,
                 [field]: value,
             };
         }, {});
+
         return viewFields;
     },
 };

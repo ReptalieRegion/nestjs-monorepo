@@ -39,15 +39,18 @@ NotificationTemplateSchema.methods = {
 
         const viewFields = fields.reduce((prev, field) => {
             const value = this.get(field);
+
             if (value === undefined) {
                 return prev;
             }
+
             if (value instanceof mongoose.Types.ObjectId) {
                 return {
                     ...prev,
                     [field]: value.toHexString(),
                 };
             }
+
             return {
                 ...prev,
                 [field]: value,

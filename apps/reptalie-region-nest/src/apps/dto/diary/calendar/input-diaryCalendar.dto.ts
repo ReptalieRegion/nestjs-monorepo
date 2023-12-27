@@ -30,12 +30,11 @@ export class InputDiaryCalendarDTO {
 }
 
 export class IUpdateCalendarDTO {
+    @IsOptional()
     @IsString()
     readonly memo: string;
 
+    @IsOptional()
     @IsEnum(DiaryCalendarMarkType, { each: true })
     readonly markType: DiaryCalendarMarkType[];
-
-    @IsString()
-    readonly date: Date;
 }

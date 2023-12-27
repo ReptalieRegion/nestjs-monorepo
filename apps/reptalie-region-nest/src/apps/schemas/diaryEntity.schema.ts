@@ -57,7 +57,7 @@ DiaryEntitySchema.methods = {
 
         const viewFields = fields.reduce((prev, field) => {
             const value = this.get(field);
-            
+
             if (value === undefined) {
                 return prev;
             }
@@ -68,11 +68,13 @@ DiaryEntitySchema.methods = {
                     [field]: value.toHexString(),
                 };
             }
+
             return {
                 ...prev,
                 [field]: value,
             };
         }, {});
+
         return viewFields;
     },
 };

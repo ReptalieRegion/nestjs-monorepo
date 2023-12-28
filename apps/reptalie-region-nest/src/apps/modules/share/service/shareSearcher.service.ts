@@ -56,7 +56,7 @@ export class ShareSearcherService {
         const typeIds = await this.reportSearcherService.findTypeIdList(currentUserId, ReportType.POST);
 
         const posts = await this.sharePostRepository
-            .find({ isDeleted: false, _id: { $ne: typeIds } })
+            .find({ isDeleted: false, _id: { $nin: typeIds } })
             .sort({ updatedAt: -1, createdAt: -1 })
             .skip(pageParam * limitSize)
             .limit(limitSize)
@@ -179,7 +179,7 @@ export class ShareSearcherService {
         const typeIds = await this.reportSearcherService.findTypeIdList(userId, ReportType.COMMENT);
 
         const comments = await this.shareCommentRepository
-            .find({ postId, isDeleted: false, _id: { $ne: typeIds } })
+            .find({ postId, isDeleted: false, _id: { $nin: typeIds } })
             .populate({
                 path: 'userId',
                 select: 'nickname imageId',
@@ -225,10 +225,10 @@ export class ShareSearcherService {
      * @returns 가져온 답글과 다음 페이지 번호를 반환합니다.
      */
     async getCommentRepliesInfiniteScroll(userId: string, commentId: string, pageParam: number, limitSize: number) {
-        const typeIds = await this.reportSearcherService.findTypeIdList(userId, ReportType.COMMENT);
+        const typeIds = await this.reportSearcherService.findTypeIdList(userId, ReportType.REPLY);
 
         const commentReplies = await this.shareCommentReplyRepository
-            .find({ commentId, isDeleted: false, _id: { $ne: typeIds } })
+            .find({ commentId, isDeleted: false, _id: { $nin: typeIds } })
             .populate({
                 path: 'userId',
                 select: 'nickname imageId',

@@ -54,8 +54,10 @@ export class UserUpdaterService {
      * @param userId - 사용자 ID
      * @param session - MongoDB 클라이언트 세션
      */
-    async updateNickname(nickname: string, userId: string, session: ClientSession) {
-        const result = await this.userRepository.updateOne({ _id: userId }, { $set: { nickname } }, { session }).exec();
+    async updateNickname(nickname: string, initials: string, userId: string, session: ClientSession) {
+        const result = await this.userRepository
+            .updateOne({ _id: userId }, { $set: { nickname, initials } }, { session })
+            .exec();
 
         if (result.modifiedCount === 0) {
             throw new InternalServerErrorException('Failed to update user nickname.');

@@ -11,6 +11,10 @@ export class InputUserDTO {
 
     @IsString()
     @IsOptional()
+    readonly initials?: string;
+
+    @IsString()
+    @IsOptional()
     readonly phone?: string;
 
     @IsString()

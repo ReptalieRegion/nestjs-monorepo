@@ -11,7 +11,7 @@ export interface IUserProfileDTO {
 }
 
 export interface IResponseUserDTO
-    extends Pick<InputUserDTO, 'name' | 'nickname' | 'phone' | 'address' | 'fcmToken' | 'imageId'> {
+    extends Pick<InputUserDTO, 'name' | 'nickname' | 'initials' | 'phone' | 'address' | 'fcmToken' | 'imageId'> {
     readonly id: string;
     readonly createdAt: Date;
     readonly updatedAt: Date;

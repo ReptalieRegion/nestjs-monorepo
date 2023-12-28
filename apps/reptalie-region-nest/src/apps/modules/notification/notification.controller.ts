@@ -72,11 +72,11 @@ export class NotificationController {
     }
 
     @Post('push/agree')
-    @HttpCode(HttpStatus.NO_CONTENT)
+    @HttpCode(HttpStatus.OK)
     @UseGuards(JwtAuthGuard)
-    async createAgree(@AuthUser() user: IUserProfileDTO, @Body() dto: IAgreeStatusDTO) {
+    async createAgree(@AuthUser() user: IUserProfileDTO) {
         try {
-            await this.notificationAgreeService.createAgree(user.id, dto.isAgree);
+            return this.notificationAgreeService.createAgree(user.id);
         } catch (error) {
             controllerErrorHandler(error);
         }

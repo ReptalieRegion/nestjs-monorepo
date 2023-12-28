@@ -10,4 +10,8 @@ export class InputFollowDTO {
     @IsOptional()
     @IsString()
     readonly followerNickname: string;
+
+    @IsOptional()
+    @IsString()
+    readonly initials: string;
 }

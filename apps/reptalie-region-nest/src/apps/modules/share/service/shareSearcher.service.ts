@@ -285,22 +285,21 @@ export class ShareSearcherService {
                         : undefined;
 
                     return {
-                        id: String(entity.userId),
-                        nickname: entity.userDetails.nickname,
-                        profile: {
-                            src: `${process.env.AWS_IMAGE_BASEURL}${entity.userImage.imageKey}`,
+                        user: {
+                            id: String(entity.userId),
+                            nickname: entity.userDetails.nickname,
+                            profile: {
+                                src: `${process.env.AWS_IMAGE_BASEURL}${entity.userImage.imageKey}`,
+                            },
+                            isFollow,
+                            isMine,
                         },
-                        isFollow,
-                        isMine,
                     };
                 }),
             );
 
             const isLastPage = likes.length < limitSize;
             const nextPage = isLastPage ? undefined : pageParam + 1;
-
-            console.log(items);
-            
 
             return { items, nextPage };
         } catch (error) {
@@ -528,6 +527,29 @@ export class ShareSearcherService {
     /**
      * 지정된 댓글 ID를 기반으로 댓글을 검색하고 반환합니다.
      *
+     * @param commentId 댓글 ID
+     * @returns 검색된 댓글 정보를 반환합니다.
+     */
+    async findCommentWithUserInfo(commentId: string) {
+        try {
+            const comment = await this.shareCommentRepository
+                .findOne({ _id: commentId, isDeleted: false })
+                .populate({ path: 'userId', select: 'nickname fcmToken' })
+                .exec();
+
+            if (!comment) {
+                throw new NotFoundException('Not found for the specified share comment Id.');
+            }
+
+            return { ...comment.Mapper(), userId: Object(comment.userId).Mapper() };
+        } catch (error) {
+            serviceErrorHandler(error, 'Invalid ObjectId for share comment Id .');
+        }
+    }
+
+    /**
+     * 지정된 댓글 ID를 기반으로 댓글을 검색하고 반환합니다.
+     *
      * @param postId 게시글 ID
      * @returns 검색된 댓글 정보를 반환합니다.
      */
@@ -634,5 +656,12 @@ export class ShareSearcherService {
     async getCommentIds(postId: string): Promise<string[]> {
         const comments = await this.shareCommentRepository.find({ postId, isDeleted: false }, { _id: 1 }).exec();
         return comments.map((entity) => entity.Mapper().id as string);
+    }
+
+    async extractUserInfo(input: string) {
+        const regex = /@(\S+)/g;
+        const matches = input.match(regex)?.map((match) => match.slice(1));
+
+        return matches ? await this.userSearcherService.extractUserInfo(matches) : undefined;
     }
 }

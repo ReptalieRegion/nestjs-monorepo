@@ -9,6 +9,9 @@ export class InputNotificationAgreeDTO {
     readonly userId: string;
 
     @IsBoolean()
+    readonly device: boolean;
+
+    @IsBoolean()
     readonly comment: boolean;
 
     @IsBoolean()
@@ -16,6 +19,9 @@ export class InputNotificationAgreeDTO {
 
     @IsBoolean()
     readonly follow: boolean;
+
+    @IsBoolean()
+    readonly tag: boolean;
 
     @IsBoolean()
     readonly service: boolean;

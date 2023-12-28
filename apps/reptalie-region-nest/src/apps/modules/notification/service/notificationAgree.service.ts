@@ -9,7 +9,7 @@ export const NotificationAgreeServiceToken = 'NotificationAgreeServiceToken';
 export class NotificationAgreeService {
     constructor(private readonly notificationAgreeRepository: NotificationAgreeRepository) {}
 
-    async createAgree(userId: string, isAgree: boolean) {
+    async createAgree(userId: string) {
         const isExistsAgree = await this.notificationAgreeRepository.findOne({ userId }).exec();
 
         if (isExistsAgree) {
@@ -17,10 +17,12 @@ export class NotificationAgreeService {
         }
 
         const dto: InputNotificationAgreeDTO = {
-            comment: isAgree,
-            follow: isAgree,
-            like: isAgree,
-            service: isAgree,
+            device: false,
+            comment: true,
+            follow: true,
+            like: true,
+            tag: true,
+            service: true,
             userId,
         };
 
@@ -29,6 +31,8 @@ export class NotificationAgreeService {
         if (!agree) {
             throw new InternalServerErrorException('Failed to save notification agree.');
         }
+
+        return { message: 'Success' };
     }
 
     async updateAgree(userId: string, isAgree: boolean, type: string) {
@@ -46,6 +50,12 @@ export class NotificationAgreeService {
                 break;
             case '공지사항':
                 query = { $set: { service: isAgree } };
+                break;
+            case '태그':
+                query = { $set: { tag: isAgree } };
+                break;
+            case '기기':
+                query = { $set: { device: isAgree } };
                 break;
             default:
                 throw new BadRequestException('Invalid data for the specified type.');
@@ -65,13 +75,14 @@ export class NotificationAgreeService {
             throw new NotFoundException('Notification agree information not found for the specified user.');
         }
 
-        const { comment, like, service, follow } = agree;
+        const { comment, like, service, follow, tag, device } = agree;
 
         return {
-            isAgreeComment: comment,
-            isAgreePostLike: like,
-            isAgreeService: service,
-            isAgreeFollow: follow,
+            isAgreeComment: device && comment,
+            isAgreePostLike: device && like,
+            isAgreeService: device && service,
+            isAgreeFollow: device && follow,
+            isAgreeTag: device && tag,
         };
     }
 
@@ -92,6 +103,9 @@ export class NotificationAgreeService {
                 break;
             case TemplateType.Follow:
                 isPushAgree = isAgree.isAgreeFollow;
+                break;
+            case TemplateType.Tag:
+                isPushAgree = isAgree.isAgreeTag;
                 break;
             default:
                 throw new BadRequestException('Invalid data for the specified type.');

@@ -1,7 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
 import { IUserProfileDTO } from '../../../dto/user/user/response-user.dto';
 import { User } from '../../../schemas/user.schema';
 import { serviceErrorHandler } from '../../../utils/error/errorHandler';
+import { randomWords } from '../../../utils/randomWords/randomWords';
 import { FollowRepository } from '../repository/follow.repository';
 import { UserRepository } from '../repository/user.repository';
 
@@ -28,12 +29,14 @@ export class UserSearcherService {
      * @returns 팔로워 목록 및 다음 페이지의 존재 여부를 반환합니다.
      */
     async getFollowersInfiniteScroll(following: string, search: string, pageParam: number, limitSize: number) {
+        const initials = this.getInitials(search);
+
         const follow = await this.followRepository
             .find(
                 {
                     following,
                     isCanceled: false,
-                    followerNickname: { $regex: new RegExp(`^${search}`, 'i') },
+                    initials: { $regex: new RegExp(`${initials}`, 'i') },
                 },
                 { follower: 1, followerNickname: 1 },
             )
@@ -120,21 +123,21 @@ export class UserSearcherService {
                     const isFollow = currentUserId ? await this.isExistsFollow(currentUserId, entity.following) : undefined;
 
                     return {
-                        id: String(entity.following),
-                        nickname: entity.userDetails.nickname,
-                        profile: {
-                            src: `${process.env.AWS_IMAGE_BASEURL}${entity.userImage.imageKey}`,
+                        user: {
+                            id: String(entity.following),
+                            nickname: entity.userDetails.nickname,
+                            profile: {
+                                src: `${process.env.AWS_IMAGE_BASEURL}${entity.userImage.imageKey}`,
+                            },
+                            isFollow,
+                            isMine,
                         },
-                        isFollow,
-                        isMine,
                     };
                 }),
             );
 
             const isLastPage = followers.length < limitSize;
             const nextPage = isLastPage ? undefined : pageParam + 1;
-
-            console.log(items);
 
             return { items, nextPage };
         } catch (error) {
@@ -167,21 +170,21 @@ export class UserSearcherService {
                     const isFollow = currentUserId ? await this.isExistsFollow(currentUserId, entity.follower) : undefined;
 
                     return {
-                        id: String(entity.follower),
-                        nickname: entity.userDetails.nickname,
-                        profile: {
-                            src: `${process.env.AWS_IMAGE_BASEURL}${entity.userImage.imageKey}`,
+                        user: {
+                            id: String(entity.follower),
+                            nickname: entity.userDetails.nickname,
+                            profile: {
+                                src: `${process.env.AWS_IMAGE_BASEURL}${entity.userImage.imageKey}`,
+                            },
+                            isFollow,
+                            isMine,
                         },
-                        isFollow,
-                        isMine,
                     };
                 }),
             );
 
             const isLastPage = followings.length < limitSize;
             const nextPage = isLastPage ? undefined : pageParam + 1;
-
-            console.log(items);
 
             return { items, nextPage };
         } catch (error) {
@@ -306,6 +309,22 @@ export class UserSearcherService {
     }
 
     /**
+     * 닉네임을 검색합니다.
+     *
+     * @param nickname - 검색할 닉네임
+     * @returns 사용자 정보를 반환합니다.
+     */
+    async extractUserInfo(nicknames: string[]) {
+        const users = await this.userRepository.find({ nickname: { $in: nicknames } }, { _id: 1, fcmToken: 1 }).exec();
+
+        if (users.length !== nicknames.length) {
+            throw new NotFoundException('Not found for the specified nickname.');
+        }
+
+        return users.map((entity) => entity.Mapper());
+    }
+
+    /**
      * 팔로우 상태의 존재 여부를 검색합니다.
      *
      * @param following - 팔로우 대상 사용자 ID
@@ -341,5 +360,55 @@ export class UserSearcherService {
     async getUserFollowers(userId: string) {
         const followers = await this.followRepository.find({ following: userId, isCanceled: false }, { follower: 1 }).exec();
         return followers.map((entity) => entity.Mapper().follower as string);
+    }
+
+    getInitials(nickname: string): string {
+        return nickname.replace(/[가-힣]/g, (char) => {
+            const charCode = char.charCodeAt(0) - 44032;
+            const initialIndex = Math.floor(charCode / 588);
+            return String.fromCharCode(initialIndex + 4352);
+        });
+    }
+
+    /**
+     * 이용 가능한 닉네임을 생성합니다.
+     *
+     * @returns 생성된 닉네임을 반환합니다.
+     */
+    async generateAvailableNickname(): Promise<string> {
+        for (let i = 0; i < 15; i++) {
+            const baseNickname = this.generateRandomNickname();
+            const nicknameToCheck = i < 5 ? baseNickname : `${baseNickname}${i - 5}`;
+
+            const isDuplicate = await this.isDuplicateNickname(nicknameToCheck);
+            if (!isDuplicate.isDuplicate) {
+                return nicknameToCheck;
+            }
+        }
+
+        throw new UnprocessableEntityException('Too many requests to generate a nickname.');
+    }
+
+    /**
+     * 무작위 닉네임을 생성합니다.
+     *
+     * @returns 생성된 닉네임을 반환합니다.
+     */
+    private generateRandomNickname(): string {
+        const { adverbs, adjectives, nouns } = randomWords;
+
+        const getRandomWord = (wordList: string[]): string => {
+            const randomIndex = Math.floor(Math.random() * wordList.length);
+            return wordList[randomIndex];
+        };
+
+        const randomAdv = getRandomWord(adverbs);
+        const randomAdj = getRandomWord(adjectives);
+        const randomNoun = getRandomWord(nouns);
+
+        const shortNickname = randomAdj + randomNoun;
+        const longNickname = randomAdv + shortNickname;
+
+        return longNickname.length > 8 ? shortNickname : longNickname;
     }
 }

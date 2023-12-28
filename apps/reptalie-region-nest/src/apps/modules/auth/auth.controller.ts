@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Headers, HttpCode, HttpStatus, Inject, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Headers, HttpCode, HttpStatus, Inject, Post, UseGuards } from '@nestjs/common';
 import { IEncryptedDataDTO, IJoinProgressDTO } from '../../dto/user/social/input-social.dto';
 import { IUserProfileDTO } from '../../dto/user/user/response-user.dto';
 import { controllerErrorHandler } from '../../utils/error/errorHandler';
@@ -119,4 +119,9 @@ export class AuthController {
      *  Get
      *
      */
+    @Get('sign-in/check')
+    @UseGuards(JwtAuthGuard)
+    async signInCheck() {
+        return { message: 'success' };
+    }
 }

@@ -39,10 +39,15 @@ export class DiaryDeleterService {
                 throw new InternalServerErrorException('Failed to delete diary entity.');
             }
 
-            await this.imageDeleterService.deleteImageByTypeId(ImageType.Diary, entityId, session);
-            await this.diaryWeightRepository
-                .updateMany({ entityId, isDeleted: false }, { $set: { isDeleted: true } }, { session })
-                .exec();
+            await Promise.all([
+                this.imageDeleterService.deleteImageByTypeId(ImageType.Diary, entityId, session),
+                this.diaryWeightRepository
+                    .updateMany({ entityId, isDeleted: false }, { $set: { isDeleted: true } }, { session })
+                    .exec(),
+                this.diaryCalendarRepository
+                    .updateMany({ entityId, userId: user.id, isDeleted: false }, { $set: { isDeleted: true } }, { session })
+                    .exec(),
+            ]);
 
             await session.commitTransaction();
 

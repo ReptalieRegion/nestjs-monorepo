@@ -66,6 +66,8 @@ export class ShareWriterService {
         let imageKeys: string[] = [];
 
         try {
+            const tagUserInfo = await this.shareSearcherService.extractUserInfo(dto.contents);
+
             const post = await this.sharePostRepository.createPost(user.id, dto, session);
             if (!post.id) {
                 throw new InternalServerErrorException('Failed to save share post.');
@@ -78,6 +80,44 @@ export class ShareWriterService {
             await session.commitTransaction();
 
             const postInfo = await this.shareSearcherService.getPostInfo({ create: { post, imageKeys } });
+
+            tagUserInfo?.map((entity) => {
+                Promise.all([this.notificationAgreeService.isPushAgree(TemplateType.Tag, entity.id as string)])
+                    .then(async ([isPushAgree]) => {
+                        if (!isPushAgree) {
+                            return;
+                        }
+
+                        const postThumbnail = `${process.env.AWS_IMAGE_BASEURL}${imageKeys[0]}`;
+                        const userThumbnail = user.profile.src;
+
+                        if (!postThumbnail || !userThumbnail) {
+                            throw new Error(
+                                '[CRAWL] Not Found postThumbnail or userThumbnail\n' +
+                                    `postThumbnail: ${postThumbnail}\n` +
+                                    `userThumbnail: ${userThumbnail}\n` +
+                                    `postId: ${post.id}\n` +
+                                    `userId: ${entity?.id}`,
+                            );
+                        }
+
+                        await this.notificationPushService.sendMessage(entity.fcmToken, {
+                            type: TemplateType.Tag,
+                            userId: entity.id as string,
+                            postId: post.id,
+                            postThumbnail,
+                            userThumbnail,
+                            articleParams: { 태그한유저: user.nickname },
+                        });
+                    })
+                    .catch((error) => {
+                        this.notificationSlackService.send(
+                            `*[푸시 알림]* 이미지 찾기 실패\n${error.message}`,
+                            '푸시알림-에러-dev',
+                        );
+                    });
+            });
+
             return { post: { ...postInfo, user } };
         } catch (error) {
             await this.imageS3HandlerService.deleteImagesFromS3(imageKeys);
@@ -98,6 +138,8 @@ export class ShareWriterService {
     async createComment(user: IUserProfileDTO, dto: InputShareCommentDTO) {
         const post = await this.shareSearcherService.findPostWithUserInfo(dto.postId);
 
+        const tagUserInfo = await this.shareSearcherService.extractUserInfo(dto.contents);
+
         const comment = await this.shareCommentRepository.createComment(user.id, dto);
         if (!comment) {
             throw new InternalServerErrorException('Failed to save share comment.');
@@ -112,15 +154,7 @@ export class ShareWriterService {
             this.notificationAgreeService.isPushAgree(TemplateType.Comment, post?.userId.id),
             this.imageSearcherService.getPostImages(comment.postId),
         ])
-            .then(async ([isPushAgree, postImage]) => {
-                if (post?.userId.id === user.id) {
-                    return;
-                }
-
-                if (!isPushAgree) {
-                    return;
-                }
-
+            .then(async ([isCommentPushAgree, postImage]) => {
                 const postThumbnail = postImage[0].src;
                 const userThumbnail = user.profile.src;
 
@@ -134,16 +168,37 @@ export class ShareWriterService {
                     );
                 }
 
-                await this.notificationPushService.sendMessage(post?.userId.fcmToken, {
-                    type: TemplateType.Comment,
-                    userId: post?.userId.id,
-                    postId: comment.postId,
-                    postThumbnail,
-                    userThumbnail,
-                    articleParams: {
-                        댓글생성한유저: user.nickname,
-                    },
-                });
+                if (post?.userId.id !== user.id && isCommentPushAgree) {
+                    await this.notificationPushService.sendMessage(post?.userId.fcmToken, {
+                        type: TemplateType.Comment,
+                        userId: post?.userId.id,
+                        postId: comment.postId,
+                        postThumbnail,
+                        userThumbnail,
+                        articleParams: { 댓글생성한유저: user.nickname },
+                    });
+                }
+
+                if (tagUserInfo?.length) {
+                    await Promise.all(
+                        tagUserInfo.map(async (entity) => {
+                            const [isTagPushAgree] = await Promise.all([
+                                this.notificationAgreeService.isPushAgree(TemplateType.Tag, entity.id as string),
+                            ]);
+
+                            if (post?.userId.id !== entity.id && isTagPushAgree) {
+                                await this.notificationPushService.sendMessage(entity.fcmToken, {
+                                    type: TemplateType.Tag,
+                                    userId: entity.id as string,
+                                    postId: comment.postId,
+                                    postThumbnail,
+                                    userThumbnail,
+                                    articleParams: { 태그한유저: user.nickname },
+                                });
+                            }
+                        }),
+                    );
+                }
             })
             .catch((error) => {
                 this.notificationSlackService.send(`*[푸시 알림]* 이미지 찾기 실패\n${error.message}`, '푸시알림-에러-dev');
@@ -160,7 +215,9 @@ export class ShareWriterService {
      * @returns 생성된 댓글에 대한 답글과 사용자 정보를 반환합니다.
      */
     async createCommentReply(user: IUserProfileDTO, dto: InputShareCommentReplyDTO) {
-        const comment = await this.shareSearcherService.findComment(dto.commentId);
+        const comment = await this.shareSearcherService.findCommentWithUserInfo(dto.commentId);
+
+        const tagUserInfo = await this.shareSearcherService.extractUserInfo(dto.contents);
 
         const commentReply = await this.shareCommentReplyRepository.createCommentReply(user.id, dto);
         if (!commentReply.id) {
@@ -168,6 +225,64 @@ export class ShareWriterService {
         }
 
         const commentReplyInfo = await this.shareSearcherService.getCommentReplyInfo({ create: { commentReply } });
+
+        /**
+         * 푸시 알림 전송
+         */
+        Promise.all([
+            this.notificationAgreeService.isPushAgree(TemplateType.Comment, comment?.userId.id),
+            this.imageSearcherService.getPostImages(comment?.postId as string),
+        ])
+            .then(async ([isCommentPushAgree, postImage]) => {
+                const postThumbnail = postImage[0].src;
+                const userThumbnail = user.profile.src;
+
+                if (!postThumbnail || !userThumbnail) {
+                    throw new Error(
+                        '[CRAWL] Not Found postThumbnail or userThumbnail\n' +
+                            `postThumbnail: ${postThumbnail}\n` +
+                            `userThumbnail: ${userThumbnail}\n` +
+                            `postId: ${comment?.postId}\n` +
+                            `userId: ${comment?.userId.id}`,
+                    );
+                }
+
+                if (comment?.userId.id !== user.id && isCommentPushAgree) {
+                    await this.notificationPushService.sendMessage(comment?.userId.fcmToken, {
+                        type: TemplateType.Comment,
+                        userId: comment?.userId.id,
+                        postId: comment?.postId as string,
+                        postThumbnail,
+                        userThumbnail,
+                        articleParams: { 댓글생성한유저: user.nickname },
+                    });
+                }
+
+                if (tagUserInfo?.length) {
+                    await Promise.all(
+                        tagUserInfo.map(async (entity) => {
+                            const [isTagPushAgree] = await Promise.all([
+                                this.notificationAgreeService.isPushAgree(TemplateType.Tag, entity.id as string),
+                            ]);
+
+                            if (comment?.userId.id !== entity.id && isTagPushAgree) {
+                                await this.notificationPushService.sendMessage(entity.fcmToken, {
+                                    type: TemplateType.Tag,
+                                    userId: entity.id as string,
+                                    postId: comment?.postId as string,
+                                    postThumbnail,
+                                    userThumbnail,
+                                    articleParams: { 태그한유저: user.nickname },
+                                });
+                            }
+                        }),
+                    );
+                }
+            })
+            .catch((error) => {
+                this.notificationSlackService.send(`*[푸시 알림]* 이미지 찾기 실패\n${error.message}`, '푸시알림-에러-dev');
+            });
+
         return {
             post: {
                 id: comment?.postId,

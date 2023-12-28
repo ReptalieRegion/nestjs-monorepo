@@ -15,6 +15,9 @@ export class NotificationAgree {
     userId: User;
 
     @Prop({ required: true, type: SchemaTypes.Boolean })
+    device: boolean;
+
+    @Prop({ required: true, type: SchemaTypes.Boolean })
     comment: boolean;
 
     @Prop({ required: true, type: SchemaTypes.Boolean })
@@ -22,6 +25,9 @@ export class NotificationAgree {
 
     @Prop({ required: true, type: SchemaTypes.Boolean })
     follow: boolean;
+
+    @Prop({ required: true, type: SchemaTypes.Boolean })
+    tag: boolean;
 
     @Prop({ required: true, type: SchemaTypes.Boolean })
     service: boolean;
@@ -33,9 +39,11 @@ NotificationAgreeSchema.methods = {
         const fields: Array<keyof IResponseNotificationAgreeDTO> = [
             'id',
             'userId',
+            'device',
             'comment',
             'like',
             'follow',
+            'tag',
             'service',
             'createdAt',
             'updatedAt',
@@ -43,15 +51,18 @@ NotificationAgreeSchema.methods = {
 
         const viewFields = fields.reduce((prev, field) => {
             const value = this.get(field);
+
             if (value === undefined) {
                 return prev;
             }
+
             if (value instanceof mongoose.Types.ObjectId) {
                 return {
                     ...prev,
                     [field]: value.toHexString(),
                 };
             }
+            
             return {
                 ...prev,
                 [field]: value,

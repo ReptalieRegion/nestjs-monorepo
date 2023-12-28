@@ -348,7 +348,19 @@ interface NotificationNotice extends NotificationBase {
     type: TemplateType.Notice;
 }
 
-export type NotificationPushParams = NotificationComment | NotificationFollow | NotificationLike | NotificationNotice;
+interface NotificationTag extends NotificationBase {
+    type: TemplateType.Tag;
+    postId: string;
+    postThumbnail: string;
+    userThumbnail: string;
+}
+
+export type NotificationPushParams =
+    | NotificationComment
+    | NotificationFollow
+    | NotificationLike
+    | NotificationNotice
+    | NotificationTag;
 
 export type NotificationPushData = {
     title: TemplateTitleType;

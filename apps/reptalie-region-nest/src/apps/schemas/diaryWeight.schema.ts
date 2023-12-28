@@ -40,7 +40,7 @@ DiaryWeightSchema.methods = {
 
         const viewFields = fields.reduce((prev, field) => {
             const value = this.get(field);
-            
+
             if (value === undefined) {
                 return prev;
             }
@@ -51,11 +51,13 @@ DiaryWeightSchema.methods = {
                     [field]: value.toHexString(),
                 };
             }
+
             return {
                 ...prev,
                 [field]: value,
             };
         }, {});
+
         return viewFields;
     },
 };

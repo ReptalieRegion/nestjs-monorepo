@@ -65,8 +65,11 @@ export class DiarySearcherService {
 
         const items = weights.map((entity) => {
             return {
-                date: entity.date,
-                weight: entity.weight,
+                entityWeight: {
+                    id: entity.id,
+                    date: entity.date,
+                    weight: entity.weight,
+                },
             };
         });
 

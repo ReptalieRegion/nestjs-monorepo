@@ -1,7 +1,6 @@
 import { Inject, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectConnection } from '@nestjs/mongoose';
 import mongoose, { ClientSession } from 'mongoose';
-import { IDeleteWeightDTO } from '../../../dto/diary/weight/input-diaryWeight.dto';
 import { ImageType } from '../../../dto/image/input-image.dto';
 import { IUserProfileDTO } from '../../../dto/user/user/response-user.dto';
 import { serviceErrorHandler } from '../../../utils/error/errorHandler';
@@ -60,10 +59,10 @@ export class DiaryDeleterService {
         }
     }
 
-    async deleteWeight(weightId: string, dto: IDeleteWeightDTO) {
+    async deleteWeight(weightId: string) {
         try {
             const result = await this.diaryWeightRepository
-                .updateOne({ id: weightId, date: dto.date, isDeleted: false }, { $set: { isDeleted: true } })
+                .updateOne({ _id: weightId, isDeleted: false }, { $set: { isDeleted: true } })
                 .exec();
 
             if (result.modifiedCount === 0) {

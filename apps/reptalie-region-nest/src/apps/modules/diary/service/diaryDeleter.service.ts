@@ -60,10 +60,10 @@ export class DiaryDeleterService {
         }
     }
 
-    async deleteWeight(entityId: string, dto: IDeleteWeightDTO) {
+    async deleteWeight(weightId: string, dto: IDeleteWeightDTO) {
         try {
             const result = await this.diaryWeightRepository
-                .updateOne({ entityId, date: dto.date, isDeleted: false }, { $set: { isDeleted: true } })
+                .updateOne({ id: weightId, date: dto.date, isDeleted: false }, { $set: { isDeleted: true } })
                 .exec();
 
             if (result.modifiedCount === 0) {

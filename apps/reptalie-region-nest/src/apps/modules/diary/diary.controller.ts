@@ -147,12 +147,12 @@ export class DiaryController {
         }
     }
 
-    @Delete('entity/:entityId/weight')
+    @Delete('entity/weight/:weightId')
     @HttpCode(HttpStatus.OK)
     @UseGuards(JwtAuthGuard)
-    async deleteWeight(@Param('entityId') entityId: string, @Body() dto: IDeleteWeightDTO) {
+    async deleteWeight(@Param('weightId') weightId: string, @Body() dto: IDeleteWeightDTO) {
         try {
-            return this.diaryDeleterService.deleteWeight(entityId, dto);
+            return this.diaryDeleterService.deleteWeight(weightId, dto);
         } catch (error) {
             controllerErrorHandler(error);
         }

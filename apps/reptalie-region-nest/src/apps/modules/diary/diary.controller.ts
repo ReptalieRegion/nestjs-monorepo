@@ -17,7 +17,7 @@ import {
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { IUpdateCalendarDTO, InputDiaryCalendarDTO } from '../../dto/diary/calendar/input-diaryCalendar.dto';
 import { IUpdateEntityDTO, InputDiaryEntityDTO } from '../../dto/diary/entity/input-diaryEntity.dto';
-import { IDeleteWeightDTO, IUpdateWeightDTO, InputDiaryWeightDTO } from '../../dto/diary/weight/input-diaryWeight.dto';
+import { IUpdateWeightDTO, InputDiaryWeightDTO } from '../../dto/diary/weight/input-diaryWeight.dto';
 import { IUserProfileDTO } from '../../dto/user/user/response-user.dto';
 import { ValidationPipe } from '../../utils/error/validator/validator.pipe';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -119,11 +119,11 @@ export class DiaryController {
         return this.diaryDeleterService.deleteEntity(user, entityId);
     }
 
-    @Delete('entity/:entityId/weight')
+    @Delete('entity/weight/:weightId')
     @HttpCode(HttpStatus.OK)
     @UseGuards(JwtAuthGuard)
-    async deleteWeight(@Param('entityId') entityId: string, @Body() dto: IDeleteWeightDTO) {
-        return this.diaryDeleterService.deleteWeight(entityId, dto);
+    async deleteWeight(@Param('weightId') weightId: string) {
+        return this.diaryDeleterService.deleteWeight(weightId);
     }
 
     @Delete('calendar/:calendarId')

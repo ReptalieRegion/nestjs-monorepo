@@ -19,7 +19,7 @@ import { IUpdateCalendarDTO, InputDiaryCalendarDTO } from '../../dto/diary/calen
 import { IUpdateEntityDTO, InputDiaryEntityDTO } from '../../dto/diary/entity/input-diaryEntity.dto';
 import { IDeleteWeightDTO, IUpdateWeightDTO, InputDiaryWeightDTO } from '../../dto/diary/weight/input-diaryWeight.dto';
 import { IUserProfileDTO } from '../../dto/user/user/response-user.dto';
-import { controllerErrorHandler } from '../../utils/error/errorHandler';
+import { ValidationPipe } from '../../utils/error/validator/validator.pipe';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { AuthUser } from '../user/user.decorator';
 import { DiaryDeleterService, DiaryDeleterServiceToken } from './service/diaryDeleter.service';
@@ -52,13 +52,9 @@ export class DiaryController {
     async createEntity(
         @AuthUser() user: IUserProfileDTO,
         @UploadedFiles() files: Express.Multer.File[],
-        @Body() dto: InputDiaryEntityDTO,
+        @Body(new ValidationPipe(-1201)) dto: InputDiaryEntityDTO,
     ) {
-        try {
-            return this.diaryWriterService.createEntity(user, files, dto);
-        } catch (error) {
-            controllerErrorHandler(error);
-        }
+        return this.diaryWriterService.createEntity(user, files, dto);
     }
 
     @Post('entity/:entityId/weight')
@@ -67,24 +63,16 @@ export class DiaryController {
     async createWeight(
         @AuthUser() user: IUserProfileDTO,
         @Param('entityId') entityId: string,
-        @Body() dto: InputDiaryWeightDTO,
+        @Body(new ValidationPipe(-1201)) dto: InputDiaryWeightDTO,
     ) {
-        try {
-            return this.diaryWriterService.createWeight(user, entityId, dto);
-        } catch (error) {
-            controllerErrorHandler(error);
-        }
+        return this.diaryWriterService.createWeight(user, entityId, dto);
     }
 
     @Post('calendar')
     @HttpCode(HttpStatus.CREATED)
     @UseGuards(JwtAuthGuard)
-    async createCalendar(@AuthUser() user: IUserProfileDTO, @Body() dto: InputDiaryCalendarDTO) {
-        try {
-            return this.diaryWriterService.createCalendar(user, dto);
-        } catch (error) {
-            controllerErrorHandler(error);
-        }
+    async createCalendar(@AuthUser() user: IUserProfileDTO, @Body(new ValidationPipe(-1201)) dto: InputDiaryCalendarDTO) {
+        return this.diaryWriterService.createCalendar(user, dto);
     }
 
     /**
@@ -99,36 +87,24 @@ export class DiaryController {
     async updateEntity(
         @AuthUser() user: IUserProfileDTO,
         @Param('entityId') entityId: string,
-        @Body() dto: IUpdateEntityDTO,
+        @Body(new ValidationPipe(-1201)) dto: IUpdateEntityDTO,
         @UploadedFiles() files?: Express.Multer.File[],
     ) {
-        try {
-            return this.diaryUpdaterService.updateEntity(user, entityId, dto, files);
-        } catch (error) {
-            controllerErrorHandler(error);
-        }
+        return this.diaryUpdaterService.updateEntity(user, entityId, dto, files);
     }
 
     @Put('entity/:entityId/weight')
     @HttpCode(HttpStatus.OK)
     @UseGuards(JwtAuthGuard)
     async updateWeight(@Param('entityId') entityId: string, @Body() dto: IUpdateWeightDTO) {
-        try {
-            return this.diaryUpdaterService.updateWeight(entityId, dto);
-        } catch (error) {
-            controllerErrorHandler(error);
-        }
+        return this.diaryUpdaterService.updateWeight(entityId, dto);
     }
 
     @Put('calendar/:calendarId')
     @HttpCode(HttpStatus.OK)
     @UseGuards(JwtAuthGuard)
     async updateCalendar(@Param('calendarId') calendarId: string, @Body() dto: IUpdateCalendarDTO) {
-        try {
-            return this.diaryUpdaterService.updateCalendar(calendarId, dto);
-        } catch (error) {
-            controllerErrorHandler(error);
-        }
+        return this.diaryUpdaterService.updateCalendar(calendarId, dto);
     }
 
     /**
@@ -140,33 +116,21 @@ export class DiaryController {
     @HttpCode(HttpStatus.OK)
     @UseGuards(JwtAuthGuard)
     async deleteEntity(@AuthUser() user: IUserProfileDTO, @Param('entityId') entityId: string) {
-        try {
-            return this.diaryDeleterService.deleteEntity(user, entityId);
-        } catch (error) {
-            controllerErrorHandler(error);
-        }
+        return this.diaryDeleterService.deleteEntity(user, entityId);
     }
 
     @Delete('entity/:entityId/weight')
     @HttpCode(HttpStatus.OK)
     @UseGuards(JwtAuthGuard)
     async deleteWeight(@Param('entityId') entityId: string, @Body() dto: IDeleteWeightDTO) {
-        try {
-            return this.diaryDeleterService.deleteWeight(entityId, dto);
-        } catch (error) {
-            controllerErrorHandler(error);
-        }
+        return this.diaryDeleterService.deleteWeight(entityId, dto);
     }
 
     @Delete('calendar/:calendarId')
     @HttpCode(HttpStatus.OK)
     @UseGuards(JwtAuthGuard)
     async deleteCalendar(@Param('calendarId') calendarId: string) {
-        try {
-            return this.diaryDeleterService.deleteCalendar(calendarId);
-        } catch (error) {
-            controllerErrorHandler(error);
-        }
+        return this.diaryDeleterService.deleteCalendar(calendarId);
     }
 
     /**
@@ -178,22 +142,14 @@ export class DiaryController {
     @HttpCode(HttpStatus.OK)
     @UseGuards(JwtAuthGuard)
     async getEntityInfiniteScroll(@AuthUser() user: IUserProfileDTO, @Query('pageParam') pageParam: number) {
-        try {
-            return this.diarySearcherService.getEntityInfiniteScroll(user.id, pageParam, 10);
-        } catch (error) {
-            controllerErrorHandler(error);
-        }
+        return this.diarySearcherService.getEntityInfiniteScroll(user.id, pageParam, 10);
     }
 
     @Get('entity/:entityId/weight/list')
     @HttpCode(HttpStatus.OK)
     @UseGuards(JwtAuthGuard)
     async getWeightInfiniteScroll(@Param('entityId') entityId: string, @Query('pageParam') pageParam: number) {
-        try {
-            return this.diarySearcherService.getWeightInfiniteScroll(entityId, pageParam, 7);
-        } catch (error) {
-            controllerErrorHandler(error);
-        }
+        return this.diarySearcherService.getWeightInfiniteScroll(entityId, pageParam, 7);
     }
 
     @Get('calendar/list')
@@ -204,10 +160,6 @@ export class DiaryController {
         @Query('startDate') startDate: Date,
         @Query('endDate') endDate: Date,
     ) {
-        try {
-            return this.diarySearcherService.getCalendarInfo(user.id, startDate, endDate);
-        } catch (error) {
-            controllerErrorHandler(error);
-        }
+        return this.diarySearcherService.getCalendarInfo(user.id, startDate, endDate);
     }
 }

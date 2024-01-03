@@ -1,5 +1,6 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { InputNotificationTemplateDTO } from '../../../dto/notification/template/input-notificationTemplate.dto';
+import { CustomException } from '../../../utils/error/customException';
 import { NotificationTemplateRepository } from '../repository/notificationTemplate.repository';
 
 export const NotificationTemplateServiceToken = 'NotificationTemplateServiceToken';
@@ -20,7 +21,7 @@ export class NotificationTemplateService {
         const template = await this.notificationTemplateRepository.createTemplate(dto, version);
 
         if (!template) {
-            throw new InternalServerErrorException('Failed to save notification template.');
+            throw new CustomException('Failed to save notification template.', HttpStatus.INTERNAL_SERVER_ERROR, -1000);
         }
     }
 
@@ -30,7 +31,7 @@ export class NotificationTemplateService {
             .exec();
 
         if (result.deletedCount === 0) {
-            throw new InternalServerErrorException('Failed to delete notification template.');
+            throw new CustomException('Failed to delete notification template.', HttpStatus.INTERNAL_SERVER_ERROR, -1000);
         }
     }
 }

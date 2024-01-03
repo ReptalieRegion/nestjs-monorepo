@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Inject, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { InjectConnection } from '@nestjs/mongoose';
 import mongoose, { ClientSession } from 'mongoose';
 import { InputDiaryCalendarDTO } from '../../../dto/diary/calendar/input-diaryCalendar.dto';
@@ -6,7 +6,8 @@ import { InputDiaryEntityDTO } from '../../../dto/diary/entity/input-diaryEntity
 import { InputDiaryWeightDTO } from '../../../dto/diary/weight/input-diaryWeight.dto';
 import { ImageType } from '../../../dto/image/input-image.dto';
 import { IUserProfileDTO } from '../../../dto/user/user/response-user.dto';
-import { serviceErrorHandler } from '../../../utils/error/errorHandler';
+import { CustomException } from '../../../utils/error/customException';
+import { CustomExceptionHandler } from '../../../utils/error/customException.handler';
 import { ImageS3HandlerService, ImageS3HandlerServiceToken } from '../../image/service/imageS3Handler.service';
 import { ImageWriterService, ImageWriterServiceToken } from '../../image/service/imageWriter.service';
 import { NotificationSlackService, NotificationSlackServiceToken } from '../../notification/service/notificationSlack.service';
@@ -63,7 +64,7 @@ export class DiaryWriterService {
             );
 
             if (!entity) {
-                throw new InternalServerErrorException('Failed to save diary entity.');
+                throw new CustomException('Failed to save diary entity.', HttpStatus.INTERNAL_SERVER_ERROR, -1000);
             }
 
             imageKeys = await this.imageS3HandlerService.uploadToS3(files);
@@ -92,29 +93,22 @@ export class DiaryWriterService {
                 .exec();
 
             if (!isExistsEntity) {
-                throw new NotFoundException('Not found for the specified diary entity.');
+                throw new CustomException('Not found for the specified diary entity.', HttpStatus.NOT_FOUND, -1000);
             }
 
             try {
                 const weight = await this.diaryWeightRepository.createWeight({ ...dto, entityId });
 
                 if (!weight) {
-                    throw new InternalServerErrorException('Failed to save diary weight.');
+                    throw new CustomException('Failed to save diary weight.', HttpStatus.INTERNAL_SERVER_ERROR, -1000);
                 }
             } catch (error) {
-                throw new HttpException(
-                    {
-                        statusCode: HttpStatus.EXPECTATION_FAILED,
-                        message: 'diaryId and date should be unique values.',
-                        error: 'Expectation Failed',
-                    },
-                    HttpStatus.EXPECTATION_FAILED,
-                );
+                throw new CustomException('diaryId and date should be unique values.', HttpStatus.EXPECTATION_FAILED, -1000);
             }
 
             return { message: 'Success' };
         } catch (error) {
-            serviceErrorHandler(error, 'Invalid ObjectId for diary entity Id.');
+            throw new CustomExceptionHandler(error).handleException('Invalid ObjectId for diary entity Id.', -1000);
         }
     }
 
@@ -124,13 +118,13 @@ export class DiaryWriterService {
             .exec();
 
         if (!isExistsEntity) {
-            throw new NotFoundException('Not found for the specified diary entity.');
+            throw new CustomException('Not found for the specified diary entity.', HttpStatus.NOT_FOUND, -1000);
         }
 
         const calendar = await this.diaryCalendarRepository.createCalendar({ ...dto, userId: user.id });
 
         if (!calendar) {
-            throw new InternalServerErrorException('Failed to save diary calendar.');
+            throw new CustomException('Failed to save diary calendar.', HttpStatus.INTERNAL_SERVER_ERROR, -1000);
         }
 
         return { message: 'Success' };

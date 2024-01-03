@@ -1,7 +1,7 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { ClientSession } from 'mongoose';
 import { ImageType } from '../../../dto/image/input-image.dto';
+import { CustomException } from '../../../utils/error/customException';
 import { ImageRepository } from '../image.repository';
 
 export const ImageDeleterServiceToken = 'ImageDeleterServiceToken';
@@ -30,7 +30,7 @@ export class ImageDeleterService {
                 .exec();
 
             if (result.modifiedCount === 0) {
-                throw new NotFoundException('Image not found');
+                throw new CustomException('Failed to delete image By imageKey.', HttpStatus.NOT_FOUND, -1000);
             }
         }
     }
@@ -48,7 +48,7 @@ export class ImageDeleterService {
             .exec();
 
         if (result.modifiedCount === 0) {
-            throw new NotFoundException('Image not found');
+            throw new CustomException('Failed to delete image By typeId.', HttpStatus.NOT_FOUND, -1000);
         }
     }
 }

@@ -1,4 +1,4 @@
-import { BadRequestException, Inject, Injectable, InternalServerErrorException } from '@nestjs/common';
+import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { InjectConnection } from '@nestjs/mongoose';
 import mongoose, { ClientSession } from 'mongoose';
 import { IUpdateCalendarDTO } from '../../../dto/diary/calendar/input-diaryCalendar.dto';
@@ -6,7 +6,8 @@ import { IUpdateEntityDTO } from '../../../dto/diary/entity/input-diaryEntity.dt
 import { IUpdateWeightDTO } from '../../../dto/diary/weight/input-diaryWeight.dto';
 import { ImageType } from '../../../dto/image/input-image.dto';
 import { IUserProfileDTO } from '../../../dto/user/user/response-user.dto';
-import { serviceErrorHandler } from '../../../utils/error/errorHandler';
+import { CustomException } from '../../../utils/error/customException';
+import { CustomExceptionHandler } from '../../../utils/error/customException.handler';
 import { ImageDeleterService, ImageDeleterServiceToken } from '../../image/service/imageDeleter.service';
 import { ImageS3HandlerService, ImageS3HandlerServiceToken } from '../../image/service/imageS3Handler.service';
 import { ImageWriterService, ImageWriterServiceToken } from '../../image/service/imageWriter.service';
@@ -50,7 +51,7 @@ export class DiaryUpdaterService {
             }
 
             if (!dto.name) {
-                throw new BadRequestException('entity name cannot be empty.');
+                throw new CustomException('entity name cannot be empty.', HttpStatus.BAD_REQUEST, -1000);
             }
 
             const result = await this.diaryEntityRepository
@@ -58,7 +59,7 @@ export class DiaryUpdaterService {
                 .exec();
 
             if (result.modifiedCount === 0) {
-                throw new InternalServerErrorException('Failed to update diary entity.');
+                throw new CustomException('Failed to update diary entity.', HttpStatus.INTERNAL_SERVER_ERROR, -1000);
             }
 
             await session.commitTransaction();
@@ -67,7 +68,7 @@ export class DiaryUpdaterService {
         } catch (error) {
             await this.imageS3HandlerService.deleteImagesFromS3(imageKeys);
             await session.abortTransaction();
-            serviceErrorHandler(error, 'Invalid ObjectId for diary entity Id.');
+            throw new CustomExceptionHandler(error).handleException('Invalid ObjectId for diary entity Id.', -1000);
         } finally {
             await session.endSession();
         }
@@ -80,12 +81,12 @@ export class DiaryUpdaterService {
                 .exec();
 
             if (result.modifiedCount === 0) {
-                throw new InternalServerErrorException('Failed to update diary weight.');
+                throw new CustomException('Failed to update diary weight.', HttpStatus.INTERNAL_SERVER_ERROR, -1000);
             }
 
             return { message: 'Success' };
         } catch (error) {
-            serviceErrorHandler(error, 'Invalid ObjectId for diary entity Id.');
+            throw new CustomExceptionHandler(error).handleException('Invalid ObjectId for diary entity Id.', -1000);
         }
     }
 
@@ -96,12 +97,12 @@ export class DiaryUpdaterService {
                 .exec();
 
             if (result.modifiedCount === 0) {
-                throw new InternalServerErrorException('Failed to update diary calendar.');
+                throw new CustomException('Failed to update diary calendar.', HttpStatus.INTERNAL_SERVER_ERROR, -1000);
             }
 
             return { message: 'Success' };
         } catch (error) {
-            serviceErrorHandler(error, 'Invalid ObjectId for diary calendar Id.');
+            throw new CustomExceptionHandler(error).handleException('Invalid ObjectId for diary calendar Id.', -1000);
         }
     }
 
@@ -116,7 +117,7 @@ export class DiaryUpdaterService {
         const result = await this.diaryEntityRepository.updateOne({ _id }, { $set: { imageId } }, { session }).exec();
 
         if (result.modifiedCount === 0) {
-            throw new InternalServerErrorException('Failed to update image Id.');
+            throw new CustomException('Failed to update image Id.', HttpStatus.INTERNAL_SERVER_ERROR, -1000);
         }
     }
 }

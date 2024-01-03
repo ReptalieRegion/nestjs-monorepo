@@ -1,9 +1,10 @@
-import { Inject, Injectable, NotFoundException, forwardRef } from '@nestjs/common';
+import { HttpStatus, Inject, Injectable, forwardRef } from '@nestjs/common';
 import { ReportType } from '../../../dto/report/input-report.dto';
 import { IResponseShareCommentDTO } from '../../../dto/share/comment/response-shareCommnet.dto';
 import { IResponseShareCommentReplyDTO } from '../../../dto/share/commentReply/response-shareCommentReply.dto';
 import { IResponseSharePostDTO } from '../../../dto/share/post/response-sharePost.dto';
-import { serviceErrorHandler } from '../../../utils/error/errorHandler';
+import { CustomException } from '../../../utils/error/customException';
+import { CustomExceptionHandler } from '../../../utils/error/customException.handler';
 import { ImageSearcherService, ImageSearcherServiceToken } from '../../image/service/imageSearcher.service';
 import { ReportSearcherService, ReportSearcherServiceToken } from '../../report/service/reportSearcher.service';
 import { UserSearcherService, UserSearcherServiceToken } from '../../user/service/userSearcher.service';
@@ -98,7 +99,7 @@ export class ShareSearcherService {
         const entity = await this.sharePostRepository.findOne({ _id: postId, isDeleted: false }).exec();
 
         if (!entity) {
-            throw new NotFoundException('Not Found Post');
+            throw new CustomException('Not found for the specified share Post Id.', HttpStatus.NOT_FOUND, -1000);
         }
 
         const post = entity.Mapper();
@@ -130,7 +131,7 @@ export class ShareSearcherService {
      * @returns 가져온 게시물과 다음 페이지 번호를 반환합니다.
      */
     async getUserPostsInfiniteScroll(currentUserId: string, targetNickname: string, pageParam: number, limitSize: number) {
-        const targetUserId = (await this.userSearcherService.findNickname(targetNickname)).id;
+        const targetUserId = (await this.userSearcherService.findNickname(targetNickname))?.id;
 
         const posts = await this.sharePostRepository
             .find({ userId: targetUserId, isDeleted: false })
@@ -303,7 +304,7 @@ export class ShareSearcherService {
 
             return { items, nextPage };
         } catch (error) {
-            serviceErrorHandler(error, 'Invalid ObjectId for post Id');
+            throw new CustomExceptionHandler(error).handleException('Invalid ObjectId for share Post Id.', -1000);
         }
     }
 
@@ -480,12 +481,12 @@ export class ShareSearcherService {
                 .exec();
 
             if (!like) {
-                throw new NotFoundException('Not found for the specified share like status.');
+                throw new CustomException('Not found for the specified share like status.', HttpStatus.NOT_FOUND, -1000);
             }
 
             return { ...like.Mapper(), postId: Object(like.postId).Mapper() };
         } catch (error) {
-            serviceErrorHandler(error, 'Invalid ObjectId for share post Id.');
+            throw new CustomExceptionHandler(error).handleException('Invalid ObjectId for share post Id.', -1000);
         }
     }
 
@@ -515,12 +516,12 @@ export class ShareSearcherService {
                 .exec();
 
             if (!post) {
-                throw new NotFoundException('Not found for the specified share Post Id.');
+                throw new CustomException('Not found for the specified share Post Id.', HttpStatus.NOT_FOUND, -1000);
             }
 
             return { ...post.Mapper(), userId: Object(post.userId).Mapper() };
         } catch (error) {
-            serviceErrorHandler(error, 'Invalid ObjectId for share post Id.');
+            throw new CustomExceptionHandler(error).handleException('Invalid ObjectId for share post Id.', -1000);
         }
     }
 
@@ -538,12 +539,12 @@ export class ShareSearcherService {
                 .exec();
 
             if (!comment) {
-                throw new NotFoundException('Not found for the specified share comment Id.');
+                throw new CustomException('Not found for the specified share comment Id.', HttpStatus.NOT_FOUND, -1000);
             }
 
             return { ...comment.Mapper(), userId: Object(comment.userId).Mapper() };
         } catch (error) {
-            serviceErrorHandler(error, 'Invalid ObjectId for share comment Id .');
+            throw new CustomExceptionHandler(error).handleException('Invalid ObjectId for share comment Id.', -1000);
         }
     }
 
@@ -558,12 +559,12 @@ export class ShareSearcherService {
             const post = await this.sharePostRepository.findOne({ _id: postId, isDeleted: false }).exec();
 
             if (!post) {
-                throw new NotFoundException('Not found for the specified share comment Id.');
+                throw new CustomException('Not found for the specified share post Id.', HttpStatus.NOT_FOUND, -1000);
             }
 
             return post.Mapper();
         } catch (error) {
-            serviceErrorHandler(error, 'Invalid ObjectId for share comment Id .');
+            throw new CustomExceptionHandler(error).handleException('Invalid ObjectId for share post Id.', -1000);
         }
     }
 
@@ -578,12 +579,12 @@ export class ShareSearcherService {
             const comment = await this.shareCommentRepository.findOne({ _id: commentId, isDeleted: false }).exec();
 
             if (!comment) {
-                throw new NotFoundException('Not found for the specified share comment Id.');
+                throw new CustomException('Not found for the specified share comment Id.', HttpStatus.NOT_FOUND, -1000);
             }
 
             return comment.Mapper();
         } catch (error) {
-            serviceErrorHandler(error, 'Invalid ObjectId for share comment Id .');
+            throw new CustomExceptionHandler(error).handleException('Invalid ObjectId for share comment Id.', -1000);
         }
     }
 
@@ -598,12 +599,12 @@ export class ShareSearcherService {
             const reply = await this.shareCommentReplyRepository.findOne({ _id: replyId, isDeleted: false }).exec();
 
             if (!reply) {
-                throw new NotFoundException('Not found for the specified share comment reply Id.');
+                throw new CustomException('Not found for the specified share comment reply Id.', HttpStatus.NOT_FOUND, -1000);
             }
 
             return reply.Mapper();
         } catch (error) {
-            serviceErrorHandler(error, 'Invalid ObjectId for share comment reply Id .');
+            throw new CustomExceptionHandler(error).handleException('Invalid ObjectId for share comment reply Id.', -1000);
         }
     }
 
@@ -655,7 +656,7 @@ export class ShareSearcherService {
      */
     async getCommentIds(postId: string): Promise<string[]> {
         const comments = await this.shareCommentRepository.find({ postId, isDeleted: false }, { _id: 1 }).exec();
-        return comments.map((entity) => entity.Mapper().id as string);
+        return comments?.map((entity) => entity.Mapper().id as string);
     }
 
     async extractUserInfo(input: string) {

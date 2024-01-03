@@ -1,6 +1,7 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { ClientSession } from 'mongoose';
 import { ImageType } from '../../../dto/image/input-image.dto';
+import { CustomException } from '../../../utils/error/customException';
 import { getCurrentDate } from '../../../utils/time/time';
 import { ImageRepository } from '../image.repository';
 
@@ -31,7 +32,7 @@ export class ImageWriterService {
         const createdImage = await this.imageRepository.createImage(images, session);
 
         if (!createdImage) {
-            throw new InternalServerErrorException('Failed to create image');
+            throw new CustomException('Failed to create image.', HttpStatus.INTERNAL_SERVER_ERROR, -1000);
         }
 
         return createdImage;

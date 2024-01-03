@@ -1,9 +1,11 @@
-import { BadRequestException, Inject, Injectable, InternalServerErrorException } from '@nestjs/common';
+import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { InjectConnection } from '@nestjs/mongoose';
 import mongoose, { ClientSession } from 'mongoose';
 import { ImageType } from '../../../dto/image/input-image.dto';
 import { fcmTokenDTO } from '../../../dto/user/user/fcm-token.dto';
 import { IUserProfileDTO } from '../../../dto/user/user/response-user.dto';
+import { CustomException } from '../../../utils/error/customException';
+import { CustomExceptionHandler } from '../../../utils/error/customException.handler';
 import { ImageDeleterService, ImageDeleterServiceToken } from '../../image/service/imageDeleter.service';
 import { ImageS3HandlerService, ImageS3HandlerServiceToken } from '../../image/service/imageS3Handler.service';
 import { ImageWriterService, ImageWriterServiceToken } from '../../image/service/imageWriter.service';
@@ -43,7 +45,7 @@ export class UserUpdaterService {
         const result = await this.userRepository.updateOne({ _id }, { $set: { imageId } }, { session }).exec();
 
         if (result.modifiedCount === 0) {
-            throw new InternalServerErrorException('Failed to update image Id.');
+            throw new CustomException('Failed to update user imageId.', HttpStatus.INTERNAL_SERVER_ERROR, -1000);
         }
     }
 
@@ -55,12 +57,16 @@ export class UserUpdaterService {
      * @param session - MongoDB 클라이언트 세션
      */
     async updateNickname(nickname: string, initials: string, userId: string, session: ClientSession) {
-        const result = await this.userRepository
-            .updateOne({ _id: userId }, { $set: { nickname, initials } }, { session })
-            .exec();
+        try {
+            const result = await this.userRepository
+                .updateOne({ _id: userId }, { $set: { nickname, initials } }, { session })
+                .exec();
 
-        if (result.modifiedCount === 0) {
-            throw new InternalServerErrorException('Failed to update user nickname.');
+            if (result.modifiedCount === 0) {
+                throw new CustomException('Failed to update user nickname.', HttpStatus.INTERNAL_SERVER_ERROR, -1000);
+            }
+        } catch (error) {
+            throw new CustomExceptionHandler(error).handleException('Invalid ObjectId for user Id.', -1000);
         }
     }
 
@@ -75,7 +81,7 @@ export class UserUpdaterService {
         const result = await this.userRepository.updateOne({ _id: user.id }, { $set: { fcmToken: dto.fcmToken } }).exec();
 
         if (result.modifiedCount === 0) {
-            throw new InternalServerErrorException('Failed to update user fcmToken.');
+            throw new CustomException('Failed to update user fcmToken.', HttpStatus.INTERNAL_SERVER_ERROR, -1000);
         }
 
         return { message: 'Success' };
@@ -90,7 +96,7 @@ export class UserUpdaterService {
      */
     async toggleFollow(following: string, follower: string) {
         if (following === follower) {
-            throw new BadRequestException('Following and follower cannot be the same user.');
+            throw new CustomException('following and follower cannot be the same user.', HttpStatus.BAD_REQUEST, -1000);
         }
 
         const followStatus = await this.userSearcherService.getFollowStatus(following, follower);
@@ -100,7 +106,7 @@ export class UserUpdaterService {
             .exec();
 
         if (result.modifiedCount === 0) {
-            throw new InternalServerErrorException('Failed to update follow status.');
+            throw new CustomException('Failed to update follow status.', HttpStatus.INTERNAL_SERVER_ERROR, -1000);
         }
 
         return { user: { nickname: followStatus?.followerNickname } };

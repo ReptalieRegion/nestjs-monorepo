@@ -1,7 +1,8 @@
-import { BadRequestException, ForbiddenException, Inject, Injectable, InternalServerErrorException } from '@nestjs/common';
+import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { InjectConnection } from '@nestjs/mongoose';
 import mongoose, { ClientSession } from 'mongoose';
 import { IJoinProgressDTO, JoinProgressType } from '../../../dto/user/social/input-social.dto';
+import { CustomException } from '../../../utils/error/customException';
 import { UserSearcherService, UserSearcherServiceToken } from '../../user/service/userSearcher.service';
 import { UserUpdaterService, UserUpdaterServiceToken } from '../../user/service/userUpdater.service';
 import { SocialRepository } from '../repository/social.repository';
@@ -49,7 +50,7 @@ export class AuthCommonService {
                 .exec();
 
             if (result.modifiedCount === 0) {
-                throw new InternalServerErrorException('Failed to update social join-progress');
+                throw new CustomException('Failed to update social join-progress.', HttpStatus.INTERNAL_SERVER_ERROR, -1000);
             }
 
             const { accessToken, refreshToken } = await this.tokenGenerationAndStorage(userId, session);
@@ -78,7 +79,7 @@ export class AuthCommonService {
             const { payload } = this.authTokenService.verifyRefreshToken(token);
             const social = await this.socialRepository.findOne({ userId: payload.sub.id }).exec();
             if (!social) {
-                throw new ForbiddenException('User information not found.');
+                throw new CustomException('Not found for the specified user social info.', HttpStatus.FORBIDDEN, -1000);
             }
 
             const mapSocial = social.Mapper();
@@ -87,7 +88,7 @@ export class AuthCommonService {
             const isMatched = this.authEncryptService.comparePBKDF2(token, decryptedSalt, mapSocial.refreshToken as string);
             if (!isMatched) {
                 await this.signOut(mapSocial.userId as string);
-                throw new ForbiddenException('Refresh token mismatch.');
+                throw new CustomException('Refresh token mismatch.', HttpStatus.FORBIDDEN, -1000);
             }
 
             const { accessToken, refreshToken } = await this.tokenGenerationAndStorage(mapSocial.userId as string, session);
@@ -113,7 +114,7 @@ export class AuthCommonService {
             .exec();
 
         if (result.modifiedCount === 0) {
-            throw new InternalServerErrorException('Failed to update the refresh token and salt');
+            throw new CustomException('Failed to delete the refresh token and salt.', HttpStatus.INTERNAL_SERVER_ERROR, -1000);
         }
 
         return { message: 'Success' };
@@ -131,7 +132,7 @@ export class AuthCommonService {
         const encryptPBKDF2Info = this.authEncryptService.encryptPBKDF2(refreshToken);
 
         if (encryptPBKDF2Info === undefined) {
-            throw new BadRequestException('Failed to generate refresh token.');
+            throw new CustomException('Failed to generate refresh token.', HttpStatus.BAD_REQUEST, -1000);
         }
 
         const { salt, encryptedData } = encryptPBKDF2Info;
@@ -154,7 +155,7 @@ export class AuthCommonService {
         const result = await this.socialRepository.updateOne({ userId }, { $set: { refreshToken, salt } }, { session }).exec();
 
         if (result.modifiedCount === 0) {
-            throw new InternalServerErrorException('Failed to update the refresh token and salt');
+            throw new CustomException('Failed to update the refresh token and salt.', HttpStatus.INTERNAL_SERVER_ERROR, -1000);
         }
     }
 }

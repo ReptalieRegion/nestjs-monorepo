@@ -17,9 +17,4 @@ export class NotificationLogRepository extends BaseRepository<NotificationLogDoc
         const savedLog = await log.save();
         return savedLog.Mapper();
     }
-
-    async readAllCheckLog(userId: string) {
-        const readCount = await this.notificationLogModel.countDocuments({ userId, isRead: false });
-        return readCount === 0;
-    }
 }

@@ -1,7 +1,8 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import * as admin from 'firebase-admin';
 import { ContentType, InputNotificationLogDTO } from '../../../dto/notification/log/input-notificationLog.dto';
 import { TemplateProviderType, TemplateType } from '../../../dto/notification/template/input-notificationTemplate.dto';
+import { CustomException } from '../../../utils/error/customException';
 import { FirebaseMessagingService, FirebaseMessagingServiceToken } from '../../firebase/service/firebase-messaging.service';
 import { UserDeleterService, UserDeleterServiceToken } from '../../user/service/userDeleter.service';
 import { DEEP_LINK_LIST, DEEP_LINK_PREFIX, DEFAULT_FCM_MESSAGE } from '../constants/notificationPush.constants';
@@ -234,7 +235,7 @@ export class NotificationPushService {
                 };
 
             default:
-                throw new Error('Not Found TemplateType');
+                throw new CustomException('Not found for the specified templateType.', HttpStatus.INTERNAL_SERVER_ERROR, -1000);
         }
     }
 
@@ -254,7 +255,7 @@ export class NotificationPushService {
             .exec();
 
         if (!templateInfo) {
-            throw new NotFoundException('Not Found Template');
+            throw new CustomException('Not found for the specified template.', HttpStatus.INTERNAL_SERVER_ERROR, -1000);
         }
 
         const {

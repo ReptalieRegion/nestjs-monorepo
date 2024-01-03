@@ -1,7 +1,8 @@
-import { PutObjectCommand, S3Client, DeleteObjectCommand, HeadObjectCommand, S3ClientConfig } from '@aws-sdk/client-s3';
-import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { DeleteObjectCommand, HeadObjectCommand, PutObjectCommand, S3Client, S3ClientConfig } from '@aws-sdk/client-s3';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import * as mime from 'mime-types';
 import { v4 as uuidv4 } from 'uuid';
+import { CustomException } from '../../../utils/error/customException';
 
 export const ImageS3HandlerServiceToken = 'ImageS3HandlerServiceToken';
 
@@ -59,7 +60,7 @@ export class ImageS3HandlerService {
             const isKeyExists = await this.checkS3ObjectExists(Params);
 
             if (!isKeyExists) {
-                throw new NotFoundException('Image does not exist.');
+                throw new CustomException('S3 Image does not exist.', HttpStatus.NOT_FOUND, -1000);
             }
 
             let retries = 0;
@@ -77,7 +78,11 @@ export class ImageS3HandlerService {
             }
 
             if (retries === MAX_RETRIES) {
-                throw new InternalServerErrorException('Image deletion failed after multiple retries');
+                throw new CustomException(
+                    'Image deletion failed after multiple retries.',
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    -1000,
+                );
             }
         }
 
@@ -91,8 +96,8 @@ export class ImageS3HandlerService {
      * @returns 업로드된 이미지의 고유한 키 배열을 반환합니다.
      */
     async uploadToS3(files: Express.Multer.File[]) {
-        if (files.length === 0) {
-            throw new BadRequestException('No files were uploaded.');
+        if (files === undefined || files.length === 0) {
+            throw new CustomException('No files were uploaded.', HttpStatus.BAD_REQUEST, -1000);
         }
 
         const imageKeys: string[] = [];
@@ -127,7 +132,11 @@ export class ImageS3HandlerService {
 
             if (retries === MAX_RETRIES) {
                 await this.deleteImagesFromS3(imageKeys);
-                throw new InternalServerErrorException('Image upload failed after multiple retries');
+                throw new CustomException(
+                    'Image upload failed after multiple retries.',
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    -1000,
+                );
             }
         }
 

@@ -1,8 +1,9 @@
-import { Inject, Injectable, InternalServerErrorException } from '@nestjs/common';
+import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { InjectConnection } from '@nestjs/mongoose';
 import mongoose, { ClientSession } from 'mongoose';
 import { ImageType } from '../../../dto/image/input-image.dto';
-import { serviceErrorHandler } from '../../../utils/error/errorHandler';
+import { CustomException } from '../../../utils/error/customException';
+import { CustomExceptionHandler } from '../../../utils/error/customException.handler';
 import { ImageDeleterService, ImageDeleterServiceToken } from '../../image/service/imageDeleter.service';
 import { ShareCommentRepository } from '../repository/shareComment.repository';
 import { ShareCommentReplyRepository } from '../repository/shareCommentReply.repository';
@@ -46,7 +47,7 @@ export class ShareDeleterService {
                 .exec();
 
             if (result.modifiedCount === 0) {
-                throw new InternalServerErrorException('Failed to delete share post.');
+                throw new CustomException('Failed to delete share post.', HttpStatus.INTERNAL_SERVER_ERROR, -1000);
             }
 
             await Promise.all([
@@ -62,7 +63,7 @@ export class ShareDeleterService {
                     .exec();
 
                 if (commentResult.modifiedCount === 0) {
-                    throw new InternalServerErrorException('Failed to delete share comment.');
+                    throw new CustomException('Failed to delete share comment.', HttpStatus.INTERNAL_SERVER_ERROR, -1000);
                 }
 
                 await this.shareCommentReplyRepository
@@ -78,7 +79,7 @@ export class ShareDeleterService {
             return this.shareSearcherService.getPostInfo({ delete: { postId } });
         } catch (error) {
             await session.abortTransaction();
-            serviceErrorHandler(error, 'Invalid ObjectId for share post Id.');
+            throw new CustomExceptionHandler(error).handleException('Invalid ObjectId for share post Id.', -1000);
         } finally {
             await session.endSession();
         }
@@ -101,7 +102,7 @@ export class ShareDeleterService {
                 .exec();
 
             if (result.modifiedCount === 0) {
-                throw new InternalServerErrorException('Failed to delete share comment.');
+                throw new CustomException('Failed to delete share comment.', HttpStatus.INTERNAL_SERVER_ERROR, -1000);
             }
 
             const isReplyCount = await this.shareSearcherService.getCommentReplyCount(commentId);
@@ -112,7 +113,7 @@ export class ShareDeleterService {
                     .exec();
 
                 if (replyResult.modifiedCount === 0) {
-                    throw new InternalServerErrorException('Failed to delete share comment reply.');
+                    throw new CustomException('Failed to delete share comment reply.', HttpStatus.INTERNAL_SERVER_ERROR, -1000);
                 }
             }
 
@@ -120,7 +121,7 @@ export class ShareDeleterService {
             return this.shareSearcherService.getCommentInfo({ delete: { commentId } });
         } catch (error) {
             await session.abortTransaction();
-            serviceErrorHandler(error, 'Invalid ObjectId for share comment Id.');
+            throw new CustomExceptionHandler(error).handleException('Invalid ObjectId for share comment Id.', -1000);
         } finally {
             await session.endSession();
         }
@@ -140,10 +141,10 @@ export class ShareDeleterService {
                 .exec();
 
             if (result.modifiedCount === 0) {
-                throw new InternalServerErrorException('Failed to delete share comment reply.');
+                throw new CustomException('Failed to delete share comment reply.', HttpStatus.INTERNAL_SERVER_ERROR, -1000);
             }
         } catch (error) {
-            serviceErrorHandler(error, 'Invalid ObjectId for share comment reply Id.');
+            throw new CustomExceptionHandler(error).handleException('Invalid ObjectId for share comment reply Id.', -1000);
         }
 
         return this.shareSearcherService.getCommentReplyInfo({ delete: { commentReplyId } });
@@ -164,7 +165,7 @@ export class ShareDeleterService {
                 .exec();
 
             if (result.modifiedCount === 0) {
-                throw new InternalServerErrorException('Failed to delete share like.');
+                throw new CustomException('Failed to delete share like.', HttpStatus.INTERNAL_SERVER_ERROR, -1000);
             }
         }
     }

@@ -3,7 +3,7 @@ import { IAgreeStatusDTO } from '../../dto/notification/agree/input-notification
 import { IMessageIdDTO, InputNotificationLogDTO } from '../../dto/notification/log/input-notificationLog.dto';
 import { InputNotificationTemplateDTO } from '../../dto/notification/template/input-notificationTemplate.dto';
 import { IUserProfileDTO } from '../../dto/user/user/response-user.dto';
-import { controllerErrorHandler } from '../../utils/error/errorHandler';
+import { ValidationPipe } from '../../utils/error/validator/validator.pipe';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { AuthUser } from '../user/user.decorator';
 import { NotificationAgreeService, NotificationAgreeServiceToken } from './service/notificationAgree.service';
@@ -42,44 +42,32 @@ export class NotificationController {
      */
     @Post('push/template')
     @HttpCode(HttpStatus.NO_CONTENT)
-    async createTemplate(@Body() dto: InputNotificationTemplateDTO) {
-        try {
-            switch (dto.provider) {
-                case 'PUSH':
-                    await this.notificationTemplateService.createPushTemplate(dto);
-                    return;
-                case 'SMS':
-                    console.log('SMS 만들 예정');
-                    return;
-                case 'LMS':
-                    console.log('LMS 만들 예정');
-                    return;
-            }
-        } catch (error) {
-            controllerErrorHandler(error);
+    async createTemplate(@Body(new ValidationPipe(-1201)) dto: InputNotificationTemplateDTO) {
+        switch (dto.provider) {
+            case 'PUSH':
+                await this.notificationTemplateService.createPushTemplate(dto);
+                return;
+            case 'SMS':
+                console.log('SMS 만들 예정');
+                return;
+            case 'LMS':
+                console.log('LMS 만들 예정');
+                return;
         }
     }
 
     @Post('push/log')
     @HttpCode(HttpStatus.CREATED)
     @UseGuards(JwtAuthGuard)
-    async createLog(@AuthUser() user: IUserProfileDTO, @Body() dto: InputNotificationLogDTO) {
-        try {
-            return this.notificationLogService.createLog(user.id, dto);
-        } catch (error) {
-            controllerErrorHandler(error);
-        }
+    async createLog(@AuthUser() user: IUserProfileDTO, @Body(new ValidationPipe(-1201)) dto: InputNotificationLogDTO) {
+        return this.notificationLogService.createLog(user.id, dto);
     }
 
     @Post('push/agree')
     @HttpCode(HttpStatus.OK)
     @UseGuards(JwtAuthGuard)
     async createAgree(@AuthUser() user: IUserProfileDTO) {
-        try {
-            return this.notificationAgreeService.createAgree(user.id);
-        } catch (error) {
-            controllerErrorHandler(error);
-        }
+        return this.notificationAgreeService.createAgree(user.id);
     }
 
     /**
@@ -91,33 +79,21 @@ export class NotificationController {
     @HttpCode(HttpStatus.NO_CONTENT)
     @UseGuards(JwtAuthGuard)
     async updateIsRead(@AuthUser() user: IUserProfileDTO) {
-        try {
-            await this.notificationLogService.updateIsRead(user.id);
-        } catch (error) {
-            controllerErrorHandler(error);
-        }
+        await this.notificationLogService.updateIsRead(user.id);
     }
 
     @Put('push/click')
     @HttpCode(HttpStatus.NO_CONTENT)
     @UseGuards(JwtAuthGuard)
     async updateIsClicked(@AuthUser() user: IUserProfileDTO, @Body() dto: IMessageIdDTO) {
-        try {
-            await this.notificationLogService.updateIsClicked(user.id, dto.messageId);
-        } catch (error) {
-            controllerErrorHandler(error);
-        }
+        await this.notificationLogService.updateIsClicked(user.id, dto.messageId);
     }
 
     @Put('push/agree')
     @HttpCode(HttpStatus.NO_CONTENT)
     @UseGuards(JwtAuthGuard)
     async updateAgree(@AuthUser() user: IUserProfileDTO, @Body() dto: IAgreeStatusDTO, @Query('type') type: string) {
-        try {
-            await this.notificationAgreeService.updateAgree(user.id, dto.isAgree, type);
-        } catch (error) {
-            controllerErrorHandler(error);
-        }
+        await this.notificationAgreeService.updateAgree(user.id, dto.isAgree, type);
     }
 
     /**
@@ -127,12 +103,8 @@ export class NotificationController {
      */
     @Delete('push/template')
     @HttpCode(HttpStatus.NO_CONTENT)
-    async deleteTemplate(@Body() dto: InputNotificationTemplateDTO) {
-        try {
-            await this.notificationTemplateService.deleteTemplate(dto);
-        } catch (error) {
-            controllerErrorHandler(error);
-        }
+    async deleteTemplate(@Body(new ValidationPipe(-1201)) dto: InputNotificationTemplateDTO) {
+        await this.notificationTemplateService.deleteTemplate(dto);
     }
 
     /**
@@ -144,32 +116,20 @@ export class NotificationController {
     @HttpCode(HttpStatus.OK)
     @UseGuards(JwtAuthGuard)
     async getLogsInfiniteScroll(@AuthUser() user: IUserProfileDTO, @Query('pageParam') pageParam: number) {
-        try {
-            return this.notificationLogService.getLogsInfiniteScroll(user.id, pageParam, 10);
-        } catch (error) {
-            controllerErrorHandler(error);
-        }
+        return this.notificationLogService.getLogsInfiniteScroll(user.id, pageParam, 10);
     }
 
     @Get('push/agree')
     @HttpCode(HttpStatus.OK)
     @UseGuards(JwtAuthGuard)
     async getAgreeInfo(@AuthUser() user: IUserProfileDTO) {
-        try {
-            return this.notificationAgreeService.getAgreeInfo(user.id);
-        } catch (error) {
-            controllerErrorHandler(error);
-        }
+        return this.notificationAgreeService.getAgreeInfo(user.id);
     }
 
     @Get('push/read-check')
     @HttpCode(HttpStatus.OK)
     @UseGuards(JwtAuthGuard)
     async getReadAllCheck(@AuthUser() user: IUserProfileDTO) {
-        try {
-            return this.notificationLogService.checkAllRead(user.id);
-        } catch (error) {
-            controllerErrorHandler(error);
-        }
+        return this.notificationLogService.checkAllRead(user.id);
     }
 }

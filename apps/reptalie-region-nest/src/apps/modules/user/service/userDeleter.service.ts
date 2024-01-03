@@ -1,4 +1,5 @@
-import { Inject, Injectable, InternalServerErrorException } from '@nestjs/common';
+import { HttpStatus, Inject, Injectable } from '@nestjs/common';
+import { CustomException } from '../../../utils/error/customException';
 import { FollowRepository } from '../repository/follow.repository';
 import { UserRepository } from '../repository/user.repository';
 import { UserSearcherService, UserSearcherServiceToken } from './userSearcher.service';
@@ -16,12 +17,12 @@ export class UserDeleterService {
     ) {}
 
     async fcmTokenDelete(userId: string) {
-        const result = await this.userRepository.updateOne({ _id: userId }, { $set: { fcmToken: '' } }).exec();
+        const result = await this.userRepository.updateOne({ _id: userId }, { $set: { fcmToken: 'defaultValue' } }).exec();
 
         if (result.modifiedCount === 0) {
-            throw new InternalServerErrorException('Failed to delete user fcmToken.');
+            throw new CustomException('Failed to delete user fcmToken.', HttpStatus.INTERNAL_SERVER_ERROR, -1000);
         }
 
-        return;
+        return { message: 'Success' };
     }
 }

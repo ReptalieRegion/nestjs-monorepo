@@ -20,6 +20,8 @@ export class ShareLikeRepository extends BaseRepository<ShareLikeDocument> {
     }
 
     async getAggregatedLikeList(postId: string, userId: string, pageParam = 0, limitSize: number) {
+        pageParam = isNaN(Number(pageParam)) ? 0 : Number(pageParam);
+
         return this.shareLikeModel
             .aggregate([
                 {

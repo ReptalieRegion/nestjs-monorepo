@@ -1,4 +1,4 @@
-import { Inject, Injectable, InternalServerErrorException } from '@nestjs/common';
+import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { InjectConnection } from '@nestjs/mongoose';
 import mongoose, { ClientSession } from 'mongoose';
 import { ImageType } from '../../../dto/image/input-image.dto';
@@ -7,7 +7,8 @@ import { InputShareCommentDTO } from '../../../dto/share/comment/input-shareComm
 import { InputShareCommentReplyDTO } from '../../../dto/share/commentReply/input-shareCommentReply.dto';
 import { InputSharePostDTO } from '../../../dto/share/post/input-sharePost.dto';
 import { IUserProfileDTO } from '../../../dto/user/user/response-user.dto';
-import { serviceErrorHandler } from '../../../utils/error/errorHandler';
+import { CustomException } from '../../../utils/error/customException';
+import { CustomExceptionHandler } from '../../../utils/error/customException.handler';
 import { ImageS3HandlerService, ImageS3HandlerServiceToken } from '../../image/service/imageS3Handler.service';
 import { ImageSearcherService, ImageSearcherServiceToken } from '../../image/service/imageSearcher.service';
 import { ImageWriterService, ImageWriterServiceToken } from '../../image/service/imageWriter.service';
@@ -69,8 +70,9 @@ export class ShareWriterService {
             const tagUserInfo = await this.shareSearcherService.extractUserInfo(dto.contents);
 
             const post = await this.sharePostRepository.createPost(user.id, dto, session);
-            if (!post.id) {
-                throw new InternalServerErrorException('Failed to save share post.');
+
+            if (!post) {
+                throw new CustomException('Failed to save share post.', HttpStatus.INTERNAL_SERVER_ERROR, -1000);
             }
 
             imageKeys = await this.imageS3HandlerService.uploadToS3(files);
@@ -141,8 +143,9 @@ export class ShareWriterService {
         const tagUserInfo = await this.shareSearcherService.extractUserInfo(dto.contents);
 
         const comment = await this.shareCommentRepository.createComment(user.id, dto);
+
         if (!comment) {
-            throw new InternalServerErrorException('Failed to save share comment.');
+            throw new CustomException('Failed to save share comment.', HttpStatus.INTERNAL_SERVER_ERROR, -1000);
         }
 
         const commentInfo = await this.shareSearcherService.getCommentInfo({ create: { comment } });
@@ -220,8 +223,9 @@ export class ShareWriterService {
         const tagUserInfo = await this.shareSearcherService.extractUserInfo(dto.contents);
 
         const commentReply = await this.shareCommentReplyRepository.createCommentReply(user.id, dto);
+
         if (!commentReply.id) {
-            throw new InternalServerErrorException('Failed to save share comment reply.');
+            throw new CustomException('Failed to save share comment reply.', HttpStatus.INTERNAL_SERVER_ERROR, -1000);
         }
 
         const commentReplyInfo = await this.shareSearcherService.getCommentReplyInfo({ create: { commentReply } });
@@ -303,8 +307,9 @@ export class ShareWriterService {
             const post = await this.shareSearcherService.findPostWithUserInfo(postId);
 
             const like = await this.shareLikeRepository.createLike({ userId: user.id, postId });
+
             if (!like) {
-                throw new InternalServerErrorException('Failed to save share like.');
+                throw new CustomException('Failed to save share like.', HttpStatus.INTERNAL_SERVER_ERROR, -1000);
             }
 
             /**
@@ -353,7 +358,7 @@ export class ShareWriterService {
 
             return { post: { id: like.postId, user: { nickname: post?.userId.nickname } } };
         } catch (error) {
-            serviceErrorHandler(error, 'post and user Id should be unique values.');
+            throw new CustomExceptionHandler(error).handleException('post and user Id should be unique values.', -1000);
         }
     }
 }

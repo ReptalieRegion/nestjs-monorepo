@@ -1,9 +1,11 @@
-import { BadRequestException, Inject, Injectable, InternalServerErrorException } from '@nestjs/common';
+import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { InjectConnection } from '@nestjs/mongoose';
 import { OAuth2Client } from 'google-auth-library';
 import mongoose, { ClientSession } from 'mongoose';
-import { JoinProgressType, SocialProvierType, IEncryptedDataDTO } from '../../../dto/user/social/input-social.dto';
+import { IEncryptedDataDTO, JoinProgressType, SocialProvierType } from '../../../dto/user/social/input-social.dto';
 import { Social } from '../../../schemas/social.schema';
+import { CustomException } from '../../../utils/error/customException';
+import { CustomExceptionHandler } from '../../../utils/error/customException.handler';
 import { UserWriterService, UserWriterServiceToken } from '../../user/service/userWriter.service';
 import { SocialRepository } from '../repository/social.repository';
 import { AuthCommonService, AuthCommonServiceToken } from './authCommon.service';
@@ -35,10 +37,6 @@ export class AuthSocialService {
      *            새로운 사용자의 경우 회원가입 정보를 제공합니다.
      */
     async kakaoSignIn(dto: IEncryptedDataDTO) {
-        if (!dto.encryptedData) {
-            throw new BadRequestException('Missing encrypted data.');
-        }
-
         const decryptedData = this.authEncryptService.decryptCrypto(dto.encryptedData);
 
         return this.socialSignIn(decryptedData, SocialProvierType.Kakao);
@@ -52,10 +50,6 @@ export class AuthSocialService {
      *            새로운 사용자의 경우 회원가입 정보를 제공합니다.
      */
     async appleSignIn(dto: IEncryptedDataDTO) {
-        if (!dto.encryptedData) {
-            throw new BadRequestException('Missing encrypted data.');
-        }
-
         const decryptedData = this.authEncryptService.decryptCrypto(dto.encryptedData);
 
         return this.socialSignIn(decryptedData, SocialProvierType.Apple);
@@ -78,19 +72,7 @@ export class AuthSocialService {
 
             return this.socialSignIn(uniqueId as string, SocialProvierType.Google);
         } catch (error) {
-            const caughtError = error as Error;
-
-            const knownErrors = [
-                "Can't parse token envelope",
-                'The verifyIdToken method requires an ID Token',
-                'Invalid token signature',
-            ];
-
-            if (knownErrors.some((knownError) => caughtError.message.includes(knownError))) {
-                throw new InternalServerErrorException('An error occurred while parsing the ID token.');
-            }
-
-            throw caughtError;
+            throw new CustomExceptionHandler(error).handleException('An error occurred while parsing the ID token.', -1000);
         }
     }
 
@@ -116,6 +98,7 @@ export class AuthSocialService {
                 : await this.socialSignUp(uniqueId, provider, session);
 
             await session.commitTransaction();
+
             return result;
         } catch (error) {
             await session.abortTransaction();
@@ -161,7 +144,7 @@ export class AuthSocialService {
         );
 
         if (!social) {
-            throw new InternalServerErrorException('Failed to save social.');
+            throw new CustomException('Failed to save social.', HttpStatus.INTERNAL_SERVER_ERROR, -1000);
         }
 
         return { type: 'SIGN_UP', joinProgress: JoinProgressType.REGISTER0, nickname: user.nickname, userId: user.id };

@@ -1,4 +1,4 @@
-import { HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { ImageType } from '../../../dto/image/input-image.dto';
 import { CustomException } from '../../../utils/error/customException';
 import { ImageRepository } from '../image.repository';
@@ -21,7 +21,7 @@ export class ImageSearcherService {
             .exec();
 
         if (!profileImage) {
-            throw new NotFoundException('Profile image not found.');
+            throw new CustomException('Not found for the specified profile image.', HttpStatus.NOT_FOUND, -1000);
         }
 
         return { src: `${process.env.AWS_IMAGE_BASEURL}${profileImage.imageKey}` };

@@ -17,7 +17,7 @@ import {
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { fcmTokenDTO } from '../../dto/user/user/fcm-token.dto';
 import { IUserProfileDTO } from '../../dto/user/user/response-user.dto';
-import { controllerErrorHandler } from '../../utils/error/errorHandler';
+import { ValidationPipe } from '../../utils/error/validator/validator.pipe';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { JwtOptionalAuthGuard } from '../auth/guards/jwtOptional-auth.guard';
 import { UserDeleterService, UserDeleterServiceToken } from './service/userDeleter.service';
@@ -44,15 +44,11 @@ export class UserController {
      *  Post
      *
      */
-    @Post(':id/follow')
+    @Post(':userId/follow')
     @HttpCode(HttpStatus.CREATED)
     @UseGuards(JwtAuthGuard)
-    async createFollow(@AuthUser() user: IUserProfileDTO, @Param('id') follower: string) {
-        try {
-            return this.userWriterService.createFollow(user, follower);
-        } catch (error) {
-            controllerErrorHandler(error);
-        }
+    async createFollow(@AuthUser() user: IUserProfileDTO, @Param('userId') follower: string) {
+        return this.userWriterService.createFollow(user, follower);
     }
 
     /**
@@ -60,15 +56,11 @@ export class UserController {
      *  Put
      *
      */
-    @Put(':id/follow')
+    @Put(':userId/follow')
     @HttpCode(HttpStatus.OK)
     @UseGuards(JwtAuthGuard)
-    async toggleFollow(@AuthUser() user: IUserProfileDTO, @Param('id') follower: string) {
-        try {
-            return this.userUpdaterService.toggleFollow(user.id, follower);
-        } catch (error) {
-            controllerErrorHandler(error);
-        }
+    async toggleFollow(@AuthUser() user: IUserProfileDTO, @Param('userId') follower: string) {
+        return this.userUpdaterService.toggleFollow(user.id, follower);
     }
 
     @Put('me/profile-image')
@@ -76,22 +68,14 @@ export class UserController {
     @UseGuards(JwtAuthGuard)
     @UseInterceptors(FilesInterceptor('files'))
     async updateMyProfile(@AuthUser() user: IUserProfileDTO, @UploadedFiles() files: Express.Multer.File[]) {
-        try {
-            return this.userUpdaterService.updateMyProfileImage(user, files);
-        } catch (error) {
-            controllerErrorHandler(error);
-        }
+        return this.userUpdaterService.updateMyProfileImage(user, files);
     }
 
     @Put('fcm-token')
     @HttpCode(HttpStatus.OK)
     @UseGuards(JwtAuthGuard)
-    async updateFcmToken(@AuthUser() user: IUserProfileDTO, @Body() dto: fcmTokenDTO) {
-        try {
-            return this.userUpdaterService.updateFcmToken(user, dto);
-        } catch (error) {
-            controllerErrorHandler(error);
-        }
+    async updateFcmToken(@AuthUser() user: IUserProfileDTO, @Body(new ValidationPipe(-1201)) dto: fcmTokenDTO) {
+        return this.userUpdaterService.updateFcmToken(user, dto);
     }
 
     /**
@@ -100,14 +84,10 @@ export class UserController {
      *
      */
     @Delete('fcm-token')
-    @HttpCode(HttpStatus.NO_CONTENT)
+    @HttpCode(HttpStatus.OK)
     @UseGuards(JwtAuthGuard)
     async deleteFcmToken(@AuthUser() user: IUserProfileDTO) {
-        try {
-            this.userDeleterService.fcmTokenDelete(user?.id);
-        } catch (error) {
-            controllerErrorHandler(error);
-        }
+        return this.userDeleterService.fcmTokenDelete(user.id);
     }
 
     /**
@@ -119,22 +99,14 @@ export class UserController {
     @HttpCode(HttpStatus.OK)
     @UseGuards(JwtOptionalAuthGuard)
     async getUserProfile(@AuthUser() user: IUserProfileDTO, @Query('nickname') nickname: string) {
-        try {
-            return this.userSearcherService.getProfile(nickname, user);
-        } catch (error) {
-            controllerErrorHandler(error);
-        }
+        return this.userSearcherService.getProfile(nickname, user);
     }
 
     @Get('me/profile')
     @HttpCode(HttpStatus.OK)
     @UseGuards(JwtAuthGuard)
     async getMyProfile(@AuthUser() user: IUserProfileDTO) {
-        try {
-            return this.userSearcherService.getMyProfile(user);
-        } catch (error) {
-            controllerErrorHandler(error);
-        }
+        return this.userSearcherService.getMyProfile(user);
     }
 
     @Get('follower/list')
@@ -145,50 +117,34 @@ export class UserController {
         @Query('search') search: string,
         @Query('pageParam') pageParam: number,
     ) {
-        try {
-            return this.userSearcherService.getFollowersInfiniteScroll(user?.id, search, pageParam, 10);
-        } catch (error) {
-            controllerErrorHandler(error);
-        }
+        return this.userSearcherService.getFollowersInfiniteScroll(user.id, search, pageParam, 10);
     }
 
-    @Get(':id/follower/list')
+    @Get(':userId/follower/list')
     @HttpCode(HttpStatus.OK)
     @UseGuards(JwtOptionalAuthGuard)
     async getUserFollowersInfiniteScroll(
         @AuthUser() user: IUserProfileDTO,
-        @Param('id') targetUserId: string,
+        @Param('userId') targetUserId: string,
         @Query('pageParam') pageParam: number,
     ) {
-        try {
-            return this.userSearcherService.getUserFollowersInfiniteScroll(user?.id, targetUserId, pageParam, 10);
-        } catch (error) {
-            controllerErrorHandler(error);
-        }
+        return this.userSearcherService.getUserFollowersInfiniteScroll(user?.id, targetUserId, pageParam, 10);
     }
 
-    @Get(':id/following/list')
+    @Get(':userId/following/list')
     @HttpCode(HttpStatus.OK)
     @UseGuards(JwtOptionalAuthGuard)
     async getUserFollowingsInfiniteScroll(
         @AuthUser() user: IUserProfileDTO,
-        @Param('id') targetUserId: string,
+        @Param('userId') targetUserId: string,
         @Query('pageParam') pageParam: number,
     ) {
-        try {
-            return this.userSearcherService.getUserFollowingsInfiniteScroll(user?.id, targetUserId, pageParam, 10);
-        } catch (error) {
-            controllerErrorHandler(error);
-        }
+        return this.userSearcherService.getUserFollowingsInfiniteScroll(user?.id, targetUserId, pageParam, 10);
     }
 
     @Get('duplicate/nickname/:nickname')
     @HttpCode(HttpStatus.OK)
     async duplicateNickname(@Param('nickname') nickname: string) {
-        try {
-            return this.userSearcherService.isDuplicateNickname(nickname);
-        } catch (error) {
-            controllerErrorHandler(error);
-        }
+        return this.userSearcherService.isDuplicateNickname(nickname);
     }
 }

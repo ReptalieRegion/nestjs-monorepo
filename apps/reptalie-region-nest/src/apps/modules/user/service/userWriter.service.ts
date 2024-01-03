@@ -1,9 +1,10 @@
-import { BadRequestException, Inject, Injectable, InternalServerErrorException } from '@nestjs/common';
+import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import mongoose, { ClientSession } from 'mongoose';
 import { ImageType } from '../../../dto/image/input-image.dto';
 import { TemplateType } from '../../../dto/notification/template/input-notificationTemplate.dto';
 import { IUserProfileDTO } from '../../../dto/user/user/response-user.dto';
-import { serviceErrorHandler } from '../../../utils/error/errorHandler';
+import { CustomException } from '../../../utils/error/customException';
+import { CustomExceptionHandler } from '../../../utils/error/customException.handler';
 import { ImageWriterService, ImageWriterServiceToken } from '../../image/service/imageWriter.service';
 import { NotificationAgreeService, NotificationAgreeServiceToken } from '../../notification/service/notificationAgree.service';
 import { NotificationPushService, NotificationPushServiceToken } from '../../notification/service/notificationPush.service';
@@ -52,7 +53,7 @@ export class UserWriterService {
         );
 
         if (!user) {
-            throw new InternalServerErrorException('Failed to save user.');
+            throw new CustomException('Failed to save user.', HttpStatus.INTERNAL_SERVER_ERROR, -1000);
         }
 
         const [image] = await this.imageWriterService.createImage(user.id as string, imageKeys, ImageType.Profile, session);
@@ -70,7 +71,7 @@ export class UserWriterService {
      */
     async createFollow(following: IUserProfileDTO, follower: string) {
         if (following.id === follower) {
-            throw new BadRequestException('Following and follower cannot be the same user.');
+            throw new CustomException('following and follower cannot be the same user.', HttpStatus.BAD_REQUEST, -1000);
         }
 
         try {
@@ -86,7 +87,7 @@ export class UserWriterService {
             });
 
             if (!follow) {
-                throw new InternalServerErrorException('Failed to save follow.');
+                throw new CustomException('Failed to save follow.', HttpStatus.INTERNAL_SERVER_ERROR, -1000);
             }
 
             /**
@@ -124,7 +125,7 @@ export class UserWriterService {
 
             return { user: { nickname: follow.followerNickname } };
         } catch (error) {
-            serviceErrorHandler(error, 'following and follower should be unique values.');
+            throw new CustomExceptionHandler(error).handleException('following and follower should be unique values.', -1000);
         }
     }
 }

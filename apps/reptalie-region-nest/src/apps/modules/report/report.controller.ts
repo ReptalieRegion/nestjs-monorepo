@@ -1,7 +1,7 @@
 import { Body, Controller, HttpCode, HttpStatus, Inject, Post, UseGuards } from '@nestjs/common';
 import { InputReportDTO } from '../../dto/report/input-report.dto';
 import { IUserProfileDTO } from '../../dto/user/user/response-user.dto';
-import { controllerErrorHandler } from '../../utils/error/errorHandler';
+import { ValidationPipe } from '../../utils/error/validator/validator.pipe';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { AuthUser } from '../user/user.decorator';
 import { ReportSearcherService, ReportSearcherServiceToken } from './service/reportSearcher.service';
@@ -24,12 +24,8 @@ export class ReportController {
     @Post('register')
     @HttpCode(HttpStatus.CREATED)
     @UseGuards(JwtAuthGuard)
-    async createPostWithImages(@AuthUser() user: IUserProfileDTO, @Body() dto: InputReportDTO) {
-        try {
-            return this.reportWriterService.createReport(user.id, dto);
-        } catch (error) {
-            controllerErrorHandler(error);
-        }
+    async createPostWithImages(@AuthUser() user: IUserProfileDTO, @Body(new ValidationPipe(-1201)) dto: InputReportDTO) {
+        return this.reportWriterService.createReport(user.id, dto);
     }
 
     /**

@@ -1,5 +1,6 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { ImageType } from '../../../dto/image/input-image.dto';
+import { CustomException } from '../../../utils/error/customException';
 import { ImageRepository } from '../image.repository';
 
 export const ImageSearcherServiceToken = 'ImageSearcherServiceToken';
@@ -38,7 +39,7 @@ export class ImageSearcherService {
             .exec();
 
         if (!postImages) {
-            throw new NotFoundException('Post image not found.');
+            throw new CustomException('Not found for the specified post image.', HttpStatus.NOT_FOUND, -1000);
         }
 
         return postImages.map((entity) => ({ src: `${process.env.AWS_IMAGE_BASEURL}${entity.imageKey}` }));

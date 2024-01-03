@@ -1,7 +1,8 @@
-import { Injectable, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { IUserProfileDTO } from '../../../dto/user/user/response-user.dto';
 import { User } from '../../../schemas/user.schema';
-import { serviceErrorHandler } from '../../../utils/error/errorHandler';
+import { CustomException } from '../../../utils/error/customException';
+import { CustomExceptionHandler } from '../../../utils/error/customException.handler';
 import { randomWords } from '../../../utils/randomWords/randomWords';
 import { FollowRepository } from '../repository/follow.repository';
 import { UserRepository } from '../repository/user.repository';
@@ -141,7 +142,7 @@ export class UserSearcherService {
 
             return { items, nextPage };
         } catch (error) {
-            serviceErrorHandler(error, 'Invalid ObjectId for user Id');
+            throw new CustomExceptionHandler(error).handleException('Invalid ObjectId for param user Id.', -1000);
         }
     }
 
@@ -188,7 +189,7 @@ export class UserSearcherService {
 
             return { items, nextPage };
         } catch (error) {
-            serviceErrorHandler(error, 'Invalid ObjectId for user Id');
+            throw new CustomExceptionHandler(error).handleException('Invalid ObjectId for param user Id.', -1000);
         }
     }
 
@@ -219,7 +220,7 @@ export class UserSearcherService {
                       .exec();
 
             if (!findUser) {
-                throw new NotFoundException('User does not exist');
+                throw new CustomException('Not found for the specified user Info.', HttpStatus.NOT_FOUND, -1000);
             }
 
             userInfo = findUser.Mapper();
@@ -251,12 +252,12 @@ export class UserSearcherService {
             const follow = await this.followRepository.findOne({ following, follower }).exec();
 
             if (!follow) {
-                throw new NotFoundException('Not found for the specified Follow status.');
+                throw new CustomException('Not found for the specified Follow status.', HttpStatus.NOT_FOUND, -1000);
             }
 
             return follow.Mapper();
         } catch (error) {
-            serviceErrorHandler(error, 'Invalid ObjectId for follower.');
+            throw new CustomExceptionHandler(error).handleException('Invalid ObjectId for follower.', -1000);
         }
     }
 
@@ -283,12 +284,12 @@ export class UserSearcherService {
             const user = await this.userRepository.findOne({ _id }).exec();
 
             if (!user) {
-                throw new NotFoundException('Not found for the specified user Id.');
+                throw new CustomException('Not found for the specified user Id.', HttpStatus.NOT_FOUND, -1000);
             }
 
             return user.Mapper();
         } catch (error) {
-            serviceErrorHandler(error, 'Invalid ObjectId for user Id.');
+            throw new CustomExceptionHandler(error).handleException('Invalid ObjectId for user Id.', -1000);
         }
     }
 
@@ -302,10 +303,10 @@ export class UserSearcherService {
         const user = await this.userRepository.findOne({ nickname }).exec();
 
         if (!user) {
-            throw new NotFoundException('Not found for the specified nickname.');
+            throw new CustomException('Not found for the specified nickname.', HttpStatus.NOT_FOUND, -1000);
         }
 
-        return user.Mapper();
+        return user?.Mapper();
     }
 
     /**
@@ -318,10 +319,10 @@ export class UserSearcherService {
         const users = await this.userRepository.find({ nickname: { $in: nicknames } }, { _id: 1, fcmToken: 1 }).exec();
 
         if (users.length !== nicknames.length) {
-            throw new NotFoundException('Not found for the specified nickname.');
+            throw new CustomException('Not found for the specified nickname.', HttpStatus.NOT_FOUND, -1000);
         }
 
-        return users.map((entity) => entity.Mapper());
+        return users?.map((entity) => entity.Mapper());
     }
 
     /**
@@ -375,7 +376,7 @@ export class UserSearcherService {
      *
      * @returns 생성된 닉네임을 반환합니다.
      */
-    async generateAvailableNickname(): Promise<string> {
+    async generateAvailableNickname() {
         for (let i = 0; i < 15; i++) {
             const baseNickname = this.generateRandomNickname();
             const nicknameToCheck = i < 5 ? baseNickname : `${baseNickname}${i - 5}`;
@@ -386,7 +387,7 @@ export class UserSearcherService {
             }
         }
 
-        throw new UnprocessableEntityException('Too many requests to generate a nickname.');
+        throw new CustomException('Too many requests to generate a nickname.', HttpStatus.UNPROCESSABLE_ENTITY, -1000);
     }
 
     /**

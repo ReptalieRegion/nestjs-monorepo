@@ -1,11 +1,12 @@
-import { Inject, Injectable, InternalServerErrorException } from '@nestjs/common';
+import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { InjectConnection } from '@nestjs/mongoose';
 import mongoose, { ClientSession } from 'mongoose';
 import { InputShareCommentDTO } from '../../../dto/share/comment/input-shareComment.dto';
 import { InputShareCommentReplyDTO } from '../../../dto/share/commentReply/input-shareCommentReply.dto';
 import { InputSharePostDTO } from '../../../dto/share/post/input-sharePost.dto';
 import { IUserProfileDTO } from '../../../dto/user/user/response-user.dto';
-import { serviceErrorHandler } from '../../../utils/error/errorHandler';
+import { CustomException } from '../../../utils/error/customException';
+import { CustomExceptionHandler } from '../../../utils/error/customException.handler';
 import { ImageDeleterService, ImageDeleterServiceToken } from '../../image/service/imageDeleter.service';
 import { ShareCommentRepository } from '../repository/shareComment.repository';
 import { ShareCommentReplyRepository } from '../repository/shareCommentReply.repository';
@@ -54,7 +55,7 @@ export class ShareUpdaterService {
                 .exec();
 
             if (result.modifiedCount === 0) {
-                throw new InternalServerErrorException('Failed to update share post.');
+                throw new CustomException('Failed to update share post.', HttpStatus.INTERNAL_SERVER_ERROR, -1000);
             }
 
             if (dto.remainingImages) {
@@ -70,7 +71,7 @@ export class ShareUpdaterService {
             return { post: { ...postInfo, user } };
         } catch (error) {
             await session.abortTransaction();
-            serviceErrorHandler(error, 'Invalid ObjectId for share post Id.');
+            throw new CustomExceptionHandler(error).handleException('Invalid ObjectId for share post Id.', -1000);
         } finally {
             await session.endSession();
         }
@@ -91,10 +92,10 @@ export class ShareUpdaterService {
                 .exec();
 
             if (result.modifiedCount === 0) {
-                throw new InternalServerErrorException('Failed to update share comment.');
+                throw new CustomException('Failed to update share comment.', HttpStatus.INTERNAL_SERVER_ERROR, -1000);
             }
         } catch (error) {
-            serviceErrorHandler(error, 'Invalid ObjectId for share comment Id.');
+            throw new CustomExceptionHandler(error).handleException('Invalid ObjectId for share comment Id.', -1000);
         }
 
         const commentInfo = await this.shareSearcherService.getCommentInfo({ update: { commentId } });
@@ -116,10 +117,10 @@ export class ShareUpdaterService {
                 .exec();
 
             if (result.modifiedCount === 0) {
-                throw new InternalServerErrorException('Failed to update share comment reply.');
+                throw new CustomException('Failed to update share comment reply.', HttpStatus.INTERNAL_SERVER_ERROR, -1000);
             }
         } catch (error) {
-            serviceErrorHandler(error, 'Invalid ObjectId for share comment reply Id.');
+            throw new CustomExceptionHandler(error).handleException('Invalid ObjectId for share comment reply Id.', -1000);
         }
 
         const commentReplyInfo = await this.shareSearcherService.getCommentReplyInfo({ update: { commentReplyId } });
@@ -141,7 +142,7 @@ export class ShareUpdaterService {
             .exec();
 
         if (result.modifiedCount === 0) {
-            throw new InternalServerErrorException('Failed to toggle the share like status.');
+            throw new CustomException('Failed to toggle the share like status.', HttpStatus.INTERNAL_SERVER_ERROR, -1000);
         }
 
         return { post: { id: likeStatus?.postId.id, user: { nickname: likeStatus?.postId.userId.nickname } } };

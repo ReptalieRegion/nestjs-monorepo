@@ -1,6 +1,8 @@
 import * as crypto from 'crypto';
 import { pbkdf2Sync, randomBytes } from 'crypto';
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
+import { CustomException } from '../../../utils/error/customException';
+import { CustomExceptionHandler } from '../../../utils/error/customException.handler';
 
 // 추후 키관리 관련 확정 후 변경 예정
 // import * as fs from 'fs';
@@ -63,6 +65,10 @@ export class AuthEncryptService {
      * @returns 복호화된 평문을 반환합니다.
      */
     decryptCrypto(encryptedData: string): string {
+        if (!encryptedData || typeof encryptedData !== 'string') {
+            throw new CustomException('Missing encrypted data.', HttpStatus.BAD_REQUEST, -1000);
+        }
+
         try {
             const { PRIVATE_SECRET_KEY } = process.env;
 
@@ -78,12 +84,7 @@ export class AuthEncryptService {
 
             return decryptedData.toString('utf8');
         } catch (error) {
-            const caughtError = error as Error;
-            if (caughtError.message.includes('decoding error')) {
-                throw new InternalServerErrorException('RSA OAEP decoding error occurred.');
-            }
-
-            throw caughtError;
+            throw new CustomExceptionHandler(error).handleException('RSA OAEP decoding error occurred.', -1000);
         }
     }
 

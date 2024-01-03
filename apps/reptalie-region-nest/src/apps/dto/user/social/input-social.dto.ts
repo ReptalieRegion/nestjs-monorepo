@@ -1,4 +1,4 @@
-import { IsString, IsEnum, IsOptional } from 'class-validator';
+import { IsEnum, IsOptional, IsString } from 'class-validator';
 
 export enum SocialProvierType {
     Kakao = 'kakao',
@@ -15,9 +15,14 @@ export interface IEncryptedDataDTO {
     encryptedData: string;
 }
 
-export interface IJoinProgressDTO {
+export class IJoinProgressDTO {
+    @IsString()
     userId: string;
+
+    @IsEnum(JoinProgressType)
     joinProgress: JoinProgressType;
+
+    @IsString()
     nickname: string;
 }
 

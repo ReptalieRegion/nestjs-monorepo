@@ -60,7 +60,7 @@ export class ImageS3HandlerService {
             const isKeyExists = await this.checkS3ObjectExists(Params);
 
             if (!isKeyExists) {
-                throw new CustomException('S3 Image does not exist.', HttpStatus.NOT_FOUND, -1000);
+                throw new CustomException('S3 Image does not exist.', HttpStatus.NOT_FOUND, -5301);
             }
 
             let retries = 0;
@@ -81,7 +81,7 @@ export class ImageS3HandlerService {
                 throw new CustomException(
                     'Image deletion failed after multiple retries.',
                     HttpStatus.INTERNAL_SERVER_ERROR,
-                    -1000,
+                    -5604,
                 );
             }
         }
@@ -97,7 +97,7 @@ export class ImageS3HandlerService {
      */
     async uploadToS3(files: Express.Multer.File[]) {
         if (files === undefined || files.length === 0) {
-            throw new CustomException('No files were uploaded.', HttpStatus.BAD_REQUEST, -1000);
+            throw new CustomException('No files were uploaded.', HttpStatus.BAD_REQUEST, -5001);
         }
 
         const imageKeys: string[] = [];
@@ -135,7 +135,7 @@ export class ImageS3HandlerService {
                 throw new CustomException(
                     'Image upload failed after multiple retries.',
                     HttpStatus.INTERNAL_SERVER_ERROR,
-                    -1000,
+                    -5605,
                 );
             }
         }

@@ -64,7 +64,7 @@ export class DiaryWriterService {
             );
 
             if (!entity) {
-                throw new CustomException('Failed to save diary entity.', HttpStatus.INTERNAL_SERVER_ERROR, -1000);
+                throw new CustomException('Failed to save diary entity.', HttpStatus.INTERNAL_SERVER_ERROR, -3601);
             }
 
             imageKeys = await this.imageS3HandlerService.uploadToS3(files);
@@ -93,22 +93,22 @@ export class DiaryWriterService {
                 .exec();
 
             if (!isExistsEntity) {
-                throw new CustomException('Not found for the specified diary entity.', HttpStatus.NOT_FOUND, -1000);
+                throw new CustomException('Not found for the specified diary entity.', HttpStatus.NOT_FOUND, -3301);
             }
 
             try {
                 const weight = await this.diaryWeightRepository.createWeight({ ...dto, entityId });
 
                 if (!weight) {
-                    throw new CustomException('Failed to save diary weight.', HttpStatus.INTERNAL_SERVER_ERROR, -1000);
+                    throw new CustomException('Failed to save diary weight.', HttpStatus.INTERNAL_SERVER_ERROR, -3602);
                 }
             } catch (error) {
-                throw new CustomException('diaryId and date should be unique values.', HttpStatus.EXPECTATION_FAILED, -1000);
+                throw new CustomException('diaryId and date should be unique values.', HttpStatus.EXPECTATION_FAILED, -3401);
             }
 
             return { message: 'Success' };
         } catch (error) {
-            throw new CustomExceptionHandler(error).handleException('Invalid ObjectId for diary entity Id.', -1000);
+            throw new CustomExceptionHandler(error).handleException('Invalid ObjectId for diary entity Id.', -3507);
         }
     }
 
@@ -118,13 +118,13 @@ export class DiaryWriterService {
             .exec();
 
         if (!isExistsEntity) {
-            throw new CustomException('Not found for the specified diary entity.', HttpStatus.NOT_FOUND, -1000);
+            throw new CustomException('Not found for the specified diary entity.', HttpStatus.NOT_FOUND, -3301);
         }
 
         const calendar = await this.diaryCalendarRepository.createCalendar({ ...dto, userId: user.id });
 
         if (!calendar) {
-            throw new CustomException('Failed to save diary calendar.', HttpStatus.INTERNAL_SERVER_ERROR, -1000);
+            throw new CustomException('Failed to save diary calendar.', HttpStatus.INTERNAL_SERVER_ERROR, -3603);
         }
 
         return { message: 'Success' };

@@ -42,7 +42,7 @@ export class NotificationController {
      */
     @Post('push/template')
     @HttpCode(HttpStatus.NO_CONTENT)
-    async createTemplate(@Body(new ValidationPipe(-1201)) dto: InputNotificationTemplateDTO) {
+    async createTemplate(@Body(new ValidationPipe(-4501)) dto: InputNotificationTemplateDTO) {
         switch (dto.provider) {
             case 'PUSH':
                 await this.notificationTemplateService.createPushTemplate(dto);
@@ -59,7 +59,7 @@ export class NotificationController {
     @Post('push/log')
     @HttpCode(HttpStatus.CREATED)
     @UseGuards(JwtAuthGuard)
-    async createLog(@AuthUser() user: IUserProfileDTO, @Body(new ValidationPipe(-1201)) dto: InputNotificationLogDTO) {
+    async createLog(@AuthUser() user: IUserProfileDTO, @Body(new ValidationPipe(-4502)) dto: InputNotificationLogDTO) {
         return this.notificationLogService.createLog(user.id, dto);
     }
 
@@ -103,7 +103,7 @@ export class NotificationController {
      */
     @Delete('push/template')
     @HttpCode(HttpStatus.NO_CONTENT)
-    async deleteTemplate(@Body(new ValidationPipe(-1201)) dto: InputNotificationTemplateDTO) {
+    async deleteTemplate(@Body(new ValidationPipe(-4501)) dto: InputNotificationTemplateDTO) {
         await this.notificationTemplateService.deleteTemplate(dto);
     }
 

@@ -52,7 +52,7 @@ export class DiaryController {
     async createEntity(
         @AuthUser() user: IUserProfileDTO,
         @UploadedFiles() files: Express.Multer.File[],
-        @Body(new ValidationPipe(-1201)) dto: InputDiaryEntityDTO,
+        @Body(new ValidationPipe(-3501)) dto: InputDiaryEntityDTO,
     ) {
         return this.diaryWriterService.createEntity(user, files, dto);
     }
@@ -63,7 +63,7 @@ export class DiaryController {
     async createWeight(
         @AuthUser() user: IUserProfileDTO,
         @Param('entityId') entityId: string,
-        @Body(new ValidationPipe(-1201)) dto: InputDiaryWeightDTO,
+        @Body(new ValidationPipe(-3502)) dto: InputDiaryWeightDTO,
     ) {
         return this.diaryWriterService.createWeight(user, entityId, dto);
     }
@@ -71,7 +71,7 @@ export class DiaryController {
     @Post('calendar')
     @HttpCode(HttpStatus.CREATED)
     @UseGuards(JwtAuthGuard)
-    async createCalendar(@AuthUser() user: IUserProfileDTO, @Body(new ValidationPipe(-1201)) dto: InputDiaryCalendarDTO) {
+    async createCalendar(@AuthUser() user: IUserProfileDTO, @Body(new ValidationPipe(-3503)) dto: InputDiaryCalendarDTO) {
         return this.diaryWriterService.createCalendar(user, dto);
     }
 
@@ -87,7 +87,7 @@ export class DiaryController {
     async updateEntity(
         @AuthUser() user: IUserProfileDTO,
         @Param('entityId') entityId: string,
-        @Body(new ValidationPipe(-1201)) dto: IUpdateEntityDTO,
+        @Body(new ValidationPipe(-3504)) dto: IUpdateEntityDTO,
         @UploadedFiles() files?: Express.Multer.File[],
     ) {
         return this.diaryUpdaterService.updateEntity(user, entityId, dto, files);
@@ -96,14 +96,14 @@ export class DiaryController {
     @Put('entity/:entityId/weight')
     @HttpCode(HttpStatus.OK)
     @UseGuards(JwtAuthGuard)
-    async updateWeight(@Param('entityId') entityId: string, @Body() dto: IUpdateWeightDTO) {
+    async updateWeight(@Param('entityId') entityId: string, @Body(new ValidationPipe(-3505)) dto: IUpdateWeightDTO) {
         return this.diaryUpdaterService.updateWeight(entityId, dto);
     }
 
     @Put('calendar/:calendarId')
     @HttpCode(HttpStatus.OK)
     @UseGuards(JwtAuthGuard)
-    async updateCalendar(@Param('calendarId') calendarId: string, @Body() dto: IUpdateCalendarDTO) {
+    async updateCalendar(@Param('calendarId') calendarId: string, @Body(new ValidationPipe(-3506)) dto: IUpdateCalendarDTO) {
         return this.diaryUpdaterService.updateCalendar(calendarId, dto);
     }
 

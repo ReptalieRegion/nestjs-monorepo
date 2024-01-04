@@ -72,7 +72,7 @@ export class AuthSocialService {
 
             return this.socialSignIn(uniqueId as string, SocialProvierType.Google);
         } catch (error) {
-            throw new CustomExceptionHandler(error).handleException('An error occurred while parsing the ID token.', -1000);
+            throw new CustomExceptionHandler(error).handleException('An error occurred while parsing the ID token.', -1611);
         }
     }
 
@@ -144,7 +144,7 @@ export class AuthSocialService {
         );
 
         if (!social) {
-            throw new CustomException('Failed to save social.', HttpStatus.INTERNAL_SERVER_ERROR, -1000);
+            throw new CustomException('Failed to save social.', HttpStatus.INTERNAL_SERVER_ERROR, -1610);
         }
 
         return { type: 'SIGN_UP', joinProgress: JoinProgressType.REGISTER0, nickname: user.nickname, userId: user.id };

@@ -10,24 +10,6 @@ export class ImageSearcherService {
     constructor(private readonly imageRepository: ImageRepository) {}
 
     /**
-     * 프로필 이미지를 가져옵니다.
-     *
-     * @param typeId - 이미지의 타입 ID입니다.
-     * @returns 가져온 프로필 이미지 정보를 반환합니다.
-     */
-    async getProfileImage(typeId: string) {
-        const profileImage = await this.imageRepository
-            .findOne({ type: ImageType.Profile, typeId, isDeleted: false }, { imageKey: 1 })
-            .exec();
-
-        if (!profileImage) {
-            throw new CustomException('Not found for the specified profile image.', HttpStatus.NOT_FOUND, -1000);
-        }
-
-        return { src: `${process.env.AWS_IMAGE_BASEURL}${profileImage.imageKey}` };
-    }
-
-    /**
      * 게시물 이미지를 가져옵니다.
      *
      * @param typeId - 이미지의 타입 ID입니다.
@@ -39,7 +21,7 @@ export class ImageSearcherService {
             .exec();
 
         if (!postImages) {
-            throw new CustomException('Not found for the specified post image.', HttpStatus.NOT_FOUND, -1000);
+            throw new CustomException('Not found for the specified post image.', HttpStatus.NOT_FOUND, -5302);
         }
 
         return postImages.map((entity) => ({ src: `${process.env.AWS_IMAGE_BASEURL}${entity.imageKey}` }));

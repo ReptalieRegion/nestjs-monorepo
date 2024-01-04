@@ -72,7 +72,7 @@ export class ShareWriterService {
             const post = await this.sharePostRepository.createPost(user.id, dto, session);
 
             if (!post) {
-                throw new CustomException('Failed to save share post.', HttpStatus.INTERNAL_SERVER_ERROR, -1000);
+                throw new CustomException('Failed to save share post.', HttpStatus.INTERNAL_SERVER_ERROR, -2601);
             }
 
             imageKeys = await this.imageS3HandlerService.uploadToS3(files);
@@ -139,13 +139,12 @@ export class ShareWriterService {
      */
     async createComment(user: IUserProfileDTO, dto: InputShareCommentDTO) {
         const post = await this.shareSearcherService.findPostWithUserInfo(dto.postId);
-
         const tagUserInfo = await this.shareSearcherService.extractUserInfo(dto.contents);
 
         const comment = await this.shareCommentRepository.createComment(user.id, dto);
 
         if (!comment) {
-            throw new CustomException('Failed to save share comment.', HttpStatus.INTERNAL_SERVER_ERROR, -1000);
+            throw new CustomException('Failed to save share comment.', HttpStatus.INTERNAL_SERVER_ERROR, -2602);
         }
 
         const commentInfo = await this.shareSearcherService.getCommentInfo({ create: { comment } });
@@ -219,13 +218,12 @@ export class ShareWriterService {
      */
     async createCommentReply(user: IUserProfileDTO, dto: InputShareCommentReplyDTO) {
         const comment = await this.shareSearcherService.findCommentWithUserInfo(dto.commentId);
-
         const tagUserInfo = await this.shareSearcherService.extractUserInfo(dto.contents);
 
         const commentReply = await this.shareCommentReplyRepository.createCommentReply(user.id, dto);
 
         if (!commentReply.id) {
-            throw new CustomException('Failed to save share comment reply.', HttpStatus.INTERNAL_SERVER_ERROR, -1000);
+            throw new CustomException('Failed to save share comment reply.', HttpStatus.INTERNAL_SERVER_ERROR, -2603);
         }
 
         const commentReplyInfo = await this.shareSearcherService.getCommentReplyInfo({ create: { commentReply } });
@@ -309,7 +307,7 @@ export class ShareWriterService {
             const like = await this.shareLikeRepository.createLike({ userId: user.id, postId });
 
             if (!like) {
-                throw new CustomException('Failed to save share like.', HttpStatus.INTERNAL_SERVER_ERROR, -1000);
+                throw new CustomException('Failed to save share like.', HttpStatus.INTERNAL_SERVER_ERROR, -2604);
             }
 
             /**
@@ -358,7 +356,7 @@ export class ShareWriterService {
 
             return { post: { id: like.postId, user: { nickname: post?.userId.nickname } } };
         } catch (error) {
-            throw new CustomExceptionHandler(error).handleException('post and user Id should be unique values.', -1000);
+            throw new CustomExceptionHandler(error).handleException('post and user Id should be unique values.', -2613);
         }
     }
 }

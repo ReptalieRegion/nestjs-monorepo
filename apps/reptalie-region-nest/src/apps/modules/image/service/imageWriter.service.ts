@@ -32,7 +32,7 @@ export class ImageWriterService {
         const createdImage = await this.imageRepository.createImage(images, session);
 
         if (!createdImage) {
-            throw new CustomException('Failed to create image.', HttpStatus.INTERNAL_SERVER_ERROR, -1000);
+            throw new CustomException('Failed to create image.', HttpStatus.INTERNAL_SERVER_ERROR, -5603);
         }
 
         return createdImage;

@@ -66,7 +66,7 @@ export class AuthEncryptService {
      */
     decryptCrypto(encryptedData: string): string {
         if (!encryptedData || typeof encryptedData !== 'string') {
-            throw new CustomException('Missing encrypted data.', HttpStatus.BAD_REQUEST, -1000);
+            throw new CustomException('Missing encrypted data.', HttpStatus.BAD_REQUEST, -1002);
         }
 
         try {
@@ -84,7 +84,7 @@ export class AuthEncryptService {
 
             return decryptedData.toString('utf8');
         } catch (error) {
-            throw new CustomExceptionHandler(error).handleException('RSA OAEP decoding error occurred.', -1000);
+            throw new CustomExceptionHandler(error).handleException('RSA OAEP decoding error occurred.', -1607);
         }
     }
 

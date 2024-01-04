@@ -45,7 +45,7 @@ export class UserUpdaterService {
         const result = await this.userRepository.updateOne({ _id }, { $set: { imageId } }, { session }).exec();
 
         if (result.modifiedCount === 0) {
-            throw new CustomException('Failed to update user imageId.', HttpStatus.INTERNAL_SERVER_ERROR, -1000);
+            throw new CustomException('Failed to update user imageId.', HttpStatus.INTERNAL_SERVER_ERROR, -1606);
         }
     }
 
@@ -63,10 +63,10 @@ export class UserUpdaterService {
                 .exec();
 
             if (result.modifiedCount === 0) {
-                throw new CustomException('Failed to update user nickname.', HttpStatus.INTERNAL_SERVER_ERROR, -1000);
+                throw new CustomException('Failed to update user nickname.', HttpStatus.INTERNAL_SERVER_ERROR, -1613);
             }
         } catch (error) {
-            throw new CustomExceptionHandler(error).handleException('Invalid ObjectId for user Id.', -1000);
+            throw new CustomExceptionHandler(error).handleException('Invalid ObjectId for user Id.', -1501);
         }
     }
 
@@ -81,7 +81,7 @@ export class UserUpdaterService {
         const result = await this.userRepository.updateOne({ _id: user.id }, { $set: { fcmToken: dto.fcmToken } }).exec();
 
         if (result.modifiedCount === 0) {
-            throw new CustomException('Failed to update user fcmToken.', HttpStatus.INTERNAL_SERVER_ERROR, -1000);
+            throw new CustomException('Failed to update user fcmToken.', HttpStatus.INTERNAL_SERVER_ERROR, -1604);
         }
 
         return { message: 'Success' };
@@ -96,7 +96,7 @@ export class UserUpdaterService {
      */
     async toggleFollow(following: string, follower: string) {
         if (following === follower) {
-            throw new CustomException('following and follower cannot be the same user.', HttpStatus.BAD_REQUEST, -1000);
+            throw new CustomException('following and follower cannot be the same user.', HttpStatus.BAD_REQUEST, -1001);
         }
 
         const followStatus = await this.userSearcherService.getFollowStatus(following, follower);
@@ -106,7 +106,7 @@ export class UserUpdaterService {
             .exec();
 
         if (result.modifiedCount === 0) {
-            throw new CustomException('Failed to update follow status.', HttpStatus.INTERNAL_SERVER_ERROR, -1000);
+            throw new CustomException('Failed to update follow status.', HttpStatus.INTERNAL_SERVER_ERROR, -1603);
         }
 
         return { user: { nickname: followStatus?.followerNickname } };

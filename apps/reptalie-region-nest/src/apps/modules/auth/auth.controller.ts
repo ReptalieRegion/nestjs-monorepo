@@ -62,7 +62,7 @@ export class AuthController {
     @Post('social/join-progress')
     @HttpCode(HttpStatus.OK)
     @UseGuards(JwtSocialAuthGuard)
-    async handleJoinProgress(@Body(new ValidationPipe(-1201)) dto: IJoinProgressDTO) {
+    async handleJoinProgress(@Body(new ValidationPipe(-1504)) dto: IJoinProgressDTO) {
         return this.authCommonService.handleJoinProgress(dto);
     }
 

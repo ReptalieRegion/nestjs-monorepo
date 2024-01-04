@@ -235,7 +235,7 @@ export class NotificationPushService {
                 };
 
             default:
-                throw new CustomException('Not found for the specified templateType.', HttpStatus.INTERNAL_SERVER_ERROR, -1000);
+                throw new CustomException('Not found for the specified templateType.', HttpStatus.INTERNAL_SERVER_ERROR, -4609);
         }
     }
 
@@ -255,7 +255,7 @@ export class NotificationPushService {
             .exec();
 
         if (!templateInfo) {
-            throw new CustomException('Not found for the specified template.', HttpStatus.INTERNAL_SERVER_ERROR, -1000);
+            throw new CustomException('Not found for the specified template.', HttpStatus.INTERNAL_SERVER_ERROR, -4609);
         }
 
         const {

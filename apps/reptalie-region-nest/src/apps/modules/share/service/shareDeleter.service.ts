@@ -47,7 +47,7 @@ export class ShareDeleterService {
                 .exec();
 
             if (result.modifiedCount === 0) {
-                throw new CustomException('Failed to delete share post.', HttpStatus.INTERNAL_SERVER_ERROR, -1000);
+                throw new CustomException('Failed to delete share post.', HttpStatus.INTERNAL_SERVER_ERROR, -2609);
             }
 
             await Promise.all([
@@ -63,7 +63,7 @@ export class ShareDeleterService {
                     .exec();
 
                 if (commentResult.modifiedCount === 0) {
-                    throw new CustomException('Failed to delete share comment.', HttpStatus.INTERNAL_SERVER_ERROR, -1000);
+                    throw new CustomException('Failed to delete share comment.', HttpStatus.INTERNAL_SERVER_ERROR, -2610);
                 }
 
                 await this.shareCommentReplyRepository
@@ -79,7 +79,7 @@ export class ShareDeleterService {
             return this.shareSearcherService.getPostInfo({ delete: { postId } });
         } catch (error) {
             await session.abortTransaction();
-            throw new CustomExceptionHandler(error).handleException('Invalid ObjectId for share post Id.', -1000);
+            throw new CustomExceptionHandler(error).handleException('Invalid ObjectId for share post Id.', -2504);
         } finally {
             await session.endSession();
         }
@@ -102,10 +102,10 @@ export class ShareDeleterService {
                 .exec();
 
             if (result.modifiedCount === 0) {
-                throw new CustomException('Failed to delete share comment.', HttpStatus.INTERNAL_SERVER_ERROR, -1000);
+                throw new CustomException('Failed to delete share comment.', HttpStatus.INTERNAL_SERVER_ERROR, -2610);
             }
 
-            const isReplyCount = await this.shareSearcherService.getCommentReplyCount(commentId);
+            const isReplyCount = await this.shareSearcherService.getCommentReplyCount(commentId, userId);
 
             if (isReplyCount) {
                 const replyResult = await this.shareCommentReplyRepository
@@ -113,7 +113,7 @@ export class ShareDeleterService {
                     .exec();
 
                 if (replyResult.modifiedCount === 0) {
-                    throw new CustomException('Failed to delete share comment reply.', HttpStatus.INTERNAL_SERVER_ERROR, -1000);
+                    throw new CustomException('Failed to delete share comment reply.', HttpStatus.INTERNAL_SERVER_ERROR, -2611);
                 }
             }
 
@@ -121,7 +121,7 @@ export class ShareDeleterService {
             return this.shareSearcherService.getCommentInfo({ delete: { commentId } });
         } catch (error) {
             await session.abortTransaction();
-            throw new CustomExceptionHandler(error).handleException('Invalid ObjectId for share comment Id.', -1000);
+            throw new CustomExceptionHandler(error).handleException('Invalid ObjectId for share comment Id.', -2505);
         } finally {
             await session.endSession();
         }
@@ -141,10 +141,10 @@ export class ShareDeleterService {
                 .exec();
 
             if (result.modifiedCount === 0) {
-                throw new CustomException('Failed to delete share comment reply.', HttpStatus.INTERNAL_SERVER_ERROR, -1000);
+                throw new CustomException('Failed to delete share comment reply.', HttpStatus.INTERNAL_SERVER_ERROR, -2611);
             }
         } catch (error) {
-            throw new CustomExceptionHandler(error).handleException('Invalid ObjectId for share comment reply Id.', -1000);
+            throw new CustomExceptionHandler(error).handleException('Invalid ObjectId for share comment reply Id.', -2506);
         }
 
         return this.shareSearcherService.getCommentReplyInfo({ delete: { commentReplyId } });
@@ -165,7 +165,7 @@ export class ShareDeleterService {
                 .exec();
 
             if (result.modifiedCount === 0) {
-                throw new CustomException('Failed to delete share like.', HttpStatus.INTERNAL_SERVER_ERROR, -1000);
+                throw new CustomException('Failed to delete share like.', HttpStatus.INTERNAL_SERVER_ERROR, -2612);
             }
         }
     }

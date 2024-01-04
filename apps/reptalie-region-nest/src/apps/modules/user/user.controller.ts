@@ -74,7 +74,7 @@ export class UserController {
     @Put('fcm-token')
     @HttpCode(HttpStatus.OK)
     @UseGuards(JwtAuthGuard)
-    async updateFcmToken(@AuthUser() user: IUserProfileDTO, @Body(new ValidationPipe(-1201)) dto: fcmTokenDTO) {
+    async updateFcmToken(@AuthUser() user: IUserProfileDTO, @Body(new ValidationPipe(-1503)) dto: fcmTokenDTO) {
         return this.userUpdaterService.updateFcmToken(user, dto);
     }
 

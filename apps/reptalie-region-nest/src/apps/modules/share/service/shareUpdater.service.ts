@@ -55,7 +55,7 @@ export class ShareUpdaterService {
                 .exec();
 
             if (result.modifiedCount === 0) {
-                throw new CustomException('Failed to update share post.', HttpStatus.INTERNAL_SERVER_ERROR, -1000);
+                throw new CustomException('Failed to update share post.', HttpStatus.INTERNAL_SERVER_ERROR, -2605);
             }
 
             if (dto.remainingImages) {
@@ -71,7 +71,7 @@ export class ShareUpdaterService {
             return { post: { ...postInfo, user } };
         } catch (error) {
             await session.abortTransaction();
-            throw new CustomExceptionHandler(error).handleException('Invalid ObjectId for share post Id.', -1000);
+            throw new CustomExceptionHandler(error).handleException('Invalid ObjectId for share post Id.', -2504);
         } finally {
             await session.endSession();
         }
@@ -92,10 +92,10 @@ export class ShareUpdaterService {
                 .exec();
 
             if (result.modifiedCount === 0) {
-                throw new CustomException('Failed to update share comment.', HttpStatus.INTERNAL_SERVER_ERROR, -1000);
+                throw new CustomException('Failed to update share comment.', HttpStatus.INTERNAL_SERVER_ERROR, -2606);
             }
         } catch (error) {
-            throw new CustomExceptionHandler(error).handleException('Invalid ObjectId for share comment Id.', -1000);
+            throw new CustomExceptionHandler(error).handleException('Invalid ObjectId for share comment Id.', -2505);
         }
 
         const commentInfo = await this.shareSearcherService.getCommentInfo({ update: { commentId } });
@@ -117,10 +117,10 @@ export class ShareUpdaterService {
                 .exec();
 
             if (result.modifiedCount === 0) {
-                throw new CustomException('Failed to update share comment reply.', HttpStatus.INTERNAL_SERVER_ERROR, -1000);
+                throw new CustomException('Failed to update share comment reply.', HttpStatus.INTERNAL_SERVER_ERROR, -2607);
             }
         } catch (error) {
-            throw new CustomExceptionHandler(error).handleException('Invalid ObjectId for share comment reply Id.', -1000);
+            throw new CustomExceptionHandler(error).handleException('Invalid ObjectId for share comment reply Id.', -2506);
         }
 
         const commentReplyInfo = await this.shareSearcherService.getCommentReplyInfo({ update: { commentReplyId } });
@@ -142,7 +142,7 @@ export class ShareUpdaterService {
             .exec();
 
         if (result.modifiedCount === 0) {
-            throw new CustomException('Failed to toggle the share like status.', HttpStatus.INTERNAL_SERVER_ERROR, -1000);
+            throw new CustomException('Failed to toggle the share like status.', HttpStatus.INTERNAL_SERVER_ERROR, -2608);
         }
 
         return { post: { id: likeStatus?.postId.id, user: { nickname: likeStatus?.postId.userId.nickname } } };

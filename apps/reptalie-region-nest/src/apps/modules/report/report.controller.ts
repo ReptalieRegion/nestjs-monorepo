@@ -24,7 +24,7 @@ export class ReportController {
     @Post('register')
     @HttpCode(HttpStatus.CREATED)
     @UseGuards(JwtAuthGuard)
-    async createPostWithImages(@AuthUser() user: IUserProfileDTO, @Body(new ValidationPipe(-1201)) dto: InputReportDTO) {
+    async createPostWithImages(@AuthUser() user: IUserProfileDTO, @Body(new ValidationPipe(-6501)) dto: InputReportDTO) {
         return this.reportWriterService.createReport(user.id, dto);
     }
 

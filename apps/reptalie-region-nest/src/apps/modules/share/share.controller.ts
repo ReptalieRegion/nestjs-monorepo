@@ -53,7 +53,7 @@ export class ShareController {
     async createPostWithImages(
         @AuthUser() user: IUserProfileDTO,
         @UploadedFiles() files: Express.Multer.File[],
-        @Body(new ValidationPipe(-1201)) dto: InputSharePostDTO,
+        @Body(new ValidationPipe(-2501)) dto: InputSharePostDTO,
     ) {
         return this.shareWriterService.createPostWithImages(user, dto, files);
     }
@@ -61,7 +61,7 @@ export class ShareController {
     @Post('comment')
     @HttpCode(HttpStatus.CREATED)
     @UseGuards(JwtAuthGuard)
-    async createComment(@AuthUser() user: IUserProfileDTO, @Body(new ValidationPipe(-1201)) dto: InputShareCommentDTO) {
+    async createComment(@AuthUser() user: IUserProfileDTO, @Body(new ValidationPipe(-2502)) dto: InputShareCommentDTO) {
         return this.shareWriterService.createComment(user, dto);
     }
 
@@ -70,7 +70,7 @@ export class ShareController {
     @UseGuards(JwtAuthGuard)
     async createCommentReply(
         @AuthUser() user: IUserProfileDTO,
-        @Body(new ValidationPipe(-1201)) dto: InputShareCommentReplyDTO,
+        @Body(new ValidationPipe(-2503)) dto: InputShareCommentReplyDTO,
     ) {
         return this.shareWriterService.createCommentReply(user, dto);
     }
@@ -93,7 +93,7 @@ export class ShareController {
     async updatePost(
         @AuthUser() user: IUserProfileDTO,
         @Param('postId') postId: string,
-        @Body(new ValidationPipe(-1201)) dto: InputSharePostDTO,
+        @Body(new ValidationPipe(-2501)) dto: InputSharePostDTO,
     ) {
         return this.shareUpdaterService.updatePost(user, postId, dto);
     }
@@ -104,7 +104,7 @@ export class ShareController {
     async updateComment(
         @AuthUser() user: IUserProfileDTO,
         @Param('commentId') commentId: string,
-        @Body(new ValidationPipe(-1201)) dto: InputShareCommentDTO,
+        @Body(new ValidationPipe(-2502)) dto: InputShareCommentDTO,
     ) {
         return this.shareUpdaterService.updateComment(user, commentId, dto);
     }
@@ -115,7 +115,7 @@ export class ShareController {
     async updateCommentReply(
         @AuthUser() user: IUserProfileDTO,
         @Param('commentReplyId') commentReplyId: string,
-        @Body(new ValidationPipe(-1201)) dto: InputShareCommentReplyDTO,
+        @Body(new ValidationPipe(-2503)) dto: InputShareCommentReplyDTO,
     ) {
         return this.shareUpdaterService.updateCommentReply(user.id, commentReplyId, dto);
     }
@@ -183,12 +183,12 @@ export class ShareController {
         return this.shareSearcherService.getUserPostsInfiniteScroll(user?.id, targetNickname, pageParam, 12);
     }
 
-    @Get('posts/:id/comments/list')
+    @Get('posts/:postId/comments/list')
     @HttpCode(HttpStatus.OK)
     @UseGuards(JwtOptionalAuthGuard)
     async getCommentsInfiniteScroll(
         @AuthUser() user: IUserProfileDTO,
-        @Param('id') postId: string,
+        @Param('postId') postId: string,
         @Query('pageParam') pageParam: number,
     ) {
         return this.shareSearcherService.getCommentsInfiniteScroll(user?.id, postId, pageParam, 10);
@@ -205,12 +205,12 @@ export class ShareController {
         return this.shareSearcherService.getCommentRepliesInfiniteScroll(user?.id, commentId, pageParam, 10);
     }
 
-    @Get('posts/:id/like/list')
+    @Get('posts/:postId/like/list')
     @HttpCode(HttpStatus.OK)
     @UseGuards(JwtOptionalAuthGuard)
     async getLikeListForPostInfiniteScroll(
         @AuthUser() user: IUserProfileDTO,
-        @Param('id') postId: string,
+        @Param('postId') postId: string,
         @Query('pageParam') pageParam: number,
     ) {
         return this.shareSearcherService.getLikeListForPostInfiniteScroll(user?.id, postId, pageParam, 10);

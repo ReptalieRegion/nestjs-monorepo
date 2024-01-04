@@ -36,7 +36,7 @@ export class DiaryDeleterService {
                 .exec();
 
             if (entityResult.modifiedCount === 0) {
-                throw new CustomException('Failed to delete diary entity.', HttpStatus.INTERNAL_SERVER_ERROR, -1000);
+                throw new CustomException('Failed to delete diary entity.', HttpStatus.INTERNAL_SERVER_ERROR, -3608);
             }
 
             await Promise.all([
@@ -54,7 +54,7 @@ export class DiaryDeleterService {
             return { message: 'Success' };
         } catch (error) {
             await session.abortTransaction();
-            throw new CustomExceptionHandler(error).handleException('Invalid ObjectId for diary entity Id.', -1000);
+            throw new CustomExceptionHandler(error).handleException('Invalid ObjectId for diary entity Id.', -3507);
         } finally {
             await session.endSession();
         }
@@ -67,12 +67,12 @@ export class DiaryDeleterService {
                 .exec();
 
             if (result.modifiedCount === 0) {
-                throw new CustomException('Failed to delete diary entity weight.', HttpStatus.INTERNAL_SERVER_ERROR, -1000);
+                throw new CustomException('Failed to delete diary entity weight.', HttpStatus.INTERNAL_SERVER_ERROR, -3609);
             }
 
             return { message: 'Success' };
         } catch (error) {
-            throw new CustomExceptionHandler(error).handleException('Invalid ObjectId for diary entity Id.', -1000);
+            throw new CustomExceptionHandler(error).handleException('Invalid ObjectId for diary weightId.', -3509);
         }
     }
 
@@ -83,12 +83,12 @@ export class DiaryDeleterService {
                 .exec();
 
             if (result.modifiedCount === 0) {
-                throw new CustomException('Failed to delete diary entity calendar.', HttpStatus.INTERNAL_SERVER_ERROR, -1000);
+                throw new CustomException('Failed to delete diary entity calendar.', HttpStatus.INTERNAL_SERVER_ERROR, -3610);
             }
 
             return { message: 'Success' };
         } catch (error) {
-            throw new CustomExceptionHandler(error).handleException('Invalid ObjectId for diary calendar Id.', -1000);
+            throw new CustomExceptionHandler(error).handleException('Invalid ObjectId for diary calendar Id.', -3508);
         }
     }
 }

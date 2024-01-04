@@ -51,7 +51,7 @@ export class DiaryUpdaterService {
             }
 
             if (!dto.name) {
-                throw new CustomException('entity name cannot be empty.', HttpStatus.BAD_REQUEST, -1000);
+                throw new CustomException('entity name cannot be empty.', HttpStatus.BAD_REQUEST, -3001);
             }
 
             const result = await this.diaryEntityRepository
@@ -59,7 +59,7 @@ export class DiaryUpdaterService {
                 .exec();
 
             if (result.modifiedCount === 0) {
-                throw new CustomException('Failed to update diary entity.', HttpStatus.INTERNAL_SERVER_ERROR, -1000);
+                throw new CustomException('Failed to update diary entity.', HttpStatus.INTERNAL_SERVER_ERROR, -3604);
             }
 
             await session.commitTransaction();
@@ -68,7 +68,7 @@ export class DiaryUpdaterService {
         } catch (error) {
             await this.imageS3HandlerService.deleteImagesFromS3(imageKeys);
             await session.abortTransaction();
-            throw new CustomExceptionHandler(error).handleException('Invalid ObjectId for diary entity Id.', -1000);
+            throw new CustomExceptionHandler(error).handleException('Invalid ObjectId for diary entity Id.', -3507);
         } finally {
             await session.endSession();
         }
@@ -81,12 +81,12 @@ export class DiaryUpdaterService {
                 .exec();
 
             if (result.modifiedCount === 0) {
-                throw new CustomException('Failed to update diary weight.', HttpStatus.INTERNAL_SERVER_ERROR, -1000);
+                throw new CustomException('Failed to update diary weight.', HttpStatus.INTERNAL_SERVER_ERROR, -3605);
             }
 
             return { message: 'Success' };
         } catch (error) {
-            throw new CustomExceptionHandler(error).handleException('Invalid ObjectId for diary entity Id.', -1000);
+            throw new CustomExceptionHandler(error).handleException('Invalid ObjectId for diary entity Id.', -3507);
         }
     }
 
@@ -97,12 +97,12 @@ export class DiaryUpdaterService {
                 .exec();
 
             if (result.modifiedCount === 0) {
-                throw new CustomException('Failed to update diary calendar.', HttpStatus.INTERNAL_SERVER_ERROR, -1000);
+                throw new CustomException('Failed to update diary calendar.', HttpStatus.INTERNAL_SERVER_ERROR, -3606);
             }
 
             return { message: 'Success' };
         } catch (error) {
-            throw new CustomExceptionHandler(error).handleException('Invalid ObjectId for diary calendar Id.', -1000);
+            throw new CustomExceptionHandler(error).handleException('Invalid ObjectId for diary calendar Id.', -3508);
         }
     }
 
@@ -117,7 +117,7 @@ export class DiaryUpdaterService {
         const result = await this.diaryEntityRepository.updateOne({ _id }, { $set: { imageId } }, { session }).exec();
 
         if (result.modifiedCount === 0) {
-            throw new CustomException('Failed to update image Id.', HttpStatus.INTERNAL_SERVER_ERROR, -1000);
+            throw new CustomException('Failed to update entity imageId.', HttpStatus.INTERNAL_SERVER_ERROR, -3607);
         }
     }
 }

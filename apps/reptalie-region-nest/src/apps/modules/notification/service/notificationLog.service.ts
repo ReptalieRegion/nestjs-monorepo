@@ -15,12 +15,12 @@ export class NotificationLogService {
             const log = await this.notificationLogRepository.createLog({ ...dto, userId });
 
             if (!log) {
-                throw new CustomException('Failed to save notification log.', HttpStatus.INTERNAL_SERVER_ERROR, -1000);
+                throw new CustomException('Failed to save notification log.', HttpStatus.INTERNAL_SERVER_ERROR, -4602);
             }
 
             return log.contents;
         } catch (error) {
-            throw new CustomExceptionHandler(error).handleException('Invalid ObjectId for template Id.', -1000);
+            throw new CustomExceptionHandler(error).handleException('Invalid ObjectId for templateId.', -4504);
         }
     }
 
@@ -30,7 +30,7 @@ export class NotificationLogService {
             .exec();
 
         if (result.modifiedCount === 0) {
-            throw new CustomException('Failed to update notification log isClicked.', HttpStatus.INTERNAL_SERVER_ERROR, -1000);
+            throw new CustomException('Failed to update notification log isClicked.', HttpStatus.INTERNAL_SERVER_ERROR, -4605);
         }
     }
 
@@ -40,7 +40,7 @@ export class NotificationLogService {
             .exec();
 
         if (result.modifiedCount === 0) {
-            throw new CustomException('Failed to update notification log isRead.', HttpStatus.INTERNAL_SERVER_ERROR, -1000);
+            throw new CustomException('Failed to update notification log isRead.', HttpStatus.INTERNAL_SERVER_ERROR, -4604);
         }
     }
 

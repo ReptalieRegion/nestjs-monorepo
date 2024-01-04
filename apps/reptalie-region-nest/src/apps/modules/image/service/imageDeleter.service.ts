@@ -11,6 +11,23 @@ export class ImageDeleterService {
     constructor(private readonly imageRepository: ImageRepository) {}
 
     /**
+     * 특정 타입 및 타입 ID를 기반으로 이미지를 삭제합니다.
+     *
+     * @param type - 이미지의 타입입니다.
+     * @param typeId - 이미지의 타입 ID입니다.
+     * @param session - 현재 세션입니다.
+     */
+    async deleteImageByTypeId(type: ImageType, typeId: string, session: ClientSession) {
+        const result = await this.imageRepository
+            .updateMany({ typeId, type, isDeleted: false }, { $set: { isDeleted: true } }, { session })
+            .exec();
+
+        if (result.modifiedCount === 0) {
+            throw new CustomException('Failed to delete image By typeId.', HttpStatus.INTERNAL_SERVER_ERROR, -5601);
+        }
+    }
+
+    /**
      * 이미지 키 목록을 기반으로 이미지를 삭제합니다.
      *
      * @param imageKeys - 삭제하지 않고 남은 이미지 키 배열입니다.
@@ -30,25 +47,8 @@ export class ImageDeleterService {
                 .exec();
 
             if (result.modifiedCount === 0) {
-                throw new CustomException('Failed to delete image By imageKey.', HttpStatus.NOT_FOUND, -1000);
+                throw new CustomException('Failed to delete image By imageKey.', HttpStatus.NOT_FOUND, -5602);
             }
-        }
-    }
-
-    /**
-     * 특정 타입 및 타입 ID를 기반으로 이미지를 삭제합니다.
-     *
-     * @param type - 이미지의 타입입니다.
-     * @param typeId - 이미지의 타입 ID입니다.
-     * @param session - 현재 세션입니다.
-     */
-    async deleteImageByTypeId(type: ImageType, typeId: string, session: ClientSession) {
-        const result = await this.imageRepository
-            .updateMany({ typeId, type, isDeleted: false }, { $set: { isDeleted: true } }, { session })
-            .exec();
-
-        if (result.modifiedCount === 0) {
-            throw new CustomException('Failed to delete image By typeId.', HttpStatus.NOT_FOUND, -1000);
         }
     }
 }

@@ -142,7 +142,7 @@ export class UserSearcherService {
 
             return { items, nextPage };
         } catch (error) {
-            throw new CustomExceptionHandler(error).handleException('Invalid ObjectId for param user Id.', -1000);
+            throw new CustomExceptionHandler(error).handleException('Invalid ObjectId for user Id.', -1501);
         }
     }
 
@@ -189,7 +189,7 @@ export class UserSearcherService {
 
             return { items, nextPage };
         } catch (error) {
-            throw new CustomExceptionHandler(error).handleException('Invalid ObjectId for param user Id.', -1000);
+            throw new CustomExceptionHandler(error).handleException('Invalid ObjectId for user Id.', -1501);
         }
     }
 
@@ -220,7 +220,7 @@ export class UserSearcherService {
                       .exec();
 
             if (!findUser) {
-                throw new CustomException('Not found for the specified user Info.', HttpStatus.NOT_FOUND, -1000);
+                throw new CustomException('Not found for the specified user Info.', HttpStatus.NOT_FOUND, -1304);
             }
 
             userInfo = findUser.Mapper();
@@ -252,12 +252,12 @@ export class UserSearcherService {
             const follow = await this.followRepository.findOne({ following, follower }).exec();
 
             if (!follow) {
-                throw new CustomException('Not found for the specified Follow status.', HttpStatus.NOT_FOUND, -1000);
+                throw new CustomException('Not found for the specified Follow status.', HttpStatus.NOT_FOUND, -1303);
             }
 
             return follow.Mapper();
         } catch (error) {
-            throw new CustomExceptionHandler(error).handleException('Invalid ObjectId for follower.', -1000);
+            throw new CustomExceptionHandler(error).handleException('Invalid ObjectId for user Id.', -1502);
         }
     }
 
@@ -284,12 +284,12 @@ export class UserSearcherService {
             const user = await this.userRepository.findOne({ _id }).exec();
 
             if (!user) {
-                throw new CustomException('Not found for the specified user Id.', HttpStatus.NOT_FOUND, -1000);
+                throw new CustomException('Not found for the specified user Id.', HttpStatus.NOT_FOUND, -1301);
             }
 
             return user.Mapper();
         } catch (error) {
-            throw new CustomExceptionHandler(error).handleException('Invalid ObjectId for user Id.', -1000);
+            throw new CustomExceptionHandler(error).handleException('Invalid ObjectId for user Id.', -1501);
         }
     }
 
@@ -303,7 +303,7 @@ export class UserSearcherService {
         const user = await this.userRepository.findOne({ nickname }).exec();
 
         if (!user) {
-            throw new CustomException('Not found for the specified nickname.', HttpStatus.NOT_FOUND, -1000);
+            throw new CustomException('Not found for the specified nickname.', HttpStatus.NOT_FOUND, -1302);
         }
 
         return user?.Mapper();
@@ -319,7 +319,7 @@ export class UserSearcherService {
         const users = await this.userRepository.find({ nickname: { $in: nicknames } }, { _id: 1, fcmToken: 1 }).exec();
 
         if (users.length !== nicknames.length) {
-            throw new CustomException('Not found for the specified nickname.', HttpStatus.NOT_FOUND, -1000);
+            throw new CustomException('Not found for the specified nickname.', HttpStatus.NOT_FOUND, -1302);
         }
 
         return users?.map((entity) => entity.Mapper());
@@ -387,7 +387,7 @@ export class UserSearcherService {
             }
         }
 
-        throw new CustomException('Too many requests to generate a nickname.', HttpStatus.UNPROCESSABLE_ENTITY, -1000);
+        throw new CustomException('Too many requests to generate a nickname.', HttpStatus.UNPROCESSABLE_ENTITY, -1502);
     }
 
     /**

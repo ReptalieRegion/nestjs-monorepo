@@ -20,7 +20,7 @@ export class UserDeleterService {
         const result = await this.userRepository.updateOne({ _id: userId }, { $set: { fcmToken: 'defaultValue' } }).exec();
 
         if (result.modifiedCount === 0) {
-            throw new CustomException('Failed to delete user fcmToken.', HttpStatus.INTERNAL_SERVER_ERROR, -1000);
+            throw new CustomException('Failed to delete user fcmToken.', HttpStatus.INTERNAL_SERVER_ERROR, -1605);
         }
 
         return { message: 'Success' };

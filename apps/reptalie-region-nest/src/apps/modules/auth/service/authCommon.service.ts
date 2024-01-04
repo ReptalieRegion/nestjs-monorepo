@@ -50,7 +50,7 @@ export class AuthCommonService {
                 .exec();
 
             if (result.modifiedCount === 0) {
-                throw new CustomException('Failed to update social join-progress.', HttpStatus.INTERNAL_SERVER_ERROR, -1000);
+                throw new CustomException('Failed to update social join-progress.', HttpStatus.INTERNAL_SERVER_ERROR, -1614);
             }
 
             const { accessToken, refreshToken } = await this.tokenGenerationAndStorage(userId, session);
@@ -79,7 +79,7 @@ export class AuthCommonService {
             const { payload } = this.authTokenService.verifyRefreshToken(token);
             const social = await this.socialRepository.findOne({ userId: payload.sub.id }).exec();
             if (!social) {
-                throw new CustomException('Not found for the specified user social info.', HttpStatus.FORBIDDEN, -1000);
+                throw new CustomException('Not found for the specified user social info.', HttpStatus.FORBIDDEN, -1201);
             }
 
             const mapSocial = social.Mapper();
@@ -88,7 +88,7 @@ export class AuthCommonService {
             const isMatched = this.authEncryptService.comparePBKDF2(token, decryptedSalt, mapSocial.refreshToken as string);
             if (!isMatched) {
                 await this.signOut(mapSocial.userId as string);
-                throw new CustomException('Refresh token mismatch.', HttpStatus.FORBIDDEN, -1000);
+                throw new CustomException('Refresh token mismatch.', HttpStatus.FORBIDDEN, -1202);
             }
 
             const { accessToken, refreshToken } = await this.tokenGenerationAndStorage(mapSocial.userId as string, session);
@@ -114,7 +114,7 @@ export class AuthCommonService {
             .exec();
 
         if (result.modifiedCount === 0) {
-            throw new CustomException('Failed to delete the refresh token and salt.', HttpStatus.INTERNAL_SERVER_ERROR, -1000);
+            throw new CustomException('Failed to delete the refresh token and salt.', HttpStatus.INTERNAL_SERVER_ERROR, -1612);
         }
 
         return { message: 'Success' };
@@ -132,7 +132,7 @@ export class AuthCommonService {
         const encryptPBKDF2Info = this.authEncryptService.encryptPBKDF2(refreshToken);
 
         if (encryptPBKDF2Info === undefined) {
-            throw new CustomException('Failed to generate refresh token.', HttpStatus.BAD_REQUEST, -1000);
+            throw new CustomException('Failed to generate refresh token.', HttpStatus.BAD_REQUEST, -1003);
         }
 
         const { salt, encryptedData } = encryptPBKDF2Info;
@@ -155,7 +155,7 @@ export class AuthCommonService {
         const result = await this.socialRepository.updateOne({ userId }, { $set: { refreshToken, salt } }, { session }).exec();
 
         if (result.modifiedCount === 0) {
-            throw new CustomException('Failed to update the refresh token and salt.', HttpStatus.INTERNAL_SERVER_ERROR, -1000);
+            throw new CustomException('Failed to update the refresh token and salt.', HttpStatus.INTERNAL_SERVER_ERROR, -1608);
         }
     }
 }

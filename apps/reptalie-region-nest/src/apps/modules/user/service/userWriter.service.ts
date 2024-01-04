@@ -53,7 +53,7 @@ export class UserWriterService {
         );
 
         if (!user) {
-            throw new CustomException('Failed to save user.', HttpStatus.INTERNAL_SERVER_ERROR, -1000);
+            throw new CustomException('Failed to save user.', HttpStatus.INTERNAL_SERVER_ERROR, -1610);
         }
 
         const [image] = await this.imageWriterService.createImage(user.id as string, imageKeys, ImageType.Profile, session);
@@ -71,7 +71,7 @@ export class UserWriterService {
      */
     async createFollow(following: IUserProfileDTO, follower: string) {
         if (following.id === follower) {
-            throw new CustomException('following and follower cannot be the same user.', HttpStatus.BAD_REQUEST, -1000);
+            throw new CustomException('following and follower cannot be the same user.', HttpStatus.BAD_REQUEST, -1001);
         }
 
         try {
@@ -87,7 +87,7 @@ export class UserWriterService {
             });
 
             if (!follow) {
-                throw new CustomException('Failed to save follow.', HttpStatus.INTERNAL_SERVER_ERROR, -1000);
+                throw new CustomException('Failed to save follow.', HttpStatus.INTERNAL_SERVER_ERROR, -1601);
             }
 
             /**
@@ -125,7 +125,7 @@ export class UserWriterService {
 
             return { user: { nickname: follow.followerNickname } };
         } catch (error) {
-            throw new CustomExceptionHandler(error).handleException('following and follower should be unique values.', -1000);
+            throw new CustomExceptionHandler(error).handleException('following and follower should be unique values.', -1602);
         }
     }
 }

@@ -34,17 +34,17 @@ export class ReportWriterService {
                 isExistsType = await this.shareSearcherService.findCommentReply(dto.typeId);
                 break;
             default:
-                throw new CustomException('Invalid data for the specified type.', HttpStatus.BAD_REQUEST, -1000);
+                throw new CustomException('Invalid data for the specified type.', HttpStatus.UNPROCESSABLE_ENTITY, -6502);
         }
 
         if (isExistsType?.userId !== dto.reported) {
-            throw new CustomException('Invalid data for the specified reported user Id.', HttpStatus.BAD_REQUEST, -1000);
+            throw new CustomException('Invalid data for the specified reported user Id.', HttpStatus.BAD_REQUEST, -6001);
         }
 
         const report = await this.reportRepository.createReport({ ...dto, reporter });
 
         if (!report) {
-            throw new CustomException('Failed to save report.', HttpStatus.INTERNAL_SERVER_ERROR, -1000);
+            throw new CustomException('Failed to save report.', HttpStatus.INTERNAL_SERVER_ERROR, -6601);
         }
 
         return { message: 'Success' };

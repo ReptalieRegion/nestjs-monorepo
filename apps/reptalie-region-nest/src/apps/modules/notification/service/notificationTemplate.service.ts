@@ -21,7 +21,7 @@ export class NotificationTemplateService {
         const template = await this.notificationTemplateRepository.createTemplate(dto, version);
 
         if (!template) {
-            throw new CustomException('Failed to save notification template.', HttpStatus.INTERNAL_SERVER_ERROR, -1000);
+            throw new CustomException('Failed to save notification template.', HttpStatus.INTERNAL_SERVER_ERROR, -4601);
         }
     }
 
@@ -31,7 +31,7 @@ export class NotificationTemplateService {
             .exec();
 
         if (result.deletedCount === 0) {
-            throw new CustomException('Failed to delete notification template.', HttpStatus.INTERNAL_SERVER_ERROR, -1000);
+            throw new CustomException('Failed to delete notification template.', HttpStatus.INTERNAL_SERVER_ERROR, -4607);
         }
     }
 }

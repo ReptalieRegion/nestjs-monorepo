@@ -3,7 +3,7 @@ import { InjectConnection } from '@nestjs/mongoose';
 import mongoose, { ClientSession } from 'mongoose';
 import { IJoinProgressDTO, JoinProgressType } from '../../../dto/user/social/input-social.dto';
 import { CustomException } from '../../../utils/error/customException';
-import { UserSearcherService, UserSearcherServiceToken } from '../../user/service/userSearcher.service';
+import { disassembleHangulToGroups } from '../../../utils/hangul/disassemble';
 import { UserUpdaterService, UserUpdaterServiceToken } from '../../user/service/userUpdater.service';
 import { SocialRepository } from '../repository/social.repository';
 import { AuthEncryptService, AuthEncryptServiceToken } from './authEncrypt.service';
@@ -25,8 +25,6 @@ export class AuthCommonService {
         private readonly authTokenService: AuthTokenService,
         @Inject(UserUpdaterServiceToken)
         private readonly userUpdaterService: UserUpdaterService,
-        @Inject(UserSearcherServiceToken)
-        private readonly userSearcherService: UserSearcherService,
     ) {}
 
     /**
@@ -41,7 +39,9 @@ export class AuthCommonService {
 
         try {
             const { userId, nickname } = dto;
-            const initials = this.userSearcherService.getInitials(nickname);
+            const initials = disassembleHangulToGroups(nickname)
+                .flatMap((values) => values[0])
+                .join('');
 
             await this.userUpdaterService.updateNickname(nickname, initials, userId, session);
 

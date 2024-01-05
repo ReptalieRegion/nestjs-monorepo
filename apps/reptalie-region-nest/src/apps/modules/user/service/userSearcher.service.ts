@@ -3,6 +3,7 @@ import { IUserProfileDTO } from '../../../dto/user/user/response-user.dto';
 import { User } from '../../../schemas/user.schema';
 import { CustomException } from '../../../utils/error/customException';
 import { CustomExceptionHandler } from '../../../utils/error/customException.handler';
+import { disassembleHangulToGroups } from '../../../utils/hangul/disassemble';
 import { randomWords } from '../../../utils/randomWords/randomWords';
 import { FollowRepository } from '../repository/follow.repository';
 import { UserRepository } from '../repository/user.repository';
@@ -30,14 +31,18 @@ export class UserSearcherService {
      * @returns 팔로워 목록 및 다음 페이지의 존재 여부를 반환합니다.
      */
     async getFollowersInfiniteScroll(following: string, search: string, pageParam: number, limitSize: number) {
-        const initials = this.getInitials(search);
+        // const initials = this.getInitials(search);
+
+        const initials = disassembleHangulToGroups(search)
+            .flatMap((values) => values[0])
+            .join('');
 
         const follow = await this.followRepository
             .find(
                 {
                     following,
                     isCanceled: false,
-                    initials: { $regex: new RegExp(`${initials}`, 'i') },
+                    initials: { $regex: new RegExp(initials, 'gi') },
                 },
                 { follower: 1, followerNickname: 1 },
             )
@@ -318,10 +323,6 @@ export class UserSearcherService {
     async extractUserInfo(nicknames: string[]) {
         const users = await this.userRepository.find({ nickname: { $in: nicknames } }, { _id: 1, fcmToken: 1 }).exec();
 
-        if (users.length !== nicknames.length) {
-            throw new CustomException('Not found for the specified nickname.', HttpStatus.NOT_FOUND, -1302);
-        }
-
         return users?.map((entity) => entity.Mapper());
     }
 
@@ -361,14 +362,6 @@ export class UserSearcherService {
     async getUserFollowers(userId: string) {
         const followers = await this.followRepository.find({ following: userId, isCanceled: false }, { follower: 1 }).exec();
         return followers.map((entity) => entity.Mapper().follower as string);
-    }
-
-    getInitials(nickname: string): string {
-        return nickname.replace(/[가-힣]/g, (char) => {
-            const charCode = char.charCodeAt(0) - 44032;
-            const initialIndex = Math.floor(charCode / 588);
-            return String.fromCharCode(initialIndex + 4352);
-        });
     }
 
     /**

@@ -97,7 +97,7 @@ export class ShareSearcherService {
      */
     async getPost(currentUserId: string, postId: string) {
         const typeIds = await this.reportSearcherService.findTypeIdList(currentUserId, ReportType.POST);
-        const entity = await this.sharePostRepository.findOne({ _id: { $eq: postId, $in: typeIds }, isDeleted: false }).exec();
+        const entity = await this.sharePostRepository.findOne({ _id: { $eq: postId, $nin: typeIds }, isDeleted: false }).exec();
 
         if (!entity) {
             throw new CustomException('Not found for the specified share Post Id.', HttpStatus.NOT_FOUND, -2301);

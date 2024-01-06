@@ -665,39 +665,49 @@ export class ShareSearcherService {
         return matches ? await this.userSearcherService.extractUserInfo(matches) : undefined;
     }
 
+    async findPostLikeUserIdsById(postId: string) {
+        return this.shareLikeRepository
+            .aggregate<{ id: string }>([{ $match: { postId } }, { $project: { id: '$_id' } }])
+            .exec();
+    }
+
     /**
      * 랜덤한 게시글 가져오기
      */
     async getRandomPosts(size?: number) {
-        return this.sharePostRepository.aggregate<IResponseSharePostDTO>([
-            { $sample: { size: size ?? 1 } },
-            {
-                $project: {
-                    id: '$_id',
-                    userId: 1,
-                    isDeleted: 1,
-                    createdAt: 1,
-                    updatedAt: 1,
+        return this.sharePostRepository
+            .aggregate<IResponseSharePostDTO>([
+                { $sample: { size: size ?? 1 } },
+                {
+                    $project: {
+                        id: '$_id',
+                        userId: 1,
+                        isDeleted: 1,
+                        createdAt: 1,
+                        updatedAt: 1,
+                    },
                 },
-            },
-        ]);
+            ])
+            .exec();
     }
 
     /**
      * 랜덤한 댓글 가져오기
      */
     async getRandomComments(size?: number) {
-        return this.shareCommentRepository.aggregate<IResponseShareCommentDTO>([
-            { $sample: { size: size ?? 1 } },
-            {
-                $project: {
-                    id: '$_id',
-                    userId: 1,
-                    isDeleted: 1,
-                    createdAt: 1,
-                    updatedAt: 1,
+        return this.shareCommentRepository
+            .aggregate<IResponseShareCommentDTO>([
+                { $sample: { size: size ?? 1 } },
+                {
+                    $project: {
+                        id: '$_id',
+                        userId: 1,
+                        isDeleted: 1,
+                        createdAt: 1,
+                        updatedAt: 1,
+                    },
                 },
-            },
-        ]);
+            ])
+            .exec();
     }
 }

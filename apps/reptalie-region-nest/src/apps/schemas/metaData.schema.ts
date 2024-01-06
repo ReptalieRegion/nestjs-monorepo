@@ -13,14 +13,14 @@ export class MetaData {
     @Prop({ required: true, type: SchemaTypes.String, unique: true })
     name: string;
 
-    @Prop({ required: true, type: SchemaTypes.String })
-    values: string;
+    @Prop({ required: true, type: SchemaTypes.Map })
+    data: Map<string, unknown>;
 }
 
 const MetaDataSchema = SchemaFactory.createForClass(MetaData);
 MetaDataSchema.methods = {
     Mapper(): Partial<IResponseMetaDataDTO> {
-        const fields: Array<keyof IResponseMetaDataDTO> = ['id', 'name', 'values', 'createdAt', 'updatedAt'];
+        const fields: Array<keyof IResponseMetaDataDTO> = ['id', 'name', 'data', 'createdAt', 'updatedAt'];
 
         const viewFields = fields.reduce((prev, field) => {
             const value = this.get(field);

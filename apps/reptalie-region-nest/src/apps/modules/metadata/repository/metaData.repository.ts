@@ -10,4 +10,10 @@ export class MetaDataRepository extends BaseRepository<MetaDataDocument> {
     constructor(@InjectModel(MetaData.name) private readonly metaDataModel: Model<MetaDataDocument>) {
         super(metaDataModel);
     }
+
+    async createMetaData(name: string, data: { [key: string]: unknown }) {
+        const metaData = new this.metaDataModel({ name, data });
+        this.metaDataModel.create(metaData);
+        return metaData;
+    }
 }

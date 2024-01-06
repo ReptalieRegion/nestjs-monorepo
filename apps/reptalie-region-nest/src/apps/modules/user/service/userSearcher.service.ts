@@ -414,7 +414,7 @@ export class UserSearcherService {
     }
 
     /**
-     * 랜덤한 유저를 가져옴
+     * 랜덤한 유저프로필을 가져옴
      */
     async getRandomUserProfile(size?: number) {
         return this.userRepository.aggregate<IUserProfileDTO>([
@@ -444,10 +444,16 @@ export class UserSearcherService {
         ]);
     }
 
+    /**
+     * 랜덤한 유저를 가져옴
+     */
     async getRandomUser(size: number) {
         return this.userRepository.aggregate<IResponseUserDTO>([{ $sample: { size: size ?? 1 } }]);
     }
 
+    /**
+     * 랜덤한 following을 follower안한 유저를 가져옴
+     */
     async getNotFollowerUserIds(followingId: string, size: number) {
         const followers = await this.followRepository.aggregate([
             { $match: { following: followingId } },
@@ -458,6 +464,38 @@ export class UserSearcherService {
             { $match: { _id: { $nin: followers } } },
             { $sample: { size: size ?? 1 } },
             { $project: { id: '$_id' } },
+        ]);
+    }
+
+    /**
+     * 랜덤한 게시글에 좋아요 안한 유저를 가져옴
+     */
+    async getRandomExcludeUser(userIds: string[], size: number) {
+        return this.userRepository.aggregate<IUserProfileDTO>([
+            { $match: { _id: { $nin: userIds } } },
+            { $sample: { size: size ?? 1 } },
+            {
+                $lookup: {
+                    from: 'images',
+                    localField: 'imageId',
+                    foreignField: '_id',
+                    as: 'userImage',
+                },
+            },
+            {
+                $unwind: '$userImage',
+            },
+            {
+                $project: {
+                    id: '$_id',
+                    nickname: 1,
+                    profile: {
+                        src: '$userImage.imageKey',
+                    },
+                    isFollow: 1,
+                    fcmToken: 1,
+                },
+            },
         ]);
     }
 

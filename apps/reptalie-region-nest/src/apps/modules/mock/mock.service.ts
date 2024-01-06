@@ -8,12 +8,16 @@ import { range } from '../../utils/array/range';
 import { disassembleHangulToGroups } from '../../utils/hangul/disassemble';
 import { AuthCommonService, AuthCommonServiceToken } from '../auth/service/authCommon.service';
 import { AuthSocialService, AuthSocialServiceToken } from '../auth/service/authSocial.service';
+import { DiaryWriterService, DiaryWriterServiceToken } from '../diary/service/diaryWriter.service';
+import { MetaDataSearcherService, MetaDataSearcherServiceToken } from '../metadata/service/metaDataSearcher.service';
+import { NotificationAgreeService, NotificationAgreeServiceToken } from '../notification/service/notificationAgree.service';
 import { NotificationSlackService, NotificationSlackServiceToken } from '../notification/service/notificationSlack.service';
 import { ShareSearcherService, ShareSearcherServiceToken } from '../share/service/shareSearcher.service';
 import { ShareWriterService, ShareWriterServiceToken } from '../share/service/shareWriter.service';
 import { UserSearcherService, UserSearcherServiceToken } from '../user/service/userSearcher.service';
 import { UserUpdaterService, UserUpdaterServiceToken } from '../user/service/userUpdater.service';
 import { UserWriterService, UserWriterServiceToken } from '../user/service/userWriter.service';
+import { GENDER_ARRAY, WEIGHT_UNIT_ARRAY } from './mock.constants';
 
 export const MockServiceToken = 'MockServiceToken';
 
@@ -39,6 +43,12 @@ export class MockService {
         private readonly shareSearcherService: ShareSearcherService,
         @Inject(NotificationSlackServiceToken)
         private readonly slackService: NotificationSlackService,
+        @Inject(NotificationAgreeServiceToken)
+        private readonly notificationAgreeService: NotificationAgreeService,
+        @Inject(DiaryWriterServiceToken)
+        private readonly diaryWriterService: DiaryWriterService,
+        @Inject(MetaDataSearcherServiceToken)
+        private readonly metaDataSearcherService: MetaDataSearcherService,
     ) {}
 
     /**
@@ -61,13 +71,26 @@ export class MockService {
                 await this.userUpdateService.updateNickname(newNickname, initials, user.id, session);
             }
             await session.commitTransaction();
+
+            this.notificationAgreeService.createAgree(user.id);
             return result;
         } catch (error) {
+            console.log(error);
             await session.abortTransaction();
             throw new Error('user 생성 실패');
         } finally {
             await session.endSession();
         }
+    }
+
+    /**
+     * 여러 유저 생성
+     */
+    async createUsers(size: number) {
+        Promise.allSettled(range(size).map(() => this.createUser())).then((results) =>
+            this.slackMessage(results, '유저생성', ''),
+        );
+        return;
     }
 
     /**
@@ -84,34 +107,31 @@ export class MockService {
         });
 
         Promise.allSettled(posts).then((results) => {
-            this.slackMessage(results, '게시글 생성');
+            this.slackMessage(results, '게시글 생성', '');
         });
     }
 
     /**
-     * 랜덤한 유저가 여러 댓글 생성
+     * 랜덤한 게시물 또는 입력한 게물울에 여러 댓글 생성
      */
-    async createComments(size: number) {
-        const users = await this.userSearcherService.getRandomUserProfile();
+    async createComments(size: number, postId?: string) {
+        const newPostId = postId ? postId : (await this.shareSearcherService.getRandomPosts())[0].id;
+        const users = await this.userSearcherService.getRandomUserProfile(size);
 
-        users.forEach(async (user) => {
-            const posts = await this.shareSearcherService.getRandomPosts(size);
-
-            Promise.allSettled(
-                posts.map(async (post) =>
-                    this.shareWriterService.createComment(user, {
-                        contents: await this.createContents(),
-                        postId: post.id,
-                    }),
-                ),
-            ).then((results) => {
-                this.slackMessage(results, '댓글 생성');
-            });
+        Promise.allSettled(
+            users.map(async (user) =>
+                this.shareWriterService.createComment(user, {
+                    contents: await this.createContents(),
+                    postId: newPostId,
+                }),
+            ),
+        ).then((results) => {
+            this.slackMessage(results, '댓글 생성', `\n${newPostId}`);
         });
     }
 
     /**
-     * 랜덤한 대댓글 생성
+     * 랜덤한 댓글 또는 입력한 댓글에 대댓글 생성
      */
     async createCommentReplies(size: number, commentId?: string) {
         const users = await this.userSearcherService.getRandomUserProfile(size);
@@ -125,20 +145,12 @@ export class MockService {
                 });
             }),
         ).then((results) => {
-            this.slackMessage(
-                results,
-                '대댓글 생성',
-                // results
-                //     .reduce((prev, result) => {
-                //         return result.status !== 'fulfilled' ? prev : [...prev, result.value.post.comment.id ?? ''];
-                //     }, [] as string[])
-                //     .join('\n'),
-            );
+            this.slackMessage(results, '대댓글 생성', `${newCommentId}`);
         });
     }
 
     /**
-     * 랜덤한 팔로우 생성
+     * 랜덤한 유저 또는 입력한 유저의 팔로워 생성
      */
     async createCommentFollow(size: number, followingNickname?: string) {
         const following = followingNickname
@@ -147,19 +159,73 @@ export class MockService {
         const userIds = await this.userSearcherService.getNotFollowerUserIds(following.id, size);
 
         Promise.allSettled(userIds.map(({ id: userId }) => this.userWriterService.createFollow(following, userId))).then(
-            (results) =>
-                this.slackMessage(
-                    results,
-                    '팔로워 생성',
-                    // results
-                    //     .reduce((prev, result) => {
-                    //         return result.status !== 'fulfilled' ? prev : [...prev, result.value?.user.nickname ?? ''];
-                    //     }, [] as string[])
-                    //     .join('\n'),
-                ),
+            (results) => this.slackMessage(results, '팔로워 생성', `\n${following.nickname}`),
         );
 
         return;
+    }
+
+    /**
+     * 랜덤한 게시물 또는 입력한 게시물 좋아요 생성
+     */
+    async createPostLike(size: number, postId?: string) {
+        const newPostId = postId ? postId : (await this.shareSearcherService.getRandomPosts())[0].id;
+        const postLikeUserIds = await this.shareSearcherService.findPostLikeUserIdsById(newPostId);
+        const users = await this.userSearcherService.getRandomExcludeUser(
+            postLikeUserIds.map(({ id }) => id),
+            size,
+        );
+
+        Promise.allSettled(users.map((user) => this.shareWriterService.createLike(user, newPostId))).then((results) =>
+            this.slackMessage(results, '좋아요 생성', `\n${newPostId}`),
+        );
+    }
+
+    async createDiaryEntity(size: number, nickname?: string) {
+        const variety = await this.generatorVariety();
+        if (variety) {
+            const user = nickname
+                ? (await this.userSearcherService.findUserProfileByNickname(nickname))[0]
+                : (await this.userSearcherService.getRandomUserProfile())[0];
+
+            range(size).map(async () => {
+                return this.diaryWriterService.createEntity(user, [await this.downloadAndConvertToMulterFile()], {
+                    gender: GENDER_ARRAY[fakerKO.number.int({ min: 0, max: GENDER_ARRAY.length - 1 })],
+                    hatching: fakerKO.date.between({ from: '2016-01-01', to: new Date() }),
+                    name: fakerKO.person.fullName(),
+                    weightUnit: WEIGHT_UNIT_ARRAY[fakerKO.number.int({ min: 0, max: WEIGHT_UNIT_ARRAY.length - 1 })],
+                    variety: variety,
+                });
+            });
+        }
+    }
+
+    private async generatorVariety() {
+        const varietyMap = await this.metaDataSearcherService.getVarietyMap();
+
+        if (!varietyMap?.data) {
+            return;
+        }
+        const classificationList = varietyMap.data.get('classificationList') as string[];
+        const speciesList = varietyMap.data.get('speciesList') as { [key: string]: string[] };
+        const detailedSpeciesList = varietyMap.data.get('detailedSpeciesList') as { [key: string]: string[] };
+        const morphList = varietyMap.data.get('morphList') as { [key: string]: string[] };
+
+        const classification = classificationList[fakerKO.number.int({ min: 0, max: classificationList.length - 1 })];
+        const species =
+            speciesList[classification][fakerKO.number.int({ min: 0, max: speciesList[classification].length - 1 })];
+        const detailedSpecies =
+            detailedSpeciesList[species][fakerKO.number.int({ min: 0, max: detailedSpeciesList[species].length - 1 })];
+        const morph = morphList[detailedSpecies]
+            ? morphList[detailedSpecies][fakerKO.number.int({ min: 0, max: morphList[detailedSpecies].length - 1 })]
+            : '기타';
+
+        return {
+            classification,
+            species,
+            detailedSpecies,
+            morph,
+        };
     }
 
     /**
@@ -183,7 +249,9 @@ export class MockService {
         };
     }
 
-    /** 태그 있는 글 생성 */
+    /**
+     * 태그 있는 글 생성
+     */
     private async createContents() {
         const tagIdsCount = fakerKO.number.int({ min: 0, max: 2 });
         const users = await this.userSearcherService.getRandomUser(tagIdsCount);

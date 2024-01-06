@@ -5,5 +5,5 @@ export class InputMetaDataDTO {
     readonly name: string;
 
     @IsString()
-    readonly values: string;
+    readonly data: string;
 }

@@ -6,7 +6,7 @@ import { getCurrentDate } from '../utils/time/time';
 import { User } from './user.schema';
 
 export interface FollowDocument extends Follow, Document {
-    Mapper(): Partial<IResponseFollowDTO>;
+    Mapper(): IResponseFollowDTO;
 }
 
 @Schema({ versionKey: false, timestamps: { currentTime: getCurrentDate } })

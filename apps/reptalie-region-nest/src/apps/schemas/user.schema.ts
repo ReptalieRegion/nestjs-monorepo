@@ -6,7 +6,7 @@ import { getCurrentDate } from '../utils/time/time';
 import { Image } from './image.schema';
 
 export interface UserDocument extends User, Document {
-    Mapper(): Partial<IResponseUserDTO>;
+    Mapper(): IResponseUserDTO;
 }
 
 @Schema({ versionKey: false, timestamps: { currentTime: getCurrentDate } })

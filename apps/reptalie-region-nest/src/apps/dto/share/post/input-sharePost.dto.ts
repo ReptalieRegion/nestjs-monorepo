@@ -7,5 +7,5 @@ export class InputSharePostDTO {
     @IsOptional()
     @IsArray()
     @IsString({ each: true })
-    readonly remainingImages: string[];
+    readonly remainingImages?: string[];
 }

@@ -208,15 +208,17 @@ export class MockService {
                 ? (await this.userSearcherService.findUserProfileByNickname(nickname))[0]
                 : (await this.userSearcherService.getRandomUserProfile())[0];
 
-            range(size).map(async () => {
-                return this.diaryWriterService.createEntity(user, [await this.downloadAndConvertToMulterFile()], {
-                    gender: GENDER_ARRAY[fakerKO.number.int({ min: 0, max: GENDER_ARRAY.length - 1 })],
-                    hatching: fakerKO.date.between({ from: '2016-01-01', to: new Date() }),
-                    name: fakerKO.person.fullName(),
-                    weightUnit: WEIGHT_UNIT_ARRAY[fakerKO.number.int({ min: 0, max: WEIGHT_UNIT_ARRAY.length - 1 })],
-                    variety: variety,
-                });
-            });
+            Promise.allSettled(
+                range(size).map(async () => {
+                    return this.diaryWriterService.createEntity(user, [await this.downloadAndConvertToMulterFile()], {
+                        gender: GENDER_ARRAY[fakerKO.number.int({ min: 0, max: GENDER_ARRAY.length - 1 })],
+                        hatching: fakerKO.date.between({ from: '2016-01-01', to: new Date() }),
+                        name: fakerKO.person.fullName(),
+                        weightUnit: WEIGHT_UNIT_ARRAY[fakerKO.number.int({ min: 0, max: WEIGHT_UNIT_ARRAY.length - 1 })],
+                        variety: variety,
+                    });
+                }),
+            ).then((results) => this.slackMessage(results, '개체 생성', `\n${nickname}`));
         }
     }
 

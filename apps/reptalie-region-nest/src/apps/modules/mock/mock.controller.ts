@@ -22,8 +22,8 @@ export class MockController {
 
     @Post('share-post')
     @HttpCode(HttpStatus.CREATED)
-    async createPost(@Body() body: { size?: string }) {
-        return this.mockService.createPosts(Number(body.size ?? '1'));
+    async createPost(@Body() body: { size?: string; nickname?: string }) {
+        return this.mockService.createPosts(Number(body.size ?? '1'), body.nickname);
     }
 
     @Post('share-post/comments')

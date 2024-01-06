@@ -96,7 +96,22 @@ export class MockService {
     /**
      * 랜덤한 유저의 게시물 생성
      */
-    async createPosts(size: number) {
+    async createPosts(size: number, nickname?: string) {
+        if (nickname) {
+            const targetUser = (await this.userSearcherService.findUserProfileByNickname(nickname))[0];
+            range(size).map(async () => {
+                const files = await Promise.all(
+                    range(fakerKO.number.int({ min: 1, max: 5 })).map(this.downloadAndConvertToMulterFile),
+                );
+                return this.shareWriterService.createPostWithImages(
+                    targetUser,
+                    { contents: await this.createContents() },
+                    files,
+                );
+            });
+            return;
+        }
+
         const users = await this.userSearcherService.getRandomUserProfile(size);
 
         const posts = users.map(async (user) => {

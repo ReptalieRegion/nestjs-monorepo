@@ -47,7 +47,11 @@ export class DiaryWriterService {
      * @param dto - 엔터티를 생성하는 데 사용되는 입력 DTO.
      * @returns 생성된 엔터티를 반환합니다.
      */
-    async createEntity(user: IUserProfileDTO, files: Express.Multer.File[], dto: InputDiaryEntityDTO) {
+    async createEntity(
+        user: IUserProfileDTO,
+        files: Express.Multer.File[],
+        dto: Omit<InputDiaryEntityDTO, 'userId' | 'imageId'>,
+    ) {
         const session: ClientSession = await this.connection.startSession();
         session.startTransaction();
 

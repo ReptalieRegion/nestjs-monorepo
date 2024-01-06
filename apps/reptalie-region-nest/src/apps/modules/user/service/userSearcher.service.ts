@@ -1,5 +1,5 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
-import { IUserProfileDTO } from '../../../dto/user/user/response-user.dto';
+import { IResponseUserDTO, IUserProfileDTO } from '../../../dto/user/user/response-user.dto';
 import { User } from '../../../schemas/user.schema';
 import { CustomException } from '../../../utils/error/customException';
 import { CustomExceptionHandler } from '../../../utils/error/customException.handler';
@@ -379,6 +379,120 @@ export class UserSearcherService {
         }
 
         throw new CustomException('Too many requests to generate a nickname.', HttpStatus.UNPROCESSABLE_ENTITY, -1502);
+    }
+
+    async findUserProfileByNickname(nickname: string) {
+        return this.userRepository.aggregate<IUserProfileDTO>([
+            { $match: { nickname } },
+            {
+                $lookup: {
+                    from: 'images',
+                    localField: 'imageId',
+                    foreignField: '_id',
+                    as: 'userImage',
+                },
+            },
+            {
+                $unwind: '$userImage',
+            },
+            {
+                $project: {
+                    id: '$_id',
+                    nickname: 1,
+                    profile: {
+                        src: '$userImage.imageKey',
+                    },
+                    isFollow: 1,
+                    fcmToken: 1,
+                },
+            },
+        ]);
+    }
+
+    /**
+     * 랜덤한 유저프로필을 가져옴
+     */
+    async getRandomUserProfile(size?: number) {
+        return this.userRepository.aggregate<IUserProfileDTO>([
+            { $sample: { size: size ?? 1 } },
+            {
+                $lookup: {
+                    from: 'images',
+                    localField: 'imageId',
+                    foreignField: '_id',
+                    as: 'userImage',
+                },
+            },
+            {
+                $unwind: '$userImage',
+            },
+            {
+                $project: {
+                    id: '$_id',
+                    nickname: 1,
+                    profile: {
+                        src: '$userImage.imageKey',
+                    },
+                    isFollow: 1,
+                    fcmToken: 1,
+                },
+            },
+        ]);
+    }
+
+    /**
+     * 랜덤한 유저를 가져옴
+     */
+    async getRandomUser(size: number) {
+        return this.userRepository.aggregate<IResponseUserDTO>([{ $sample: { size: size ?? 1 } }]);
+    }
+
+    /**
+     * 랜덤한 following을 follower안한 유저를 가져옴
+     */
+    async getNotFollowerUserIds(followingId: string, size: number) {
+        const followers = await this.followRepository.aggregate([
+            { $match: { following: followingId } },
+            { $project: { _id: 1 } },
+        ]);
+
+        return this.userRepository.aggregate<{ id: string }>([
+            { $match: { _id: { $nin: followers } } },
+            { $sample: { size: size ?? 1 } },
+            { $project: { id: '$_id' } },
+        ]);
+    }
+
+    /**
+     * 랜덤한 게시글에 좋아요 안한 유저를 가져옴
+     */
+    async getRandomExcludeUser(userIds: string[], size: number) {
+        return this.userRepository.aggregate<IUserProfileDTO>([
+            { $match: { _id: { $nin: userIds } } },
+            { $sample: { size: size ?? 1 } },
+            {
+                $lookup: {
+                    from: 'images',
+                    localField: 'imageId',
+                    foreignField: '_id',
+                    as: 'userImage',
+                },
+            },
+            {
+                $unwind: '$userImage',
+            },
+            {
+                $project: {
+                    id: '$_id',
+                    nickname: 1,
+                    profile: {
+                        src: '$userImage.imageKey',
+                    },
+                    isFollow: 1,
+                    fcmToken: 1,
+                },
+            },
+        ]);
     }
 
     /**

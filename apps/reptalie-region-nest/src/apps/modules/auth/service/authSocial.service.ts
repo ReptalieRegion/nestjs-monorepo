@@ -1,3 +1,4 @@
+import { fakerKO } from '@faker-js/faker';
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { InjectConnection } from '@nestjs/mongoose';
 import { OAuth2Client } from 'google-auth-library';
@@ -74,6 +75,27 @@ export class AuthSocialService {
         } catch (error) {
             throw new CustomExceptionHandler(error).handleException('An error occurred while parsing the ID token.', -1611);
         }
+    }
+
+    /**
+     * mock 데이터 생성
+     */
+    async mockSocialSignUp(session: ClientSession) {
+        const providers = [SocialProvierType.Apple, SocialProvierType.Google, SocialProvierType.Kakao];
+        const user = await this.userWriterService.createUser(session);
+        const randomIndex = Math.floor(Math.random() * providers.length);
+
+        await this.socialRepository.createSocial(
+            {
+                userId: user.id as string,
+                provider: providers[randomIndex],
+                uniqueId: `mock_${fakerKO.string.uuid()}`,
+                joinProgress: JoinProgressType.DONE,
+            },
+            session,
+        );
+
+        return user;
     }
 
     /**

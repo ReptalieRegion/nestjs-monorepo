@@ -116,6 +116,7 @@ export class NotificationController {
     @HttpCode(HttpStatus.OK)
     @UseGuards(JwtAuthGuard)
     async getLogsInfiniteScroll(@AuthUser() user: IUserProfileDTO, @Query('pageParam') pageParam: number) {
+        pageParam = isNaN(Number(pageParam)) ? 0 : Number(pageParam);
         return this.notificationLogService.getLogsInfiniteScroll(user.id, pageParam, 10);
     }
 

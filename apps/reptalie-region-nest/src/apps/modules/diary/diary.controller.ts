@@ -142,6 +142,7 @@ export class DiaryController {
     @HttpCode(HttpStatus.OK)
     @UseGuards(JwtAuthGuard)
     async getEntityInfiniteScroll(@AuthUser() user: IUserProfileDTO, @Query('pageParam') pageParam: number) {
+        pageParam = isNaN(Number(pageParam)) ? 0 : Number(pageParam);
         return this.diarySearcherService.getEntityInfiniteScroll(user.id, pageParam, 10);
     }
 
@@ -149,6 +150,7 @@ export class DiaryController {
     @HttpCode(HttpStatus.OK)
     @UseGuards(JwtAuthGuard)
     async getWeightInfiniteScroll(@Param('entityId') entityId: string, @Query('pageParam') pageParam: number) {
+        pageParam = isNaN(Number(pageParam)) ? 0 : Number(pageParam);
         return this.diarySearcherService.getWeightInfiniteScroll(entityId, pageParam, 7);
     }
 

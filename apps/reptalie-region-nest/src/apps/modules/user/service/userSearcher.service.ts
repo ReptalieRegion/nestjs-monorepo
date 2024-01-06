@@ -31,8 +31,6 @@ export class UserSearcherService {
      * @returns 팔로워 목록 및 다음 페이지의 존재 여부를 반환합니다.
      */
     async getFollowersInfiniteScroll(following: string, search: string, pageParam: number, limitSize: number) {
-        // const initials = this.getInitials(search);
-
         const initials = disassembleHangulToGroups(search)
             .flatMap((values) => values[0])
             .join('');

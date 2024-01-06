@@ -90,6 +90,13 @@ export class UserController {
         return this.userDeleterService.fcmTokenDelete(user.id);
     }
 
+    @Delete('withdrawal-request')
+    @HttpCode(HttpStatus.OK)
+    @UseGuards(JwtAuthGuard)
+    async deleteUser(@AuthUser() user: IUserProfileDTO) {
+        return this.userDeleterService.deleteUser(user.id);
+    }
+
     /**
      *
      *  Get
@@ -117,6 +124,7 @@ export class UserController {
         @Query('search') search: string,
         @Query('pageParam') pageParam: number,
     ) {
+        pageParam = isNaN(Number(pageParam)) ? 0 : Number(pageParam);
         return this.userSearcherService.getFollowersInfiniteScroll(user.id, search, pageParam, 10);
     }
 
@@ -128,6 +136,7 @@ export class UserController {
         @Param('userId') targetUserId: string,
         @Query('pageParam') pageParam: number,
     ) {
+        pageParam = isNaN(Number(pageParam)) ? 0 : Number(pageParam);
         return this.userSearcherService.getUserFollowersInfiniteScroll(user?.id, targetUserId, pageParam, 10);
     }
 
@@ -139,6 +148,7 @@ export class UserController {
         @Param('userId') targetUserId: string,
         @Query('pageParam') pageParam: number,
     ) {
+        pageParam = isNaN(Number(pageParam)) ? 0 : Number(pageParam);
         return this.userSearcherService.getUserFollowingsInfiniteScroll(user?.id, targetUserId, pageParam, 10);
     }
 

@@ -162,6 +162,7 @@ export class ShareController {
     @HttpCode(HttpStatus.OK)
     @UseGuards(JwtOptionalAuthGuard)
     async getPostsInfiniteScroll(@AuthUser() user: IUserProfileDTO, @Query('pageParam') pageParam: number) {
+        pageParam = isNaN(Number(pageParam)) ? 0 : Number(pageParam);
         return this.shareSearcherService.getPostsInfiniteScroll(user?.id, pageParam, 10);
     }
 
@@ -180,6 +181,7 @@ export class ShareController {
         @Param('nickname') targetNickname: string,
         @Query('pageParam') pageParam: number,
     ) {
+        pageParam = isNaN(Number(pageParam)) ? 0 : Number(pageParam);
         return this.shareSearcherService.getUserPostsInfiniteScroll(user?.id, targetNickname, pageParam, 12);
     }
 
@@ -191,6 +193,7 @@ export class ShareController {
         @Param('postId') postId: string,
         @Query('pageParam') pageParam: number,
     ) {
+        pageParam = isNaN(Number(pageParam)) ? 0 : Number(pageParam);
         return this.shareSearcherService.getCommentsInfiniteScroll(user?.id, postId, pageParam, 10);
     }
 
@@ -202,6 +205,7 @@ export class ShareController {
         @Param('id') commentId: string,
         @Query('pageParam') pageParam: number,
     ) {
+        pageParam = isNaN(Number(pageParam)) ? 0 : Number(pageParam);
         return this.shareSearcherService.getCommentRepliesInfiniteScroll(user?.id, commentId, pageParam, 10);
     }
 
@@ -213,6 +217,7 @@ export class ShareController {
         @Param('postId') postId: string,
         @Query('pageParam') pageParam: number,
     ) {
+        pageParam = isNaN(Number(pageParam)) ? 0 : Number(pageParam);
         return this.shareSearcherService.getLikeListForPostInfiniteScroll(user?.id, postId, pageParam, 10);
     }
 
@@ -220,6 +225,7 @@ export class ShareController {
     @HttpCode(HttpStatus.OK)
     @UseGuards(JwtAuthGuard)
     async getMyPostsInfiniteScroll(@AuthUser() user: IUserProfileDTO, @Query('pageParam') pageParam: number) {
+        pageParam = isNaN(Number(pageParam)) ? 0 : Number(pageParam);
         return this.shareSearcherService.getMyPostsInfiniteScroll(user.id, pageParam, 12);
     }
 }

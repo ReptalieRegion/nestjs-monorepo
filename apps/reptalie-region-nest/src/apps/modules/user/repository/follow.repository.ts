@@ -19,9 +19,7 @@ export class FollowRepository extends BaseRepository<FollowDocument> {
         return savedFollow.Mapper();
     }
 
-    async getAggregatedFollowerList(currentUserId: string, targetUserId: string, pageParam = 0, limitSize: number) {
-        pageParam = isNaN(Number(pageParam)) ? 0 : Number(pageParam);
-
+    async getAggregatedFollowerList(currentUserId: string, targetUserId: string, pageParam: number, limitSize: number) {
         return this.followModel
             .aggregate([
                 {
@@ -82,9 +80,7 @@ export class FollowRepository extends BaseRepository<FollowDocument> {
             .exec();
     }
 
-    async getAggregatedFollowingList(currentUserId: string, targetUserId: string, pageParam = 0, limitSize: number) {
-        pageParam = isNaN(Number(pageParam)) ? 0 : Number(pageParam);
-
+    async getAggregatedFollowingList(currentUserId: string, targetUserId: string, pageParam: number, limitSize: number) {
         return this.followModel
             .aggregate([
                 {

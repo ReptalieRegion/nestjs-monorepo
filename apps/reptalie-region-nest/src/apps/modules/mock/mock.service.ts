@@ -99,7 +99,7 @@ export class MockService {
     async createPosts(size: number, nickname?: string) {
         if (nickname) {
             const targetUser = (await this.userSearcherService.findUserProfileByNickname(nickname))[0];
-            range(size).map(async () => {
+            const posts = range(size).map(async () => {
                 const files = await Promise.all(
                     range(fakerKO.number.int({ min: 1, max: 5 })).map(this.downloadAndConvertToMulterFile),
                 );
@@ -109,6 +109,11 @@ export class MockService {
                     files,
                 );
             });
+
+            Promise.allSettled(posts).then((results) => {
+                this.slackMessage(results, '게시글 생성', nickname);
+            });
+
             return;
         }
 

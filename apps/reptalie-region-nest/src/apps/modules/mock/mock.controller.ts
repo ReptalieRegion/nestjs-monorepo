@@ -1,5 +1,5 @@
 import { Body, Controller, HttpCode, HttpStatus, Inject, Post } from '@nestjs/common';
-import { controllerErrorHandler } from '../../utils/error/errorHandler';
+import { controllerErrorHandler } from '../../../../dist/apps/utils/error/errorHandler';
 import { MockService, MockServiceToken } from './mock.service';
 
 @Controller('/mock')

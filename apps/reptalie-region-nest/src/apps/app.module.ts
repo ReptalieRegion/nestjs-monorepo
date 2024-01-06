@@ -5,6 +5,7 @@ import { LoggerMiddleware } from './middlwares/logger.middleware';
 import { AuthModule } from './modules/auth/auth.module';
 import { DiaryModule } from './modules/diary/diary.module';
 import { MetaDataModule } from './modules/metadata/metaData.module';
+import { MockModule } from './modules/mock/mock.module';
 import { NotificationModule } from './modules/notification/notification.module';
 import { ReportModule } from './modules/report/report.module';
 import { ShareModule } from './modules/share/share.module';
@@ -14,6 +15,7 @@ import { CustomMongooseModule } from './utils/customModules/mongoose';
 
 @Module({
     imports: [
+        MockModule,
         UserModule,
         AuthModule,
         ShareModule,

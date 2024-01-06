@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
-import { IUserProfileDTO } from '../../../dto/user/user/response-user.dto';
+import { IResponseUserDTO, IUserProfileDTO } from '../../../dto/user/user/response-user.dto';
 import { User } from '../../../schemas/user.schema';
 import { serviceErrorHandler } from '../../../utils/error/errorHandler';
 import { randomWords } from '../../../utils/randomWords/randomWords';
@@ -317,10 +317,6 @@ export class UserSearcherService {
     async extractUserInfo(nicknames: string[]) {
         const users = await this.userRepository.find({ nickname: { $in: nicknames } }, { _id: 1, fcmToken: 1 }).exec();
 
-        if (users.length !== nicknames.length) {
-            throw new NotFoundException('Not found for the specified nickname.');
-        }
-
         return users.map((entity) => entity.Mapper());
     }
 
@@ -387,6 +383,82 @@ export class UserSearcherService {
         }
 
         throw new UnprocessableEntityException('Too many requests to generate a nickname.');
+    }
+
+    async findUserProfileByNickname(nickname: string) {
+        return this.userRepository.aggregate<IUserProfileDTO>([
+            { $match: { nickname } },
+            {
+                $lookup: {
+                    from: 'images',
+                    localField: 'imageId',
+                    foreignField: '_id',
+                    as: 'userImage',
+                },
+            },
+            {
+                $unwind: '$userImage',
+            },
+            {
+                $project: {
+                    id: '$_id',
+                    nickname: 1,
+                    profile: {
+                        src: '$userImage.imageKey',
+                    },
+                    isFollow: 1,
+                    fcmToken: 1,
+                },
+            },
+        ]);
+    }
+
+    /**
+     * 랜덤한 유저를 가져옴
+     */
+    async getRandomUserProfile(size?: number) {
+        return this.userRepository.aggregate<IUserProfileDTO>([
+            { $sample: { size: size ?? 1 } },
+            {
+                $lookup: {
+                    from: 'images',
+                    localField: 'imageId',
+                    foreignField: '_id',
+                    as: 'userImage',
+                },
+            },
+            {
+                $unwind: '$userImage',
+            },
+            {
+                $project: {
+                    id: '$_id',
+                    nickname: 1,
+                    profile: {
+                        src: '$userImage.imageKey',
+                    },
+                    isFollow: 1,
+                    fcmToken: 1,
+                },
+            },
+        ]);
+    }
+
+    async getRandomUser(size: number) {
+        return this.userRepository.aggregate<IResponseUserDTO>([{ $sample: { size: size ?? 1 } }]);
+    }
+
+    async getNotFollowerUserIds(followingId: string, size: number) {
+        const followers = await this.followRepository.aggregate([
+            { $match: { following: followingId } },
+            { $project: { _id: 1 } },
+        ]);
+
+        return this.userRepository.aggregate<{ id: string }>([
+            { $match: { _id: { $nin: followers } } },
+            { $sample: { size: size ?? 1 } },
+            { $project: { id: '$_id' } },
+        ]);
     }
 
     /**

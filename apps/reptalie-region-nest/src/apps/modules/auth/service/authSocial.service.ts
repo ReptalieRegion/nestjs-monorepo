@@ -1,8 +1,9 @@
+import { fakerKO } from '@faker-js/faker';
 import { BadRequestException, Inject, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectConnection } from '@nestjs/mongoose';
 import { OAuth2Client } from 'google-auth-library';
 import mongoose, { ClientSession } from 'mongoose';
-import { JoinProgressType, SocialProvierType, IEncryptedDataDTO } from '../../../dto/user/social/input-social.dto';
+import { IEncryptedDataDTO, JoinProgressType, SocialProvierType } from '../../../dto/user/social/input-social.dto';
 import { Social } from '../../../schemas/social.schema';
 import { UserWriterService, UserWriterServiceToken } from '../../user/service/userWriter.service';
 import { SocialRepository } from '../repository/social.repository';
@@ -92,6 +93,27 @@ export class AuthSocialService {
 
             throw caughtError;
         }
+    }
+
+    /**
+     * mock 데이터 생성
+     */
+    async mockSocialSignUp(session: ClientSession) {
+        const providers = [SocialProvierType.Apple, SocialProvierType.Google, SocialProvierType.Kakao];
+        const user = await this.userWriterService.createUser(session);
+        const randomIndex = Math.floor(Math.random() * providers.length);
+
+        await this.socialRepository.createSocial(
+            {
+                userId: user.id as string,
+                provider: providers[randomIndex],
+                uniqueId: `mock_${fakerKO.string.uuid()}`,
+                joinProgress: JoinProgressType.DONE,
+            },
+            session,
+        );
+
+        return user;
     }
 
     /**

@@ -4222,6 +4222,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "linkType": "HARD"\
         }]\
       ]],\
+      ["@faker-js/faker", [\
+        ["npm:8.3.1", {\
+          "packageLocation": "./.yarn/cache/@faker-js-faker-npm-8.3.1-80494d2a5c-33efe91241.zip/node_modules/@faker-js/faker/",\
+          "packageDependencies": [\
+            ["@faker-js/faker", "npm:8.3.1"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
       ["@fastify/busboy", [\
         ["npm:1.2.1", {\
           "packageLocation": "./.yarn/cache/@fastify-busboy-npm-1.2.1-238dba8f7a-6e773a2929.zip/node_modules/@fastify/busboy/",\
@@ -5770,6 +5779,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageDependencies": [\
             ["@reptalie-region-nest/server", "workspace:apps/reptalie-region-nest"],\
             ["@aws-sdk/client-s3", "npm:3.350.0"],\
+            ["@faker-js/faker", "npm:8.3.1"],\
             ["@nestjs/axios", "virtual:4193bf06da2ec84559cd057c0b05b7b506ca9e325d38300a6a4ebc0278e1b48cf2ad44e18e2976b41e0318d7e02f72a97edb0a4ccd702e3dc4f399b1d6655dd8#npm:3.0.1"],\
             ["@nestjs/cache-manager", "virtual:4193bf06da2ec84559cd057c0b05b7b506ca9e325d38300a6a4ebc0278e1b48cf2ad44e18e2976b41e0318d7e02f72a97edb0a4ccd702e3dc4f399b1d6655dd8#npm:1.0.0"],\
             ["@nestjs/cli", "npm:9.5.0"],\

@@ -73,11 +73,11 @@ export class MockService {
             await session.commitTransaction();
 
             this.notificationAgreeService.createAgree(user.id);
+            this.slackService.send('유저 생성 성공', 'mock-data');
             return result;
         } catch (error) {
-            console.log(error);
+            this.slackService.send('유저 생성 실패', 'mock-data');
             await session.abortTransaction();
-            throw new Error('user 생성 실패');
         } finally {
             await session.endSession();
         }

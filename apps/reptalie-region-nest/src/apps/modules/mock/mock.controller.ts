@@ -20,10 +20,16 @@ export class MockController {
         return this.mockService.createUsers(Number(body.size ?? '1'));
     }
 
+    @Post('share-posts')
+    @HttpCode(HttpStatus.CREATED)
+    async createPosts(@Body() body: { size?: string; nickname?: string }) {
+        return this.mockService.createPosts(Number(body.size ?? '1'), body.nickname);
+    }
+
     @Post('share-post')
     @HttpCode(HttpStatus.CREATED)
-    async createPost(@Body() body: { size?: string; nickname?: string }) {
-        return this.mockService.createPosts(Number(body.size ?? '1'), body.nickname);
+    async createPost(@Body() body: { nickname: string }) {
+        return this.mockService.createPost(body.nickname);
     }
 
     @Post('share-post/comments')

@@ -5,6 +5,7 @@ import { InjectConnection } from '@nestjs/mongoose';
 import axios from 'axios';
 import mongoose from 'mongoose';
 import { range } from '../../utils/array/range';
+import { UnCatchException } from '../../utils/error/unCatchException';
 import { disassembleHangulToGroups } from '../../utils/hangul/disassemble';
 import { AuthCommonService, AuthCommonServiceToken } from '../auth/service/authCommon.service';
 import { AuthSocialService, AuthSocialServiceToken } from '../auth/service/authSocial.service';
@@ -87,9 +88,7 @@ export class MockService {
      * 여러 유저 생성
      */
     async createUsers(size: number) {
-        Promise.allSettled(range(size).map(() => this.createUser())).then((results) =>
-            this.slackMessage(results, '유저생성', ''),
-        );
+        Promise.allSettled(range(size).map(this.createUser)).then((results) => this.slackMessage(results, '유저생성', ''));
         return;
     }
 
@@ -129,6 +128,29 @@ export class MockService {
         Promise.allSettled(posts).then((results) => {
             this.slackMessage(results, '게시글 생성', '');
         });
+    }
+
+    async createPost(nickname: string) {
+        try {
+            const targetUser = (await this.userSearcherService.findUserProfileByNickname(nickname))[0];
+
+            const files = await Promise.all(
+                range(fakerKO.number.int({ min: 1, max: 5 })).map(this.downloadAndConvertToMulterFile),
+            );
+
+            const post = await this.shareWriterService.createPostWithImages(
+                targetUser,
+                { contents: await this.createContents() },
+                files,
+            );
+            return post;
+        } catch (error) {
+            if (error instanceof Error) {
+                return error.message;
+            }
+
+            throw new UnCatchException();
+        }
     }
 
     /**

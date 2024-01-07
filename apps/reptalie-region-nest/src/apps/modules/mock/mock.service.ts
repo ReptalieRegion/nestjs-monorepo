@@ -1,10 +1,11 @@
 import { Readable } from 'stream';
 import { fakerKO } from '@faker-js/faker';
-import { Inject, Injectable } from '@nestjs/common';
+import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { InjectConnection } from '@nestjs/mongoose';
 import axios from 'axios';
 import mongoose from 'mongoose';
 import { range } from '../../utils/array/range';
+import { CustomException } from '../../utils/error/customException';
 import { UnCatchException } from '../../utils/error/unCatchException';
 import { disassembleHangulToGroups } from '../../utils/hangul/disassemble';
 import { AuthCommonService, AuthCommonServiceToken } from '../auth/service/authCommon.service';
@@ -146,7 +147,7 @@ export class MockService {
             return post;
         } catch (error) {
             if (error instanceof Error) {
-                return error.message;
+                throw new CustomException(error.message, HttpStatus.INTERNAL_SERVER_ERROR, -99992);
             }
 
             throw new UnCatchException();

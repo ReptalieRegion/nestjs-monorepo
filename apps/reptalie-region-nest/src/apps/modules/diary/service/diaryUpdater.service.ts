@@ -43,7 +43,7 @@ export class DiaryUpdaterService {
 
         try {
             if (files?.length) {
-                await this.imageDeleterService.deleteImageByTypeId(ImageType.Diary, entityId, session);
+                await this.imageDeleterService.deleteImageByTypeId(ImageType.Diary, [entityId], session);
 
                 imageKeys = await this.imageS3HandlerService.uploadToS3(files);
                 const [image] = await this.imageWriterService.createImage(entityId, imageKeys, ImageType.Diary, session);

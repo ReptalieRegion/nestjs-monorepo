@@ -1,4 +1,5 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
+import { ClientSession } from 'mongoose';
 import { InputNotificationAgreeDTO } from '../../../dto/notification/agree/input-notificationAgree.dto';
 import { TemplateType } from '../../../dto/notification/template/input-notificationTemplate.dto';
 import { CustomException } from '../../../utils/error/customException';
@@ -113,5 +114,13 @@ export class NotificationAgreeService {
         }
 
         return isPushAgree;
+    }
+
+    async withdrawalNotificationInfo(userId: string, session: ClientSession) {
+        const result = await this.notificationAgreeRepository.deleteOne({ userId }, { session }).exec();
+
+        if (result.deletedCount === 0) {
+            throw new CustomException('Failed to delete notification agree.', HttpStatus.INTERNAL_SERVER_ERROR, -4610);
+        }
     }
 }

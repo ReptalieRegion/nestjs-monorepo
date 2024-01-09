@@ -76,35 +76,9 @@ export class UserSearcherService {
      */
     async getProfile(nickname: string, user?: IUserProfileDTO) {
         const userInfo = await this.getUserInfo({ nickname, currentUserId: user?.id });
-        const followCount = await this.getFollowCount(userInfo?.id);
         const isMine = user?.nickname === nickname;
 
-        return {
-            user: {
-                ...userInfo,
-                isMine,
-                followerCount: followCount.follower,
-                followingCount: followCount.following,
-            },
-        };
-    }
-
-    /**
-     * 사용자 자신의 정보를 검색합니다.
-     *
-     * @param user - 요청하는 사용자 정보
-     * @returns 사용자 프로필 정보를 반환합니다.
-     */
-    async getMyProfile(user: IUserProfileDTO) {
-        const followCount = await this.getFollowCount(user.id);
-
-        return {
-            user: {
-                ...user,
-                followerCount: followCount.follower,
-                followingCount: followCount.following,
-            },
-        };
+        return { user: { ...userInfo, isMine } };
     }
 
     /**
@@ -309,7 +283,7 @@ export class UserSearcherService {
             throw new CustomException('Not found for the specified nickname.', HttpStatus.NOT_FOUND, -1302);
         }
 
-        return user?.Mapper();
+        return user.Mapper();
     }
 
     /**
@@ -348,7 +322,7 @@ export class UserSearcherService {
             this.followRepository.countDocuments({ following: targetUserId, isCanceled: false }).exec(),
         ]);
 
-        return { follower: followerCount, following: followingCount };
+        return { followerCount, followingCount };
     }
 
     /**

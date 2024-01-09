@@ -2,18 +2,18 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 
 import mongoose, { Document, SchemaTypes } from 'mongoose';
 import { SocialProvierType } from '../dto/user/social/input-social.dto';
-import { IResponseUserDTO } from '../dto/user/user/response-user.dto';
+import { IResponseTempUserDTO } from '../dto/user/tempUser/response-tempUser.dto';
 import { getCurrentDate } from '../utils/time/time';
 import { Image } from './image.schema';
 import { User } from './user.schema';
 
 export interface TempUserDocument extends TempUser, Document {
-    Mapper(): Partial<IResponseUserDTO>;
+    Mapper(): Partial<IResponseTempUserDTO>;
 }
 
 @Schema({ versionKey: false, timestamps: { currentTime: getCurrentDate } })
 export class TempUser {
-    @Prop({ required: true, index: true, ref: 'User', type: SchemaTypes.ObjectId })
+    @Prop({ required: true, index: true, unique: true, ref: 'User', type: SchemaTypes.ObjectId })
     userId: User;
 
     @Prop({ ref: 'Image', type: SchemaTypes.ObjectId })
@@ -36,24 +36,23 @@ export class TempUser {
 
     @Prop({ type: SchemaTypes.String, default: 'defaultValue' })
     address: string;
-
-    @Prop({ type: SchemaTypes.String, default: 'defaultValue' })
-    salt: string;
 }
 
 const tempUserSchema = SchemaFactory.createForClass(TempUser);
 tempUserSchema.index({ createdAt: 1 });
+tempUserSchema.index({ provider: 1, uniqueId: 1 }, { unique: true });
 tempUserSchema.methods = {
-    Mapper(): Partial<IResponseUserDTO> {
-        const fields: Array<keyof IResponseUserDTO> = [
+    Mapper(): Partial<IResponseTempUserDTO> {
+        const fields: Array<keyof IResponseTempUserDTO> = [
             'id',
-            'name',
+            'userId',
+            'imageId',
+            'provider',
+            'uniqueId',
             'nickname',
-            'initials',
+            'name',
             'phone',
             'address',
-            'fcmToken',
-            'imageId',
             'createdAt',
             'updatedAt',
         ];

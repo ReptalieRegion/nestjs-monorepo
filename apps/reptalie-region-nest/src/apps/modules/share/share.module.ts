@@ -29,11 +29,11 @@ import {
         MongooseModuleShareComment,
         MongooseModuleShareCommentReply,
         MongooseModuleShareLike,
+        ImageModule,
         forwardRef(() => AuthModule),
         forwardRef(() => UserModule),
         forwardRef(() => ReportModule),
-        NotificationModule,
-        ImageModule,
+        forwardRef(() => NotificationModule),
     ],
     controllers: [ShareController],
     providers: [

@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import mongoose, { ClientSession, Model } from 'mongoose';
 
 import { InputShareCommentReplyDTO } from '../../../dto/share/commentReply/input-shareCommentReply.dto';
-import { ShareCommentReplyDocument, ShareCommentReply } from '../../../schemas/shareCommentReply.schema';
+import { ShareCommentReply, ShareCommentReplyDocument } from '../../../schemas/shareCommentReply.schema';
 import { BaseRepository } from '../../base/base.repository';
 
 @Injectable()
@@ -18,5 +18,9 @@ export class ShareCommentReplyRepository extends BaseRepository<ShareCommentRepl
         const reply = new this.shareCommentReplyModel({ ...replyInfo, userId });
         const savedReply = await reply.save();
         return savedReply.Mapper();
+    }
+
+    async deleteCommentReply(query: mongoose.FilterQuery<ShareCommentReplyDocument>, session: ClientSession) {
+        await this.shareCommentReplyModel.updateMany(query, { $set: { isDeleted: true } }, { session }).exec();
     }
 }

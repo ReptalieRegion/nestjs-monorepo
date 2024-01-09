@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { ObjectId } from 'bson';
-import { Model } from 'mongoose';
+import mongoose, { ClientSession, Model } from 'mongoose';
 
 import { InputShareLikeDTO } from '../../../dto/share/like/input-shareLike.dto';
 import { ShareLike, ShareLikeDocument } from '../../../schemas/shareLike.schema';
@@ -78,5 +78,9 @@ export class ShareLikeRepository extends BaseRepository<ShareLikeDocument> {
                 },
             ])
             .exec();
+    }
+
+    async deleteLike(query: mongoose.FilterQuery<ShareLikeDocument>, session: ClientSession) {
+        await this.shareLikeModel.updateMany(query, { $set: { isCanceled: true } }, { session }).exec();
     }
 }

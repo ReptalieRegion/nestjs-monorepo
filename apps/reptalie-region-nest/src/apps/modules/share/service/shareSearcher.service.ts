@@ -621,6 +621,28 @@ export class ShareSearcherService {
     }
 
     /**
+     * 유저의 생성한 게시물에 대한 수를 반환합니다.
+     *
+     * @param nickname 게시물 ID
+     * @param currentUserId 유저 ID
+     * @returns 댓글 수를 반환합니다.
+     */
+    async getPostAndFollowerCount(currentUserId: string, nickname: string) {
+        const targetUserInfo = await this.userSearcherService.findNickname(nickname);
+        const typeIds = currentUserId
+            ? await this.reportSearcherService.findTypeIdList(currentUserId, ReportType.POST)
+            : undefined;
+
+        const postCount = await this.sharePostRepository
+            .countDocuments({ _id: { $nin: typeIds }, userId: targetUserInfo.id, isDeleted: false })
+            .exec();
+
+        const { followerCount, followingCount } = await this.userSearcherService.getFollowCount(targetUserInfo.id as string);
+
+        return { postCount, followerCount, followingCount };
+    }
+
+    /**
      * 지정된 게시물 ID에 대한 댓글 수를 반환합니다.
      *
      * @param postId 게시물 ID
@@ -647,13 +669,26 @@ export class ShareSearcherService {
     }
 
     /**
+     * 지정된 유저에 대한 게시글 ID 목록을 반환합니다.
+     *
+     * @param userId 게시물 ID
+     * @returns 댓글 ID 목록를 반환합니다.
+     */
+    async getPostIds(userId: string): Promise<string[]> {
+        const posts = await this.sharePostRepository.find({ userId, isDeleted: false }, { _id: 1 }).exec();
+        return posts?.map((entity) => entity.Mapper().id as string);
+    }
+
+    /**
      * 지정된 게시물 ID에 대한 댓글 ID 목록을 반환합니다.
      *
      * @param postId 게시물 ID
      * @returns 댓글 ID 목록를 반환합니다.
      */
-    async getCommentIds(postId: string): Promise<string[]> {
-        const comments = await this.shareCommentRepository.find({ postId, isDeleted: false }, { _id: 1 }).exec();
+    async getCommentIds(postIds: string[]): Promise<string[]> {
+        const comments = await this.shareCommentRepository
+            .find({ postId: { $in: postIds }, isDeleted: false }, { _id: 1 })
+            .exec();
         return comments?.map((entity) => entity.Mapper().id as string);
     }
 

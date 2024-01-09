@@ -28,22 +28,22 @@ export class IJoinProgressDTO {
 
 export class InputSocialDTO {
     @IsString()
-    userId: string;
+    readonly userId: string;
 
     @IsEnum(SocialProvierType)
-    provider: SocialProvierType;
+    readonly provider: SocialProvierType;
 
     @IsString()
-    uniqueId: string;
+    readonly uniqueId: string;
 
     @IsEnum(JoinProgressType)
-    joinProgress: JoinProgressType;
+    readonly joinProgress: JoinProgressType;
 
     @IsString()
     @IsOptional()
-    salt?: string;
+    readonly salt?: string;
 
     @IsString()
     @IsOptional()
-    refreshToken?: string;
+    readonly refreshToken?: string;
 }

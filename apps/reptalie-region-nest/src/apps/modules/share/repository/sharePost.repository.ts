@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { ClientSession, Model } from 'mongoose';
+import mongoose, { ClientSession, Model } from 'mongoose';
 
 import { InputSharePostDTO } from '../../../dto/share/post/input-sharePost.dto';
 import { SharePost, SharePostDocument } from '../../../schemas/sharePost.schema';
@@ -16,5 +16,9 @@ export class SharePostRepository extends BaseRepository<SharePostDocument> {
         const sharePost = new this.sharePostModel({ ...sharePostInfo, userId });
         const savedSharePost = await sharePost.save({ session });
         return savedSharePost.Mapper();
+    }
+
+    async deletePost(query: mongoose.FilterQuery<SharePostDocument>, session: ClientSession) {
+        await this.sharePostModel.updateMany(query, { $set: { isDeleted: true } }, { session }).exec();
     }
 }

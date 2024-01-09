@@ -126,7 +126,7 @@ export class UserUpdaterService {
         let imageKeys: string[] = [];
 
         try {
-            await this.imageDeleterService.deleteImageByTypeId(ImageType.Profile, user.id, session);
+            await this.imageDeleterService.deleteImageByTypeId(ImageType.Profile, [user.id], session);
             imageKeys = await this.imageS3HandlerService.uploadToS3(files);
             const [image] = await this.imageWriterService.createImage(user.id, imageKeys, ImageType.Profile, session);
             await this.updateImageId(user.id, image.id as string, session);

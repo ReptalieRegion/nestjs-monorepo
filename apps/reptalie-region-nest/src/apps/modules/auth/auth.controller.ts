@@ -66,6 +66,13 @@ export class AuthController {
         return this.authCommonService.handleJoinProgress(dto);
     }
 
+    // @Post('restore-request')
+    // @HttpCode(HttpStatus.OK)
+    // @UseGuards(JwtSocialAuthGuard)
+    // async restoreRequest(@Body()) {
+    //     return this.authSocialService.restoreRequest(user.id);
+    // }
+
     /**
      *
      *  Put
@@ -82,6 +89,13 @@ export class AuthController {
     @UseGuards(JwtAuthGuard)
     async signOut(@AuthUser() user: IUserProfileDTO) {
         return this.authCommonService.signOut(user.id);
+    }
+
+    @Delete('withdrawal-request')
+    @HttpCode(HttpStatus.OK)
+    @UseGuards(JwtAuthGuard)
+    async withdrawalRequest(@AuthUser() user: IUserProfileDTO) {
+        return this.authSocialService.withdrawalRequest(user.id);
     }
 
     /**

@@ -51,11 +51,11 @@ export class ShareDeleterService {
             }
 
             await Promise.all([
-                this.imageDeleterService.deleteImageByTypeId(ImageType.Share, postId, session),
+                this.imageDeleterService.deleteImageByTypeId(ImageType.Share, [postId], session),
                 this.deleteLike(postId, session),
             ]);
 
-            const commentIds = await this.shareSearcherService.getCommentIds(postId);
+            const commentIds = await this.shareSearcherService.getCommentIds([postId]);
 
             if (commentIds.length) {
                 const commentResult = await this.shareCommentRepository
@@ -168,5 +168,29 @@ export class ShareDeleterService {
                 throw new CustomException('Failed to delete share like.', HttpStatus.INTERNAL_SERVER_ERROR, -2612);
             }
         }
+    }
+
+    async withdrawalShareInfo(userId: string, session: ClientSession) {
+        const postIds = await this.shareSearcherService.getPostIds(userId);
+
+        if (postIds.length) {
+            const commentIds = await this.shareSearcherService.getCommentIds(postIds);
+
+            await this.sharePostRepository.deletePost({ userId, isDeleted: false }, session);
+            await this.imageDeleterService.deleteImageByTypeId(ImageType.Share, postIds, session);
+            await this.shareLikeRepository.deleteLike({ postId: { $in: postIds }, isCanceled: false }, session);
+            await this.shareCommentRepository.deleteComment({ postId: { $in: postIds }, isDeleted: false }, session);
+
+            if (commentIds.length) {
+                await this.shareCommentReplyRepository.deleteCommentReply(
+                    { commentId: { $in: commentIds }, isDeleted: false },
+                    session,
+                );
+            }
+        }
+
+        await this.shareCommentRepository.deleteComment({ userId, isDeleted: false }, session);
+        await this.shareCommentReplyRepository.deleteCommentReply({ userId, isDeleted: false }, session);
+        await this.shareLikeRepository.deleteLike({ userId, isCanceled: false }, session);
     }
 }

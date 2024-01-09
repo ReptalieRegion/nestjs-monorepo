@@ -18,7 +18,13 @@ export class SharePostRepository extends BaseRepository<SharePostDocument> {
         return savedSharePost.Mapper();
     }
 
-    async deletePost(query: mongoose.FilterQuery<SharePostDocument>, session: ClientSession) {
+    async withdrawalPost(query: mongoose.FilterQuery<SharePostDocument>, session: ClientSession) {
         await this.sharePostModel.updateMany(query, { $set: { isDeleted: true } }, { session }).exec();
+    }
+
+    async restorePost(oldUserId: string, newUserId: string, session: ClientSession) {
+        await this.sharePostModel
+            .updateMany({ userId: oldUserId, isDeleted: true }, { $set: { userId: newUserId, isDeleted: false } }, { session })
+            .exec();
     }
 }

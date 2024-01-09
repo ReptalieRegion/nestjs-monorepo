@@ -18,7 +18,13 @@ export class DiaryEntityRepository extends BaseRepository<DiaryEntityDocument> {
         return savedEntity.Mapper();
     }
 
-    async deleteEntity(query: mongoose.FilterQuery<DiaryEntityDocument>, session: ClientSession) {
+    async withdrawalEntity(query: mongoose.FilterQuery<DiaryEntityDocument>, session: ClientSession) {
         await this.diaryEntityModel.updateMany(query, { $set: { isDeleted: true } }, { session }).exec();
+    }
+
+    async restoreEntity(oldUserId: string, newUserId: string, session: ClientSession) {
+        await this.diaryEntityModel
+            .updateMany({ userId: oldUserId, isDeleted: true }, { $set: { userId: newUserId, isDeleted: false } }, { session })
+            .exec();
     }
 }

@@ -18,7 +18,13 @@ export class DiaryWeightRepository extends BaseRepository<DiaryWeightDocument> {
         return savedWeight.Mapper();
     }
 
-    async deleteWeight(query: mongoose.FilterQuery<DiaryWeightDocument>, session: ClientSession) {
+    async withdrawalWeight(query: mongoose.FilterQuery<DiaryWeightDocument>, session: ClientSession) {
         await this.diaryWeightModel.updateMany(query, { $set: { isDeleted: true } }, { session }).exec();
+    }
+
+    async restoreWeight(entityIds: string[], session: ClientSession) {
+        await this.diaryWeightModel
+            .updateMany({ entityId: { $in: entityIds }, isDeleted: true }, { $set: { isDeleted: false } }, { session })
+            .exec();
     }
 }

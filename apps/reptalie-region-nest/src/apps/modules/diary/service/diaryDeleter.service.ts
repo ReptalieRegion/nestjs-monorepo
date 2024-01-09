@@ -102,8 +102,8 @@ export class DiaryDeleterService {
             return;
         }
 
-        await this.diaryEntityRepository.deleteEntity({ userId, isDeleted: false }, session);
-        await this.diaryCalendarRepository.deleteCalendar({ userId, isDeleted: false }, session);
-        await this.diaryWeightRepository.deleteWeight({ entityId: { $in: entityIds }, isDeleted: false }, session);
+        await this.diaryEntityRepository.withdrawalEntity({ userId, isDeleted: false }, session);
+        await this.diaryCalendarRepository.withdrawalCalendar({ userId, isDeleted: false }, session);
+        await this.diaryWeightRepository.withdrawalWeight({ entityId: { $in: entityIds }, isDeleted: false }, session);
     }
 }

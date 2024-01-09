@@ -680,6 +680,17 @@ export class ShareSearcherService {
     }
 
     /**
+     * 지정된 복원해야할 유저에 대한 게시글 ID 목록을 반환합니다.
+     *
+     * @param userId 게시물 ID
+     * @returns 댓글 ID 목록를 반환합니다.
+     */
+    async getRestorePostIds(userId: string): Promise<string[]> {
+        const posts = await this.sharePostRepository.find({ userId, isDeleted: true }, { _id: 1 }).exec();
+        return posts?.map((entity) => entity.Mapper().id as string);
+    }
+
+    /**
      * 지정된 게시물 ID에 대한 댓글 ID 목록을 반환합니다.
      *
      * @param postId 게시물 ID
@@ -688,6 +699,19 @@ export class ShareSearcherService {
     async getCommentIds(postIds: string[]): Promise<string[]> {
         const comments = await this.shareCommentRepository
             .find({ postId: { $in: postIds }, isDeleted: false }, { _id: 1 })
+            .exec();
+        return comments?.map((entity) => entity.Mapper().id as string);
+    }
+
+    /**
+     * 지정된 복원해야할 유저에 대한 댓글 ID 목록을 반환합니다.
+     *
+     * @param userId 게시물 ID
+     * @returns 댓글 ID 목록를 반환합니다.
+     */
+    async getRestoreCommentIds(postIds: string[]): Promise<string[]> {
+        const comments = await this.shareCommentRepository
+            .find({ postId: { $in: postIds }, isDeleted: true }, { _id: 1 })
             .exec();
         return comments?.map((entity) => entity.Mapper().id as string);
     }

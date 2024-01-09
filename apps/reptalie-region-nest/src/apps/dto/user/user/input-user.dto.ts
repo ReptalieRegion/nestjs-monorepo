@@ -27,5 +27,5 @@ export class InputUserDTO {
 
     @IsString()
     @IsOptional()
-    readonly imageId: string;
+    readonly imageId?: string;
 }

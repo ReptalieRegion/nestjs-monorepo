@@ -18,7 +18,14 @@ export class DiaryCalendarRepository extends BaseRepository<DiaryCalendarDocumen
         return savedCalendar.Mapper();
     }
 
-    async deleteCalendar(query: mongoose.FilterQuery<DiaryCalendarDocument>, session: ClientSession) {
+    async withdrawalCalendar(query: mongoose.FilterQuery<DiaryCalendarDocument>, session: ClientSession) {
         await this.diaryCalendarModel.updateMany(query, { $set: { isDeleted: true } }, { session }).exec();
+    }
+
+
+    async restoreCalendar(oldUserId: string, newUserId: string, session: ClientSession) {
+        await this.diaryCalendarModel
+            .updateMany({ userId: oldUserId, isDeleted: true }, { $set: { userId: newUserId, isDeleted: false } }, { session })
+            .exec();
     }
 }

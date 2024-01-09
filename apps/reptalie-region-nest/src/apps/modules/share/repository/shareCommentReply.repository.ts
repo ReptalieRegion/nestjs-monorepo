@@ -20,7 +20,13 @@ export class ShareCommentReplyRepository extends BaseRepository<ShareCommentRepl
         return savedReply.Mapper();
     }
 
-    async deleteCommentReply(query: mongoose.FilterQuery<ShareCommentReplyDocument>, session: ClientSession) {
+    async withdrawalCommentReply(query: mongoose.FilterQuery<ShareCommentReplyDocument>, session: ClientSession) {
         await this.shareCommentReplyModel.updateMany(query, { $set: { isDeleted: true } }, { session }).exec();
+    }
+
+    async restoreCommentReply(oldUserId: string, newUserId: string, session: ClientSession) {
+        await this.shareCommentReplyModel
+            .updateMany({ userId: oldUserId, isDeleted: true }, { $set: { userId: newUserId, isDeleted: false } }, { session })
+            .exec();
     }
 }

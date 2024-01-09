@@ -142,4 +142,22 @@ export class UserUpdaterService {
             await session.endSession();
         }
     }
+
+    async restoreFollowInfo(oldUserId: string, newUserId: string, session: ClientSession) {
+        await this.followRepository
+            .updateMany(
+                { following: oldUserId, isCanceled: true },
+                { $set: { isCanceled: false, following: newUserId } },
+                { session },
+            )
+            .exec();
+
+        await this.followRepository
+            .updateMany(
+                { follower: oldUserId, isCanceled: true },
+                { $set: { isCanceled: false, follower: newUserId } },
+                { session },
+            )
+            .exec();
+    }
 }

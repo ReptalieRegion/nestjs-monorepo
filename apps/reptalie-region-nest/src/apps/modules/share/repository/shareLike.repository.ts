@@ -80,7 +80,17 @@ export class ShareLikeRepository extends BaseRepository<ShareLikeDocument> {
             .exec();
     }
 
-    async deleteLike(query: mongoose.FilterQuery<ShareLikeDocument>, session: ClientSession) {
+    async withdrawalLike(query: mongoose.FilterQuery<ShareLikeDocument>, session: ClientSession) {
         await this.shareLikeModel.updateMany(query, { $set: { isCanceled: true } }, { session }).exec();
+    }
+
+    async restoreLike(oldUserId: string, newUserId: string, session: ClientSession) {
+        await this.shareLikeModel
+            .updateMany(
+                { userId: oldUserId, isCanceled: true },
+                { $set: { userId: newUserId, isCanceled: false } },
+                { session },
+            )
+            .exec();
     }
 }

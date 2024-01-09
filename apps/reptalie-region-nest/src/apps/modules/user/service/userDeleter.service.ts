@@ -19,10 +19,26 @@ export class UserDeleterService {
 
         return { message: 'Success' };
     }
+    async withdrawalUserInfo(_id: string, session: ClientSession) {
+        const result = await this.userRepository.deleteOne({ _id }, { session }).exec();
+
+        if (result.deletedCount === 0) {
+            throw new CustomException('Failed to delete user', HttpStatus.INTERNAL_SERVER_ERROR, -1616);
+        }
+    }
 
     async withdrawalFollowInfo(userId: string, session: ClientSession) {
         await this.followRepository
-            .updateMany({ $or: [{ following: userId }, { follower: userId }] }, { $set: { isCanceled: true } }, { session })
+            .updateMany(
+                {
+                    $or: [
+                        { following: userId, isCanceled: false },
+                        { follower: userId, isCanceled: false },
+                    ],
+                },
+                { $set: { isCanceled: true } },
+                { session },
+            )
             .exec();
     }
 }

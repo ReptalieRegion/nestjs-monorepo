@@ -1,5 +1,6 @@
 import { Body, Controller, Delete, Get, Headers, HttpCode, HttpStatus, Inject, Post, UseGuards } from '@nestjs/common';
 import { IEncryptedDataDTO, IJoinProgressDTO } from '../../dto/user/social/input-social.dto';
+import { IRestoreRequestDTO } from '../../dto/user/tempUser/input-tempUser.dto';
 import { IUserProfileDTO } from '../../dto/user/user/response-user.dto';
 import { ValidationPipe } from '../../utils/error/validator/validator.pipe';
 import { AuthUser } from '../user/user.decorator';
@@ -66,12 +67,12 @@ export class AuthController {
         return this.authCommonService.handleJoinProgress(dto);
     }
 
-    // @Post('restore-request')
-    // @HttpCode(HttpStatus.OK)
-    // @UseGuards(JwtSocialAuthGuard)
-    // async restoreRequest(@Body()) {
-    //     return this.authSocialService.restoreRequest(user.id);
-    // }
+    @Post('restore-request')
+    @HttpCode(HttpStatus.OK)
+    @UseGuards(JwtSocialAuthGuard)
+    async restoreRequest(@Body() dto: IRestoreRequestDTO) {
+        return this.authSocialService.restoreRequest(dto);
+    }
 
     /**
      *

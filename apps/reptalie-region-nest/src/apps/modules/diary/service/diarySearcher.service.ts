@@ -113,13 +113,24 @@ export class DiarySearcherService {
     }
 
     /**
-     * 지정된 유저에 대한 게시글 ID 목록을 반환합니다.
+     * 지정된 유저에 대한 개체 ID 목록을 반환합니다.
      *
      * @param userId 게시물 ID
      * @returns 댓글 ID 목록를 반환합니다.
      */
     async getEntityIds(userId: string): Promise<string[]> {
         const entitys = await this.diaryEntityRepository.find({ userId, isDeleted: false }, { _id: 1 }).exec();
+        return entitys?.map((entity) => entity.Mapper().id as string);
+    }
+
+    /**
+     * 지정된 유저에 대한 개체 ID 목록을 반환합니다.
+     *
+     * @param userId 게시물 ID
+     * @returns 댓글 ID 목록를 반환합니다.
+     */
+    async getRestoreEntityIds(userId: string): Promise<string[]> {
+        const entitys = await this.diaryEntityRepository.find({ userId, isDeleted: true }, { _id: 1 }).exec();
         return entitys?.map((entity) => entity.Mapper().id as string);
     }
 }

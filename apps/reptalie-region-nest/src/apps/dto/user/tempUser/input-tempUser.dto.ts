@@ -2,8 +2,8 @@ import { IsEnum, IsOptional, IsString } from 'class-validator';
 import { SocialProvierType } from '../social/input-social.dto';
 
 export interface IRestoreRequestDTO {
-    readonly provider: SocialProvierType;
-    readonly uniqueId: string;
+    readonly provider: string;
+    readonly encryptedData: string;
 }
 
 export class InputTempUserDTO {

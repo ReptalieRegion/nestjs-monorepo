@@ -18,7 +18,13 @@ export class ShareCommentRepository extends BaseRepository<ShareCommentDocument>
         return savedComment.Mapper();
     }
 
-    async deleteComment(query: mongoose.FilterQuery<ShareCommentDocument>, session: ClientSession) {
+    async withdrawalComment(query: mongoose.FilterQuery<ShareCommentDocument>, session: ClientSession) {
         await this.shareCommentModel.updateMany(query, { $set: { isDeleted: true } }, { session }).exec();
+    }
+
+    async restoreComment(oldUserId: string, newUserId: string, session: ClientSession) {
+        await this.shareCommentModel
+            .updateMany({ userId: oldUserId, isDeleted: true }, { $set: { userId: newUserId, isDeleted: false } }, { session })
+            .exec();
     }
 }

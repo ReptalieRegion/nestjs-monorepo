@@ -14,6 +14,7 @@ import { ImageWriterService, ImageWriterServiceToken } from '../../image/service
 import { DiaryCalendarRepository } from '../repository/diaryCalendar.repository';
 import { DiaryEntityRepository } from '../repository/diaryEntity.repository';
 import { DiaryWeightRepository } from '../repository/diaryWeight.repository';
+import { DiarySearcherService, DiarySearcherServiceToken } from './diarySearcher.service';
 
 export const DiaryUpdaterServiceToken = 'DiaryUpdaterServiceToken';
 
@@ -33,6 +34,8 @@ export class DiaryUpdaterService {
         private readonly imageWriterService: ImageWriterService,
         @Inject(ImageDeleterServiceToken)
         private readonly imageDeleterService: ImageDeleterService,
+        @Inject(DiarySearcherServiceToken)
+        private readonly diarySearcherService: DiarySearcherService,
     ) {}
 
     async updateEntity(user: IUserProfileDTO, entityId: string, dto: IUpdateEntityDTO, files?: Express.Multer.File[]) {
@@ -119,5 +122,17 @@ export class DiaryUpdaterService {
         if (result.modifiedCount === 0) {
             throw new CustomException('Failed to update entity imageId.', HttpStatus.INTERNAL_SERVER_ERROR, -3607);
         }
+    }
+
+    async restoreDiaryInfo(oldUserId: string, newUserId: string, session: ClientSession) {
+        const entityIds = await this.diarySearcherService.getRestoreEntityIds(oldUserId);
+
+        if (!entityIds.length) {
+            return;
+        }
+
+        await this.diaryEntityRepository.restoreEntity(oldUserId, newUserId, session);
+        await this.diaryCalendarRepository.restoreCalendar(oldUserId, newUserId, session);
+        await this.diaryWeightRepository.restoreWeight(entityIds, session);
     }
 }

@@ -176,21 +176,28 @@ export class ShareDeleterService {
         if (postIds.length) {
             const commentIds = await this.shareSearcherService.getCommentIds(postIds);
 
-            await this.sharePostRepository.deletePost({ userId, isDeleted: false }, session);
+            await this.sharePostRepository.withdrawalPost({ userId, isDeleted: false }, session);
             await this.imageDeleterService.deleteImageByTypeId(ImageType.Share, postIds, session);
-            await this.shareLikeRepository.deleteLike({ postId: { $in: postIds }, isCanceled: false }, session);
-            await this.shareCommentRepository.deleteComment({ postId: { $in: postIds }, isDeleted: false }, session);
+            await this.shareLikeRepository.withdrawalLike(
+                { postId: { $in: postIds }, userId: { $ne: userId }, isCanceled: false },
+                session,
+            );
 
             if (commentIds.length) {
-                await this.shareCommentReplyRepository.deleteCommentReply(
-                    { commentId: { $in: commentIds }, isDeleted: false },
+                await this.shareCommentRepository.withdrawalComment(
+                    { postId: { $in: postIds }, userId: { $ne: userId }, isDeleted: false },
+                    session,
+                );
+
+                await this.shareCommentReplyRepository.withdrawalCommentReply(
+                    { commentId: { $in: commentIds }, userId: { $ne: userId }, isDeleted: false },
                     session,
                 );
             }
         }
 
-        await this.shareCommentRepository.deleteComment({ userId, isDeleted: false }, session);
-        await this.shareCommentReplyRepository.deleteCommentReply({ userId, isDeleted: false }, session);
-        await this.shareLikeRepository.deleteLike({ userId, isCanceled: false }, session);
+        await this.shareCommentRepository.withdrawalComment({ userId, isDeleted: false }, session);
+        await this.shareCommentReplyRepository.withdrawalCommentReply({ userId, isDeleted: false }, session);
+        await this.shareLikeRepository.withdrawalLike({ userId, isCanceled: false }, session);
     }
 }

@@ -35,6 +35,12 @@ export class UserSearcherService {
             .flatMap((values) => values[0])
             .join('');
 
+        const isExistsSpecialChar = /^[ㄱ-ㅎ가-힣a-zA-Z0-9]{1,10}$/.test(initials);
+
+        if (!isExistsSpecialChar) {
+            return { items: [], nextPage: undefined };
+        }
+
         const follow = await this.followRepository
             .find(
                 {
@@ -75,10 +81,30 @@ export class UserSearcherService {
      * @returns 사용자 프로필 정보를 반환합니다.
      */
     async getProfile(nickname: string, user?: IUserProfileDTO) {
-        const userInfo = await this.getUserInfo({ nickname, currentUserId: user?.id });
+        const findUser = await this.userRepository
+            .findOne({ nickname })
+            .populate({ path: 'imageId', select: 'imageKey -_id' })
+            .exec();
+
+        if (!findUser) {
+            throw new CustomException('Not found for the specified user Info.', HttpStatus.NOT_FOUND, -1307);
+        }
+
+        const userInfo = findUser.Mapper();
+        const isFollow = user?.id ? await this.isExistsFollow(user?.id, userInfo.id as string) : undefined;
         const isMine = user?.nickname === nickname;
 
-        return { user: { ...userInfo, isMine } };
+        return {
+            user: {
+                id: userInfo.id,
+                nickname: userInfo.nickname,
+                profile: {
+                    src: `${process.env.AWS_IMAGE_BASEURL}${Object(userInfo.imageId).imageKey}`,
+                },
+                isFollow,
+                isMine,
+            },
+        };
     }
 
     /**

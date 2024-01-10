@@ -67,7 +67,7 @@ export class AuthController {
         return this.authCommonService.handleJoinProgress(dto);
     }
 
-    @Post('restore-request')
+    @Post('restore')
     @HttpCode(HttpStatus.OK)
     @UseGuards(JwtSocialAuthGuard)
     async restoreRequest(@Body() dto: IRestoreRequestDTO) {
@@ -92,7 +92,7 @@ export class AuthController {
         return this.authCommonService.signOut(user.id);
     }
 
-    @Delete('withdrawal-request')
+    @Delete('withdrawal')
     @HttpCode(HttpStatus.OK)
     @UseGuards(JwtAuthGuard)
     async withdrawalRequest(@AuthUser() user: IUserProfileDTO) {
@@ -105,6 +105,7 @@ export class AuthController {
      *
      */
     @Get('sign-in/check')
+    @HttpCode(HttpStatus.OK)
     @UseGuards(JwtAuthGuard)
     async signInCheck() {
         return { message: 'success' };

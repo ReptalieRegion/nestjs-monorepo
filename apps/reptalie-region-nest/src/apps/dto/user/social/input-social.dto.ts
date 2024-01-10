@@ -1,4 +1,4 @@
-import { IsEnum, IsOptional, IsString } from 'class-validator';
+import { IsEnum, IsOptional, IsString, Matches } from 'class-validator';
 
 export enum SocialProvierType {
     Kakao = 'kakao',
@@ -23,6 +23,7 @@ export class IJoinProgressDTO {
     joinProgress: JoinProgressType;
 
     @IsString()
+    @Matches(/^[ㄱ-ㅎ가-힣a-zA-Z0-9]{1,10}$/, { message: '닉네임은 한국어, 영어, 숫자만 허용됩니다.' })
     nickname: string;
 }
 

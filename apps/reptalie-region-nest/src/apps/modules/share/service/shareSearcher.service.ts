@@ -58,6 +58,11 @@ export class ShareSearcherService {
 
         const posts = await this.sharePostRepository
             .find({ isDeleted: false, _id: { $nin: typeIds } })
+            .populate({
+                path: 'userId',
+                select: 'nickname imageId',
+                populate: { path: 'imageId', model: 'Image', select: 'imageKey -_id' },
+            })
             .sort({ createdAt: -1 })
             .skip(pageParam * limitSize)
             .limit(limitSize)
@@ -65,8 +70,8 @@ export class ShareSearcherService {
 
         const items = await Promise.all(
             posts.map(async (entity) => {
-                const post = Object(entity).Mapper();
-                const userInfo = await this.userSearcherService.getUserInfo({ targetUserId: post.userId, currentUserId });
+                const post = entity.Mapper();
+                const userInfo = await this.userSearcherService.getUserInfo({ user: entity.userId, currentUserId });
                 const images = post.id && (await this.imageSearcherService.getPostImages(post.id));
 
                 return {
@@ -97,14 +102,21 @@ export class ShareSearcherService {
      */
     async getPost(currentUserId: string, postId: string) {
         const typeIds = await this.reportSearcherService.findTypeIdList(currentUserId, ReportType.POST);
-        const entity = await this.sharePostRepository.findOne({ _id: { $eq: postId, $nin: typeIds }, isDeleted: false }).exec();
+        const entity = await this.sharePostRepository
+            .findOne({ _id: { $eq: postId, $nin: typeIds }, isDeleted: false })
+            .populate({
+                path: 'userId',
+                select: 'nickname imageId',
+                populate: { path: 'imageId', model: 'Image', select: 'imageKey -_id' },
+            })
+            .exec();
 
         if (!entity) {
             throw new CustomException('Not found for the specified share Post Id.', HttpStatus.NOT_FOUND, -2301);
         }
 
         const post = entity.Mapper();
-        const userInfo = await this.userSearcherService.getUserInfo({ targetUserId: post.userId, currentUserId });
+        const userInfo = await this.userSearcherService.getUserInfo({ user: Object(post.userId), currentUserId });
         const images = post.id && (await this.imageSearcherService.getPostImages(post.id));
 
         return {

@@ -10,6 +10,7 @@ import { CustomException } from '../../../utils/error/customException';
 import { CustomExceptionHandler } from '../../../utils/error/customException.handler';
 import { ImageDeleterService, ImageDeleterServiceToken } from '../../image/service/imageDeleter.service';
 import { ImageS3HandlerService, ImageS3HandlerServiceToken } from '../../image/service/imageS3Handler.service';
+import { ImageUpdaterService, ImageUpdaterServiceToken } from '../../image/service/imageUpdater.service';
 import { ImageWriterService, ImageWriterServiceToken } from '../../image/service/imageWriter.service';
 import { DiaryCalendarRepository } from '../repository/diaryCalendar.repository';
 import { DiaryEntityRepository } from '../repository/diaryEntity.repository';
@@ -34,6 +35,8 @@ export class DiaryUpdaterService {
         private readonly imageWriterService: ImageWriterService,
         @Inject(ImageDeleterServiceToken)
         private readonly imageDeleterService: ImageDeleterService,
+        @Inject(ImageUpdaterServiceToken)
+        private readonly imageUpdaterService: ImageUpdaterService,
         @Inject(DiarySearcherServiceToken)
         private readonly diarySearcherService: DiarySearcherService,
     ) {}
@@ -130,7 +133,8 @@ export class DiaryUpdaterService {
         if (!entityIds.length) {
             return;
         }
-
+        
+        await this.imageUpdaterService.restoreImageByTypeId(ImageType.Diary, entityIds, session);
         await this.diaryEntityRepository.restoreEntity(oldUserId, newUserId, session);
         await this.diaryCalendarRepository.restoreCalendar(oldUserId, newUserId, session);
         await this.diaryWeightRepository.restoreWeight(entityIds, session);

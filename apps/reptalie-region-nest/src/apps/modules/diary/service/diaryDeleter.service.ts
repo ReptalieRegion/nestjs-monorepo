@@ -103,6 +103,7 @@ export class DiaryDeleterService {
         }
 
         await this.diaryEntityRepository.withdrawalEntity({ userId, isDeleted: false }, session);
+        await this.imageDeleterService.deleteImageByTypeId(ImageType.Diary, entityIds, session);
         await this.diaryCalendarRepository.withdrawalCalendar({ userId, isDeleted: false }, session);
         await this.diaryWeightRepository.withdrawalWeight({ entityId: { $in: entityIds }, isDeleted: false }, session);
     }

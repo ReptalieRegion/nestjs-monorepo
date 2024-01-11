@@ -10,6 +10,7 @@ import { CustomException } from '../../../utils/error/customException';
 import { CustomExceptionHandler } from '../../../utils/error/customException.handler';
 import { ImageDeleterService, ImageDeleterServiceToken } from '../../image/service/imageDeleter.service';
 import { ImageS3HandlerService, ImageS3HandlerServiceToken } from '../../image/service/imageS3Handler.service';
+import { ImageSearcherService, ImageSearcherServiceToken } from '../../image/service/imageSearcher.service';
 import { ImageUpdaterService, ImageUpdaterServiceToken } from '../../image/service/imageUpdater.service';
 import { ImageWriterService, ImageWriterServiceToken } from '../../image/service/imageWriter.service';
 import { DiaryCalendarRepository } from '../repository/diaryCalendar.repository';
@@ -37,6 +38,8 @@ export class DiaryUpdaterService {
         private readonly imageDeleterService: ImageDeleterService,
         @Inject(ImageUpdaterServiceToken)
         private readonly imageUpdaterService: ImageUpdaterService,
+        @Inject(ImageSearcherServiceToken)
+        private readonly imageSearcherService: ImageSearcherService,
         @Inject(DiarySearcherServiceToken)
         private readonly diarySearcherService: DiarySearcherService,
     ) {}
@@ -133,8 +136,11 @@ export class DiaryUpdaterService {
         if (!entityIds.length) {
             return;
         }
-        
-        await this.imageUpdaterService.restoreImageByTypeId(ImageType.Diary, entityIds, session);
+
+        const imagesPromises = entityIds.map(async (entity) => await this.imageSearcherService.getDiaryImages(entity));
+        const images = await Promise.all(imagesPromises);
+
+        await this.imageUpdaterService.restoreImageById(images, session);
         await this.diaryEntityRepository.restoreEntity(oldUserId, newUserId, session);
         await this.diaryCalendarRepository.restoreCalendar(oldUserId, newUserId, session);
         await this.diaryWeightRepository.restoreWeight(entityIds, session);

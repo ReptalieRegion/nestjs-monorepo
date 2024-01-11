@@ -40,4 +40,20 @@ export class ImageUpdaterService {
             .updateMany({ typeId: { $in: typeIds }, type, isDeleted: true }, { $set: { isDeleted: false } }, { session })
             .exec();
     }
+
+    /**
+     * 특정 타입 및 타입 ID를 기반으로 이미지를 복원합니다.
+     *
+     * @param imageId - 이미지의 ID입니다.
+     * @param session - 현재 세션입니다.
+     */
+    async restoreImageById(imageId: string[], session: ClientSession) {
+        await this.imageRepository
+            .updateMany(
+                { _id: { $in: imageId }, type: ImageType.Diary, isDeleted: true },
+                { $set: { isDeleted: false } },
+                { session },
+            )
+            .exec();
+    }
 }

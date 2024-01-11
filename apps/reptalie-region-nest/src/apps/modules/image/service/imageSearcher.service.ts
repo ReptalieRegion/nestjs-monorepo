@@ -62,6 +62,6 @@ export class ImageSearcherService {
             throw new CustomException('Not found for the specified diary image.', HttpStatus.NOT_FOUND, -5302);
         }
 
-        return profileImages.Mapper();
+        return profileImages.Mapper().id as string;
     }
 }

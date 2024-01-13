@@ -1,4 +1,4 @@
-import { IsString, IsEnum, IsOptional } from 'class-validator';
+import { IsEnum, IsOptional, IsString, Matches } from 'class-validator';
 
 export enum SocialProvierType {
     Kakao = 'kakao',
@@ -15,30 +15,36 @@ export interface IEncryptedDataDTO {
     encryptedData: string;
 }
 
-export interface IJoinProgressDTO {
-    userId: string;
-    joinProgress: JoinProgressType;
-    nickname: string;
-}
-
-export class InputSocialDTO {
+export class IJoinProgressDTO {
     @IsString()
     userId: string;
-
-    @IsEnum(SocialProvierType)
-    provider: SocialProvierType;
-
-    @IsString()
-    uniqueId: string;
 
     @IsEnum(JoinProgressType)
     joinProgress: JoinProgressType;
 
     @IsString()
-    @IsOptional()
-    salt?: string;
+    @Matches(/^[ㄱ-ㅎ가-힣a-zA-Z0-9]{1,10}$/, { message: '닉네임은 한국어, 영어, 숫자만 허용됩니다.' })
+    nickname: string;
+}
+
+export class InputSocialDTO {
+    @IsString()
+    readonly userId: string;
+
+    @IsEnum(SocialProvierType)
+    readonly provider: SocialProvierType;
+
+    @IsString()
+    readonly uniqueId: string;
+
+    @IsEnum(JoinProgressType)
+    readonly joinProgress: JoinProgressType;
 
     @IsString()
     @IsOptional()
-    refreshToken?: string;
+    readonly salt?: string;
+
+    @IsString()
+    @IsOptional()
+    readonly refreshToken?: string;
 }

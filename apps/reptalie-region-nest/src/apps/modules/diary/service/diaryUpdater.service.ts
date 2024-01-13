@@ -1,4 +1,4 @@
-import { BadRequestException, Inject, Injectable, InternalServerErrorException } from '@nestjs/common';
+import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { InjectConnection } from '@nestjs/mongoose';
 import mongoose, { ClientSession } from 'mongoose';
 import { IUpdateCalendarDTO } from '../../../dto/diary/calendar/input-diaryCalendar.dto';
@@ -6,13 +6,17 @@ import { IUpdateEntityDTO } from '../../../dto/diary/entity/input-diaryEntity.dt
 import { IUpdateWeightDTO } from '../../../dto/diary/weight/input-diaryWeight.dto';
 import { ImageType } from '../../../dto/image/input-image.dto';
 import { IUserProfileDTO } from '../../../dto/user/user/response-user.dto';
-import { serviceErrorHandler } from '../../../utils/error/errorHandler';
+import { CustomException } from '../../../utils/error/customException';
+import { CustomExceptionHandler } from '../../../utils/error/customException.handler';
 import { ImageDeleterService, ImageDeleterServiceToken } from '../../image/service/imageDeleter.service';
 import { ImageS3HandlerService, ImageS3HandlerServiceToken } from '../../image/service/imageS3Handler.service';
+import { ImageSearcherService, ImageSearcherServiceToken } from '../../image/service/imageSearcher.service';
+import { ImageUpdaterService, ImageUpdaterServiceToken } from '../../image/service/imageUpdater.service';
 import { ImageWriterService, ImageWriterServiceToken } from '../../image/service/imageWriter.service';
 import { DiaryCalendarRepository } from '../repository/diaryCalendar.repository';
 import { DiaryEntityRepository } from '../repository/diaryEntity.repository';
 import { DiaryWeightRepository } from '../repository/diaryWeight.repository';
+import { DiarySearcherService, DiarySearcherServiceToken } from './diarySearcher.service';
 
 export const DiaryUpdaterServiceToken = 'DiaryUpdaterServiceToken';
 
@@ -32,6 +36,12 @@ export class DiaryUpdaterService {
         private readonly imageWriterService: ImageWriterService,
         @Inject(ImageDeleterServiceToken)
         private readonly imageDeleterService: ImageDeleterService,
+        @Inject(ImageUpdaterServiceToken)
+        private readonly imageUpdaterService: ImageUpdaterService,
+        @Inject(ImageSearcherServiceToken)
+        private readonly imageSearcherService: ImageSearcherService,
+        @Inject(DiarySearcherServiceToken)
+        private readonly diarySearcherService: DiarySearcherService,
     ) {}
 
     async updateEntity(user: IUserProfileDTO, entityId: string, dto: IUpdateEntityDTO, files?: Express.Multer.File[]) {
@@ -42,7 +52,7 @@ export class DiaryUpdaterService {
 
         try {
             if (files?.length) {
-                await this.imageDeleterService.deleteImageByTypeId(ImageType.Diary, entityId, session);
+                await this.imageDeleterService.deleteImageByTypeId(ImageType.Diary, [entityId], session);
 
                 imageKeys = await this.imageS3HandlerService.uploadToS3(files);
                 const [image] = await this.imageWriterService.createImage(entityId, imageKeys, ImageType.Diary, session);
@@ -50,7 +60,7 @@ export class DiaryUpdaterService {
             }
 
             if (!dto.name) {
-                throw new BadRequestException('entity name cannot be empty.');
+                throw new CustomException('entity name cannot be empty.', HttpStatus.BAD_REQUEST, -3001);
             }
 
             const result = await this.diaryEntityRepository
@@ -58,7 +68,7 @@ export class DiaryUpdaterService {
                 .exec();
 
             if (result.modifiedCount === 0) {
-                throw new InternalServerErrorException('Failed to update diary entity.');
+                throw new CustomException('Failed to update diary entity.', HttpStatus.INTERNAL_SERVER_ERROR, -3604);
             }
 
             await session.commitTransaction();
@@ -67,7 +77,7 @@ export class DiaryUpdaterService {
         } catch (error) {
             await this.imageS3HandlerService.deleteImagesFromS3(imageKeys);
             await session.abortTransaction();
-            serviceErrorHandler(error, 'Invalid ObjectId for diary entity Id.');
+            throw new CustomExceptionHandler(error).handleException('Invalid ObjectId for diary entity Id.', -3507);
         } finally {
             await session.endSession();
         }
@@ -80,12 +90,12 @@ export class DiaryUpdaterService {
                 .exec();
 
             if (result.modifiedCount === 0) {
-                throw new InternalServerErrorException('Failed to update diary weight.');
+                throw new CustomException('Failed to update diary weight.', HttpStatus.INTERNAL_SERVER_ERROR, -3605);
             }
 
             return { message: 'Success' };
         } catch (error) {
-            serviceErrorHandler(error, 'Invalid ObjectId for diary entity Id.');
+            throw new CustomExceptionHandler(error).handleException('Invalid ObjectId for diary entity Id.', -3507);
         }
     }
 
@@ -96,12 +106,12 @@ export class DiaryUpdaterService {
                 .exec();
 
             if (result.modifiedCount === 0) {
-                throw new InternalServerErrorException('Failed to update diary calendar.');
+                throw new CustomException('Failed to update diary calendar.', HttpStatus.INTERNAL_SERVER_ERROR, -3606);
             }
 
             return { message: 'Success' };
         } catch (error) {
-            serviceErrorHandler(error, 'Invalid ObjectId for diary calendar Id.');
+            throw new CustomExceptionHandler(error).handleException('Invalid ObjectId for diary calendar Id.', -3508);
         }
     }
 
@@ -116,7 +126,23 @@ export class DiaryUpdaterService {
         const result = await this.diaryEntityRepository.updateOne({ _id }, { $set: { imageId } }, { session }).exec();
 
         if (result.modifiedCount === 0) {
-            throw new InternalServerErrorException('Failed to update image Id.');
+            throw new CustomException('Failed to update entity imageId.', HttpStatus.INTERNAL_SERVER_ERROR, -3607);
         }
+    }
+
+    async restoreDiaryInfo(oldUserId: string, newUserId: string, session: ClientSession) {
+        const entityIds = await this.diarySearcherService.getRestoreEntityIds(oldUserId);
+
+        if (!entityIds.length) {
+            return;
+        }
+
+        const imagesPromises = entityIds.map(async (entity) => await this.imageSearcherService.getDiaryImages(entity));
+        const images = await Promise.all(imagesPromises);
+
+        await this.imageUpdaterService.restoreImageById(images, session);
+        await this.diaryEntityRepository.restoreEntity(oldUserId, newUserId, session);
+        await this.diaryCalendarRepository.restoreCalendar(oldUserId, newUserId, session);
+        await this.diaryWeightRepository.restoreWeight(entityIds, session);
     }
 }

@@ -1,7 +1,8 @@
 import { Body, Controller, Delete, Get, Headers, HttpCode, HttpStatus, Inject, Post, UseGuards } from '@nestjs/common';
 import { IEncryptedDataDTO, IJoinProgressDTO } from '../../dto/user/social/input-social.dto';
+import { IRestoreRequestDTO } from '../../dto/user/tempUser/input-tempUser.dto';
 import { IUserProfileDTO } from '../../dto/user/user/response-user.dto';
-import { controllerErrorHandler } from '../../utils/error/errorHandler';
+import { ValidationPipe } from '../../utils/error/validator/validator.pipe';
 import { AuthUser } from '../user/user.decorator';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { JwtSocialAuthGuard } from './guards/jwtSocial-auth.guard';
@@ -28,68 +29,49 @@ export class AuthController {
     @Post('social/token')
     @HttpCode(HttpStatus.OK)
     async authToken() {
-        try {
-            return this.authTokenService.getAuthTokenAndPublicKey();
-        } catch (error) {
-            controllerErrorHandler(error);
-        }
+        return this.authTokenService.getAuthTokenAndPublicKey();
     }
 
     @Post('social/kakao')
     @HttpCode(HttpStatus.CREATED)
     @UseGuards(JwtSocialAuthGuard)
     async socialKakao(@Body() dto: IEncryptedDataDTO) {
-        try {
-            return this.authSocialService.kakaoSignIn(dto);
-        } catch (error) {
-            controllerErrorHandler(error);
-        }
+        return this.authSocialService.kakaoSignIn(dto);
     }
 
     @Post('social/apple')
     @HttpCode(HttpStatus.CREATED)
     @UseGuards(JwtSocialAuthGuard)
     async socialApple(@Body() dto: IEncryptedDataDTO) {
-        try {
-            return this.authSocialService.appleSignIn(dto);
-        } catch (error) {
-            controllerErrorHandler(error);
-        }
+        return this.authSocialService.appleSignIn(dto);
     }
 
     @Post('social/google')
     @HttpCode(HttpStatus.CREATED)
     async socialGoogle(@Headers('authorization') authorizationHeader: string) {
-        try {
-            const idToken = authorizationHeader.split('Bearer ')[1];
-
-            return this.authSocialService.googleSignIn(idToken);
-        } catch (error) {
-            controllerErrorHandler(error);
-        }
+        const idToken = authorizationHeader?.split('Bearer ')[1];
+        return this.authSocialService.googleSignIn(idToken);
     }
 
     @Post('refresh')
     @HttpCode(HttpStatus.OK)
     async verifyRefreshToken(@Headers('authorization') authorizationHeader: string) {
-        try {
-            const refreshToken = authorizationHeader.split('Bearer ')[1];
-
-            return this.authCommonService.verifyRefreshToken(refreshToken);
-        } catch (error) {
-            controllerErrorHandler(error);
-        }
+        const refreshToken = authorizationHeader?.split('Bearer ')[1];
+        return this.authCommonService.verifyRefreshToken(refreshToken);
     }
 
     @Post('social/join-progress')
     @HttpCode(HttpStatus.OK)
     @UseGuards(JwtSocialAuthGuard)
-    async handleJoinProgress(@Body() dto: IJoinProgressDTO) {
-        try {
-            return this.authCommonService.handleJoinProgress(dto);
-        } catch (error) {
-            controllerErrorHandler(error);
-        }
+    async handleJoinProgress(@Body(new ValidationPipe(-1504)) dto: IJoinProgressDTO) {
+        return this.authCommonService.handleJoinProgress(dto);
+    }
+
+    @Post('restore')
+    @HttpCode(HttpStatus.OK)
+    @UseGuards(JwtSocialAuthGuard)
+    async restoreRequest(@Body() dto: IRestoreRequestDTO) {
+        return this.authSocialService.restoreRequest(dto);
     }
 
     /**
@@ -107,11 +89,14 @@ export class AuthController {
     @HttpCode(HttpStatus.OK)
     @UseGuards(JwtAuthGuard)
     async signOut(@AuthUser() user: IUserProfileDTO) {
-        try {
-            return this.authCommonService.signOut(user.id);
-        } catch (error) {
-            controllerErrorHandler(error);
-        }
+        return this.authCommonService.signOut(user.id);
+    }
+
+    @Delete('withdrawal')
+    @HttpCode(HttpStatus.OK)
+    @UseGuards(JwtAuthGuard)
+    async withdrawalRequest(@AuthUser() user: IUserProfileDTO) {
+        return this.authSocialService.withdrawalRequest(user.id);
     }
 
     /**
@@ -120,6 +105,7 @@ export class AuthController {
      *
      */
     @Get('sign-in/check')
+    @HttpCode(HttpStatus.OK)
     @UseGuards(JwtAuthGuard)
     async signInCheck() {
         return { message: 'success' };

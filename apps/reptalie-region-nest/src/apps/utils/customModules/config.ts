@@ -27,6 +27,7 @@ const configs = () => {
         AWS_REGION: env.AWS_REGION,
         AWS_BUCKET: env.AWS_BUCKET,
         AWS_IMAGE_BASEURL: env.AWS_IMAGE_BASEURL,
+        USER_BASE_IMAGE: env.USER_BASE_IMAGE,
         REDIS_URI: env.REDIS_URI,
         GOOGLE_CLIENT_ID: env.GOOGLE_CLIENT_ID,
         API_GATEWAY_URI: env.API_GATEWAY_URI,

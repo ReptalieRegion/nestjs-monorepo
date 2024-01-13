@@ -1,6 +1,8 @@
-import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
+import { ClientSession } from 'mongoose';
 import { InputNotificationAgreeDTO } from '../../../dto/notification/agree/input-notificationAgree.dto';
 import { TemplateType } from '../../../dto/notification/template/input-notificationTemplate.dto';
+import { CustomException } from '../../../utils/error/customException';
 import { NotificationAgreeRepository } from '../repository/notificationAgree.repository';
 
 export const NotificationAgreeServiceToken = 'NotificationAgreeServiceToken';
@@ -13,7 +15,7 @@ export class NotificationAgreeService {
         const isExistsAgree = await this.notificationAgreeRepository.findOne({ userId }).exec();
 
         if (isExistsAgree) {
-            throw new BadRequestException('Data has already been created.');
+            throw new CustomException('Data has already been created.', HttpStatus.INTERNAL_SERVER_ERROR, -4608);
         }
 
         const dto: InputNotificationAgreeDTO = {
@@ -29,7 +31,7 @@ export class NotificationAgreeService {
         const agree = await this.notificationAgreeRepository.createAgree(dto);
 
         if (!agree) {
-            throw new InternalServerErrorException('Failed to save notification agree.');
+            throw new CustomException('Failed to save notification agree.', HttpStatus.INTERNAL_SERVER_ERROR, -4603);
         }
 
         return { message: 'Success' };
@@ -58,13 +60,13 @@ export class NotificationAgreeService {
                 query = { $set: { device: isAgree } };
                 break;
             default:
-                throw new BadRequestException('Invalid data for the specified type.');
+                throw new CustomException('Invalid data for the specified type.', HttpStatus.UNPROCESSABLE_ENTITY, -4503);
         }
 
         const result = await this.notificationAgreeRepository.updateOne({ userId }, query).exec();
 
         if (result.modifiedCount === 0) {
-            throw new InternalServerErrorException('Failed to update notification agree.');
+            throw new CustomException('Failed to update notification agree.', HttpStatus.INTERNAL_SERVER_ERROR, -4606);
         }
     }
 
@@ -72,7 +74,7 @@ export class NotificationAgreeService {
         const agree = await this.notificationAgreeRepository.findOne({ userId }).exec();
 
         if (!agree) {
-            throw new NotFoundException('Notification agree information not found for the specified user.');
+            throw new CustomException('Not found for the specified notification agree info.', HttpStatus.NOT_FOUND, -4301);
         }
 
         const { comment, like, service, follow, tag, device } = agree;
@@ -108,9 +110,17 @@ export class NotificationAgreeService {
                 isPushAgree = isAgree.isAgreeTag;
                 break;
             default:
-                throw new BadRequestException('Invalid data for the specified type.');
+                throw new CustomException('Invalid data for the specified type.', HttpStatus.UNPROCESSABLE_ENTITY, -4503);
         }
 
         return isPushAgree;
+    }
+
+    async withdrawalNotificationInfo(userId: string, session: ClientSession) {
+        const result = await this.notificationAgreeRepository.deleteOne({ userId }, { session }).exec();
+
+        if (result.deletedCount === 0) {
+            throw new CustomException('Failed to delete notification agree.', HttpStatus.INTERNAL_SERVER_ERROR, -4610);
+        }
     }
 }

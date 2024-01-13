@@ -3,7 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { ClientSession, Model } from 'mongoose';
 
 import { InputUserDTO } from '../../../dto/user/user/input-user.dto';
-import { UserDocument, User } from '../../../schemas/user.schema';
+import { User, UserDocument } from '../../../schemas/user.schema';
 import { BaseRepository } from '../../base/base.repository';
 
 @Injectable()
@@ -16,9 +16,5 @@ export class UserRepository extends BaseRepository<UserDocument> {
         const user = new this.userModel(dto);
         const savedUser = await user.save({ session });
         return savedUser.Mapper();
-    }
-
-    async findByEmail(email: string) {
-        return await this.userModel.findOne({ userId: email }).exec();
     }
 }

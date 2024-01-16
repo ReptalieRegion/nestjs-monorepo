@@ -15,6 +15,7 @@ import { ImageWriterService, ImageWriterServiceToken } from '../../image/service
 import { NotificationAgreeService, NotificationAgreeServiceToken } from '../../notification/service/notificationAgree.service';
 import { NotificationPushService, NotificationPushServiceToken } from '../../notification/service/notificationPush.service';
 import { NotificationSlackService, NotificationSlackServiceToken } from '../../notification/service/notificationSlack.service';
+import { ReportSearcherService, ReportSearcherServiceToken } from '../../report/service/reportSearcher.service';
 import { ShareCommentRepository } from '../repository/shareComment.repository';
 import { ShareCommentReplyRepository } from '../repository/shareCommentReply.repository';
 import { ShareLikeRepository } from '../repository/shareLike.repository';
@@ -25,6 +26,8 @@ export const ShareWriterServiceToken = 'ShareWriterServiceToken';
 
 @Injectable()
 export class ShareWriterService {
+    private readonly MAX_REPORT_LIMIT = 5;
+
     constructor(
         @InjectConnection()
         private readonly connection: mongoose.Connection,
@@ -50,6 +53,9 @@ export class ShareWriterService {
         private readonly notificationPushService: NotificationPushService,
         @Inject(NotificationSlackServiceToken)
         private readonly notificationSlackService: NotificationSlackService,
+
+        @Inject(ReportSearcherServiceToken)
+        private readonly reportSearcherService: ReportSearcherService,
     ) {}
 
     /**
@@ -67,6 +73,16 @@ export class ShareWriterService {
         let imageKeys: string[] = [];
 
         try {
+            const reportShareContentCount = await this.reportSearcherService.reportShareContentCount(user.id);
+
+            if (reportShareContentCount > this.MAX_REPORT_LIMIT) {
+                throw new CustomException(
+                    'The save operation has failed due to exceeding the maximum report limit.',
+                    HttpStatus.UNPROCESSABLE_ENTITY,
+                    -2507,
+                );
+            }
+
             const tagUserInfo = await this.shareSearcherService.extractUserInfo(dto.contents);
 
             const post = await this.sharePostRepository.createPost(user.id, dto, session);
@@ -84,9 +100,16 @@ export class ShareWriterService {
             const postInfo = await this.shareSearcherService.getPostInfo({ create: { post, imageKeys } });
 
             tagUserInfo?.map((entity) => {
-                Promise.all([this.notificationAgreeService.isPushAgree(TemplateType.Tag, entity.id as string)])
-                    .then(async ([isPushAgree]) => {
+                Promise.all([
+                    this.notificationAgreeService.isPushAgree(TemplateType.Tag, entity.id as string),
+                    this.reportSearcherService.getblockedList(entity.id as string),
+                ])
+                    .then(async ([isPushAgree, blockedList]) => {
                         if (!isPushAgree) {
+                            return;
+                        }
+
+                        if (blockedList && blockedList.some((item) => item === user.id)) {
                             return;
                         }
 
@@ -138,6 +161,16 @@ export class ShareWriterService {
      * @returns 생성된 댓글과 사용자 정보를 반환합니다.
      */
     async createComment(user: IUserProfileDTO, dto: InputShareCommentDTO) {
+        const reportShareContentCount = await this.reportSearcherService.reportShareContentCount(user.id);
+
+        if (reportShareContentCount > this.MAX_REPORT_LIMIT) {
+            throw new CustomException(
+                'The save operation has failed due to 5 accumulated reports.',
+                HttpStatus.UNPROCESSABLE_ENTITY,
+                -2507,
+            );
+        }
+
         const post = await this.shareSearcherService.findPostWithUserInfo(dto.postId);
         const tagUserInfo = await this.shareSearcherService.extractUserInfo(dto.contents);
 
@@ -155,8 +188,9 @@ export class ShareWriterService {
         Promise.all([
             this.notificationAgreeService.isPushAgree(TemplateType.Comment, post?.userId.id),
             this.imageSearcherService.getPostImages(comment.postId),
+            this.reportSearcherService.getblockedList(post?.userId.id),
         ])
-            .then(async ([isCommentPushAgree, postImage]) => {
+            .then(async ([isCommentPushAgree, postImage, blockedList]) => {
                 const postThumbnail = postImage[0].src;
                 const userThumbnail = user.profile.src;
 
@@ -170,7 +204,9 @@ export class ShareWriterService {
                     );
                 }
 
-                if (post?.userId.id !== user.id && isCommentPushAgree) {
+                const isExistsBlocking = blockedList && blockedList.some((item) => item === user.id);
+
+                if (post?.userId.id !== user.id && isCommentPushAgree && !isExistsBlocking) {
                     await this.notificationPushService.sendMessage(post?.userId.fcmToken, {
                         type: TemplateType.Comment,
                         userId: post?.userId.id,
@@ -184,11 +220,14 @@ export class ShareWriterService {
                 if (tagUserInfo?.length) {
                     await Promise.all(
                         tagUserInfo.map(async (entity) => {
-                            const [isTagPushAgree] = await Promise.all([
+                            const [isTagPushAgree, isTagblockedList] = await Promise.all([
                                 this.notificationAgreeService.isPushAgree(TemplateType.Tag, entity.id as string),
+                                this.reportSearcherService.getblockedList(entity.id as string),
                             ]);
 
-                            if (post?.userId.id !== entity.id && isTagPushAgree) {
+                            const isExistsBlockingTag = isTagblockedList && isTagblockedList.some((item) => item === user.id);
+
+                            if (post?.userId.id !== entity.id && isTagPushAgree && !isExistsBlockingTag) {
                                 await this.notificationPushService.sendMessage(entity.fcmToken, {
                                     type: TemplateType.Tag,
                                     userId: entity.id as string,
@@ -217,6 +256,16 @@ export class ShareWriterService {
      * @returns 생성된 댓글에 대한 답글과 사용자 정보를 반환합니다.
      */
     async createCommentReply(user: IUserProfileDTO, dto: InputShareCommentReplyDTO) {
+        const reportShareContentCount = await this.reportSearcherService.reportShareContentCount(user.id);
+
+        if (reportShareContentCount > this.MAX_REPORT_LIMIT) {
+            throw new CustomException(
+                'The save operation has failed due to 5 accumulated reports.',
+                HttpStatus.UNPROCESSABLE_ENTITY,
+                -2507,
+            );
+        }
+
         const comment = await this.shareSearcherService.findCommentWithUserInfo(dto.commentId);
         const tagUserInfo = await this.shareSearcherService.extractUserInfo(dto.contents);
 
@@ -234,8 +283,9 @@ export class ShareWriterService {
         Promise.all([
             this.notificationAgreeService.isPushAgree(TemplateType.Comment, comment?.userId.id),
             this.imageSearcherService.getPostImages(comment?.postId as string),
+            this.reportSearcherService.getblockedList(comment?.userId.id),
         ])
-            .then(async ([isCommentPushAgree, postImage]) => {
+            .then(async ([isCommentPushAgree, postImage, blockedList]) => {
                 const postThumbnail = postImage[0].src;
                 const userThumbnail = user.profile.src;
 
@@ -249,7 +299,9 @@ export class ShareWriterService {
                     );
                 }
 
-                if (comment?.userId.id !== user.id && isCommentPushAgree) {
+                const isExistsBlocking = blockedList && blockedList.some((item) => item === user.id);
+
+                if (comment?.userId.id !== user.id && isCommentPushAgree && !isExistsBlocking) {
                     await this.notificationPushService.sendMessage(comment?.userId.fcmToken, {
                         type: TemplateType.Comment,
                         userId: comment?.userId.id,
@@ -263,11 +315,13 @@ export class ShareWriterService {
                 if (tagUserInfo?.length) {
                     await Promise.all(
                         tagUserInfo.map(async (entity) => {
-                            const [isTagPushAgree] = await Promise.all([
+                            const [isTagPushAgree, isTagblockedList] = await Promise.all([
                                 this.notificationAgreeService.isPushAgree(TemplateType.Tag, entity.id as string),
+                                this.reportSearcherService.getblockedList(entity.id as string),
                             ]);
+                            const isExistsBlockingTag = isTagblockedList && isTagblockedList.some((item) => item === user.id);
 
-                            if (comment?.userId.id !== entity.id && isTagPushAgree) {
+                            if (comment?.userId.id !== entity.id && isTagPushAgree && !isExistsBlockingTag) {
                                 await this.notificationPushService.sendMessage(entity.fcmToken, {
                                     type: TemplateType.Tag,
                                     userId: entity.id as string,
@@ -316,13 +370,18 @@ export class ShareWriterService {
             Promise.all([
                 this.notificationAgreeService.isPushAgree(TemplateType.Like, post?.userId.id),
                 this.imageSearcherService.getPostImages(post?.id as string),
+                this.reportSearcherService.getblockedList(post?.userId.id),
             ])
-                .then(async ([isPushAgree, postImage]) => {
+                .then(async ([isPushAgree, postImage, blockedList]) => {
                     if (post?.userId.id === user.id) {
                         return;
                     }
 
                     if (!isPushAgree) {
+                        return;
+                    }
+
+                    if (blockedList && blockedList.some((item) => item === user.id)) {
                         return;
                     }
 

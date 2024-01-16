@@ -228,4 +228,11 @@ export class ShareController {
         pageParam = isNaN(Number(pageParam)) ? 0 : Number(pageParam);
         return this.shareSearcherService.getMyPostsInfiniteScroll(user.id, pageParam, 12);
     }
+
+    @Get('posts/users/:nickname/activity-summary')
+    @HttpCode(HttpStatus.OK)
+    @UseGuards(JwtOptionalAuthGuard)
+    async getUserPostCount(@AuthUser() user: IUserProfileDTO, @Param('nickname') nickname: string) {
+        return this.shareSearcherService.getPostAndFollowerCount(user?.id, nickname);
+    }
 }

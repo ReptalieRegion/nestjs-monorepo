@@ -90,13 +90,6 @@ export class UserController {
         return this.userDeleterService.fcmTokenDelete(user.id);
     }
 
-    @Delete('withdrawal-request')
-    @HttpCode(HttpStatus.OK)
-    @UseGuards(JwtAuthGuard)
-    async deleteUser(@AuthUser() user: IUserProfileDTO) {
-        return this.userDeleterService.deleteUser(user.id);
-    }
-
     /**
      *
      *  Get
@@ -113,7 +106,7 @@ export class UserController {
     @HttpCode(HttpStatus.OK)
     @UseGuards(JwtAuthGuard)
     async getMyProfile(@AuthUser() user: IUserProfileDTO) {
-        return this.userSearcherService.getMyProfile(user);
+        return { user: { ...user } };
     }
 
     @Get('follower/list')

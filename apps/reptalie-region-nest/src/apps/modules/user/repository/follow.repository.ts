@@ -19,11 +19,19 @@ export class FollowRepository extends BaseRepository<FollowDocument> {
         return savedFollow.Mapper();
     }
 
-    async getAggregatedFollowerList(currentUserId: string, targetUserId: string, pageParam: number, limitSize: number) {
+    async getAggregatedFollowerList(
+        currentUserId: string,
+        targetUserId: string,
+        blockedIds: string[],
+        pageParam: number,
+        limitSize: number,
+    ) {
+        const blockedList = blockedIds.map((entity) => new ObjectId(entity));
+
         return this.followModel
             .aggregate([
                 {
-                    $match: { follower: new ObjectId(targetUserId), isCanceled: false },
+                    $match: { follower: new ObjectId(targetUserId), following: { $nin: blockedList }, isCanceled: false },
                 },
                 {
                     $lookup: {
@@ -80,11 +88,19 @@ export class FollowRepository extends BaseRepository<FollowDocument> {
             .exec();
     }
 
-    async getAggregatedFollowingList(currentUserId: string, targetUserId: string, pageParam: number, limitSize: number) {
+    async getAggregatedFollowingList(
+        currentUserId: string,
+        targetUserId: string,
+        blockedIds: string[],
+        pageParam: number,
+        limitSize: number,
+    ) {
+        const blockedList = blockedIds.map((entity) => new ObjectId(entity));
+
         return this.followModel
             .aggregate([
                 {
-                    $match: { following: new ObjectId(targetUserId), isCanceled: false },
+                    $match: { following: new ObjectId(targetUserId), follower: { $nin: blockedList }, isCanceled: false },
                 },
                 {
                     $lookup: {

@@ -1,10 +1,11 @@
-import { HttpStatus, Injectable } from '@nestjs/common';
+import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { IResponseUserDTO, IUserProfileDTO } from '../../../dto/user/user/response-user.dto';
 import { User } from '../../../schemas/user.schema';
 import { CustomException } from '../../../utils/error/customException';
 import { CustomExceptionHandler } from '../../../utils/error/customException.handler';
 import { disassembleHangulToGroups } from '../../../utils/hangul/disassemble';
 import { randomWords } from '../../../utils/randomWords/randomWords';
+import { ReportSearcherService, ReportSearcherServiceToken } from '../../report/service/reportSearcher.service';
 import { FollowRepository } from '../repository/follow.repository';
 import { UserRepository } from '../repository/user.repository';
 
@@ -19,7 +20,13 @@ interface UserOption {
 
 @Injectable()
 export class UserSearcherService {
-    constructor(private readonly userRepository: UserRepository, private readonly followRepository: FollowRepository) {}
+    constructor(
+        private readonly userRepository: UserRepository,
+        private readonly followRepository: FollowRepository,
+
+        @Inject(ReportSearcherServiceToken)
+        private readonly reportSearcherService: ReportSearcherService,
+    ) {}
 
     /**
      * 팔로워 목록을 페이지별로 무한 스크롤을 통해 검색합니다.
@@ -35,10 +42,19 @@ export class UserSearcherService {
             .flatMap((values) => values[0])
             .join('');
 
+        const isExistsSpecialChar = /^[ㄱ-ㅎ가-힣a-zA-Z0-9]{1,10}$/.test(initials);
+
+        if (!isExistsSpecialChar) {
+            return { items: [], nextPage: undefined };
+        }
+
+        const blockedIds = await this.reportSearcherService.getblockedList(following);
+
         const follow = await this.followRepository
             .find(
                 {
                     following,
+                    follower: { $nin: blockedIds },
                     isCanceled: false,
                     initials: { $regex: new RegExp(initials, 'gi') },
                 },
@@ -75,34 +91,28 @@ export class UserSearcherService {
      * @returns 사용자 프로필 정보를 반환합니다.
      */
     async getProfile(nickname: string, user?: IUserProfileDTO) {
-        const userInfo = await this.getUserInfo({ nickname, currentUserId: user?.id });
-        const followCount = await this.getFollowCount(userInfo?.id);
+        const findUser = await this.userRepository
+            .findOne({ nickname })
+            .populate({ path: 'imageId', select: 'imageKey -_id' })
+            .exec();
+
+        if (!findUser) {
+            throw new CustomException('Not found for the specified user Info.', HttpStatus.NOT_FOUND, -1307);
+        }
+
+        const userInfo = findUser.Mapper();
+        const isFollow = user?.id ? await this.isExistsFollow(user?.id, userInfo.id as string) : undefined;
         const isMine = user?.nickname === nickname;
 
         return {
             user: {
-                ...userInfo,
+                id: userInfo.id,
+                nickname: userInfo.nickname,
+                profile: {
+                    src: `${process.env.AWS_IMAGE_BASEURL}${Object(userInfo.imageId).imageKey}`,
+                },
+                isFollow,
                 isMine,
-                followerCount: followCount.follower,
-                followingCount: followCount.following,
-            },
-        };
-    }
-
-    /**
-     * 사용자 자신의 정보를 검색합니다.
-     *
-     * @param user - 요청하는 사용자 정보
-     * @returns 사용자 프로필 정보를 반환합니다.
-     */
-    async getMyProfile(user: IUserProfileDTO) {
-        const followCount = await this.getFollowCount(user.id);
-
-        return {
-            user: {
-                ...user,
-                followerCount: followCount.follower,
-                followingCount: followCount.following,
             },
         };
     }
@@ -118,7 +128,15 @@ export class UserSearcherService {
      */
     async getUserFollowersInfiniteScroll(userId: string, targetUserId: string, pageParam: number, limitSize: number) {
         try {
-            const followers = await this.followRepository.getAggregatedFollowerList(userId, targetUserId, pageParam, limitSize);
+            const blockedIds = await this.reportSearcherService.getblockedList(userId);
+
+            const followers = await this.followRepository.getAggregatedFollowerList(
+                userId,
+                targetUserId,
+                blockedIds,
+                pageParam,
+                limitSize,
+            );
 
             const items = await Promise.all(
                 followers.map(async (entity) => {
@@ -160,9 +178,12 @@ export class UserSearcherService {
      */
     async getUserFollowingsInfiniteScroll(userId: string, targetUserId: string, pageParam: number, limitSize: number) {
         try {
+            const blockedIds = await this.reportSearcherService.getblockedList(userId);
+
             const followings = await this.followRepository.getAggregatedFollowingList(
                 userId,
                 targetUserId,
+                blockedIds,
                 pageParam,
                 limitSize,
             );
@@ -309,7 +330,7 @@ export class UserSearcherService {
             throw new CustomException('Not found for the specified nickname.', HttpStatus.NOT_FOUND, -1302);
         }
 
-        return user?.Mapper();
+        return user.Mapper();
     }
 
     /**
@@ -320,7 +341,6 @@ export class UserSearcherService {
      */
     async extractUserInfo(nicknames: string[]) {
         const users = await this.userRepository.find({ nickname: { $in: nicknames } }, { _id: 1, fcmToken: 1 }).exec();
-
         return users?.map((entity) => entity.Mapper());
     }
 
@@ -348,7 +368,7 @@ export class UserSearcherService {
             this.followRepository.countDocuments({ following: targetUserId, isCanceled: false }).exec(),
         ]);
 
-        return { follower: followerCount, following: followingCount };
+        return { followerCount, followingCount };
     }
 
     /**

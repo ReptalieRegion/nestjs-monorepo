@@ -9,6 +9,7 @@ import { ImageDeleterService, ImageDeleterServiceToken } from '../../image/servi
 import { DiaryCalendarRepository } from '../repository/diaryCalendar.repository';
 import { DiaryEntityRepository } from '../repository/diaryEntity.repository';
 import { DiaryWeightRepository } from '../repository/diaryWeight.repository';
+import { DiarySearcherService, DiarySearcherServiceToken } from './diarySearcher.service';
 
 export const DiaryDeleterServiceToken = 'DiaryDeleterServiceToken';
 
@@ -24,6 +25,8 @@ export class DiaryDeleterService {
 
         @Inject(ImageDeleterServiceToken)
         private readonly imageDeleterService: ImageDeleterService,
+        @Inject(DiarySearcherServiceToken)
+        private readonly diarySearcherService: DiarySearcherService,
     ) {}
 
     async deleteEntity(user: IUserProfileDTO, entityId: string) {
@@ -40,7 +43,7 @@ export class DiaryDeleterService {
             }
 
             await Promise.all([
-                this.imageDeleterService.deleteImageByTypeId(ImageType.Diary, entityId, session),
+                this.imageDeleterService.deleteImageByTypeId(ImageType.Diary, [entityId], session),
                 this.diaryWeightRepository
                     .updateMany({ entityId, isDeleted: false }, { $set: { isDeleted: true } }, { session })
                     .exec(),
@@ -90,5 +93,18 @@ export class DiaryDeleterService {
         } catch (error) {
             throw new CustomExceptionHandler(error).handleException('Invalid ObjectId for diary calendar Id.', -3508);
         }
+    }
+
+    async withdrawalDiaryInfo(userId: string, session: ClientSession) {
+        const entityIds = await this.diarySearcherService.getEntityIds(userId);
+
+        if (!entityIds.length) {
+            return;
+        }
+
+        await this.diaryEntityRepository.withdrawalEntity({ userId, isDeleted: false }, session);
+        await this.imageDeleterService.deleteImageByTypeId(ImageType.Diary, entityIds, session);
+        await this.diaryCalendarRepository.withdrawalCalendar({ userId, isDeleted: false }, session);
+        await this.diaryWeightRepository.withdrawalWeight({ entityId: { $in: entityIds }, isDeleted: false }, session);
     }
 }

@@ -17,9 +17,9 @@ export class ImageDeleterService {
      * @param typeId - 이미지의 타입 ID입니다.
      * @param session - 현재 세션입니다.
      */
-    async deleteImageByTypeId(type: ImageType, typeId: string, session: ClientSession) {
+    async deleteImageByTypeId(type: ImageType, typeIds: string[], session: ClientSession) {
         const result = await this.imageRepository
-            .updateMany({ typeId, type, isDeleted: false }, { $set: { isDeleted: true } }, { session })
+            .updateMany({ typeId: { $in: typeIds }, type, isDeleted: false }, { $set: { isDeleted: true } }, { session })
             .exec();
 
         if (result.modifiedCount === 0) {

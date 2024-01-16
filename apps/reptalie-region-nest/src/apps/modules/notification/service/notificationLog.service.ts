@@ -1,4 +1,5 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
+import { ClientSession } from 'mongoose';
 import { InputNotificationLogDTO } from '../../../dto/notification/log/input-notificationLog.dto';
 import { CustomException } from '../../../utils/error/customException';
 import { CustomExceptionHandler } from '../../../utils/error/customException.handler';
@@ -70,7 +71,11 @@ export class NotificationLogService {
     async checkAllRead(userId: string) {
         const readCount = await this.notificationLogRepository.countDocuments({ userId, isRead: false });
         const isReadAllLog = readCount === 0;
-        
+
         return { isReadAllLog };
+    }
+
+    async restoreLog(oldUserId: string, newUserId: string, session: ClientSession) {
+        await this.notificationLogRepository.updateMany({ userId: oldUserId }, { $set: { userId: newUserId } }, { session });
     }
 }

@@ -2,13 +2,18 @@ import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import mongoose, { ClientSession } from 'mongoose';
 import { ImageType } from '../../../dto/image/input-image.dto';
 import { TemplateType } from '../../../dto/notification/template/input-notificationTemplate.dto';
+import { IResponseTempUserDTO } from '../../../dto/user/tempUser/response-tempUser.dto';
 import { IUserProfileDTO } from '../../../dto/user/user/response-user.dto';
 import { CustomException } from '../../../utils/error/customException';
 import { CustomExceptionHandler } from '../../../utils/error/customException.handler';
+import { disassembleHangulToGroups } from '../../../utils/hangul/disassemble';
+import { ImageSearcherService, ImageSearcherServiceToken } from '../../image/service/imageSearcher.service';
+import { ImageUpdaterService, ImageUpdaterServiceToken } from '../../image/service/imageUpdater.service';
 import { ImageWriterService, ImageWriterServiceToken } from '../../image/service/imageWriter.service';
 import { NotificationAgreeService, NotificationAgreeServiceToken } from '../../notification/service/notificationAgree.service';
 import { NotificationPushService, NotificationPushServiceToken } from '../../notification/service/notificationPush.service';
 import { NotificationSlackService, NotificationSlackServiceToken } from '../../notification/service/notificationSlack.service';
+import { ReportSearcherService, ReportSearcherServiceToken } from '../../report/service/reportSearcher.service';
 import { FollowRepository } from '../repository/follow.repository';
 import { UserRepository } from '../repository/user.repository';
 import { UserSearcherService, UserSearcherServiceToken } from './userSearcher.service';
@@ -28,6 +33,10 @@ export class UserWriterService {
         private readonly userUpdaterService: UserUpdaterService,
         @Inject(ImageWriterServiceToken)
         private readonly imageWriterService: ImageWriterService,
+        @Inject(ImageSearcherServiceToken)
+        private readonly imageSearcherService: ImageSearcherService,
+        @Inject(ImageUpdaterServiceToken)
+        private readonly imageUpdaterService: ImageUpdaterService,
 
         @Inject(NotificationAgreeServiceToken)
         private readonly notificationAgreeService: NotificationAgreeService,
@@ -35,6 +44,9 @@ export class UserWriterService {
         private readonly notificationPushService: NotificationPushService,
         @Inject(NotificationSlackServiceToken)
         private readonly notificationSlackService: NotificationSlackService,
+
+        @Inject(ReportSearcherServiceToken)
+        private readonly reportSearcherService: ReportSearcherService,
     ) {}
 
     /**
@@ -45,7 +57,9 @@ export class UserWriterService {
      */
     async createUser(session: ClientSession) {
         const nickname = await this.userSearcherService.generateAvailableNickname();
-        const imageKeys = ['6f433309-a36b-4498-b819-48ace2d19c7f.jpeg'];
+        const { USER_BASE_IMAGE } = process.env;
+
+        const imageKeys = [USER_BASE_IMAGE as string];
 
         const user = await this.userRepository.createUser(
             { nickname, imageId: String(new mongoose.Types.ObjectId()) },
@@ -58,6 +72,34 @@ export class UserWriterService {
 
         const [image] = await this.imageWriterService.createImage(user.id as string, imageKeys, ImageType.Profile, session);
         await this.userUpdaterService.updateImageId(user.id as string, image.id as string, session);
+
+        return user;
+    }
+
+    /**
+     * 회원탈퇴한 유저를 복원 작업을 수행합니다.
+     *
+     * @param session MongoDB 클라이언트 세션
+     * @returns 생성된 사용자 객체를 반환합니다.
+     */
+    async restoreUser(
+        userInfo: Partial<IResponseTempUserDTO>,
+        session: ClientSession,
+        name?: string,
+        phone?: string,
+        address?: string,
+    ) {
+        const image = await this.imageSearcherService.getProfileImages(userInfo.userId as string);
+        const initials = disassembleHangulToGroups(userInfo.nickname as string)
+            .flatMap((values) => values[0])
+            .join('');
+
+        const user = await this.userRepository.createUser(
+            { nickname: userInfo.nickname as string, imageId: image.id, name, phone, address, initials },
+            session,
+        );
+
+        await this.imageUpdaterService.updateImage(image.id as string, user.id as string, session);
 
         return user;
     }
@@ -93,9 +135,16 @@ export class UserWriterService {
             /**
              * 푸시 알림 전송
              */
-            Promise.all([this.notificationAgreeService.isPushAgree(TemplateType.Follow, follower)])
-                .then(async ([isPushAgree]) => {
+            Promise.all([
+                this.notificationAgreeService.isPushAgree(TemplateType.Follow, follower),
+                this.reportSearcherService.getblockedList(follower),
+            ])
+                .then(async ([isPushAgree, blockedList]) => {
                     if (!isPushAgree) {
+                        return;
+                    }
+
+                    if (blockedList && blockedList.some((item) => item === following.id)) {
                         return;
                     }
 

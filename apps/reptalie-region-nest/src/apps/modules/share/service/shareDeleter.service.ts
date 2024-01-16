@@ -51,11 +51,11 @@ export class ShareDeleterService {
             }
 
             await Promise.all([
-                this.imageDeleterService.deleteImageByTypeId(ImageType.Share, postId, session),
+                this.imageDeleterService.deleteImageByTypeId(ImageType.Share, [postId], session),
                 this.deleteLike(postId, session),
             ]);
 
-            const commentIds = await this.shareSearcherService.getCommentIds(postId);
+            const commentIds = await this.shareSearcherService.getCommentIds([postId]);
 
             if (commentIds.length) {
                 const commentResult = await this.shareCommentRepository
@@ -105,7 +105,7 @@ export class ShareDeleterService {
                 throw new CustomException('Failed to delete share comment.', HttpStatus.INTERNAL_SERVER_ERROR, -2610);
             }
 
-            const isReplyCount = await this.shareSearcherService.getCommentReplyCount(commentId, userId);
+            const isReplyCount = await this.shareSearcherService.getCommentReplyAllCount(commentId);
 
             if (isReplyCount) {
                 const replyResult = await this.shareCommentReplyRepository
@@ -157,7 +157,7 @@ export class ShareDeleterService {
      * @param session - 현재 세션입니다.
      */
     async deleteLike(postId: string, session: ClientSession) {
-        const isLikeCount = await this.shareSearcherService.getLikeCount(postId);
+        const isLikeCount = await this.shareSearcherService.getLikeAllCount(postId);
 
         if (isLikeCount) {
             const result = await this.shareLikeRepository
@@ -168,5 +168,36 @@ export class ShareDeleterService {
                 throw new CustomException('Failed to delete share like.', HttpStatus.INTERNAL_SERVER_ERROR, -2612);
             }
         }
+    }
+
+    async withdrawalShareInfo(userId: string, session: ClientSession) {
+        const postIds = await this.shareSearcherService.getPostIds(userId);
+
+        if (postIds.length) {
+            const commentIds = await this.shareSearcherService.getCommentIds(postIds);
+
+            await this.sharePostRepository.withdrawalPost({ userId, isDeleted: false }, session);
+            await this.imageDeleterService.deleteImageByTypeId(ImageType.Share, postIds, session);
+            await this.shareLikeRepository.withdrawalLike(
+                { postId: { $in: postIds }, userId: { $ne: userId }, isCanceled: false },
+                session,
+            );
+
+            if (commentIds.length) {
+                await this.shareCommentRepository.withdrawalComment(
+                    { postId: { $in: postIds }, userId: { $ne: userId }, isDeleted: false },
+                    session,
+                );
+
+                await this.shareCommentReplyRepository.withdrawalCommentReply(
+                    { commentId: { $in: commentIds }, userId: { $ne: userId }, isDeleted: false },
+                    session,
+                );
+            }
+        }
+
+        await this.shareCommentRepository.withdrawalComment({ userId, isDeleted: false }, session);
+        await this.shareCommentReplyRepository.withdrawalCommentReply({ userId, isDeleted: false }, session);
+        await this.shareLikeRepository.withdrawalLike({ userId, isCanceled: false }, session);
     }
 }

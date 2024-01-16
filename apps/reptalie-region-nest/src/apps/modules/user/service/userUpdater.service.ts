@@ -65,8 +65,13 @@ export class UserUpdaterService {
             if (result.modifiedCount === 0) {
                 throw new CustomException('Failed to update user nickname.', HttpStatus.INTERNAL_SERVER_ERROR, -1613);
             }
-        } catch (error) {
-            throw new CustomExceptionHandler(error).handleException('Invalid ObjectId for user Id.', -1501);
+        } catch (caughtError) {
+            const error = caughtError as Error;
+            const isErrorFlag = error.message.includes('Cast to ObjectId failed') ? true : false;
+
+            const message = isErrorFlag ? 'Invalid ObjectId for user Id.' : 'nickname should be unique values.';
+            const code = isErrorFlag ? -1501 : -1620;
+            throw new CustomExceptionHandler(error).handleException(message, code);
         }
     }
 
@@ -126,7 +131,7 @@ export class UserUpdaterService {
         let imageKeys: string[] = [];
 
         try {
-            await this.imageDeleterService.deleteImageByTypeId(ImageType.Profile, user.id, session);
+            await this.imageDeleterService.deleteImageByTypeId(ImageType.Profile, [user.id], session);
             imageKeys = await this.imageS3HandlerService.uploadToS3(files);
             const [image] = await this.imageWriterService.createImage(user.id, imageKeys, ImageType.Profile, session);
             await this.updateImageId(user.id, image.id as string, session);
@@ -141,5 +146,23 @@ export class UserUpdaterService {
         } finally {
             await session.endSession();
         }
+    }
+
+    async restoreFollowInfo(oldUserId: string, newUserId: string, session: ClientSession) {
+        await this.followRepository
+            .updateMany(
+                { following: oldUserId, isCanceled: true },
+                { $set: { isCanceled: false, following: newUserId } },
+                { session },
+            )
+            .exec();
+
+        await this.followRepository
+            .updateMany(
+                { follower: oldUserId, isCanceled: true },
+                { $set: { isCanceled: false, follower: newUserId } },
+                { session },
+            )
+            .exec();
     }
 }

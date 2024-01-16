@@ -1,6 +1,7 @@
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { InjectConnection } from '@nestjs/mongoose';
 import mongoose, { ClientSession } from 'mongoose';
+import { ImageType } from '../../../dto/image/input-image.dto';
 import { InputShareCommentDTO } from '../../../dto/share/comment/input-shareComment.dto';
 import { InputShareCommentReplyDTO } from '../../../dto/share/commentReply/input-shareCommentReply.dto';
 import { InputSharePostDTO } from '../../../dto/share/post/input-sharePost.dto';
@@ -8,6 +9,7 @@ import { IUserProfileDTO } from '../../../dto/user/user/response-user.dto';
 import { CustomException } from '../../../utils/error/customException';
 import { CustomExceptionHandler } from '../../../utils/error/customException.handler';
 import { ImageDeleterService, ImageDeleterServiceToken } from '../../image/service/imageDeleter.service';
+import { ImageUpdaterService, ImageUpdaterServiceToken } from '../../image/service/imageUpdater.service';
 import { ShareCommentRepository } from '../repository/shareComment.repository';
 import { ShareCommentReplyRepository } from '../repository/shareCommentReply.repository';
 import { ShareLikeRepository } from '../repository/shareLike.repository';
@@ -25,12 +27,14 @@ export class ShareUpdaterService {
         private readonly sharePostRepository: SharePostRepository,
         private readonly shareLikeRepository: ShareLikeRepository,
         private readonly shareCommentRepository: ShareCommentRepository,
-        private readonly shareCommnetReplyRepository: ShareCommentReplyRepository,
+        private readonly shareCommentReplyRepository: ShareCommentReplyRepository,
 
         @Inject(ShareSearcherServiceToken)
         private readonly shareSearcherService: ShareSearcherService,
         @Inject(ImageDeleterServiceToken)
         private readonly imageDeleterService: ImageDeleterService,
+        @Inject(ImageUpdaterServiceToken)
+        private readonly imageUpdaterService: ImageUpdaterService,
     ) {}
 
     /**
@@ -112,7 +116,7 @@ export class ShareUpdaterService {
      */
     async updateCommentReply(userId: string, commentReplyId: string, dto: InputShareCommentReplyDTO) {
         try {
-            const result = await this.shareCommnetReplyRepository
+            const result = await this.shareCommentReplyRepository
                 .updateOne({ _id: commentReplyId, userId, isDeleted: false }, { $set: { contents: dto.contents } })
                 .exec();
 
@@ -146,5 +150,41 @@ export class ShareUpdaterService {
         }
 
         return { post: { id: likeStatus?.postId.id, user: { nickname: likeStatus?.postId.userId.nickname } } };
+    }
+
+    async restoreShareInfo(oldUserId: string, newUserId: string, session: ClientSession) {
+        const postIds = await this.shareSearcherService.getRestorePostIds(oldUserId);
+
+        if (postIds.length) {
+            const commentIds = await this.shareSearcherService.getRestoreCommentIds(postIds);
+
+            await this.sharePostRepository.restorePost(oldUserId, newUserId, session);
+            await this.imageUpdaterService.restoreImageByTypeId(ImageType.Share, postIds, session);
+            await this.shareLikeRepository
+                .updateMany(
+                    { postId: { $in: postIds }, userId: { $ne: oldUserId }, isCanceled: true },
+                    { $set: { isCanceled: false } },
+                    { session },
+                )
+                .exec();
+
+            if (commentIds.length) {
+                await this.shareCommentRepository.updateMany(
+                    { postId: { $in: postIds }, userId: { $ne: oldUserId }, isDeleted: false },
+                    { $set: { isDeleted: false } },
+                    { session },
+                );
+
+                await this.shareCommentReplyRepository.updateMany(
+                    { commentId: { $in: commentIds }, userId: { $ne: oldUserId }, isDeleted: false },
+                    { $set: { isDeleted: false } },
+                    { session },
+                );
+            }
+        }
+
+        await this.shareCommentRepository.restoreComment(oldUserId, newUserId, session);
+        await this.shareCommentReplyRepository.restoreCommentReply(oldUserId, newUserId, session);
+        await this.shareLikeRepository.restoreLike(oldUserId, newUserId, session);
     }
 }

@@ -1,5 +1,5 @@
 import { HttpStatus, Inject, Injectable, forwardRef } from '@nestjs/common';
-import { ReportType } from '../../../dto/report/input-report.dto';
+import { ReportShareContentType } from '../../../dto/report/share/input-reportShareContent.dto';
 import { IResponseShareCommentDTO } from '../../../dto/share/comment/response-shareCommnet.dto';
 import { IResponseShareCommentReplyDTO } from '../../../dto/share/commentReply/response-shareCommentReply.dto';
 import { IResponseSharePostDTO } from '../../../dto/share/post/response-sharePost.dto';
@@ -54,10 +54,11 @@ export class ShareSearcherService {
      *  추후 게시글 조회 로직 수정해야함
      */
     async getPostsInfiniteScroll(currentUserId: string, pageParam: number, limitSize: number) {
-        const typeIds = await this.reportSearcherService.findTypeIdList(currentUserId, ReportType.POST);
+        const typeIds = await this.reportSearcherService.findTypeIdList(currentUserId, ReportShareContentType.POST);
+        const blockedIds = await this.reportSearcherService.getblockedList(currentUserId);
 
         const posts = await this.sharePostRepository
-            .find({ isDeleted: false, _id: { $nin: typeIds } })
+            .find({ _id: { $nin: typeIds }, userId: { $nin: blockedIds }, isDeleted: false })
             .populate({
                 path: 'userId',
                 select: 'nickname imageId',
@@ -82,7 +83,7 @@ export class ShareSearcherService {
                         images,
                         isMine: currentUserId ? currentUserId === userInfo.id : false,
                         isLike: currentUserId && post.id ? await this.isExistsLike(currentUserId, post.id) : undefined,
-                        likeCount: post.id && (await this.getLikeCount(post.id)),
+                        likeCount: post.id && (await this.getLikeCount(currentUserId, post.id)),
                         commentCount: post.id && (await this.getCommentCount(post.id, currentUserId)),
                         user: { ...userInfo },
                     },
@@ -101,9 +102,11 @@ export class ShareSearcherService {
      * 특정 게시글 조회 로직
      */
     async getPost(currentUserId: string, postId: string) {
-        const typeIds = await this.reportSearcherService.findTypeIdList(currentUserId, ReportType.POST);
+        const typeIds = await this.reportSearcherService.findTypeIdList(currentUserId, ReportShareContentType.POST);
+        const blockedIds = await this.reportSearcherService.getblockedList(currentUserId);
+
         const entity = await this.sharePostRepository
-            .findOne({ _id: { $eq: postId, $nin: typeIds }, isDeleted: false })
+            .findOne({ _id: { $eq: postId, $nin: typeIds }, userId: { $nin: blockedIds }, isDeleted: false })
             .populate({
                 path: 'userId',
                 select: 'nickname imageId',
@@ -127,7 +130,7 @@ export class ShareSearcherService {
                 images,
                 isMine: currentUserId ? currentUserId === userInfo.id : false,
                 isLike: currentUserId && post.id ? await this.isExistsLike(currentUserId, post.id) : undefined,
-                likeCount: post.id && (await this.getLikeCount(post.id)),
+                likeCount: post.id && (await this.getLikeCount(currentUserId, post.id)),
                 commentCount: post.id && (await this.getCommentCount(post.id, currentUserId)),
                 user: { ...userInfo },
             },
@@ -144,7 +147,7 @@ export class ShareSearcherService {
      * @returns 가져온 게시물과 다음 페이지 번호를 반환합니다.
      */
     async getUserPostsInfiniteScroll(currentUserId: string, targetNickname: string, pageParam: number, limitSize: number) {
-        const typeIds = await this.reportSearcherService.findTypeIdList(currentUserId, ReportType.POST);
+        const typeIds = await this.reportSearcherService.findTypeIdList(currentUserId, ReportShareContentType.POST);
         const targetUserId = (await this.userSearcherService.findNickname(targetNickname))?.id;
 
         const posts = await this.sharePostRepository
@@ -168,7 +171,7 @@ export class ShareSearcherService {
                         images,
                         isMine,
                         isLike: currentUserId && post.id ? await this.isExistsLike(currentUserId, post?.id) : undefined,
-                        likeCount: post.id && (await this.getLikeCount(post.id)),
+                        likeCount: post.id && (await this.getLikeCount(currentUserId, post.id)),
                         commentCount: post.id && (await this.getCommentCount(post.id, currentUserId)),
                     },
                 };
@@ -191,10 +194,11 @@ export class ShareSearcherService {
      * @returns 가져온 댓글과 다음 페이지 번호를 반환합니다.
      */
     async getCommentsInfiniteScroll(userId: string, postId: string, pageParam: number, limitSize: number) {
-        const typeIds = await this.reportSearcherService.findTypeIdList(userId, ReportType.COMMENT);
+        const typeIds = await this.reportSearcherService.findTypeIdList(userId, ReportShareContentType.COMMENT);
+        const blockedIds = await this.reportSearcherService.getblockedList(userId);
 
         const comments = await this.shareCommentRepository
-            .find({ postId, isDeleted: false, _id: { $nin: typeIds } })
+            .find({ _id: { $nin: typeIds }, postId, userId: { $nin: blockedIds }, isDeleted: false })
             .populate({
                 path: 'userId',
                 select: 'nickname imageId',
@@ -240,10 +244,11 @@ export class ShareSearcherService {
      * @returns 가져온 답글과 다음 페이지 번호를 반환합니다.
      */
     async getCommentRepliesInfiniteScroll(userId: string, commentId: string, pageParam: number, limitSize: number) {
-        const typeIds = await this.reportSearcherService.findTypeIdList(userId, ReportType.REPLY);
+        const typeIds = await this.reportSearcherService.findTypeIdList(userId, ReportShareContentType.REPLY);
+        const blockedIds = await this.reportSearcherService.getblockedList(userId);
 
         const commentReplies = await this.shareCommentReplyRepository
-            .find({ commentId, isDeleted: false, _id: { $nin: typeIds } })
+            .find({ _id: { $nin: typeIds }, userId: { $nin: blockedIds }, commentId, isDeleted: false })
             .populate({
                 path: 'userId',
                 select: 'nickname imageId',
@@ -289,7 +294,14 @@ export class ShareSearcherService {
      */
     async getLikeListForPostInfiniteScroll(userId: string, postId: string, pageParam: number, limitSize: number) {
         try {
-            const likes = await this.shareLikeRepository.getAggregatedLikeList(postId, userId, pageParam, limitSize);
+            const blockedIds = await this.reportSearcherService.getblockedList(userId);
+            const likes = await this.shareLikeRepository.getAggregatedLikeList(
+                postId,
+                userId,
+                blockedIds,
+                pageParam,
+                limitSize,
+            );
 
             const items = await Promise.all(
                 likes.map(async (entity) => {
@@ -351,7 +363,7 @@ export class ShareSearcherService {
                         images,
                         isMine: true,
                         isLike: post.id ? await this.isExistsLike(userId, post?.id) : undefined,
-                        likeCount: post.id && (await this.getLikeCount(post.id)),
+                        likeCount: post.id && (await this.getLikeCount(userId, post.id)),
                         commentCount: post.id && (await this.getCommentCount(post.id, userId)),
                     },
                 };
@@ -389,7 +401,7 @@ export class ShareSearcherService {
             const [images, isLike, likeCount, commentCount] = await Promise.all([
                 mappedPost?.id && this.imageSearcherService.getPostImages(mappedPost.id),
                 mappedPost?.userId && mappedPost?.id ? this.isExistsLike(mappedPost.userId, mappedPost.id) : undefined,
-                mappedPost?.id && this.getLikeCount(mappedPost.id),
+                mappedPost?.id && this.getLikeCount(mappedPost.userId, mappedPost.id),
                 mappedPost?.id && this.getCommentCount(mappedPost.id, mappedPost.userId),
             ]);
 
@@ -628,7 +640,18 @@ export class ShareSearcherService {
      * @param postId 게시물 ID
      * @returns 좋아요 수를 반환합니다.
      */
-    async getLikeCount(postId: string): Promise<number> {
+    async getLikeCount(userId: string, postId: string): Promise<number> {
+        const blockedIds = await this.reportSearcherService.getblockedList(userId);
+        return this.shareLikeRepository.countDocuments({ postId, userId: { $nin: blockedIds }, isCanceled: false }).exec();
+    }
+
+    /**
+     * 지정된 게시물 ID에 모든 좋아요 수를 반환합니다.
+     *
+     * @param postId 게시물 ID
+     * @returns 좋아요 수를 반환합니다.
+     */
+    async getLikeAllCount(postId: string): Promise<number> {
         return this.shareLikeRepository.countDocuments({ postId, isCanceled: false }).exec();
     }
 
@@ -642,7 +665,7 @@ export class ShareSearcherService {
     async getPostAndFollowerCount(currentUserId: string, nickname: string) {
         const targetUserInfo = await this.userSearcherService.findNickname(nickname);
         const typeIds = currentUserId
-            ? await this.reportSearcherService.findTypeIdList(currentUserId, ReportType.POST)
+            ? await this.reportSearcherService.findTypeIdList(currentUserId, ReportShareContentType.POST)
             : undefined;
 
         const postCount = await this.sharePostRepository
@@ -662,9 +685,12 @@ export class ShareSearcherService {
      * @returns 댓글 수를 반환합니다.
      */
     async getCommentCount(postId: string, currentUserId: string): Promise<number> {
-        const typeIds = await this.reportSearcherService.findTypeIdList(currentUserId, ReportType.COMMENT);
+        const typeIds = await this.reportSearcherService.findTypeIdList(currentUserId, ReportShareContentType.COMMENT);
+        const blockedIds = await this.reportSearcherService.getblockedList(currentUserId);
 
-        return this.shareCommentRepository.countDocuments({ _id: { $nin: typeIds }, postId, isDeleted: false }).exec();
+        return this.shareCommentRepository
+            .countDocuments({ _id: { $nin: typeIds }, postId, userId: { $nin: blockedIds }, isDeleted: false })
+            .exec();
     }
 
     /**
@@ -675,9 +701,23 @@ export class ShareSearcherService {
      * @returns 답글 수를 반환합니다.
      */
     async getCommentReplyCount(commentId: string, currentUserId: string): Promise<number> {
-        const typeIds = await this.reportSearcherService.findTypeIdList(currentUserId, ReportType.REPLY);
+        const typeIds = await this.reportSearcherService.findTypeIdList(currentUserId, ReportShareContentType.REPLY);
+        const blockedIds = await this.reportSearcherService.getblockedList(currentUserId);
 
-        return this.shareCommentReplyRepository.countDocuments({ _id: { $nin: typeIds }, commentId, isDeleted: false }).exec();
+        return this.shareCommentReplyRepository
+            .countDocuments({ _id: { $nin: typeIds }, userId: { $nin: blockedIds }, commentId, isDeleted: false })
+            .exec();
+    }
+
+    /**
+     * 지정된 댓글 ID에 대한 모든 답글 수를 반환합니다.
+     *
+     * @param commentId 댓글 ID
+     * @param currentUserId 유저 ID
+     * @returns 답글 수를 반환합니다.
+     */
+    async getCommentReplyAllCount(commentId: string): Promise<number> {
+        return this.shareCommentReplyRepository.countDocuments({ commentId, isDeleted: false }).exec();
     }
 
     /**

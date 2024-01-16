@@ -8,7 +8,8 @@ import { MetaData, MetaDataSchema } from '../../schemas/metaData.schema';
 import { NotificationAgree, NotificationAgreeSchema } from '../../schemas/notificationAgree.schema';
 import { NotificationLog, NotificationLogSchema } from '../../schemas/notificationLog.schema';
 import { NotificationTemplate, NotificationTemplateSchema } from '../../schemas/notificationTemplate.schema';
-import { Report, ReportSchema } from '../../schemas/report.schema';
+import { ReportShareContent, ReportShareContentSchema } from '../../schemas/reportShareContent.schema';
+import { ReportUserBlocking, ReportUserBlockingSchema } from '../../schemas/reportUserBlocking.schema';
 import { ShareComment, ShareCommentSchema } from '../../schemas/shareComment.schema';
 import { ShareCommentReply, ShareCommentReplySchema } from '../../schemas/shareCommentReply.schema';
 import { ShareLike, ShareLikeSchema } from '../../schemas/shareLike.schema';
@@ -69,7 +70,13 @@ export const MongooseModuleDiaryCalendar = MongooseModule.forFeature([
 ]);
 
 // report 관련 모듈
-export const MongooseModuleReport = MongooseModule.forFeature([{ name: Report.name, schema: ReportSchema }]);
+export const MongooseModuleReportShareContent = MongooseModule.forFeature([
+    { name: ReportShareContent.name, schema: ReportShareContentSchema },
+]);
+
+export const MongooseModuleReportUserBlocking = MongooseModule.forFeature([
+    { name: ReportUserBlocking.name, schema: ReportUserBlockingSchema },
+]);
 
 // metadata 관련 모듈
 export const MongooseModuleMetaData = MongooseModule.forFeature([{ name: MetaData.name, schema: MetaDataSchema }]);

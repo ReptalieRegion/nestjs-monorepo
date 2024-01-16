@@ -65,8 +65,13 @@ export class UserUpdaterService {
             if (result.modifiedCount === 0) {
                 throw new CustomException('Failed to update user nickname.', HttpStatus.INTERNAL_SERVER_ERROR, -1613);
             }
-        } catch (error) {
-            throw new CustomExceptionHandler(error).handleException('Invalid ObjectId for user Id.', -1501);
+        } catch (caughtError) {
+            const error = caughtError as Error;
+            const isErrorFlag = error.message.includes('Cast to ObjectId failed') ? true : false;
+
+            const message = isErrorFlag ? 'Invalid ObjectId for user Id.' : 'nickname should be unique values.';
+            const code = isErrorFlag ? -1501 : -1620;
+            throw new CustomExceptionHandler(error).handleException(message, code);
         }
     }
 

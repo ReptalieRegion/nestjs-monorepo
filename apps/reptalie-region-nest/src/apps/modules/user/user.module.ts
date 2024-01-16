@@ -4,6 +4,7 @@ import { MongooseModuleFollow, MongooseModuleUser } from '../../utils/customModu
 import { AuthModule } from '../auth/auth.module';
 import { ImageModule } from '../image/image.module';
 import { NotificationModule } from '../notification/notification.module';
+import { ReportModule } from '../report/report.module';
 import { ShareModule } from '../share/share.module';
 import { FollowRepository } from './repository/follow.repository';
 import { UserRepository } from './repository/user.repository';
@@ -23,6 +24,7 @@ import {
         forwardRef(() => ShareModule),
         forwardRef(() => AuthModule),
         forwardRef(() => NotificationModule),
+        forwardRef(() => ReportModule),
     ],
     controllers: [UserController],
     providers: [

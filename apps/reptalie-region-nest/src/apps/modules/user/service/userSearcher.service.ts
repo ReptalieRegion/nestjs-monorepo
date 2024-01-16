@@ -1,10 +1,11 @@
-import { HttpStatus, Injectable } from '@nestjs/common';
+import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { IUserProfileDTO } from '../../../dto/user/user/response-user.dto';
 import { User } from '../../../schemas/user.schema';
 import { CustomException } from '../../../utils/error/customException';
 import { CustomExceptionHandler } from '../../../utils/error/customException.handler';
 import { disassembleHangulToGroups } from '../../../utils/hangul/disassemble';
 import { randomWords } from '../../../utils/randomWords/randomWords';
+import { ReportSearcherService, ReportSearcherServiceToken } from '../../report/service/reportSearcher.service';
 import { FollowRepository } from '../repository/follow.repository';
 import { UserRepository } from '../repository/user.repository';
 
@@ -19,7 +20,13 @@ interface UserOption {
 
 @Injectable()
 export class UserSearcherService {
-    constructor(private readonly userRepository: UserRepository, private readonly followRepository: FollowRepository) {}
+    constructor(
+        private readonly userRepository: UserRepository,
+        private readonly followRepository: FollowRepository,
+
+        @Inject(ReportSearcherServiceToken)
+        private readonly reportSearcherService: ReportSearcherService,
+    ) {}
 
     /**
      * 팔로워 목록을 페이지별로 무한 스크롤을 통해 검색합니다.
@@ -41,10 +48,13 @@ export class UserSearcherService {
             return { items: [], nextPage: undefined };
         }
 
+        const blockedIds = await this.reportSearcherService.getblockedList(following);
+
         const follow = await this.followRepository
             .find(
                 {
                     following,
+                    follower: { $nin: blockedIds },
                     isCanceled: false,
                     initials: { $regex: new RegExp(initials, 'gi') },
                 },
@@ -118,7 +128,15 @@ export class UserSearcherService {
      */
     async getUserFollowersInfiniteScroll(userId: string, targetUserId: string, pageParam: number, limitSize: number) {
         try {
-            const followers = await this.followRepository.getAggregatedFollowerList(userId, targetUserId, pageParam, limitSize);
+            const blockedIds = await this.reportSearcherService.getblockedList(userId);
+
+            const followers = await this.followRepository.getAggregatedFollowerList(
+                userId,
+                targetUserId,
+                blockedIds,
+                pageParam,
+                limitSize,
+            );
 
             const items = await Promise.all(
                 followers.map(async (entity) => {
@@ -160,9 +178,12 @@ export class UserSearcherService {
      */
     async getUserFollowingsInfiniteScroll(userId: string, targetUserId: string, pageParam: number, limitSize: number) {
         try {
+            const blockedIds = await this.reportSearcherService.getblockedList(userId);
+
             const followings = await this.followRepository.getAggregatedFollowingList(
                 userId,
                 targetUserId,
+                blockedIds,
                 pageParam,
                 limitSize,
             );
@@ -320,7 +341,6 @@ export class UserSearcherService {
      */
     async extractUserInfo(nicknames: string[]) {
         const users = await this.userRepository.find({ nickname: { $in: nicknames } }, { _id: 1, fcmToken: 1 }).exec();
-
         return users?.map((entity) => entity.Mapper());
     }
 

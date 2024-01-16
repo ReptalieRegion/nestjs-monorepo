@@ -13,6 +13,7 @@ import { ImageWriterService, ImageWriterServiceToken } from '../../image/service
 import { NotificationAgreeService, NotificationAgreeServiceToken } from '../../notification/service/notificationAgree.service';
 import { NotificationPushService, NotificationPushServiceToken } from '../../notification/service/notificationPush.service';
 import { NotificationSlackService, NotificationSlackServiceToken } from '../../notification/service/notificationSlack.service';
+import { ReportSearcherService, ReportSearcherServiceToken } from '../../report/service/reportSearcher.service';
 import { FollowRepository } from '../repository/follow.repository';
 import { UserRepository } from '../repository/user.repository';
 import { UserSearcherService, UserSearcherServiceToken } from './userSearcher.service';
@@ -43,6 +44,9 @@ export class UserWriterService {
         private readonly notificationPushService: NotificationPushService,
         @Inject(NotificationSlackServiceToken)
         private readonly notificationSlackService: NotificationSlackService,
+
+        @Inject(ReportSearcherServiceToken)
+        private readonly reportSearcherService: ReportSearcherService,
     ) {}
 
     /**
@@ -131,9 +135,16 @@ export class UserWriterService {
             /**
              * 푸시 알림 전송
              */
-            Promise.all([this.notificationAgreeService.isPushAgree(TemplateType.Follow, follower)])
-                .then(async ([isPushAgree]) => {
+            Promise.all([
+                this.notificationAgreeService.isPushAgree(TemplateType.Follow, follower),
+                this.reportSearcherService.getblockedList(follower),
+            ])
+                .then(async ([isPushAgree, blockedList]) => {
                     if (!isPushAgree) {
+                        return;
+                    }
+
+                    if (blockedList && blockedList.some((item) => item === following.id)) {
                         return;
                     }
 

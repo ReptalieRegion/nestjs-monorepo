@@ -105,7 +105,7 @@ export class ShareDeleterService {
                 throw new CustomException('Failed to delete share comment.', HttpStatus.INTERNAL_SERVER_ERROR, -2610);
             }
 
-            const isReplyCount = await this.shareSearcherService.getCommentReplyCount(commentId, userId);
+            const isReplyCount = await this.shareSearcherService.getCommentReplyAllCount(commentId);
 
             if (isReplyCount) {
                 const replyResult = await this.shareCommentReplyRepository
@@ -157,7 +157,7 @@ export class ShareDeleterService {
      * @param session - 현재 세션입니다.
      */
     async deleteLike(postId: string, session: ClientSession) {
-        const isLikeCount = await this.shareSearcherService.getLikeCount(postId);
+        const isLikeCount = await this.shareSearcherService.getLikeAllCount(postId);
 
         if (isLikeCount) {
             const result = await this.shareLikeRepository

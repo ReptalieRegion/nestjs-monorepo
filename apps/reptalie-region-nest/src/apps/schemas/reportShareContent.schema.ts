@@ -1,38 +1,39 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 
 import mongoose, { Document, SchemaTypes, Types } from 'mongoose';
-import { ReportDetailsType, ReportType } from '../dto/report/input-report.dto';
-import { IResponseReportDTO } from '../dto/report/response-report.dto';
+import { ReportShareContentDetailsType, ReportShareContentType } from '../dto/report/share/input-reportShareContent.dto';
+import { IResponseReportShareContentDTO } from '../dto/report/share/response-reportShareContent.dto';
 import { getCurrentDate } from '../utils/time/time';
 import { User } from './user.schema';
 
-export interface ReportDocument extends Report, Document {
-    Mapper(): Partial<IResponseReportDTO>;
+export interface ReportShareContentDocument extends ReportShareContent, Document {
+    Mapper(): Partial<IResponseReportShareContentDTO>;
 }
 
 @Schema({ versionKey: false, timestamps: { currentTime: getCurrentDate } })
-export class Report {
+export class ReportShareContent {
     @Prop({ index: true, ref: 'User', type: SchemaTypes.ObjectId })
     reporter: User;
 
-    @Prop({ ref: 'User', type: SchemaTypes.ObjectId })
+    @Prop({ index: true, ref: 'User', type: SchemaTypes.ObjectId })
     reported: User;
 
-    @Prop({ required: true, enum: ReportType })
-    type: ReportType;
+    @Prop({ required: true, enum: ReportShareContentType })
+    type: ReportShareContentType;
 
     @Prop({ required: true, type: SchemaTypes.ObjectId, refPath: 'type' })
     typeId: Types.ObjectId;
 
-    @Prop({ required: true, enum: ReportDetailsType })
-    details: ReportDetailsType;
+    @Prop({ required: true, enum: ReportShareContentDetailsType })
+    details: ReportShareContentDetailsType;
 }
 
-const ReportSchema = SchemaFactory.createForClass(Report);
-ReportSchema.index({ reporter: 1, type: 1 });
-ReportSchema.methods = {
-    Mapper(): Partial<IResponseReportDTO> {
-        const fields: Array<keyof IResponseReportDTO> = [
+const ReportShareContentSchema = SchemaFactory.createForClass(ReportShareContent);
+ReportShareContentSchema.index({ reporter: 1, type: 1 });
+ReportShareContentSchema.index({ reporter: 1, typeId: 1 }, { unique: true });
+ReportShareContentSchema.methods = {
+    Mapper(): Partial<IResponseReportShareContentDTO> {
+        const fields: Array<keyof IResponseReportShareContentDTO> = [
             'id',
             'reporter',
             'reported',
@@ -67,4 +68,4 @@ ReportSchema.methods = {
     },
 };
 
-export { ReportSchema };
+export { ReportShareContentSchema };

@@ -19,11 +19,13 @@ export class ShareLikeRepository extends BaseRepository<ShareLikeDocument> {
         return savedLike.Mapper();
     }
 
-    async getAggregatedLikeList(postId: string, userId: string, pageParam: number, limitSize: number) {
+    async getAggregatedLikeList(postId: string, userId: string, blockedIds: string[], pageParam: number, limitSize: number) {
+        const blockedList = blockedIds.map((entity) => new ObjectId(entity));
+        
         return this.shareLikeModel
             .aggregate([
                 {
-                    $match: { postId: new ObjectId(postId), isCanceled: false },
+                    $match: { postId: new ObjectId(postId), userId: { $nin: blockedList }, isCanceled: false },
                 },
                 {
                     $lookup: {

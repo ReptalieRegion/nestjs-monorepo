@@ -14,9 +14,9 @@ export class ReportDeleterService {
         private readonly reportUserBlockingRepository: ReportUserBlockingRepository,
     ) {}
 
-    async deleteReportUserBlocking(blocker: string, blockingId: string) {
+    async deleteReportUserBlocking(blockingId: string) {
         try {
-            const result = await this.reportUserBlockingRepository.deleteOne({ _id: blockingId, blocker }).exec();
+            const result = await this.reportUserBlockingRepository.deleteOne({ _id: blockingId }).exec();
 
             if (result.deletedCount === 0) {
                 throw new CustomException('Failed to delete report user blocking.', HttpStatus.INTERNAL_SERVER_ERROR, -6603);

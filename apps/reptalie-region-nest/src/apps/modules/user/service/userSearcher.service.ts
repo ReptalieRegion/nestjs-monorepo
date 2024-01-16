@@ -48,7 +48,7 @@ export class UserSearcherService {
             return { items: [], nextPage: undefined };
         }
 
-        const blockedIds = await this.reportSearcherService.getblockedList(following);
+        const blockedIds = await this.reportSearcherService.getUserBlockedIds(following);
 
         const follow = await this.followRepository
             .find(
@@ -128,7 +128,7 @@ export class UserSearcherService {
      */
     async getUserFollowersInfiniteScroll(userId: string, targetUserId: string, pageParam: number, limitSize: number) {
         try {
-            const blockedIds = await this.reportSearcherService.getblockedList(userId);
+            const blockedIds = await this.reportSearcherService.getUserBlockedIds(userId);
 
             const followers = await this.followRepository.getAggregatedFollowerList(
                 userId,
@@ -178,7 +178,7 @@ export class UserSearcherService {
      */
     async getUserFollowingsInfiniteScroll(userId: string, targetUserId: string, pageParam: number, limitSize: number) {
         try {
-            const blockedIds = await this.reportSearcherService.getblockedList(userId);
+            const blockedIds = await this.reportSearcherService.getUserBlockedIds(userId);
 
             const followings = await this.followRepository.getAggregatedFollowingList(
                 userId,

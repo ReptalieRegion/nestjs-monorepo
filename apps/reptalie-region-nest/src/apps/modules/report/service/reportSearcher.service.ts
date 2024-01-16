@@ -82,7 +82,13 @@ export class ReportSearcherService {
         return this.reportShareContentRepository.countDocuments({ reported });
     }
 
-    async getblockedList(blocker: string) {
+    async isBlockedUser(blocker: string, isBlockedId: string) {
+        const blockedIds = await this.getUserBlockedIds(blocker);
+
+        return blockedIds?.includes(isBlockedId) ?? false;
+    }
+
+    async getUserBlockedIds(blocker: string) {
         const blockings = await this.reportUserBlockingRepository.find({ blocker }).exec();
         return blockings.map((entitiy) => entitiy.Mapper().blocked as string);
     }

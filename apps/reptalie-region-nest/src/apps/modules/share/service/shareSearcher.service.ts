@@ -55,7 +55,7 @@ export class ShareSearcherService {
      */
     async getPostsInfiniteScroll(currentUserId: string, pageParam: number, limitSize: number) {
         const typeIds = await this.reportSearcherService.findTypeIdList(currentUserId, ReportShareContentType.POST);
-        const blockedIds = await this.reportSearcherService.getblockedList(currentUserId);
+        const blockedIds = await this.reportSearcherService.getUserBlockedIds(currentUserId);
 
         const posts = await this.sharePostRepository
             .find({ _id: { $nin: typeIds }, userId: { $nin: blockedIds }, isDeleted: false })
@@ -103,7 +103,7 @@ export class ShareSearcherService {
      */
     async getPost(currentUserId: string, postId: string) {
         const typeIds = await this.reportSearcherService.findTypeIdList(currentUserId, ReportShareContentType.POST);
-        const blockedIds = await this.reportSearcherService.getblockedList(currentUserId);
+        const blockedIds = await this.reportSearcherService.getUserBlockedIds(currentUserId);
 
         const entity = await this.sharePostRepository
             .findOne({ _id: { $eq: postId, $nin: typeIds }, userId: { $nin: blockedIds }, isDeleted: false })
@@ -195,7 +195,7 @@ export class ShareSearcherService {
      */
     async getCommentsInfiniteScroll(userId: string, postId: string, pageParam: number, limitSize: number) {
         const typeIds = await this.reportSearcherService.findTypeIdList(userId, ReportShareContentType.COMMENT);
-        const blockedIds = await this.reportSearcherService.getblockedList(userId);
+        const blockedIds = await this.reportSearcherService.getUserBlockedIds(userId);
 
         const comments = await this.shareCommentRepository
             .find({ _id: { $nin: typeIds }, postId, userId: { $nin: blockedIds }, isDeleted: false })
@@ -245,7 +245,7 @@ export class ShareSearcherService {
      */
     async getCommentRepliesInfiniteScroll(userId: string, commentId: string, pageParam: number, limitSize: number) {
         const typeIds = await this.reportSearcherService.findTypeIdList(userId, ReportShareContentType.REPLY);
-        const blockedIds = await this.reportSearcherService.getblockedList(userId);
+        const blockedIds = await this.reportSearcherService.getUserBlockedIds(userId);
 
         const commentReplies = await this.shareCommentReplyRepository
             .find({ _id: { $nin: typeIds }, userId: { $nin: blockedIds }, commentId, isDeleted: false })
@@ -294,7 +294,8 @@ export class ShareSearcherService {
      */
     async getLikeListForPostInfiniteScroll(userId: string, postId: string, pageParam: number, limitSize: number) {
         try {
-            const blockedIds = await this.reportSearcherService.getblockedList(userId);
+            const blockedIds = await this.reportSearcherService.getUserBlockedIds(userId);
+            
             const likes = await this.shareLikeRepository.getAggregatedLikeList(
                 postId,
                 userId,
@@ -641,7 +642,7 @@ export class ShareSearcherService {
      * @returns 좋아요 수를 반환합니다.
      */
     async getLikeCount(userId: string, postId: string): Promise<number> {
-        const blockedIds = await this.reportSearcherService.getblockedList(userId);
+        const blockedIds = await this.reportSearcherService.getUserBlockedIds(userId);
         return this.shareLikeRepository.countDocuments({ postId, userId: { $nin: blockedIds }, isCanceled: false }).exec();
     }
 
@@ -686,7 +687,7 @@ export class ShareSearcherService {
      */
     async getCommentCount(postId: string, currentUserId: string): Promise<number> {
         const typeIds = await this.reportSearcherService.findTypeIdList(currentUserId, ReportShareContentType.COMMENT);
-        const blockedIds = await this.reportSearcherService.getblockedList(currentUserId);
+        const blockedIds = await this.reportSearcherService.getUserBlockedIds(currentUserId);
 
         return this.shareCommentRepository
             .countDocuments({ _id: { $nin: typeIds }, postId, userId: { $nin: blockedIds }, isDeleted: false })
@@ -702,7 +703,7 @@ export class ShareSearcherService {
      */
     async getCommentReplyCount(commentId: string, currentUserId: string): Promise<number> {
         const typeIds = await this.reportSearcherService.findTypeIdList(currentUserId, ReportShareContentType.REPLY);
-        const blockedIds = await this.reportSearcherService.getblockedList(currentUserId);
+        const blockedIds = await this.reportSearcherService.getUserBlockedIds(currentUserId);
 
         return this.shareCommentReplyRepository
             .countDocuments({ _id: { $nin: typeIds }, userId: { $nin: blockedIds }, commentId, isDeleted: false })

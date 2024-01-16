@@ -49,8 +49,8 @@ export class ReportController {
     @Delete('user-blocking/:blockingId')
     @HttpCode(HttpStatus.OK)
     @UseGuards(JwtAuthGuard)
-    async deleteReportUserBlocking(@AuthUser() user: IUserProfileDTO, @Param('blockingId') blockingId: string) {
-        return this.reportDeleterService.deleteReportUserBlocking(user.id, blockingId);
+    async deleteReportUserBlocking(@Param('blockingId') blockingId: string) {
+        return this.reportDeleterService.deleteReportUserBlocking(blockingId);
     }
 
     /**

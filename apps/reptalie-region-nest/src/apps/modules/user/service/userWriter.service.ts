@@ -137,14 +137,10 @@ export class UserWriterService {
              */
             Promise.all([
                 this.notificationAgreeService.isPushAgree(TemplateType.Follow, follower),
-                this.reportSearcherService.getblockedList(follower),
+                this.reportSearcherService.isBlockedUser(follower, following.id),
             ])
-                .then(async ([isPushAgree, blockedList]) => {
-                    if (!isPushAgree) {
-                        return;
-                    }
-
-                    if (blockedList && blockedList.some((item) => item === following.id)) {
+                .then(async ([isPushAgree, isBlockedUser]) => {
+                    if (!isPushAgree || isBlockedUser) {
                         return;
                     }
 

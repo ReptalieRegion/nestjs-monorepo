@@ -67,22 +67,14 @@ export class ShareWriterService {
      * @returns 생성된 게시물과 사용자 정보를 반환합니다.
      */
     async createPostWithImages(user: IUserProfileDTO, dto: InputSharePostDTO, files: Express.Multer.File[]) {
+        await this.isReportLimitExceeded(user.id);
+
         const session: ClientSession = await this.connection.startSession();
         session.startTransaction();
 
         let imageKeys: string[] = [];
 
         try {
-            const reportShareContentCount = await this.reportSearcherService.reportShareContentCount(user.id);
-
-            if (reportShareContentCount > this.MAX_REPORT_LIMIT) {
-                throw new CustomException(
-                    'The save operation has failed due to exceeding the maximum report limit.',
-                    HttpStatus.UNPROCESSABLE_ENTITY,
-                    -2507,
-                );
-            }
-
             const tagUserInfo = await this.shareSearcherService.extractUserInfo(dto.contents);
 
             const post = await this.sharePostRepository.createPost(user.id, dto, session);
@@ -102,14 +94,10 @@ export class ShareWriterService {
             tagUserInfo?.map((entity) => {
                 Promise.all([
                     this.notificationAgreeService.isPushAgree(TemplateType.Tag, entity.id as string),
-                    this.reportSearcherService.getblockedList(entity.id as string),
+                    this.reportSearcherService.isBlockedUser(entity.id as string, user.id),
                 ])
-                    .then(async ([isPushAgree, blockedList]) => {
-                        if (!isPushAgree) {
-                            return;
-                        }
-
-                        if (blockedList && blockedList.some((item) => item === user.id)) {
+                    .then(async ([isPushAgree, isTagBlockedUser]) => {
+                        if (!isPushAgree || isTagBlockedUser) {
                             return;
                         }
 
@@ -161,15 +149,7 @@ export class ShareWriterService {
      * @returns 생성된 댓글과 사용자 정보를 반환합니다.
      */
     async createComment(user: IUserProfileDTO, dto: InputShareCommentDTO) {
-        const reportShareContentCount = await this.reportSearcherService.reportShareContentCount(user.id);
-
-        if (reportShareContentCount > this.MAX_REPORT_LIMIT) {
-            throw new CustomException(
-                'The save operation has failed due to 5 accumulated reports.',
-                HttpStatus.UNPROCESSABLE_ENTITY,
-                -2507,
-            );
-        }
+        await this.isReportLimitExceeded(user.id);
 
         const post = await this.shareSearcherService.findPostWithUserInfo(dto.postId);
         const tagUserInfo = await this.shareSearcherService.extractUserInfo(dto.contents);
@@ -188,9 +168,9 @@ export class ShareWriterService {
         Promise.all([
             this.notificationAgreeService.isPushAgree(TemplateType.Comment, post?.userId.id),
             this.imageSearcherService.getPostImages(comment.postId),
-            this.reportSearcherService.getblockedList(post?.userId.id),
+            this.reportSearcherService.isBlockedUser(post?.userId.id, user.id),
         ])
-            .then(async ([isCommentPushAgree, postImage, blockedList]) => {
+            .then(async ([isCommentPushAgree, postImage, isBlockedUser]) => {
                 const postThumbnail = postImage[0].src;
                 const userThumbnail = user.profile.src;
 
@@ -204,9 +184,7 @@ export class ShareWriterService {
                     );
                 }
 
-                const isExistsBlocking = blockedList && blockedList.some((item) => item === user.id);
-
-                if (post?.userId.id !== user.id && isCommentPushAgree && !isExistsBlocking) {
+                if (post?.userId.id !== user.id && isCommentPushAgree && !isBlockedUser) {
                     await this.notificationPushService.sendMessage(post?.userId.fcmToken, {
                         type: TemplateType.Comment,
                         userId: post?.userId.id,
@@ -220,14 +198,12 @@ export class ShareWriterService {
                 if (tagUserInfo?.length) {
                     await Promise.all(
                         tagUserInfo.map(async (entity) => {
-                            const [isTagPushAgree, isTagblockedList] = await Promise.all([
+                            const [isTagPushAgree, isTagBlockedUser] = await Promise.all([
                                 this.notificationAgreeService.isPushAgree(TemplateType.Tag, entity.id as string),
-                                this.reportSearcherService.getblockedList(entity.id as string),
+                                this.reportSearcherService.isBlockedUser(entity.id as string, user.id),
                             ]);
 
-                            const isExistsBlockingTag = isTagblockedList && isTagblockedList.some((item) => item === user.id);
-
-                            if (post?.userId.id !== entity.id && isTagPushAgree && !isExistsBlockingTag) {
+                            if (post?.userId.id !== entity.id && isTagPushAgree && !isTagBlockedUser) {
                                 await this.notificationPushService.sendMessage(entity.fcmToken, {
                                     type: TemplateType.Tag,
                                     userId: entity.id as string,
@@ -256,15 +232,7 @@ export class ShareWriterService {
      * @returns 생성된 댓글에 대한 답글과 사용자 정보를 반환합니다.
      */
     async createCommentReply(user: IUserProfileDTO, dto: InputShareCommentReplyDTO) {
-        const reportShareContentCount = await this.reportSearcherService.reportShareContentCount(user.id);
-
-        if (reportShareContentCount > this.MAX_REPORT_LIMIT) {
-            throw new CustomException(
-                'The save operation has failed due to 5 accumulated reports.',
-                HttpStatus.UNPROCESSABLE_ENTITY,
-                -2507,
-            );
-        }
+        await this.isReportLimitExceeded(user.id);
 
         const comment = await this.shareSearcherService.findCommentWithUserInfo(dto.commentId);
         const tagUserInfo = await this.shareSearcherService.extractUserInfo(dto.contents);
@@ -283,9 +251,9 @@ export class ShareWriterService {
         Promise.all([
             this.notificationAgreeService.isPushAgree(TemplateType.Comment, comment?.userId.id),
             this.imageSearcherService.getPostImages(comment?.postId as string),
-            this.reportSearcherService.getblockedList(comment?.userId.id),
+            this.reportSearcherService.isBlockedUser(comment?.userId.id, user.id),
         ])
-            .then(async ([isCommentPushAgree, postImage, blockedList]) => {
+            .then(async ([isCommentPushAgree, postImage, isBlockedUser]) => {
                 const postThumbnail = postImage[0].src;
                 const userThumbnail = user.profile.src;
 
@@ -299,9 +267,7 @@ export class ShareWriterService {
                     );
                 }
 
-                const isExistsBlocking = blockedList && blockedList.some((item) => item === user.id);
-
-                if (comment?.userId.id !== user.id && isCommentPushAgree && !isExistsBlocking) {
+                if (comment?.userId.id !== user.id && isCommentPushAgree && !isBlockedUser) {
                     await this.notificationPushService.sendMessage(comment?.userId.fcmToken, {
                         type: TemplateType.Comment,
                         userId: comment?.userId.id,
@@ -315,13 +281,12 @@ export class ShareWriterService {
                 if (tagUserInfo?.length) {
                     await Promise.all(
                         tagUserInfo.map(async (entity) => {
-                            const [isTagPushAgree, isTagblockedList] = await Promise.all([
+                            const [isTagPushAgree, isTagBlockedUser] = await Promise.all([
                                 this.notificationAgreeService.isPushAgree(TemplateType.Tag, entity.id as string),
-                                this.reportSearcherService.getblockedList(entity.id as string),
+                                this.reportSearcherService.isBlockedUser(entity.id as string, user.id),
                             ]);
-                            const isExistsBlockingTag = isTagblockedList && isTagblockedList.some((item) => item === user.id);
 
-                            if (comment?.userId.id !== entity.id && isTagPushAgree && !isExistsBlockingTag) {
+                            if (comment?.userId.id !== entity.id && isTagPushAgree && !isTagBlockedUser) {
                                 await this.notificationPushService.sendMessage(entity.fcmToken, {
                                     type: TemplateType.Tag,
                                     userId: entity.id as string,
@@ -370,18 +335,10 @@ export class ShareWriterService {
             Promise.all([
                 this.notificationAgreeService.isPushAgree(TemplateType.Like, post?.userId.id),
                 this.imageSearcherService.getPostImages(post?.id as string),
-                this.reportSearcherService.getblockedList(post?.userId.id),
+                this.reportSearcherService.isBlockedUser(post?.userId.id, user.id),
             ])
-                .then(async ([isPushAgree, postImage, blockedList]) => {
-                    if (post?.userId.id === user.id) {
-                        return;
-                    }
-
-                    if (!isPushAgree) {
-                        return;
-                    }
-
-                    if (blockedList && blockedList.some((item) => item === user.id)) {
+                .then(async ([isPushAgree, postImage, isBlockedUser]) => {
+                    if (post?.userId.id === user.id || !isPushAgree || isBlockedUser) {
                         return;
                     }
 
@@ -416,6 +373,18 @@ export class ShareWriterService {
             return { post: { id: like.postId, user: { nickname: post?.userId.nickname } } };
         } catch (error) {
             throw new CustomExceptionHandler(error).handleException('post and user Id should be unique values.', -2613);
+        }
+    }
+
+    private async isReportLimitExceeded(userId: string) {
+        const reportShareContentCount = await this.reportSearcherService.reportShareContentCount(userId);
+
+        if (reportShareContentCount > this.MAX_REPORT_LIMIT) {
+            throw new CustomException(
+                'The save operation has failed due to exceeding the maximum report limit.',
+                HttpStatus.UNPROCESSABLE_ENTITY,
+                -2507,
+            );
         }
     }
 }

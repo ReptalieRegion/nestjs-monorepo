@@ -14,7 +14,7 @@ export class ReportSearcherService {
 
     async getUserBlockingInfiniteScroll(blocker: string, pageParam: number, limitSize: number) {
         const blockings = await this.reportUserBlockingRepository
-            .find({ blocker, isDeleted: false })
+            .find({ blocker })
             .populate({
                 path: 'blocked',
                 select: 'nickname imageId',
@@ -71,7 +71,7 @@ export class ReportSearcherService {
     }
 
     async getblockedList(blocker: string) {
-        const blockings = await this.reportUserBlockingRepository.find({ blocker, isDeleted: false }).exec();
+        const blockings = await this.reportUserBlockingRepository.find({ blocker }).exec();
         return blockings.map((entitiy) => entitiy.Mapper().blocked as string);
     }
 }

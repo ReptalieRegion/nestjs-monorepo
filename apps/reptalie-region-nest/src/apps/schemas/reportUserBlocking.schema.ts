@@ -16,22 +16,12 @@ export class ReportUserBlocking {
 
     @Prop({ index: true, ref: 'User', type: SchemaTypes.ObjectId })
     blocked: User;
-
-    @Prop({ default: false, type: SchemaTypes.Boolean })
-    isDeleted: boolean;
 }
 
 const ReportUserBlockingSchema = SchemaFactory.createForClass(ReportUserBlocking);
 ReportUserBlockingSchema.methods = {
     Mapper(): Partial<IResponseReportBlockingDTO> {
-        const fields: Array<keyof IResponseReportBlockingDTO> = [
-            'id',
-            'blocker',
-            'blocked',
-            'isDeleted',
-            'createdAt',
-            'updatedAt',
-        ];
+        const fields: Array<keyof IResponseReportBlockingDTO> = ['id', 'blocker', 'blocked', 'createdAt', 'updatedAt'];
 
         const viewFields = fields.reduce((prev, field) => {
             const value = this.get(field);

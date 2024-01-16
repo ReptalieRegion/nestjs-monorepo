@@ -16,11 +16,9 @@ export class ReportDeleterService {
 
     async deleteReportUserBlocking(blocker: string, blockingId: string) {
         try {
-            const result = await this.reportUserBlockingRepository
-                .updateOne({ _id: blockingId, blocker, isDeleted: false }, { $set: { isDeleted: true } })
-                .exec();
+            const result = await this.reportUserBlockingRepository.deleteOne({ _id: blockingId, blocker }).exec();
 
-            if (result.modifiedCount === 0) {
+            if (result.deletedCount === 0) {
                 throw new CustomException('Failed to delete report user blocking.', HttpStatus.INTERNAL_SERVER_ERROR, -6603);
             }
 
@@ -32,5 +30,6 @@ export class ReportDeleterService {
 
     async withdrawalReportInfo(userId: string, session: ClientSession) {
         await this.reportShareContentRepository.deleteMany({ reporter: userId }, { session }).exec();
+        await this.reportUserBlockingRepository.deleteMany({ blocker: userId }, { session }).exec();
     }
 }

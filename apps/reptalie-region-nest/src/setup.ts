@@ -1,8 +1,8 @@
-import { HttpStatus, ValidationPipe } from '@nestjs/common';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import axios from 'axios';
 import passport from 'passport';
 import { SLACK_NOTIFICATION_URI, SLACK_USERNAME } from './apps/modules/notification/constants/notificationSlack.constants';
+import { CustomExceptionFilter } from './apps/utils/error/filter/customException.filter';
 
 export const setup = (app: NestExpressApplication) => {
     // 라우터 URL 접두사
@@ -10,13 +10,7 @@ export const setup = (app: NestExpressApplication) => {
     app.setGlobalPrefix(globalPrefix);
 
     // 요청 데이터 검증 및 유효성 검사 파이프
-    app.useGlobalPipes(
-        new ValidationPipe({
-            transform: true,
-            whitelist: true,
-            errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY,
-        }),
-    );
+    app.useGlobalFilters(new CustomExceptionFilter());
 
     // cors 설정
     const whitelist = ['http://localhost:3000'];

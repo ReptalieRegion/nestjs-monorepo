@@ -1,9 +1,10 @@
-import { Inject, Injectable, NotFoundException, forwardRef } from '@nestjs/common';
+import { HttpStatus, Inject, Injectable, forwardRef } from '@nestjs/common';
 import { ReportType } from '../../../dto/report/input-report.dto';
 import { IResponseShareCommentDTO } from '../../../dto/share/comment/response-shareCommnet.dto';
 import { IResponseShareCommentReplyDTO } from '../../../dto/share/commentReply/response-shareCommentReply.dto';
 import { IResponseSharePostDTO } from '../../../dto/share/post/response-sharePost.dto';
-import { serviceErrorHandler } from '../../../utils/error/errorHandler';
+import { CustomException } from '../../../utils/error/customException';
+import { CustomExceptionHandler } from '../../../utils/error/customException.handler';
 import { ImageSearcherService, ImageSearcherServiceToken } from '../../image/service/imageSearcher.service';
 import { ReportSearcherService, ReportSearcherServiceToken } from '../../report/service/reportSearcher.service';
 import { UserSearcherService, UserSearcherServiceToken } from '../../user/service/userSearcher.service';
@@ -56,16 +57,21 @@ export class ShareSearcherService {
         const typeIds = await this.reportSearcherService.findTypeIdList(currentUserId, ReportType.POST);
 
         const posts = await this.sharePostRepository
-            .find({ isDeleted: false, _id: { $ne: typeIds } })
-            .sort({ updatedAt: -1, createdAt: -1 })
+            .find({ isDeleted: false, _id: { $nin: typeIds } })
+            .populate({
+                path: 'userId',
+                select: 'nickname imageId',
+                populate: { path: 'imageId', model: 'Image', select: 'imageKey -_id' },
+            })
+            .sort({ createdAt: -1 })
             .skip(pageParam * limitSize)
             .limit(limitSize)
             .exec();
 
         const items = await Promise.all(
             posts.map(async (entity) => {
-                const post = Object(entity).Mapper();
-                const userInfo = await this.userSearcherService.getUserInfo({ targetUserId: post.userId, currentUserId });
+                const post = entity.Mapper();
+                const userInfo = await this.userSearcherService.getUserInfo({ user: entity.userId, currentUserId });
                 const images = post.id && (await this.imageSearcherService.getPostImages(post.id));
 
                 return {
@@ -77,7 +83,7 @@ export class ShareSearcherService {
                         isMine: currentUserId ? currentUserId === userInfo.id : false,
                         isLike: currentUserId && post.id ? await this.isExistsLike(currentUserId, post.id) : undefined,
                         likeCount: post.id && (await this.getLikeCount(post.id)),
-                        commentCount: post.id && (await this.getCommentCount(post.id)),
+                        commentCount: post.id && (await this.getCommentCount(post.id, currentUserId)),
                         user: { ...userInfo },
                     },
                 };
@@ -95,14 +101,22 @@ export class ShareSearcherService {
      * 특정 게시글 조회 로직
      */
     async getPost(currentUserId: string, postId: string) {
-        const entity = await this.sharePostRepository.findOne({ _id: postId, isDeleted: false }).exec();
+        const typeIds = await this.reportSearcherService.findTypeIdList(currentUserId, ReportType.POST);
+        const entity = await this.sharePostRepository
+            .findOne({ _id: { $eq: postId, $nin: typeIds }, isDeleted: false })
+            .populate({
+                path: 'userId',
+                select: 'nickname imageId',
+                populate: { path: 'imageId', model: 'Image', select: 'imageKey -_id' },
+            })
+            .exec();
 
         if (!entity) {
-            throw new NotFoundException('Not Found Post');
+            throw new CustomException('Not found for the specified share Post Id.', HttpStatus.NOT_FOUND, -2301);
         }
 
         const post = entity.Mapper();
-        const userInfo = await this.userSearcherService.getUserInfo({ targetUserId: post.userId, currentUserId });
+        const userInfo = await this.userSearcherService.getUserInfo({ user: Object(post.userId), currentUserId });
         const images = post.id && (await this.imageSearcherService.getPostImages(post.id));
 
         return {
@@ -114,7 +128,7 @@ export class ShareSearcherService {
                 isMine: currentUserId ? currentUserId === userInfo.id : false,
                 isLike: currentUserId && post.id ? await this.isExistsLike(currentUserId, post.id) : undefined,
                 likeCount: post.id && (await this.getLikeCount(post.id)),
-                commentCount: post.id && (await this.getCommentCount(post.id)),
+                commentCount: post.id && (await this.getCommentCount(post.id, currentUserId)),
                 user: { ...userInfo },
             },
         };
@@ -130,11 +144,12 @@ export class ShareSearcherService {
      * @returns 가져온 게시물과 다음 페이지 번호를 반환합니다.
      */
     async getUserPostsInfiniteScroll(currentUserId: string, targetNickname: string, pageParam: number, limitSize: number) {
-        const targetUserId = (await this.userSearcherService.findNickname(targetNickname)).id;
+        const typeIds = await this.reportSearcherService.findTypeIdList(currentUserId, ReportType.POST);
+        const targetUserId = (await this.userSearcherService.findNickname(targetNickname))?.id;
 
         const posts = await this.sharePostRepository
-            .find({ userId: targetUserId, isDeleted: false })
-            .sort({ updatedAt: -1, createdAt: -1 })
+            .find({ userId: targetUserId, isDeleted: false, _id: { $nin: typeIds } })
+            .sort({ createdAt: -1 })
             .skip(pageParam * limitSize)
             .limit(limitSize)
             .exec();
@@ -154,7 +169,7 @@ export class ShareSearcherService {
                         isMine,
                         isLike: currentUserId && post.id ? await this.isExistsLike(currentUserId, post?.id) : undefined,
                         likeCount: post.id && (await this.getLikeCount(post.id)),
-                        commentCount: post.id && (await this.getCommentCount(post.id)),
+                        commentCount: post.id && (await this.getCommentCount(post.id, currentUserId)),
                     },
                 };
             }),
@@ -179,13 +194,13 @@ export class ShareSearcherService {
         const typeIds = await this.reportSearcherService.findTypeIdList(userId, ReportType.COMMENT);
 
         const comments = await this.shareCommentRepository
-            .find({ postId, isDeleted: false, _id: { $ne: typeIds } })
+            .find({ postId, isDeleted: false, _id: { $nin: typeIds } })
             .populate({
                 path: 'userId',
                 select: 'nickname imageId',
                 populate: { path: 'imageId', model: 'Image', select: 'imageKey -_id' },
             })
-            .sort({ updatedAt: -1, createdAt: -1 })
+            .sort({ createdAt: -1 })
             .skip(pageParam * limitSize)
             .limit(limitSize)
             .exec();
@@ -200,7 +215,7 @@ export class ShareSearcherService {
                         id: comment.id,
                         contents: comment.contents,
                         createdAt: comment.createdAt,
-                        replyCount: comment.id && (await this.getCommentReplyCount(comment.id)),
+                        replyCount: comment.id && (await this.getCommentReplyCount(comment.id, userId)),
                         isMine: userId ? userInfo.id === userId : false,
                         isModified: comment.createdAt?.getTime() !== comment.updatedAt?.getTime(),
                         user: { ...userInfo },
@@ -225,16 +240,16 @@ export class ShareSearcherService {
      * @returns 가져온 답글과 다음 페이지 번호를 반환합니다.
      */
     async getCommentRepliesInfiniteScroll(userId: string, commentId: string, pageParam: number, limitSize: number) {
-        const typeIds = await this.reportSearcherService.findTypeIdList(userId, ReportType.COMMENT);
+        const typeIds = await this.reportSearcherService.findTypeIdList(userId, ReportType.REPLY);
 
         const commentReplies = await this.shareCommentReplyRepository
-            .find({ commentId, isDeleted: false, _id: { $ne: typeIds } })
+            .find({ commentId, isDeleted: false, _id: { $nin: typeIds } })
             .populate({
                 path: 'userId',
                 select: 'nickname imageId',
                 populate: { path: 'imageId', model: 'Image', select: 'imageKey -_id' },
             })
-            .sort({ updatedAt: -1, createdAt: -1 })
+            .sort({ createdAt: -1 })
             .skip(pageParam * limitSize)
             .limit(limitSize)
             .exec();
@@ -303,7 +318,7 @@ export class ShareSearcherService {
 
             return { items, nextPage };
         } catch (error) {
-            serviceErrorHandler(error, 'Invalid ObjectId for post Id');
+            throw new CustomExceptionHandler(error).handleException('Invalid ObjectId for share post Id.', -2504);
         }
     }
 
@@ -318,7 +333,7 @@ export class ShareSearcherService {
     async getMyPostsInfiniteScroll(userId: string, pageParam: number, limitSize: number) {
         const posts = await this.sharePostRepository
             .find({ userId, isDeleted: false })
-            .sort({ updatedAt: -1, createdAt: -1 })
+            .sort({ createdAt: -1 })
             .skip(pageParam * limitSize)
             .limit(limitSize)
             .exec();
@@ -337,7 +352,7 @@ export class ShareSearcherService {
                         isMine: true,
                         isLike: post.id ? await this.isExistsLike(userId, post?.id) : undefined,
                         likeCount: post.id && (await this.getLikeCount(post.id)),
-                        commentCount: post.id && (await this.getCommentCount(post.id)),
+                        commentCount: post.id && (await this.getCommentCount(post.id, userId)),
                     },
                 };
             }),
@@ -375,7 +390,7 @@ export class ShareSearcherService {
                 mappedPost?.id && this.imageSearcherService.getPostImages(mappedPost.id),
                 mappedPost?.userId && mappedPost?.id ? this.isExistsLike(mappedPost.userId, mappedPost.id) : undefined,
                 mappedPost?.id && this.getLikeCount(mappedPost.id),
-                mappedPost?.id && this.getCommentCount(mappedPost.id),
+                mappedPost?.id && this.getCommentCount(mappedPost.id, mappedPost.userId),
             ]);
 
             return { id, contents: mappedPost?.contents, images, isMine: true, isLike, likeCount, commentCount };
@@ -480,12 +495,12 @@ export class ShareSearcherService {
                 .exec();
 
             if (!like) {
-                throw new NotFoundException('Not found for the specified share like status.');
+                throw new CustomException('Not found for the specified share like status.', HttpStatus.NOT_FOUND, -2303);
             }
 
             return { ...like.Mapper(), postId: Object(like.postId).Mapper() };
         } catch (error) {
-            serviceErrorHandler(error, 'Invalid ObjectId for share post Id.');
+            throw new CustomExceptionHandler(error).handleException('Invalid ObjectId for share post Id.', -2504);
         }
     }
 
@@ -515,12 +530,12 @@ export class ShareSearcherService {
                 .exec();
 
             if (!post) {
-                throw new NotFoundException('Not found for the specified share Post Id.');
+                throw new CustomException('Not found for the specified share Post Id.', HttpStatus.NOT_FOUND, -2301);
             }
 
             return { ...post.Mapper(), userId: Object(post.userId).Mapper() };
         } catch (error) {
-            serviceErrorHandler(error, 'Invalid ObjectId for share post Id.');
+            throw new CustomExceptionHandler(error).handleException('Invalid ObjectId for share post Id.', -2504);
         }
     }
 
@@ -538,12 +553,12 @@ export class ShareSearcherService {
                 .exec();
 
             if (!comment) {
-                throw new NotFoundException('Not found for the specified share comment Id.');
+                throw new CustomException('Not found for the specified share comment Id.', HttpStatus.NOT_FOUND, -2302);
             }
 
             return { ...comment.Mapper(), userId: Object(comment.userId).Mapper() };
         } catch (error) {
-            serviceErrorHandler(error, 'Invalid ObjectId for share comment Id .');
+            throw new CustomExceptionHandler(error).handleException('Invalid ObjectId for share comment Id.', -2505);
         }
     }
 
@@ -558,12 +573,12 @@ export class ShareSearcherService {
             const post = await this.sharePostRepository.findOne({ _id: postId, isDeleted: false }).exec();
 
             if (!post) {
-                throw new NotFoundException('Not found for the specified share comment Id.');
+                throw new CustomException('Not found for the specified share post Id.', HttpStatus.NOT_FOUND, -2301);
             }
 
             return post.Mapper();
         } catch (error) {
-            serviceErrorHandler(error, 'Invalid ObjectId for share comment Id .');
+            throw new CustomExceptionHandler(error).handleException('Invalid ObjectId for share post Id.', -2504);
         }
     }
 
@@ -578,12 +593,12 @@ export class ShareSearcherService {
             const comment = await this.shareCommentRepository.findOne({ _id: commentId, isDeleted: false }).exec();
 
             if (!comment) {
-                throw new NotFoundException('Not found for the specified share comment Id.');
+                throw new CustomException('Not found for the specified share comment Id.', HttpStatus.NOT_FOUND, -2302);
             }
 
             return comment.Mapper();
         } catch (error) {
-            serviceErrorHandler(error, 'Invalid ObjectId for share comment Id .');
+            throw new CustomExceptionHandler(error).handleException('Invalid ObjectId for share comment Id.', -2505);
         }
     }
 
@@ -598,23 +613,13 @@ export class ShareSearcherService {
             const reply = await this.shareCommentReplyRepository.findOne({ _id: replyId, isDeleted: false }).exec();
 
             if (!reply) {
-                throw new NotFoundException('Not found for the specified share comment reply Id.');
+                throw new CustomException('Not found for the specified share comment reply Id.', HttpStatus.NOT_FOUND, -2304);
             }
 
             return reply.Mapper();
         } catch (error) {
-            serviceErrorHandler(error, 'Invalid ObjectId for share comment reply Id .');
+            throw new CustomExceptionHandler(error).handleException('Invalid ObjectId for share comment reply Id.', -2506);
         }
-    }
-
-    /**
-     * 지정된 사용자 ID에 대한 게시물 수를 반환합니다.
-     *
-     * @param userId 사용자 ID
-     * @returns 게시물 수를 반환합니다.
-     */
-    async getPostCount(userId: string): Promise<number> {
-        return this.sharePostRepository.countDocuments({ userId, isDeleted: false }).exec();
     }
 
     /**
@@ -628,23 +633,73 @@ export class ShareSearcherService {
     }
 
     /**
+     * 유저의 생성한 게시물에 대한 수를 반환합니다.
+     *
+     * @param nickname 게시물 ID
+     * @param currentUserId 유저 ID
+     * @returns 댓글 수를 반환합니다.
+     */
+    async getPostAndFollowerCount(currentUserId: string, nickname: string) {
+        const targetUserInfo = await this.userSearcherService.findNickname(nickname);
+        const typeIds = currentUserId
+            ? await this.reportSearcherService.findTypeIdList(currentUserId, ReportType.POST)
+            : undefined;
+
+        const postCount = await this.sharePostRepository
+            .countDocuments({ _id: { $nin: typeIds }, userId: targetUserInfo.id, isDeleted: false })
+            .exec();
+
+        const { followerCount, followingCount } = await this.userSearcherService.getFollowCount(targetUserInfo.id as string);
+
+        return { postCount, followerCount, followingCount };
+    }
+
+    /**
      * 지정된 게시물 ID에 대한 댓글 수를 반환합니다.
      *
      * @param postId 게시물 ID
+     * @param currentUserId 유저 ID
      * @returns 댓글 수를 반환합니다.
      */
-    async getCommentCount(postId: string): Promise<number> {
-        return this.shareCommentRepository.countDocuments({ postId, isDeleted: false }).exec();
+    async getCommentCount(postId: string, currentUserId: string): Promise<number> {
+        const typeIds = await this.reportSearcherService.findTypeIdList(currentUserId, ReportType.COMMENT);
+
+        return this.shareCommentRepository.countDocuments({ _id: { $nin: typeIds }, postId, isDeleted: false }).exec();
     }
 
     /**
      * 지정된 댓글 ID에 대한 답글 수를 반환합니다.
      *
      * @param commentId 댓글 ID
+     * @param currentUserId 유저 ID
      * @returns 답글 수를 반환합니다.
      */
-    async getCommentReplyCount(commentId: string): Promise<number> {
-        return this.shareCommentReplyRepository.countDocuments({ commentId, isDeleted: false }).exec();
+    async getCommentReplyCount(commentId: string, currentUserId: string): Promise<number> {
+        const typeIds = await this.reportSearcherService.findTypeIdList(currentUserId, ReportType.REPLY);
+
+        return this.shareCommentReplyRepository.countDocuments({ _id: { $nin: typeIds }, commentId, isDeleted: false }).exec();
+    }
+
+    /**
+     * 지정된 유저에 대한 게시글 ID 목록을 반환합니다.
+     *
+     * @param userId 게시물 ID
+     * @returns 댓글 ID 목록를 반환합니다.
+     */
+    async getPostIds(userId: string): Promise<string[]> {
+        const posts = await this.sharePostRepository.find({ userId, isDeleted: false }, { _id: 1 }).exec();
+        return posts?.map((entity) => entity.Mapper().id as string);
+    }
+
+    /**
+     * 지정된 복원해야할 유저에 대한 게시글 ID 목록을 반환합니다.
+     *
+     * @param userId 게시물 ID
+     * @returns 댓글 ID 목록를 반환합니다.
+     */
+    async getRestorePostIds(userId: string): Promise<string[]> {
+        const posts = await this.sharePostRepository.find({ userId, isDeleted: true }, { _id: 1 }).exec();
+        return posts?.map((entity) => entity.Mapper().id as string);
     }
 
     /**
@@ -653,9 +708,24 @@ export class ShareSearcherService {
      * @param postId 게시물 ID
      * @returns 댓글 ID 목록를 반환합니다.
      */
-    async getCommentIds(postId: string): Promise<string[]> {
-        const comments = await this.shareCommentRepository.find({ postId, isDeleted: false }, { _id: 1 }).exec();
-        return comments.map((entity) => entity.Mapper().id as string);
+    async getCommentIds(postIds: string[]): Promise<string[]> {
+        const comments = await this.shareCommentRepository
+            .find({ postId: { $in: postIds }, isDeleted: false }, { _id: 1 })
+            .exec();
+        return comments?.map((entity) => entity.Mapper().id as string);
+    }
+
+    /**
+     * 지정된 복원해야할 유저에 대한 댓글 ID 목록을 반환합니다.
+     *
+     * @param userId 게시물 ID
+     * @returns 댓글 ID 목록를 반환합니다.
+     */
+    async getRestoreCommentIds(postIds: string[]): Promise<string[]> {
+        const comments = await this.shareCommentRepository
+            .find({ postId: { $in: postIds }, isDeleted: true }, { _id: 1 })
+            .exec();
+        return comments?.map((entity) => entity.Mapper().id as string);
     }
 
     async extractUserInfo(input: string) {

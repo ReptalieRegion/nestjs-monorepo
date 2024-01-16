@@ -20,10 +20,10 @@ import { DiaryWeightRepository } from './repository/diaryWeight.repository';
         MongooseModuleDiaryEntity,
         MongooseModuleDiaryWeight,
         MongooseModuleDiaryCalendar,
+        ImageModule,
         forwardRef(() => AuthModule),
         forwardRef(() => UserModule),
-        ImageModule,
-        NotificationModule,
+        forwardRef(() => NotificationModule),
     ],
     controllers: [DiaryController],
     providers: [

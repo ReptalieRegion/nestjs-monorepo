@@ -4,6 +4,7 @@ import {
     ImageDeleterServiceProvider,
     ImageS3HandlerServiceProvider,
     ImageSearcherServiceProvider,
+    ImageUpdaterServiceProvider,
     ImageWriterServiceProvider,
 } from './image.providers';
 import { ImageRepository } from './image.repository';
@@ -17,12 +18,14 @@ import { ImageRepository } from './image.repository';
         ImageWriterServiceProvider,
         ImageDeleterServiceProvider,
         ImageSearcherServiceProvider,
+        ImageUpdaterServiceProvider,
     ],
     exports: [
         ImageS3HandlerServiceProvider,
         ImageWriterServiceProvider,
         ImageDeleterServiceProvider,
         ImageSearcherServiceProvider,
+        ImageUpdaterServiceProvider,
     ],
 })
 export class ImageModule {}

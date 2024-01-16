@@ -14,6 +14,7 @@ import { ShareCommentReply, ShareCommentReplySchema } from '../../schemas/shareC
 import { ShareLike, ShareLikeSchema } from '../../schemas/shareLike.schema';
 import { SharePost, SharePostSchema } from '../../schemas/sharePost.schema';
 import { Social, socialSchema } from '../../schemas/social.schema';
+import { TempUser, tempUserSchema } from '../../schemas/tempUser.schema';
 import { User, userSchema } from '../../schemas/user.schema';
 
 export const CustomMongooseModule = MongooseModule.forRoot(process.env.MONGODB_URI ?? '', {
@@ -28,6 +29,8 @@ export const MongooseModuleUser = MongooseModule.forFeature([{ name: User.name, 
 export const MongooseModuleFollow = MongooseModule.forFeature([{ name: Follow.name, schema: FollowSchema }]);
 
 export const MongooseModuleSocial = MongooseModule.forFeature([{ name: Social.name, schema: socialSchema }]);
+
+export const MongooseModuleTempUser = MongooseModule.forFeature([{ name: TempUser.name, schema: tempUserSchema }]);
 
 // share 관련 모듈
 export const MongooseModuleSharePost = MongooseModule.forFeature([{ name: SharePost.name, schema: SharePostSchema }]);

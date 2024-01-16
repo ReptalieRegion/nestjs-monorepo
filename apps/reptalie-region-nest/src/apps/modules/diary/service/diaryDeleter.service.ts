@@ -1,14 +1,15 @@
-import { Inject, Injectable, InternalServerErrorException } from '@nestjs/common';
+import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { InjectConnection } from '@nestjs/mongoose';
 import mongoose, { ClientSession } from 'mongoose';
-import { IDeleteWeightDTO } from '../../../dto/diary/weight/input-diaryWeight.dto';
 import { ImageType } from '../../../dto/image/input-image.dto';
 import { IUserProfileDTO } from '../../../dto/user/user/response-user.dto';
-import { serviceErrorHandler } from '../../../utils/error/errorHandler';
+import { CustomException } from '../../../utils/error/customException';
+import { CustomExceptionHandler } from '../../../utils/error/customException.handler';
 import { ImageDeleterService, ImageDeleterServiceToken } from '../../image/service/imageDeleter.service';
 import { DiaryCalendarRepository } from '../repository/diaryCalendar.repository';
 import { DiaryEntityRepository } from '../repository/diaryEntity.repository';
 import { DiaryWeightRepository } from '../repository/diaryWeight.repository';
+import { DiarySearcherService, DiarySearcherServiceToken } from './diarySearcher.service';
 
 export const DiaryDeleterServiceToken = 'DiaryDeleterServiceToken';
 
@@ -24,6 +25,8 @@ export class DiaryDeleterService {
 
         @Inject(ImageDeleterServiceToken)
         private readonly imageDeleterService: ImageDeleterService,
+        @Inject(DiarySearcherServiceToken)
+        private readonly diarySearcherService: DiarySearcherService,
     ) {}
 
     async deleteEntity(user: IUserProfileDTO, entityId: string) {
@@ -36,11 +39,11 @@ export class DiaryDeleterService {
                 .exec();
 
             if (entityResult.modifiedCount === 0) {
-                throw new InternalServerErrorException('Failed to delete diary entity.');
+                throw new CustomException('Failed to delete diary entity.', HttpStatus.INTERNAL_SERVER_ERROR, -3608);
             }
 
             await Promise.all([
-                this.imageDeleterService.deleteImageByTypeId(ImageType.Diary, entityId, session),
+                this.imageDeleterService.deleteImageByTypeId(ImageType.Diary, [entityId], session),
                 this.diaryWeightRepository
                     .updateMany({ entityId, isDeleted: false }, { $set: { isDeleted: true } }, { session })
                     .exec(),
@@ -54,25 +57,25 @@ export class DiaryDeleterService {
             return { message: 'Success' };
         } catch (error) {
             await session.abortTransaction();
-            serviceErrorHandler(error, 'Invalid ObjectId for diary entity Id.');
+            throw new CustomExceptionHandler(error).handleException('Invalid ObjectId for diary entity Id.', -3507);
         } finally {
             await session.endSession();
         }
     }
 
-    async deleteWeight(entityId: string, dto: IDeleteWeightDTO) {
+    async deleteWeight(weightId: string) {
         try {
             const result = await this.diaryWeightRepository
-                .updateOne({ entityId, date: dto.date, isDeleted: false }, { $set: { isDeleted: true } })
+                .updateOne({ _id: weightId, isDeleted: false }, { $set: { isDeleted: true } })
                 .exec();
 
             if (result.modifiedCount === 0) {
-                throw new InternalServerErrorException('Failed to delete diary entity weight.');
+                throw new CustomException('Failed to delete diary entity weight.', HttpStatus.INTERNAL_SERVER_ERROR, -3609);
             }
 
             return { message: 'Success' };
         } catch (error) {
-            serviceErrorHandler(error, 'Invalid ObjectId for diary entity Id.');
+            throw new CustomExceptionHandler(error).handleException('Invalid ObjectId for diary weightId.', -3509);
         }
     }
 
@@ -83,12 +86,25 @@ export class DiaryDeleterService {
                 .exec();
 
             if (result.modifiedCount === 0) {
-                throw new InternalServerErrorException('Failed to delete diary entity calendar.');
+                throw new CustomException('Failed to delete diary entity calendar.', HttpStatus.INTERNAL_SERVER_ERROR, -3610);
             }
 
             return { message: 'Success' };
         } catch (error) {
-            serviceErrorHandler(error, 'Invalid ObjectId for diary calendar Id.');
+            throw new CustomExceptionHandler(error).handleException('Invalid ObjectId for diary calendar Id.', -3508);
         }
+    }
+
+    async withdrawalDiaryInfo(userId: string, session: ClientSession) {
+        const entityIds = await this.diarySearcherService.getEntityIds(userId);
+
+        if (!entityIds.length) {
+            return;
+        }
+
+        await this.diaryEntityRepository.withdrawalEntity({ userId, isDeleted: false }, session);
+        await this.imageDeleterService.deleteImageByTypeId(ImageType.Diary, entityIds, session);
+        await this.diaryCalendarRepository.withdrawalCalendar({ userId, isDeleted: false }, session);
+        await this.diaryWeightRepository.withdrawalWeight({ entityId: { $in: entityIds }, isDeleted: false }, session);
     }
 }

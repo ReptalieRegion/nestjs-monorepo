@@ -12,8 +12,11 @@ export class InputDiaryWeightDTO {
     readonly weight: number;
 }
 
-export interface IUpdateWeightDTO {
+export class IUpdateWeightDTO {
+    @IsString()
     readonly date: Date;
+
+    @IsNumber()
     readonly weight: number;
 }
 

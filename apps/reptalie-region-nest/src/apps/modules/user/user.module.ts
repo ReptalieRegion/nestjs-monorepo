@@ -19,10 +19,10 @@ import {
     imports: [
         MongooseModuleUser,
         MongooseModuleFollow,
+        ImageModule,
         forwardRef(() => ShareModule),
         forwardRef(() => AuthModule),
         forwardRef(() => NotificationModule),
-        ImageModule,
     ],
     controllers: [UserController],
     providers: [

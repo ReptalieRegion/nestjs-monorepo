@@ -1,6 +1,7 @@
-import { ForbiddenException, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
+import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { JwtService, JwtSignOptions } from '@nestjs/jwt';
 import { JsonWebTokenError, TokenExpiredError } from 'jsonwebtoken';
+import { CustomException } from '../../../utils/error/customException';
 import { IJwtPayload } from '../interfaces/jwtPayload';
 import { AuthEncryptService, AuthEncryptServiceToken } from './authEncrypt.service';
 
@@ -52,9 +53,15 @@ export class AuthTokenService {
             return this.jwtService.verify(token, { secret: JWT_REFRESH_SECRET_KEY });
         } catch (error) {
             if (error instanceof TokenExpiredError) {
-                throw new ForbiddenException('The provided refresh token has expired.');
+                throw new CustomException('The provided refresh token has expired.', HttpStatus.FORBIDDEN, -1204);
             } else if (error instanceof JsonWebTokenError) {
-                throw new ForbiddenException('There was an issue with the JWT(RefreshToken).');
+                throw new CustomException('There was an issue with the JWT(RefreshToken).', HttpStatus.FORBIDDEN, -1207);
+            } else if (error instanceof SyntaxError) {
+                throw new CustomException(
+                    'There was a syntax error with the provided JWT(RefreshToken).',
+                    HttpStatus.FORBIDDEN,
+                    -1210,
+                );
             } else {
                 throw error;
             }
@@ -74,9 +81,15 @@ export class AuthTokenService {
             return this.jwtService.verify(token, { secret: JWT_ACCESS_SECRET_KEY });
         } catch (error) {
             if (error instanceof TokenExpiredError) {
-                throw new UnauthorizedException('The provided access token has expired.');
+                throw new CustomException('The provided access token has expired.', HttpStatus.UNAUTHORIZED, -1101);
             } else if (error instanceof JsonWebTokenError) {
-                throw new ForbiddenException('There was an issue with the JWT(AccessToken).');
+                throw new CustomException('There was an issue with the JWT(AccessToken).', HttpStatus.FORBIDDEN, -1206);
+            } else if (error instanceof SyntaxError) {
+                throw new CustomException(
+                    'There was a syntax error with the provided JWT(AccessToken).',
+                    HttpStatus.FORBIDDEN,
+                    -1209,
+                );
             } else {
                 throw error;
             }
@@ -97,9 +110,15 @@ export class AuthTokenService {
             return true;
         } catch (error) {
             if (error instanceof TokenExpiredError) {
-                throw new ForbiddenException('The provided token has expired.');
+                throw new CustomException('The provided auth token has expired.', HttpStatus.FORBIDDEN, -1203);
             } else if (error instanceof JsonWebTokenError) {
-                throw new ForbiddenException('There was an issue with the JWT(AuthToken).');
+                throw new CustomException('There was an issue with the JWT(AuthToken).', HttpStatus.FORBIDDEN, -1205);
+            } else if (error instanceof SyntaxError) {
+                throw new CustomException(
+                    'There was a syntax error with the provided JWT(AuthToken).',
+                    HttpStatus.FORBIDDEN,
+                    -1208,
+                );
             } else {
                 throw error;
             }

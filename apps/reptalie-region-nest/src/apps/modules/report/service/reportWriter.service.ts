@@ -1,5 +1,6 @@
-import { BadRequestException, Inject, Injectable, InternalServerErrorException } from '@nestjs/common';
+import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { InputReportDTO } from '../../../dto/report/input-report.dto';
+import { CustomException } from '../../../utils/error/customException';
 import { ShareSearcherService, ShareSearcherServiceToken } from '../../share/service/shareSearcher.service';
 import { UserSearcherService, UserSearcherServiceToken } from '../../user/service/userSearcher.service';
 import { ReportRepository } from '../repository/report.repository';
@@ -33,17 +34,17 @@ export class ReportWriterService {
                 isExistsType = await this.shareSearcherService.findCommentReply(dto.typeId);
                 break;
             default:
-                throw new BadRequestException('Invalid data for the specified type.');
+                throw new CustomException('Invalid data for the specified type.', HttpStatus.UNPROCESSABLE_ENTITY, -6502);
         }
 
         if (isExistsType?.userId !== dto.reported) {
-            throw new BadRequestException('Invalid data for the specified reported user Id.');
+            throw new CustomException('Invalid data for the specified reported user Id.', HttpStatus.BAD_REQUEST, -6001);
         }
 
         const report = await this.reportRepository.createReport({ ...dto, reporter });
 
         if (!report) {
-            throw new InternalServerErrorException('Failed to save report.');
+            throw new CustomException('Failed to save report.', HttpStatus.INTERNAL_SERVER_ERROR, -6601);
         }
 
         return { message: 'Success' };

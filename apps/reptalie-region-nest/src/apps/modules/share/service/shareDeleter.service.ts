@@ -1,8 +1,9 @@
-import { Inject, Injectable, InternalServerErrorException } from '@nestjs/common';
+import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { InjectConnection } from '@nestjs/mongoose';
 import mongoose, { ClientSession } from 'mongoose';
 import { ImageType } from '../../../dto/image/input-image.dto';
-import { serviceErrorHandler } from '../../../utils/error/errorHandler';
+import { CustomException } from '../../../utils/error/customException';
+import { CustomExceptionHandler } from '../../../utils/error/customException.handler';
 import { ImageDeleterService, ImageDeleterServiceToken } from '../../image/service/imageDeleter.service';
 import { ShareCommentRepository } from '../repository/shareComment.repository';
 import { ShareCommentReplyRepository } from '../repository/shareCommentReply.repository';
@@ -46,15 +47,15 @@ export class ShareDeleterService {
                 .exec();
 
             if (result.modifiedCount === 0) {
-                throw new InternalServerErrorException('Failed to delete share post.');
+                throw new CustomException('Failed to delete share post.', HttpStatus.INTERNAL_SERVER_ERROR, -2609);
             }
 
             await Promise.all([
-                this.imageDeleterService.deleteImageByTypeId(ImageType.Share, postId, session),
+                this.imageDeleterService.deleteImageByTypeId(ImageType.Share, [postId], session),
                 this.deleteLike(postId, session),
             ]);
 
-            const commentIds = await this.shareSearcherService.getCommentIds(postId);
+            const commentIds = await this.shareSearcherService.getCommentIds([postId]);
 
             if (commentIds.length) {
                 const commentResult = await this.shareCommentRepository
@@ -62,7 +63,7 @@ export class ShareDeleterService {
                     .exec();
 
                 if (commentResult.modifiedCount === 0) {
-                    throw new InternalServerErrorException('Failed to delete share comment.');
+                    throw new CustomException('Failed to delete share comment.', HttpStatus.INTERNAL_SERVER_ERROR, -2610);
                 }
 
                 await this.shareCommentReplyRepository
@@ -78,7 +79,7 @@ export class ShareDeleterService {
             return this.shareSearcherService.getPostInfo({ delete: { postId } });
         } catch (error) {
             await session.abortTransaction();
-            serviceErrorHandler(error, 'Invalid ObjectId for share post Id.');
+            throw new CustomExceptionHandler(error).handleException('Invalid ObjectId for share post Id.', -2504);
         } finally {
             await session.endSession();
         }
@@ -101,10 +102,10 @@ export class ShareDeleterService {
                 .exec();
 
             if (result.modifiedCount === 0) {
-                throw new InternalServerErrorException('Failed to delete share comment.');
+                throw new CustomException('Failed to delete share comment.', HttpStatus.INTERNAL_SERVER_ERROR, -2610);
             }
 
-            const isReplyCount = await this.shareSearcherService.getCommentReplyCount(commentId);
+            const isReplyCount = await this.shareSearcherService.getCommentReplyCount(commentId, userId);
 
             if (isReplyCount) {
                 const replyResult = await this.shareCommentReplyRepository
@@ -112,7 +113,7 @@ export class ShareDeleterService {
                     .exec();
 
                 if (replyResult.modifiedCount === 0) {
-                    throw new InternalServerErrorException('Failed to delete share comment reply.');
+                    throw new CustomException('Failed to delete share comment reply.', HttpStatus.INTERNAL_SERVER_ERROR, -2611);
                 }
             }
 
@@ -120,7 +121,7 @@ export class ShareDeleterService {
             return this.shareSearcherService.getCommentInfo({ delete: { commentId } });
         } catch (error) {
             await session.abortTransaction();
-            serviceErrorHandler(error, 'Invalid ObjectId for share comment Id.');
+            throw new CustomExceptionHandler(error).handleException('Invalid ObjectId for share comment Id.', -2505);
         } finally {
             await session.endSession();
         }
@@ -140,10 +141,10 @@ export class ShareDeleterService {
                 .exec();
 
             if (result.modifiedCount === 0) {
-                throw new InternalServerErrorException('Failed to delete share comment reply.');
+                throw new CustomException('Failed to delete share comment reply.', HttpStatus.INTERNAL_SERVER_ERROR, -2611);
             }
         } catch (error) {
-            serviceErrorHandler(error, 'Invalid ObjectId for share comment reply Id.');
+            throw new CustomExceptionHandler(error).handleException('Invalid ObjectId for share comment reply Id.', -2506);
         }
 
         return this.shareSearcherService.getCommentReplyInfo({ delete: { commentReplyId } });
@@ -164,8 +165,39 @@ export class ShareDeleterService {
                 .exec();
 
             if (result.modifiedCount === 0) {
-                throw new InternalServerErrorException('Failed to delete share like.');
+                throw new CustomException('Failed to delete share like.', HttpStatus.INTERNAL_SERVER_ERROR, -2612);
             }
         }
+    }
+
+    async withdrawalShareInfo(userId: string, session: ClientSession) {
+        const postIds = await this.shareSearcherService.getPostIds(userId);
+
+        if (postIds.length) {
+            const commentIds = await this.shareSearcherService.getCommentIds(postIds);
+
+            await this.sharePostRepository.withdrawalPost({ userId, isDeleted: false }, session);
+            await this.imageDeleterService.deleteImageByTypeId(ImageType.Share, postIds, session);
+            await this.shareLikeRepository.withdrawalLike(
+                { postId: { $in: postIds }, userId: { $ne: userId }, isCanceled: false },
+                session,
+            );
+
+            if (commentIds.length) {
+                await this.shareCommentRepository.withdrawalComment(
+                    { postId: { $in: postIds }, userId: { $ne: userId }, isDeleted: false },
+                    session,
+                );
+
+                await this.shareCommentReplyRepository.withdrawalCommentReply(
+                    { commentId: { $in: commentIds }, userId: { $ne: userId }, isDeleted: false },
+                    session,
+                );
+            }
+        }
+
+        await this.shareCommentRepository.withdrawalComment({ userId, isDeleted: false }, session);
+        await this.shareCommentReplyRepository.withdrawalCommentReply({ userId, isDeleted: false }, session);
+        await this.shareLikeRepository.withdrawalLike({ userId, isCanceled: false }, session);
     }
 }

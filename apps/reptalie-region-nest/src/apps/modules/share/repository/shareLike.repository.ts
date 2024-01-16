@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { ObjectId } from 'bson';
-import { Model } from 'mongoose';
+import mongoose, { ClientSession, Model } from 'mongoose';
 
 import { InputShareLikeDTO } from '../../../dto/share/like/input-shareLike.dto';
 import { ShareLike, ShareLikeDocument } from '../../../schemas/shareLike.schema';
@@ -19,7 +19,7 @@ export class ShareLikeRepository extends BaseRepository<ShareLikeDocument> {
         return savedLike.Mapper();
     }
 
-    async getAggregatedLikeList(postId: string, userId: string, pageParam = 0, limitSize: number) {
+    async getAggregatedLikeList(postId: string, userId: string, pageParam: number, limitSize: number) {
         return this.shareLikeModel
             .aggregate([
                 {
@@ -77,6 +77,20 @@ export class ShareLikeRepository extends BaseRepository<ShareLikeDocument> {
                     $limit: limitSize,
                 },
             ])
+            .exec();
+    }
+
+    async withdrawalLike(query: mongoose.FilterQuery<ShareLikeDocument>, session: ClientSession) {
+        await this.shareLikeModel.updateMany(query, { $set: { isCanceled: true } }, { session }).exec();
+    }
+
+    async restoreLike(oldUserId: string, newUserId: string, session: ClientSession) {
+        await this.shareLikeModel
+            .updateMany(
+                { userId: oldUserId, isCanceled: true },
+                { $set: { userId: newUserId, isCanceled: false } },
+                { session },
+            )
             .exec();
     }
 }

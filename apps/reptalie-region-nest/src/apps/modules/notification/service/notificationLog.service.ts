@@ -1,6 +1,8 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
+import { ClientSession } from 'mongoose';
 import { InputNotificationLogDTO } from '../../../dto/notification/log/input-notificationLog.dto';
-import { serviceErrorHandler } from '../../../utils/error/errorHandler';
+import { CustomException } from '../../../utils/error/customException';
+import { CustomExceptionHandler } from '../../../utils/error/customException.handler';
 import { NotificationLogRepository } from '../repository/notificationLog.repository';
 
 export const NotificationLogServiceToken = 'NotificationLogServiceToken';
@@ -14,18 +16,13 @@ export class NotificationLogService {
             const log = await this.notificationLogRepository.createLog({ ...dto, userId });
 
             if (!log) {
-                throw new InternalServerErrorException('Failed to save notification log.');
+                throw new CustomException('Failed to save notification log.', HttpStatus.INTERNAL_SERVER_ERROR, -4602);
             }
 
             return log.contents;
         } catch (error) {
-            serviceErrorHandler(error, 'Invalid ObjectId for template Id.');
+            throw new CustomExceptionHandler(error).handleException('Invalid ObjectId for templateId.', -4504);
         }
-    }
-
-    async checkAllRead(userId: string) {
-        const isReadAllLog = await this.notificationLogRepository.readAllCheckLog(userId);
-        return { isReadAllLog };
     }
 
     async updateIsClicked(userId: string, messageId: string) {
@@ -34,7 +31,7 @@ export class NotificationLogService {
             .exec();
 
         if (result.modifiedCount === 0) {
-            throw new InternalServerErrorException('Failed to update notification log isClicked.');
+            throw new CustomException('Failed to update notification log isClicked.', HttpStatus.INTERNAL_SERVER_ERROR, -4605);
         }
     }
 
@@ -44,7 +41,7 @@ export class NotificationLogService {
             .exec();
 
         if (result.modifiedCount === 0) {
-            throw new InternalServerErrorException('Failed to update notification log isRead.');
+            throw new CustomException('Failed to update notification log isRead.', HttpStatus.INTERNAL_SERVER_ERROR, -4604);
         }
     }
 
@@ -69,5 +66,16 @@ export class NotificationLogService {
         const nextPage = isLastPage ? undefined : pageParam + 1;
 
         return { items, nextPage };
+    }
+
+    async checkAllRead(userId: string) {
+        const readCount = await this.notificationLogRepository.countDocuments({ userId, isRead: false });
+        const isReadAllLog = readCount === 0;
+
+        return { isReadAllLog };
+    }
+
+    async restoreLog(oldUserId: string, newUserId: string, session: ClientSession) {
+        await this.notificationLogRepository.updateMany({ userId: oldUserId }, { $set: { userId: newUserId } }, { session });
     }
 }

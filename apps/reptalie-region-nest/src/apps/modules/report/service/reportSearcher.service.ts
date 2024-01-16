@@ -1,5 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable, forwardRef } from '@nestjs/common';
 import { ReportShareContentType } from '../../../dto/report/share/input-reportShareContent.dto';
+import { UserSearcherService, UserSearcherServiceToken } from '../../user/service/userSearcher.service';
 import { ReportShareContentRepository } from '../repository/reportShareContent.repository';
 import { ReportUserBlockingRepository } from '../repository/reportUserBlocking.repository';
 
@@ -10,6 +11,9 @@ export class ReportSearcherService {
     constructor(
         private readonly reportShareContentRepository: ReportShareContentRepository,
         private readonly reportUserBlockingRepository: ReportUserBlockingRepository,
+
+        @Inject(forwardRef(() => UserSearcherServiceToken))
+        private readonly userSearcherService: UserSearcherService,
     ) {}
 
     async getUserBlockingInfiniteScroll(blocker: string, pageParam: number, limitSize: number) {
@@ -45,6 +49,14 @@ export class ReportSearcherService {
         const nextPage = isLastPage ? undefined : pageParam + 1;
 
         return { items, nextPage };
+    }
+
+    async getUserBlockingCheck(blocker: string, nickname: string) {
+        const blocked = (await this.userSearcherService.findNickname(nickname)).id as string;
+
+        const blocking = await this.reportUserBlockingRepository.findOne({ blocker, blocked }).exec();
+
+        return { isBlockedUser: blocking ? true : false };
     }
 
     async findTypeIdList(reporter: string, type: ReportShareContentType): Promise<string[] | undefined> {

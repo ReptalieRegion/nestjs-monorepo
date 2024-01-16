@@ -65,4 +65,11 @@ export class ReportController {
         pageParam = isNaN(Number(pageParam)) ? 0 : Number(pageParam);
         return this.reportSearcherService.getUserBlockingInfiniteScroll(user.id, pageParam, 10);
     }
+
+    @Get('users/:nickname/blocking/check')
+    @HttpCode(HttpStatus.OK)
+    @UseGuards(JwtAuthGuard)
+    async getUserBlockingCheck(@AuthUser() user: IUserProfileDTO, @Param('nickname') nickname: string) {
+        return this.reportSearcherService.getUserBlockingCheck(user.id, nickname);
+    }
 }

@@ -13,6 +13,7 @@ export class SocialRepository extends BaseRepository<SocialDocument> {
     }
 
     async createSocial(dto: InputSocialDTO, session: ClientSession) {
+        console.log(dto);
         const social = new this.socialModel(dto);
         const savedSocial = await social.save({ session });
         return savedSocial.Mapper();

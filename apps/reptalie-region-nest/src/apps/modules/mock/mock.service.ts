@@ -61,6 +61,7 @@ export class MockService {
         session.startTransaction();
         try {
             const user = await this.authSocialService.mockSocialSignUp(session);
+
             if (!user.id) {
                 throw new Error('userId 없음');
             }
@@ -89,7 +90,9 @@ export class MockService {
      * 여러 유저 생성
      */
     async createUsers(size: number) {
-        Promise.allSettled(range(size).map(this.createUser)).then((results) => this.slackMessage(results, '유저생성', ''));
+        await Promise.allSettled(range(size).map(() => this.createUser())).then((results) =>
+            this.slackMessage(results, '유저생성', ''),
+        );
         return;
     }
 

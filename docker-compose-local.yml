@@ -10,7 +10,7 @@ services:
         build: ./dockers/mongodb-replica/init
         restart: 'no'
         networks:
-            - reptalie-region
+            - crawl
 
     mongodb1:
         image: arm64v8/mongo:6.0
@@ -29,9 +29,9 @@ services:
         environment:
             - MONGO_INITDB_ROOT_USERNAME=admin
             - MONGO_INITDB_ROOT_PASSWORD=1234
-            - MONGO_INITDB_DATABASE=reptalie-region-local
+            - MONGO_INITDB_DATABASE=crawl-local
         networks:
-            - reptalie-region
+            - crawl
 
     mongodb2:
         image: arm64v8/mongo:6.0
@@ -49,9 +49,9 @@ services:
         environment:
             - MONGO_INITDB_ROOT_USERNAME=admin
             - MONGO_INITDB_ROOT_PASSWORD=1234
-            - MONGO_INITDB_DATABASE=reptalie-region-local
+            - MONGO_INITDB_DATABASE=crawl-local
         networks:
-            - reptalie-region
+            - crawl
 
     mongodb3:
         image: arm64v8/mongo:6.0
@@ -69,13 +69,13 @@ services:
         environment:
             - MONGO_INITDB_ROOT_USERNAME=admin
             - MONGO_INITDB_ROOT_PASSWORD=1234
-            - MONGO_INITDB_DATABASE=reptalie-region-local
+            - MONGO_INITDB_DATABASE=crawl-local
         networks:
-            - reptalie-region
+            - crawl
 
 volumes:
     keys:
 
 networks:
-    reptalie-region:
+    crawl:
         external: true

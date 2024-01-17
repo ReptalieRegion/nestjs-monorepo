@@ -1,4 +1,12 @@
 document.addEventListener('scroll', checkVisibleHeader);
+window.onload = function () {
+    const googleplay = document.getElementById('googleplay');
+    googleplay.onclick = ready;
+};
+
+function ready() {
+    alert('서비스 준비중이예요');
+}
 
 function checkVisibleHeader() {
     const scrollTop = document.documentElement.scrollTop;
@@ -32,23 +40,29 @@ function checkVisibleHeader() {
 
     const innerWidth = window.innerWidth;
 
-    const thirdLeftImage = document.getElementById('left-image');
+    const thirdLeftImage = document.getElementById('third-left-image');
     const thirdLeftImageBottom = window.scrollY + thirdLeftImage.getBoundingClientRect().bottom;
     if (innerWidth <= 768 && thirdLeftImageBottom <= scrollBottom + 100) {
         const thirdImageWrapper = document.getElementById('third-section-image');
         const moveX = Math.max(0, Math.min(1, 100 / (scrollBottom + 100 - thirdLeftImageBottom)));
         thirdImageWrapper.style.transform = `translate3d(calc(((650px - 100vw) * ${moveX}) - (650px - 100vw)), 0px, 0px)`;
+    } else if (innerWidth < 768) {
+        thirdImageWrapper.style.transform = '';
+    }
+
+    const fourthLeftImage = document.getElementById('fourth-left-image');
+    const fourthLeftImageBottom = window.scrollY + fourthLeftImage.getBoundingClientRect().bottom;
+    if (innerWidth <= 768 && fourthLeftImageBottom <= scrollBottom + 100) {
+        const fourthImageWrapper = document.getElementById('fourth-section-image');
+        const moveX = Math.max(0, Math.min(1, 100 / (scrollBottom + 100 - fourthLeftImageBottom)));
+        fourthImageWrapper.style.transform = `translate3d(calc(((650px - 100vw) * ${moveX}) - (650px - 100vw)), 0px, 0px)`;
+    } else if (innerWidth < 768) {
+        fourthImageWrapper.style.transform = '';
     }
 
     const fourthSectionH1 = document.getElementById('fourth-h1');
     if (scrollBottom >= window.scrollY + fourthSectionH1.getBoundingClientRect().top) {
         const fourthSectionContent = document.getElementById('fourth-section-content');
         fourthSectionContent.classList.add('section__text-wrapper-animation');
-    }
-
-    const fourthSectionImage = document.getElementById('fourth-section-image');
-    if (scrollBottom >= window.scrollY + fourthSectionImage.getBoundingClientRect().top + 50) {
-        const leftImage = document.getElementById('fourth-section-image');
-        leftImage.classList.add('fourth-section__image_animation');
     }
 }

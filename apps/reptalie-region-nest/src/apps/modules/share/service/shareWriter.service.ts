@@ -379,7 +379,7 @@ export class ShareWriterService {
     private async isReportLimitExceeded(userId: string) {
         const reportShareContentCount = await this.reportSearcherService.reportShareContentCount(userId);
 
-        if (reportShareContentCount > this.MAX_REPORT_LIMIT) {
+        if (reportShareContentCount >= this.MAX_REPORT_LIMIT) {
             throw new CustomException(
                 'The save operation has failed due to exceeding the maximum report limit.',
                 HttpStatus.UNPROCESSABLE_ENTITY,

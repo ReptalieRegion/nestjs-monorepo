@@ -9,7 +9,7 @@ RUN corepack enable
 RUN yarn set version stable
 
 # Copy config files and source
-COPY /apps/reptalie-region-nest ./apps/reptile-region-nest/
+COPY /apps/crawl-nest ./apps/crawl-nest/
 COPY /configs ./configs
 COPY .yarn .yarn
 COPY .yarnrc.yml .
@@ -17,7 +17,7 @@ COPY yarn.lock .
 COPY package.json .
 
 # Install dependencies and build
-RUN cd ./apps/reptile-region-nest && yarn install || (cat /tmp/*/build.log; exit 1)
+RUN cd ./apps/crawl-nest && yarn install || (cat /tmp/*/build.log; exit 1)
 
 # build
 RUN yarn build:server
@@ -38,9 +38,9 @@ COPY --from=builder /builder/.pnp.cjs .
 COPY --from=builder /builder/.pnp.loader.mjs .
 COPY --from=builder /builder/yarn.lock .
 COPY --from=builder /builder/package.json .
-COPY --from=builder /builder/apps/reptile-region-nest/dist /runner/apps/reptile-region-nest/dist
-COPY --from=builder /builder/apps/reptile-region-nest/package.json /runner/apps/reptile-region-nest/
+COPY --from=builder /builder/apps/crawl-nest/dist /runner/apps/crawl-nest/dist
+COPY --from=builder /builder/apps/crawl-nest/package.json /runner/apps/crawl-nest/
 
 # # ⚙️ Configure the default command
-WORKDIR /runner/apps/reptile-region-nest
+WORKDIR /runner/apps/crawl-nest
 CMD yarn start:prod

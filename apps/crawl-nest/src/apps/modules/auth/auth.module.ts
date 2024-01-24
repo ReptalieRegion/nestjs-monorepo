@@ -24,6 +24,7 @@ import { TempUserRepository } from './repository/tempUser.repository';
         CustomJwtModule,
         PassportModule,
         ImageModule,
+        NotificationModule,
         forwardRef(() => UserModule),
         forwardRef(() => ShareModule),
         forwardRef(() => DiaryModule),

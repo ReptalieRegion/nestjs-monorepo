@@ -40,7 +40,7 @@ services:
         command: --replSet myRepl --keyFile /keys/mongodb-keyfile
         restart: always
         ports:
-            - 27018:27017
+            - 27018:27018
         depends_on:
             - key-gen
         volumes:
@@ -60,7 +60,7 @@ services:
         command: --replSet myRepl --keyFile /keys/mongodb-keyfile
         restart: always
         ports:
-            - 27019:27017
+            - 27019:27019
         depends_on:
             - key-gen
         volumes:

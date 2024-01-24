@@ -4,6 +4,7 @@ import mongoose, { ClientSession } from 'mongoose';
 import { IJoinProgressDTO, JoinProgressType } from '../../../dto/user/social/input-social.dto';
 import { CustomException } from '../../../utils/error/customException';
 import { disassembleHangulToGroups } from '../../../utils/hangul/disassemble';
+import { NotificationSlackService, NotificationSlackServiceToken } from '../../notification/service/notificationSlack.service';
 import { UserUpdaterService, UserUpdaterServiceToken } from '../../user/service/userUpdater.service';
 import { SocialRepository } from '../repository/social.repository';
 import { AuthEncryptService, AuthEncryptServiceToken } from './authEncrypt.service';
@@ -25,6 +26,8 @@ export class AuthCommonService {
         private readonly authTokenService: AuthTokenService,
         @Inject(UserUpdaterServiceToken)
         private readonly userUpdaterService: UserUpdaterService,
+        @Inject(NotificationSlackServiceToken)
+        private readonly slackService: NotificationSlackService,
     ) {}
 
     /**
@@ -56,6 +59,7 @@ export class AuthCommonService {
             const { accessToken, refreshToken } = await this.tokenGenerationAndStorage(userId, session);
             await session.commitTransaction();
 
+            this.slackService.send(`*신규 가입* ${nickname}`, '신규가입');
             return { type: 'SIGN_UP', joinProgress: JoinProgressType.DONE, accessToken, refreshToken };
         } catch (error) {
             await session.abortTransaction();

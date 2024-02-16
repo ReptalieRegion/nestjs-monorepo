@@ -15,6 +15,7 @@ import {
     UseInterceptors,
 } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
+import { DeviceInfoDTO } from '../../dto/user/user/device-info.dto';
 import { fcmTokenDTO } from '../../dto/user/user/fcm-token.dto';
 import { IUserProfileDTO } from '../../dto/user/user/response-user.dto';
 import { ValidationPipe } from '../../utils/error/validator/validator.pipe';
@@ -76,6 +77,13 @@ export class UserController {
     @UseGuards(JwtAuthGuard)
     async updateFcmToken(@AuthUser() user: IUserProfileDTO, @Body(new ValidationPipe(-1503)) dto: fcmTokenDTO) {
         return this.userUpdaterService.updateFcmToken(user, dto);
+    }
+
+    @Put('device-info')
+    @HttpCode(HttpStatus.OK)
+    @UseGuards(JwtAuthGuard)
+    async updateDeviceInfo(@AuthUser() user: IUserProfileDTO, @Body(new ValidationPipe(-1506)) dto: DeviceInfoDTO) {
+        return this.userUpdaterService.updateDeviceInfo(user.id, dto);
     }
 
     /**

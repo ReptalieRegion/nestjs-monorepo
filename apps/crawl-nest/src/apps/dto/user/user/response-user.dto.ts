@@ -13,6 +13,13 @@ export interface IUserProfileDTO {
 export interface IResponseUserDTO
     extends Pick<InputUserDTO, 'name' | 'nickname' | 'initials' | 'phone' | 'address' | 'fcmToken' | 'imageId'> {
     readonly id: string;
+    readonly deviceInfo: {
+        readonly version: string;
+        readonly buildNumber: string;
+        readonly systemName: string;
+        readonly systemVersion: string;
+    };
+    readonly lastAccessAt: Date;
     readonly createdAt: Date;
     readonly updatedAt: Date;
 }

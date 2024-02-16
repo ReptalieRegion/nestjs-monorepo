@@ -2,10 +2,12 @@ import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { InjectConnection } from '@nestjs/mongoose';
 import mongoose, { ClientSession } from 'mongoose';
 import { ImageType } from '../../../dto/image/input-image.dto';
+import { DeviceInfoDTO } from '../../../dto/user/user/device-info.dto';
 import { fcmTokenDTO } from '../../../dto/user/user/fcm-token.dto';
 import { IUserProfileDTO } from '../../../dto/user/user/response-user.dto';
 import { CustomException } from '../../../utils/error/customException';
 import { CustomExceptionHandler } from '../../../utils/error/customException.handler';
+import { getCurrentDate } from '../../../utils/time/time';
 import { ImageDeleterService, ImageDeleterServiceToken } from '../../image/service/imageDeleter.service';
 import { ImageS3HandlerService, ImageS3HandlerServiceToken } from '../../image/service/imageS3Handler.service';
 import { ImageWriterService, ImageWriterServiceToken } from '../../image/service/imageWriter.service';
@@ -90,6 +92,23 @@ export class UserUpdaterService {
         }
 
         return { message: 'Success' };
+    }
+
+    /**
+     * 사용자의 디바이스 정보를 업데이트하는 메서드입니다.
+     *
+     * @param userId: - 업데이트할 사용자 아이디
+     * @param deviceInfo - 새로운 디바이스 정보를 포함한 객체
+     */
+    async updateDeviceInfo(userId: string, deviceInfo: DeviceInfoDTO) {
+        try {
+            await this.userRepository
+                .findByIdAndUpdate(userId, { $set: { deviceInfo, lastAccessAt: getCurrentDate() } }, { upsert: true })
+                .exec();
+            return { message: 'Success' };
+        } catch (_error) {
+            throw new CustomException('Failed to update user deviceInfo', HttpStatus.INTERNAL_SERVER_ERROR, -1621);
+        }
     }
 
     /**

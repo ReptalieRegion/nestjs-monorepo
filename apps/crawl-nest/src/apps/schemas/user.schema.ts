@@ -33,6 +33,9 @@ export class User {
     @Prop({ type: SchemaTypes.Mixed })
     deviceInfo: DeviceInfoDTO;
 
+    @Prop({ type: SchemaTypes.Date, default: getCurrentDate })
+    lastAccessAt: Date;
+
     @Prop({ ref: 'Image', type: SchemaTypes.ObjectId })
     imageId: Image;
 }
@@ -51,6 +54,7 @@ userSchema.methods = {
             'fcmToken',
             'imageId',
             'deviceInfo',
+            'lastAccessAt',
             'createdAt',
             'updatedAt',
         ];

@@ -1,6 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 
 import mongoose, { Document, SchemaTypes } from 'mongoose';
+import { DeviceInfoDTO } from '../dto/user/user/device-info.dto';
 import { IResponseUserDTO } from '../dto/user/user/response-user.dto';
 import { getCurrentDate } from '../utils/time/time';
 import { Image } from './image.schema';
@@ -29,6 +30,12 @@ export class User {
     @Prop({ type: SchemaTypes.String, default: 'defaultValue' })
     fcmToken: string;
 
+    @Prop({ type: SchemaTypes.Mixed })
+    deviceInfo: DeviceInfoDTO;
+
+    @Prop({ type: SchemaTypes.Date, default: getCurrentDate })
+    lastAccessAt: Date;
+
     @Prop({ ref: 'Image', type: SchemaTypes.ObjectId })
     imageId: Image;
 }
@@ -46,6 +53,8 @@ userSchema.methods = {
             'address',
             'fcmToken',
             'imageId',
+            'deviceInfo',
+            'lastAccessAt',
             'createdAt',
             'updatedAt',
         ];

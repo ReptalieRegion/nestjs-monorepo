@@ -13,8 +13,8 @@ export class MetaData {
     @Prop({ required: true, type: SchemaTypes.String, unique: true })
     name: string;
 
-    @Prop({ required: true, type: SchemaTypes.String })
-    values: string;
+    @Prop({ required: true, type: SchemaTypes.Map })
+    data: Map<string, unknown>;
 }
 
 const MetaDataSchema = SchemaFactory.createForClass(MetaData);

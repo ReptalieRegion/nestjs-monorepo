@@ -1,6 +1,7 @@
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
-import { IUserProfileDTO } from '../../../dto/user/user/response-user.dto';
-import { User } from '../../../schemas/user.schema';
+
+import { User } from '@private-crawl/models';
+import { IUserProfileDTO } from '../../../dto/user/user/user-profile.dto';
 import { CustomException } from '../../../utils/error/customException';
 import { CustomExceptionHandler } from '../../../utils/error/customException.handler';
 import { disassembleHangulToGroups } from '../../../utils/hangul/disassemble';

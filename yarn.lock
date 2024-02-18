@@ -1197,6 +1197,7 @@ __metadata:
     "@nestjs/schematics": "npm:^9.0.0"
     "@nestjs/testing": "npm:^9.0.0"
     "@private-crawl/models": "workspace:^"
+    "@private-crawl/types": "workspace:^"
     "@types/cookie-parser": "npm:^1.4.3"
     "@types/express": "npm:^4.17.13"
     "@types/jest": "npm:29.5.0"

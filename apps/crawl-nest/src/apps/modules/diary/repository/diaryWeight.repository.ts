@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import { DiaryWeight, DiaryWeightDocument } from '@private-crawl/models';
 import mongoose, { ClientSession, Model } from 'mongoose';
 
 import { InputDiaryWeightDTO } from '../../../dto/diary/weight/input-diaryWeight.dto';
-import { DiaryWeight, DiaryWeightDocument } from '../../../schemas/diaryWeight.schema';
 import { BaseRepository } from '../../base/base.repository';
 
 @Injectable()

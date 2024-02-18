@@ -18,7 +18,7 @@ import { FilesInterceptor } from '@nestjs/platform-express';
 import { InputShareCommentDTO } from '../../dto/share/comment/input-shareComment.dto';
 import { InputShareCommentReplyDTO } from '../../dto/share/commentReply/input-shareCommentReply.dto';
 import { InputSharePostDTO } from '../../dto/share/post/input-sharePost.dto';
-import { IUserProfileDTO } from '../../dto/user/user/response-user.dto';
+import { IUserProfileDTO } from '../../dto/user/user/user-profile.dto';
 import { ValidationPipe } from '../../utils/error/validator/validator.pipe';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { JwtOptionalAuthGuard } from '../auth/guards/jwtOptional-auth.guard';

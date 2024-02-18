@@ -5,7 +5,7 @@ import { ImageType } from '../../../dto/image/input-image.dto';
 import { InputShareCommentDTO } from '../../../dto/share/comment/input-shareComment.dto';
 import { InputShareCommentReplyDTO } from '../../../dto/share/commentReply/input-shareCommentReply.dto';
 import { InputSharePostDTO } from '../../../dto/share/post/input-sharePost.dto';
-import { IUserProfileDTO } from '../../../dto/user/user/response-user.dto';
+import { IUserProfileDTO } from '../../../dto/user/user/user-profile.dto';
 import { CustomException } from '../../../utils/error/customException';
 import { CustomExceptionHandler } from '../../../utils/error/customException.handler';
 import { ImageDeleterService, ImageDeleterServiceToken } from '../../image/service/imageDeleter.service';

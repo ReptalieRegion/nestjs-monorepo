@@ -6,7 +6,7 @@ import { TemplateType } from '../../../dto/notification/template/input-notificat
 import { InputShareCommentDTO } from '../../../dto/share/comment/input-shareComment.dto';
 import { InputShareCommentReplyDTO } from '../../../dto/share/commentReply/input-shareCommentReply.dto';
 import { InputSharePostDTO } from '../../../dto/share/post/input-sharePost.dto';
-import { IUserProfileDTO } from '../../../dto/user/user/response-user.dto';
+import { IUserProfileDTO } from '../../../dto/user/user/user-profile.dto';
 import { CustomException } from '../../../utils/error/customException';
 import { CustomExceptionHandler } from '../../../utils/error/customException.handler';
 import { ImageS3HandlerService, ImageS3HandlerServiceToken } from '../../image/service/imageS3Handler.service';

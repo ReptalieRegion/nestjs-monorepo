@@ -5,7 +5,7 @@ import { IUpdateCalendarDTO } from '../../../dto/diary/calendar/input-diaryCalen
 import { IUpdateEntityDTO } from '../../../dto/diary/entity/input-diaryEntity.dto';
 import { IUpdateWeightDTO } from '../../../dto/diary/weight/input-diaryWeight.dto';
 import { ImageType } from '../../../dto/image/input-image.dto';
-import { IUserProfileDTO } from '../../../dto/user/user/response-user.dto';
+import { IUserProfileDTO } from '../../../dto/user/user/user-profile.dto';
 import { CustomException } from '../../../utils/error/customException';
 import { CustomExceptionHandler } from '../../../utils/error/customException.handler';
 import { ImageDeleterService, ImageDeleterServiceToken } from '../../image/service/imageDeleter.service';

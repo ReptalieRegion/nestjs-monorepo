@@ -1,9 +1,9 @@
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
+import { ITempUser } from '@private-crawl/types';
 import mongoose, { ClientSession } from 'mongoose';
 import { ImageType } from '../../../dto/image/input-image.dto';
 import { TemplateType } from '../../../dto/notification/template/input-notificationTemplate.dto';
-import { IResponseTempUserDTO } from '../../../dto/user/tempUser/response-tempUser.dto';
-import { IUserProfileDTO } from '../../../dto/user/user/response-user.dto';
+import { IUserProfileDTO } from '../../../dto/user/user/user-profile.dto';
 import { CustomException } from '../../../utils/error/customException';
 import { CustomExceptionHandler } from '../../../utils/error/customException.handler';
 import { disassembleHangulToGroups } from '../../../utils/hangul/disassemble';
@@ -82,13 +82,7 @@ export class UserWriterService {
      * @param session MongoDB 클라이언트 세션
      * @returns 생성된 사용자 객체를 반환합니다.
      */
-    async restoreUser(
-        userInfo: Partial<IResponseTempUserDTO>,
-        session: ClientSession,
-        name?: string,
-        phone?: string,
-        address?: string,
-    ) {
+    async restoreUser(userInfo: Partial<ITempUser>, session: ClientSession, name?: string, phone?: string, address?: string) {
         const image = await this.imageSearcherService.getProfileImages(userInfo.userId as string);
         const initials = disassembleHangulToGroups(userInfo.nickname as string)
             .flatMap((values) => values[0])

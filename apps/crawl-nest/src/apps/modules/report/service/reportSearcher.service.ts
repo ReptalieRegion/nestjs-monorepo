@@ -1,4 +1,5 @@
 import { Inject, Injectable, forwardRef } from '@nestjs/common';
+import { SchemaId } from '@private-crawl/types';
 import { ReportShareContentType } from '../../../dto/report/share/input-reportShareContent.dto';
 import { UserSearcherService, UserSearcherServiceToken } from '../../user/service/userSearcher.service';
 import { ReportShareContentRepository } from '../repository/reportShareContent.repository';
@@ -59,7 +60,7 @@ export class ReportSearcherService {
         return { isBlockedUser: blocking ? true : false };
     }
 
-    async findTypeIdList(reporter: string, type: ReportShareContentType): Promise<string[] | undefined> {
+    async findTypeIdList(reporter: SchemaId.Id, type: ReportShareContentType): Promise<string[] | undefined> {
         if (!reporter) {
             return undefined;
         }
@@ -88,7 +89,7 @@ export class ReportSearcherService {
         return blockedIds?.includes(isBlockedId) ?? false;
     }
 
-    async getUserBlockedIds(blocker: string) {
+    async getUserBlockedIds(blocker: SchemaId.Id) {
         const blockings = await this.reportUserBlockingRepository.find({ blocker }).exec();
         return blockings.map((entitiy) => entitiy.Mapper().blocked as string);
     }

@@ -4,7 +4,7 @@ import mongoose, { ClientSession } from 'mongoose';
 import { ImageType } from '../../../dto/image/input-image.dto';
 import { DeviceInfoDTO } from '../../../dto/user/user/device-info.dto';
 import { fcmTokenDTO } from '../../../dto/user/user/fcm-token.dto';
-import { IUserProfileDTO } from '../../../dto/user/user/response-user.dto';
+import { IUserProfileDTO } from '../../../dto/user/user/user-profile.dto';
 import { CustomException } from '../../../utils/error/customException';
 import { CustomExceptionHandler } from '../../../utils/error/customException.handler';
 import { getCurrentDate } from '../../../utils/time/time';

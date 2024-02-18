@@ -1,5 +1,5 @@
+import { SocialProviderType } from '@private-crawl/types/enums/social';
 import { IsEnum, IsOptional, IsString } from 'class-validator';
-import { SocialProvierType } from '../social/input-social.dto';
 
 export interface IRestoreRequestDTO {
     readonly provider: string;
@@ -13,8 +13,8 @@ export class InputTempUserDTO {
     @IsString()
     readonly imageId: string;
 
-    @IsEnum(SocialProvierType)
-    readonly provider: SocialProvierType;
+    @IsEnum(SocialProviderType)
+    readonly provider: SocialProviderType;
 
     @IsString()
     readonly uniqueId: string;

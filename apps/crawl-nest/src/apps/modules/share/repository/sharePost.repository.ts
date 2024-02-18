@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import { SharePost, SharePostDocument } from '@private-crawl/models';
 import mongoose, { ClientSession, Model } from 'mongoose';
 
 import { InputSharePostDTO } from '../../../dto/share/post/input-sharePost.dto';
-import { SharePost, SharePostDocument } from '../../../schemas/sharePost.schema';
 import { BaseRepository } from '../../base/base.repository';
 
 @Injectable()

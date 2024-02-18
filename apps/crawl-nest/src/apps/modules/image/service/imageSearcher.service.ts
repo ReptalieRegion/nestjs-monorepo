@@ -1,4 +1,5 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
+import { SchemaId } from '@private-crawl/types';
 import { ImageType } from '../../../dto/image/input-image.dto';
 import { CustomException } from '../../../utils/error/customException';
 import { ImageRepository } from '../image.repository';
@@ -15,7 +16,7 @@ export class ImageSearcherService {
      * @param typeId - 이미지의 타입 ID입니다.
      * @returns 가져온 게시물 이미지 정보를 배열로 반환합니다.
      */
-    async getPostImages(typeId: string) {
+    async getPostImages(typeId: SchemaId.Id) {
         const postImages = await this.imageRepository
             .find({ type: ImageType.Share, typeId, isDeleted: false }, { imageKey: 1 })
             .exec();

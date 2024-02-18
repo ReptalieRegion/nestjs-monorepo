@@ -27,7 +27,7 @@ RUN npm install -g corepack && corepack enable
 RUN yarn set version stable
 
 # Copy files in logical layer order
-COPY --from=builder /builder/.yarn .yarn
+COPY --from=builder /builder/.yarn ./.yarn
 COPY --from=builder /builder/.pnp.cjs .
 COPY --from=builder /builder/.pnp.loader.mjs .
 COPY --from=builder /builder/yarn.lock .

@@ -7,7 +7,7 @@ export const DEEP_LINK_PREFIX = 'crawl://';
 export const DEEP_LINK_LIST = {
     notice: 'notice',
     sharePostUser: (nickname: string) => `users/${nickname}`,
-    sharePostDetail: (postId: SchemaId.Id, type: 'comment' | 'like') => `posts/${postId}/detail/${type}`,
+    sharePostDetail: (postId: SchemaId, type: 'comment' | 'like') => `posts/${postId}/detail/${type}`,
 } as const;
 
 export const DEFAULT_NOTIFEE_OPTION_IOS = {

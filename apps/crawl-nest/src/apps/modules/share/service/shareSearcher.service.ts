@@ -522,7 +522,7 @@ export class ShareSearcherService {
      * @param postId 게시물 ID
      * @returns 좋아요 상태 여부 (존재하는 경우 true, 없는 경우 false, 알 수 없는 경우 undefined)
      */
-    async isExistsLike(userId: SchemaId.Id, postId: string): Promise<boolean | undefined> {
+    async isExistsLike(userId: SchemaId, postId: string): Promise<boolean | undefined> {
         const like = await this.shareLikeRepository.findOne({ userId, postId }).exec();
         return like ? (like.isCanceled ? false : true) : undefined;
     }
@@ -639,7 +639,7 @@ export class ShareSearcherService {
      * @param postId 게시물 ID
      * @returns 좋아요 수를 반환합니다.
      */
-    async getLikeCount(userId: SchemaId.Id, postId: string): Promise<number> {
+    async getLikeCount(userId: SchemaId, postId: string): Promise<number> {
         const blockedIds = await this.reportSearcherService.getUserBlockedIds(userId);
         return this.shareLikeRepository.countDocuments({ postId, userId: { $nin: blockedIds }, isCanceled: false }).exec();
     }
@@ -683,7 +683,7 @@ export class ShareSearcherService {
      * @param currentUserId 유저 ID
      * @returns 댓글 수를 반환합니다.
      */
-    async getCommentCount(postId: string, currentUserId: SchemaId.Id): Promise<number> {
+    async getCommentCount(postId: string, currentUserId: SchemaId): Promise<number> {
         const typeIds = await this.reportSearcherService.findTypeIdList(currentUserId, ReportShareContentType.COMMENT);
         const blockedIds = await this.reportSearcherService.getUserBlockedIds(currentUserId);
 

@@ -2,11 +2,11 @@ import { SchemaId } from '../common/id';
 import { ImageType } from '../enums';
 
 interface IImage {
-    _id: SchemaId.Id;
+    _id: SchemaId;
     id: string;
     imageKey: string;
     type: ImageType;
-    typeId: SchemaId.Id;
+    typeId: SchemaId;
     isDeleted: boolean;
     createdAt: Date;
     updatedAt: Date;

@@ -1,11 +1,11 @@
-import { SchemaId } from '../common/id';
+import { SchemaId } from '../common';
 import { DiaryCalendarMarkType } from '../enums';
 
 interface IDiaryCalendar {
-    _id: SchemaId.Id;
+    _id: SchemaId;
     id: string;
-    userId: SchemaId.Id;
-    entityId: SchemaId.Id;
+    userId: SchemaId;
+    entityId: SchemaId;
     memo: string;
     markType: DiaryCalendarMarkType[];
     date: Date;

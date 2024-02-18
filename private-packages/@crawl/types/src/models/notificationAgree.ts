@@ -1,9 +1,9 @@
 import { SchemaId } from '../common/id';
 
 interface INotificationAgree {
-    _id: SchemaId.Id;
+    _id: SchemaId;
     id: string;
-    userId: SchemaId.Id;
+    userId: SchemaId;
     device: boolean;
     comment: boolean;
     like: boolean;

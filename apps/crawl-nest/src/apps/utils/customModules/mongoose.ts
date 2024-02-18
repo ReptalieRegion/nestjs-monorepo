@@ -40,8 +40,6 @@ import {
 
 export const CustomMongooseModule = MongooseModule.forRoot(process.env.MONGODB_URI ?? '', {
     dbName: 'crawl',
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
 });
 
 // user 관련 모듈

@@ -5,7 +5,6 @@
         "esbenp.prettier-vscode",
         "pkief.material-icon-theme",
         "bradlc.vscode-tailwindcss",
-        "redhat.vscode-yaml",
-        "styled-components.vscode-styled-components"
+        "redhat.vscode-yaml"
     ]
 }

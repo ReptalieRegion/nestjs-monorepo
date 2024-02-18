@@ -1,13 +1,9 @@
 {
     "name": "@private-crawl/utils",
-    "main": "index.ts",
+    "main": "dist/index",
     "scripts": {
         "build": "tsc -p tsconfig.build.json",
         "prepack": "yarn build"
-    },
-    "dependencies": {
-        "@nestjs/mongoose": "^9.2.2",
-        "mongoose": "7.2.4"
     },
     "devDependencies": {
         "typescript": "5.0.4"

@@ -1,6 +1,6 @@
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { InjectConnection } from '@nestjs/mongoose';
-import { JoinProgressType } from '@private-crawl/types/enums/social';
+import { JoinProgressType } from '@private-crawl/types';
 import mongoose, { ClientSession } from 'mongoose';
 import { IJoinProgressDTO } from '../../../dto/user/social/input-social.dto';
 import { CustomException } from '../../../utils/error/customException';

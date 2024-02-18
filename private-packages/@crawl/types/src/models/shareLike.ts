@@ -1,10 +1,10 @@
 import { SchemaId } from '../common/id';
 
 interface IShareLike {
-    _id: SchemaId.Id;
+    _id: SchemaId;
     id: string;
-    postId: SchemaId.Id;
-    userId: SchemaId.Id;
+    postId: SchemaId;
+    userId: SchemaId;
     isCanceled: boolean;
     createdAt: Date;
     updatedAt: Date;

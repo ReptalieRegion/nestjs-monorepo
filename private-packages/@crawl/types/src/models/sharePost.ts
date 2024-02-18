@@ -1,14 +1,13 @@
 import { SchemaId } from '../common/id';
 
-interface IShareComment {
-    _id: SchemaId.Id;
+interface ISharePost {
+    _id: SchemaId;
     id: string;
-    postId: SchemaId.Id;
-    userId: SchemaId.Id;
+    userId: SchemaId;
     contents: string;
     isDeleted: boolean;
     createdAt: Date;
     updatedAt: Date;
 }
 
-export type { IShareComment };
+export type { ISharePost };

@@ -7,7 +7,7 @@ interface BasicTemplate {
 }
 
 interface INotificationTemplate {
-    _id: SchemaId.Id;
+    _id: SchemaId;
     id: string;
     type: TemplateType;
     provider: TemplateProviderType;

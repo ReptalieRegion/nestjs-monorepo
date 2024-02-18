@@ -327,7 +327,7 @@ interface NotificationBase {
 
 interface NotificationComment extends NotificationBase {
     type: TemplateType.Comment;
-    postId: SchemaId.Id;
+    postId: SchemaId;
     postThumbnail: string;
     userThumbnail: string;
 }
@@ -340,7 +340,7 @@ interface NotificationFollow extends NotificationBase {
 
 interface NotificationLike extends NotificationBase {
     type: TemplateType.Like;
-    postId: SchemaId.Id;
+    postId: SchemaId;
     userThumbnail: string;
     postThumbnail: string;
 }
@@ -351,7 +351,7 @@ interface NotificationNotice extends NotificationBase {
 
 interface NotificationTag extends NotificationBase {
     type: TemplateType.Tag;
-    postId: SchemaId.Id;
+    postId: SchemaId;
     postThumbnail: string;
     userThumbnail: string;
 }

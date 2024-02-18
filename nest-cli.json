@@ -1,0 +1,49 @@
+{
+    "$schema": "https://json.schemastore.org/nest-cli",
+    "sourceRoot": "apps/crawl-nest/src",
+    "collection": "@nestjs/schematics",
+    "monorepo": true,
+    "root": "apps/crawl-nest",
+    "compilerOptions": {
+        "deleteOutDir": true,
+        "tsConfigPath": "apps/crawl-nest/tsconfig.build.json"
+    },
+    "projects": {
+        "@app/crawl-nest": {
+            "type": "application",
+            "root": "apps/crawl-nest",
+            "entryFile": "main",
+            "sourceRoot": "apps/crawl-nest/src",
+            "compilerOptions": {
+                "tsConfigPath": "apps/crawl-nest/tsconfig.build.json"
+            }
+        },
+        "@private-crawl/models": {
+            "type": "library",
+            "root": "private-packages/@crawl/models",
+            "entryFile": "index",
+            "sourceRoot": "private-packages/@crawl/models/src",
+            "compilerOptions": {
+                "tsConfigPath": "private-packages/@crawl/models/tsconfig.build.json"
+            }
+        },
+        "@private-crawl/types": {
+            "type": "library",
+            "root": "private-packages/@crawl/types",
+            "entryFile": "index",
+            "sourceRoot": "private-packages/@crawl/types/src",
+            "compilerOptions": {
+                "tsConfigPath": "private-packages/@crawl/types/tsconfig.build.json"
+            }
+        },
+        "@private-crawl/utils": {
+            "type": "library",
+            "root": "private-packages/utils",
+            "entryFile": "index",
+            "sourceRoot": "private-packages/utils/src",
+            "compilerOptions": {
+                "tsConfigPath": "private-packages/utils/tsconfig.build.json"
+            }
+        }
+    }
+}

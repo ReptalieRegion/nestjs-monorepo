@@ -2,10 +2,10 @@ import { SchemaId } from '../common/id';
 import { SocialProviderType } from '../enums/social';
 
 interface ITempUser {
-    _id: SchemaId.Id;
+    _id: SchemaId;
     id: string;
-    userId: SchemaId.Id;
-    imageId: SchemaId.Id;
+    userId: SchemaId;
+    imageId: SchemaId;
     provider: SocialProviderType;
     uniqueId: string;
     nickname: string;

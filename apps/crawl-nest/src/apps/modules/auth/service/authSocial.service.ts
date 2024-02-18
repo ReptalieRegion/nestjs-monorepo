@@ -1,8 +1,7 @@
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { InjectConnection } from '@nestjs/mongoose';
 import { Social } from '@private-crawl/models';
-import { ITempUser } from '@private-crawl/types';
-import { JoinProgressType, SocialProviderType } from '@private-crawl/types/enums/social';
+import { ITempUser, JoinProgressType, SocialProviderType } from '@private-crawl/types';
 import { OAuth2Client } from 'google-auth-library';
 import mongoose, { ClientSession } from 'mongoose';
 import { ImageType } from '../../../dto/image/input-image.dto';

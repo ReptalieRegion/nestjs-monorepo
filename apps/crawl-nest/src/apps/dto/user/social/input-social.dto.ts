@@ -1,4 +1,4 @@
-import { JoinProgressType, SocialProviderType } from '@private-crawl/types/enums/social';
+import { JoinProgressType, SocialProviderType } from '@private-crawl/types';
 import { IsEnum, IsOptional, IsString, Matches } from 'class-validator';
 
 export interface IEncryptedDataDTO {

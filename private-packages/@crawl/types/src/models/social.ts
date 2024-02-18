@@ -2,9 +2,9 @@ import { SchemaId } from '../common/id';
 import { JoinProgressType, SocialProviderType } from '../enums/social';
 
 interface ISocial {
-    _id: SchemaId.Id;
+    _id: SchemaId;
     id: string;
-    userId: SchemaId.Id;
+    userId: SchemaId;
     provider: SocialProviderType;
     uniqueId: string;
     joinProgress: JoinProgressType;

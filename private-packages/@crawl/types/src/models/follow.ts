@@ -1,10 +1,10 @@
 import { SchemaId } from '../common/id';
 
 interface IFollow {
-    _id: SchemaId.Id;
+    _id: SchemaId;
     id: string;
-    following: SchemaId.Id;
-    follower: SchemaId.Id;
+    following: SchemaId;
+    follower: SchemaId;
     followerNickname: string;
     initials: string;
     isCanceled: boolean;

@@ -25,10 +25,10 @@ interface NoticeContent extends BasicTemplate {
 type PushLogContents = ProfileContent | SharePostContent | NoticeContent;
 
 interface INotificationLog {
-    _id: SchemaId.Id;
+    _id: SchemaId;
     id: string;
-    userId: SchemaId.Id;
-    templateId: SchemaId.Id;
+    userId: SchemaId;
+    templateId: SchemaId;
     messageId: string;
     contents: PushLogContents;
     isRead: boolean;

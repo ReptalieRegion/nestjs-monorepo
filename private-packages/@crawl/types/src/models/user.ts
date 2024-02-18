@@ -1,3 +1,5 @@
+import { SchemaId } from '../common/id';
+
 interface IDeviceInfo {
     version: string;
     buildNumber: string;
@@ -6,7 +8,7 @@ interface IDeviceInfo {
 }
 
 interface IUser {
-    _id: SchemaId.Id;
+    _id: SchemaId;
     id: string;
     nickname: string;
     initials: string;
@@ -14,9 +16,9 @@ interface IUser {
     phone: string;
     address: string;
     fcmToken: string;
-    deviceInfo?: DeviceInfoDTO;
+    deviceInfo?: IDeviceInfo;
     lastAccessAt?: Date;
-    imageId: Image;
+    imageId: SchemaId;
     createdAt: Date;
     updatedAt: Date;
 }

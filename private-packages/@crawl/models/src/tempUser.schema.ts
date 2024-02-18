@@ -1,7 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 
-import { ITempUser } from '@private-crawl/types';
-import { SocialProviderType } from '@private-crawl/types/enums/social';
+import { ITempUser, SocialProviderType } from '@private-crawl/types';
 import { getCurrentDate } from '@private-crawl/utils';
 import { Document, SchemaTypes } from 'mongoose';
 

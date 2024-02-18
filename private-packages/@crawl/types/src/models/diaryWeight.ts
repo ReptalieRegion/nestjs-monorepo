@@ -1,9 +1,9 @@
 import { SchemaId } from '../common/id';
 
 interface IDiaryWeight {
-    _id: SchemaId.Id;
+    _id: SchemaId;
     id: string;
-    entityId: SchemaId.Id;
+    entityId: SchemaId;
     date: Date;
     weight: number;
     isDeleted: boolean;

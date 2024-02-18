@@ -1,10 +1,10 @@
 import { SchemaId } from '../common/id';
 
 interface IReportUserBlocking {
-    _id: SchemaId.Id;
+    _id: SchemaId;
     id: string;
-    blocker: SchemaId.Id;
-    blocked: SchemaId.Id;
+    blocker: SchemaId;
+    blocked: SchemaId;
     createdAt: Date;
     updatedAt: Date;
 }

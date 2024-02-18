@@ -9,10 +9,10 @@ interface IBasicVariety {
 }
 
 interface IDiaryEntity {
-    _id: SchemaId.Id;
+    _id: SchemaId;
     id: string;
-    userId: SchemaId.Id;
-    imageId: SchemaId.Id;
+    userId: SchemaId;
+    imageId: SchemaId;
     name: string;
     gender: DiaryEntityGenderType;
     variety: IBasicVariety;

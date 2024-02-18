@@ -60,7 +60,7 @@ export class ReportSearcherService {
         return { isBlockedUser: blocking ? true : false };
     }
 
-    async findTypeIdList(reporter: SchemaId.Id, type: ReportShareContentType): Promise<string[] | undefined> {
+    async findTypeIdList(reporter: SchemaId, type: ReportShareContentType): Promise<string[] | undefined> {
         if (!reporter) {
             return undefined;
         }
@@ -89,7 +89,7 @@ export class ReportSearcherService {
         return blockedIds?.includes(isBlockedId) ?? false;
     }
 
-    async getUserBlockedIds(blocker: SchemaId.Id) {
+    async getUserBlockedIds(blocker: SchemaId) {
         const blockings = await this.reportUserBlockingRepository.find({ blocker }).exec();
         return blockings.map((entitiy) => entitiy.Mapper().blocked as string);
     }

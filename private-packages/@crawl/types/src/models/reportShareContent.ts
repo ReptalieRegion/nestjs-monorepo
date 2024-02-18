@@ -2,12 +2,12 @@ import { SchemaId } from '../common/id';
 import { ReportShareContentDetailsType, ReportShareContentType } from '../enums';
 
 interface IReportShareContent {
-    _id: SchemaId.Id;
+    _id: SchemaId;
     id: string;
-    reporter: SchemaId.Id;
-    reported: SchemaId.Id;
+    reporter: SchemaId;
+    reported: SchemaId;
     type: ReportShareContentType;
-    typeId: SchemaId.Id;
+    typeId: SchemaId;
     details: ReportShareContentDetailsType;
     createdAt: Date;
     updatedAt: Date;

@@ -5,7 +5,7 @@
     "scripts": {
         "server": "yarn workspace @crawl-nest/server",
         "build": "nest build",
-        "build:server": "nest build apps/crawl-nest --debug --watch",
+        "build:server": "nest build apps/crawl-nest",
         "start:server": "cross-env NODE_ENV=development nest start apps/crawl-nest",
         "local:server": "cross-env NODE_ENV=local nest start apps/crawl-nest --watch",
         "dev:server": "cross-env NODE_ENV=development nest start apps/crawl-nest --watch",

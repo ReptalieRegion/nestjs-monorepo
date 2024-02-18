@@ -1,25 +1,19 @@
 # 🛠 Build the builder image
 FROM node:18-alpine as builder
-RUN npm install -g npm@latest
-
 WORKDIR /builder
 
+
 # yarn berry
-RUN corepack enable
+RUN npm install -g corepack && corepack enable
 RUN yarn set version stable
 
 # Copy config files and source
 COPY /apps/crawl-nest ./apps/crawl-nest/
 COPY /private-packages ./private-packages
-COPY tsconfig.base.json .
-COPY nest-cli.json .
-COPY .yarn .yarn
-COPY .yarnrc.yml .
-COPY yarn.lock .
-COPY package.json .
+COPY tsconfig.base.json nest-cli.json .yarn* .yarnrc.yml yarn.lock package.json ./
 
 # Install dependencies and build
-RUN cd ./apps/crawl-nest && yarn install || (cat /tmp/*/build.log; exit 1)
+RUN yarn install --frozen-lockfile || (cat /tmp/*/build.log; exit 1)
 
 # build
 RUN yarn build:server

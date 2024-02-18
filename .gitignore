@@ -24,3 +24,5 @@ node_modules
 dockers/data
 
 .DS_Store
+
+dist

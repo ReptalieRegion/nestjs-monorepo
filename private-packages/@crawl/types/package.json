@@ -1,0 +1,15 @@
+{
+    "name": "@private-crawl/types",
+    "main": "index.ts",
+    "scripts": {
+        "build": "tsc -p tsconfig.build.json",
+        "prepack": "yarn build"
+    },
+    "dependencies": {
+        "mongoose": "7.2.4"
+    },
+    "devDependencies": {
+        "typescript": "5.0.4"
+    },
+    "packageManager": "yarn@4.1.0"
+}

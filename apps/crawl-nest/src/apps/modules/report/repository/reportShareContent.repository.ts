@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import { ReportShareContent, ReportShareContentDocument } from '@private-crawl/models';
 import { Model } from 'mongoose';
 
 import { InputReportShareContentDTO } from '../../../dto/report/share/input-reportShareContent.dto';
-import { ReportShareContent, ReportShareContentDocument } from '../../../schemas/reportShareContent.schema';
 import { BaseRepository } from '../../base/base.repository';
 
 @Injectable()

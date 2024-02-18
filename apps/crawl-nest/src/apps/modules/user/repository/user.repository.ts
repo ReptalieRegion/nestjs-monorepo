@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import { User, UserDocument } from '@private-crawl/models';
 import { ClientSession, Model } from 'mongoose';
 
 import { InputUserDTO } from '../../../dto/user/user/input-user.dto';
-import { User, UserDocument } from '../../../schemas/user.schema';
 import { BaseRepository } from '../../base/base.repository';
 
 @Injectable()

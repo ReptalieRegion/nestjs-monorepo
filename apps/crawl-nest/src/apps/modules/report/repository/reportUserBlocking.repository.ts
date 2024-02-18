@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import { ReportUserBlocking, ReportUserBlockingDocument } from '@private-crawl/models';
 import { Model } from 'mongoose';
 
 import { InputReportUserBlockingDTO } from '../../../dto/report/blocking/input-reportUserBlocking.dto';
-import { ReportUserBlocking, ReportUserBlockingDocument } from '../../../schemas/reportUserBlocking.schema';
 import { BaseRepository } from '../../base/base.repository';
 
 @Injectable()

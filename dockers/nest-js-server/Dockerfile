@@ -3,7 +3,7 @@ FROM node:18-alpine as builder
 WORKDIR /builder
 
 # yarn berry
-RUN npm install -g corepack && corepack enable
+RUN npm install -g npm@latest && corepack enable
 RUN yarn set version stable
 
 # Copy config files and source
@@ -23,7 +23,7 @@ FROM node:18-alpine as runner
 WORKDIR /runner
 
 # yarn berry
-RUN npm install -g corepack && corepack enable
+RUN npm install -g npm@latest && corepack enable
 RUN yarn set version stable
 
 # Copy files in logical layer order

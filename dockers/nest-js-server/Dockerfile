@@ -2,7 +2,6 @@
 FROM node:18-alpine as builder
 WORKDIR /builder
 
-
 # yarn berry
 RUN npm install -g corepack && corepack enable
 RUN yarn set version stable
@@ -20,15 +19,13 @@ RUN yarn build:server
 
 # # 🚀 Build the runner image
 FROM node:18-alpine as runner
-RUN npm install -g npm@latest
-
 WORKDIR /runner
 
 # yarn berry
-RUN corepack enable
+RUN npm install -g corepack && corepack enable
 RUN yarn set version stable
 
-# # Copy files in logical layer order
+# Copy files in logical layer order
 COPY --from=builder /builder/.yarn .yarn
 COPY --from=builder /builder/.pnp.cjs .
 COPY --from=builder /builder/.pnp.loader.mjs .
@@ -37,5 +34,5 @@ COPY --from=builder /builder/package.json .
 COPY --from=builder /builder/apps/crawl-nest/dist /runner/apps/crawl-nest/dist
 COPY --from=builder /builder/apps/crawl-nest/package.json /runner/apps/crawl-nest/
 
-# # ⚙️ Configure the default command
+# Configure the default command
 CMD yarn start:prod

@@ -12,6 +12,7 @@ RUN yarn set version stable
 COPY /apps/crawl-nest ./apps/crawl-nest/
 COPY /private-packages ./private-packages
 COPY tsconfig.base.json .
+COPY nest-cli.json .
 COPY .yarn .yarn
 COPY .yarnrc.yml .
 COPY yarn.lock .

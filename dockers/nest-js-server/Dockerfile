@@ -36,4 +36,4 @@ COPY --from=builder /builder/apps/crawl-nest/dist ./apps/crawl-nest/dist
 COPY --from=builder /builder/apps/crawl-nest/package.json ./apps/crawl-nest/
 
 # Configure the default command
-CMD yarn start:prod
+CMD yarn prod:server

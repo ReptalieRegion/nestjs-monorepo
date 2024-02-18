@@ -32,8 +32,8 @@ COPY --from=builder /builder/.pnp.cjs .
 COPY --from=builder /builder/.pnp.loader.mjs .
 COPY --from=builder /builder/yarn.lock .
 COPY --from=builder /builder/package.json .
-COPY --from=builder /builder/apps/crawl-nest/dist /runner/apps/crawl-nest/dist
-COPY --from=builder /builder/apps/crawl-nest/package.json /runner/apps/crawl-nest/
+COPY --from=builder /builder/apps/crawl-nest/dist ./apps/crawl-nest/dist
+COPY --from=builder /builder/apps/crawl-nest/package.json ./apps/crawl-nest/
 
 # Configure the default command
 CMD yarn start:prod

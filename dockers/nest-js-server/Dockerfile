@@ -13,7 +13,7 @@ COPY tsconfig.base.json nest-cli.json .yarnrc.yml yarn.lock package.json ./
 COPY .yarn .yarn
 
 # Install dependencies and build
-RUN yarn install --frozen-lockfile || (cat /tmp/*/build.log; exit 1)
+RUN yarn install || (cat /tmp/*/build.log; exit 1)
 
 # build
 RUN yarn build:server

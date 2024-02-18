@@ -10,7 +10,7 @@
         "local:server": "NODE_ENV=local nest start apps/crawl-nest --watch",
         "dev:server": "NODE_ENV=development nest start apps/crawl-nest --watch",
         "debug:server": "NODE_ENV=development nest start apps/crawl-nest --debug --watch",
-        "prod:server": "NODE_ENV=production node ./apps/crawl-nest/dist/src/main",
+        "prod:server": "NODE_ENV=production node apps/crawl-nest/dist/src/main",
         "g:typecheck": "yarn workspaces foreach -pv run typecheck",
         "lint-front": "lint-staged",
         "prepare": "husky install",
@@ -40,6 +40,7 @@
         "lint-staged": "^13.2.2",
         "prettier": "^2.8.8",
         "source-map-support": "^0.5.21",
+        "tslib": "^2.6.2",
         "typescript": "5.0.4"
     }
 }

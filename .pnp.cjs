@@ -65,6 +65,7 @@ const RAW_RUNTIME_STATE =
           ["lint-staged", "npm:13.3.0"],\
           ["prettier", "npm:2.8.8"],\
           ["source-map-support", "npm:0.5.21"],\
+          ["tslib", "npm:2.6.2"],\
           ["typescript", "patch:typescript@npm%3A5.0.4#optional!builtin<compat/typescript>::version=5.0.4&hash=b5f058"]\
         ],\
         "linkType": "SOFT"\
@@ -13581,6 +13582,7 @@ const RAW_RUNTIME_STATE =
           ["lint-staged", "npm:13.3.0"],\
           ["prettier", "npm:2.8.8"],\
           ["source-map-support", "npm:0.5.21"],\
+          ["tslib", "npm:2.6.2"],\
           ["typescript", "patch:typescript@npm%3A5.0.4#optional!builtin<compat/typescript>::version=5.0.4&hash=b5f058"]\
         ],\
         "linkType": "SOFT"\

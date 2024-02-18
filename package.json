@@ -10,7 +10,7 @@
         "local:server": "cross-env NODE_ENV=local nest start apps/crawl-nest --watch",
         "dev:server": "cross-env NODE_ENV=development nest start apps/crawl-nest --watch",
         "debug:server": "cross-env NODE_ENV=development nest start apps/crawl-nest --debug --watch",
-        "prod:server": "cross-env NODE_ENV=production node apps/crawl-nest/dist/src/main",
+        "prod:server": "cross-env NODE_ENV=production node ./apps/crawl-nest/dist/src/main",
         "g:typecheck": "yarn workspaces foreach -pv run typecheck",
         "lint-front": "lint-staged",
         "prepare": "husky install",

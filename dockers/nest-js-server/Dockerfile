@@ -10,7 +10,8 @@ RUN yarn set version stable
 
 # Copy config files and source
 COPY /apps/crawl-nest ./apps/crawl-nest/
-COPY /configs ./configs
+COPY /private-packages ./private-packages
+COPY tsconfig.base.json .
 COPY .yarn .yarn
 COPY .yarnrc.yml .
 COPY yarn.lock .
@@ -42,5 +43,4 @@ COPY --from=builder /builder/apps/crawl-nest/dist /runner/apps/crawl-nest/dist
 COPY --from=builder /builder/apps/crawl-nest/package.json /runner/apps/crawl-nest/
 
 # # ⚙️ Configure the default command
-WORKDIR /runner/apps/crawl-nest
 CMD yarn start:prod

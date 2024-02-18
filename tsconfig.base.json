@@ -25,7 +25,8 @@
         "strictPropertyInitialization": false,
         "noImplicitAny": true,
         "strictBindCallApply": true,
-        "noFallthroughCasesInSwitch": true
+        "noFallthroughCasesInSwitch": true,
+        "composite": true
     },
     "exclude": ["**/node_modules", "**/.*/"]
 }

@@ -4,6 +4,7 @@
     "collection": "@nestjs/schematics",
     "monorepo": true,
     "root": "apps/crawl-nest",
+    "entryFile": "src/main",
     "compilerOptions": {
         "deleteOutDir": true,
         "tsConfigPath": "apps/crawl-nest/tsconfig.build.json"
@@ -12,7 +13,7 @@
         "@app/crawl-nest": {
             "type": "application",
             "root": "apps/crawl-nest",
-            "entryFile": "main",
+            "entryFile": "src/main",
             "sourceRoot": "apps/crawl-nest/src",
             "compilerOptions": {
                 "tsConfigPath": "apps/crawl-nest/tsconfig.build.json"

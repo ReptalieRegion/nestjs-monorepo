@@ -9,7 +9,8 @@ RUN yarn set version stable
 # Copy config files and source
 COPY /apps/crawl-nest ./apps/crawl-nest/
 COPY /private-packages ./private-packages
-COPY tsconfig.base.json nest-cli.json .yarn* .yarnrc.yml yarn.lock package.json ./
+COPY tsconfig.base.json nest-cli.json .yarnrc.yml yarn.lock package.json ./
+COPY .yarn .yarn
 
 # Install dependencies and build
 RUN yarn install --frozen-lockfile || (cat /tmp/*/build.log; exit 1)

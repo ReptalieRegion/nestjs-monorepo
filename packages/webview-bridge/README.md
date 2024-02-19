@@ -1,1 +1,0 @@
-# rn-next-bridge-interface

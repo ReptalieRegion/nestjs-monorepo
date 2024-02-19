@@ -18,8 +18,7 @@
         "@private-crawl/utils": "workspace:^",
         "mongoose": "7.2.4",
         "reflect-metadata": "^0.1.13",
-        "rxjs": "^7.2.0",
-        "rimraf": "^3.0.2"
+        "rxjs": "^7.2.0"
     },
     "devDependencies": {
         "typescript": "5.0.4"

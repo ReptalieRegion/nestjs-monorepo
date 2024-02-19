@@ -1,11 +1,13 @@
 {
     "name": "@private-crawl/utils",
-    "main": "dist/index",
+    "main": "dist/src/index.js",
+    "types": "dist/src/index.d.ts",
     "scripts": {
-        "build": "tsc -p tsconfig.build.json",
-        "prepack": "yarn build"
+        "prebuild": "rimraf dist",
+        "build": "yarn prebuild && tsc -p tsconfig.build.json"
     },
     "devDependencies": {
+        "rimraf": "^3.0.2",
         "typescript": "5.0.4"
     },
     "packageManager": "yarn@4.1.0"

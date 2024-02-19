@@ -3,12 +3,11 @@
     "version": "1.0.0",
     "description": "Mongoose schema package",
     "author": "Yun Chan Park",
-    "main": "dist/index.js",
-    "types": "dist/index.d.ts",
+    "main": "dist/src/index.js",
+    "types": "dist/src/index.d.ts",
     "scripts": {
         "prebuild": "rimraf dist",
-        "build": "tsc -p tsconfig.build.json",
-        "prepack": "yarn build"
+        "build": "yarn prebuild && tsc -p tsconfig.build.json"
     },
     "dependencies": {
         "@nestjs/common": "^10.3.3",
@@ -18,8 +17,8 @@
         "@private-crawl/utils": "workspace:^",
         "mongoose": "7.2.4",
         "reflect-metadata": "^0.1.13",
-        "rxjs": "^7.2.0",
-        "rimraf": "^3.0.2"
+        "rimraf": "^3.0.2",
+        "rxjs": "^7.2.0"
     },
     "devDependencies": {
         "typescript": "5.0.4"

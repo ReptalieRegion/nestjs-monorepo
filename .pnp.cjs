@@ -3135,6 +3135,7 @@ const RAW_RUNTIME_STATE =
         "packageDependencies": [\
           ["@private-crawl/types", "workspace:private-packages/@crawl/types"],\
           ["mongoose", "npm:7.2.4"],\
+          ["rimraf", "npm:3.0.2"],\
           ["typescript", "patch:typescript@npm%3A5.0.4#optional!builtin<compat/typescript>::version=5.0.4&hash=b5f058"]\
         ],\
         "linkType": "SOFT"\
@@ -3145,6 +3146,7 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./private-packages/utils/",\
         "packageDependencies": [\
           ["@private-crawl/utils", "workspace:private-packages/utils"],\
+          ["rimraf", "npm:3.0.2"],\
           ["typescript", "patch:typescript@npm%3A5.0.4#optional!builtin<compat/typescript>::version=5.0.4&hash=b5f058"]\
         ],\
         "linkType": "SOFT"\

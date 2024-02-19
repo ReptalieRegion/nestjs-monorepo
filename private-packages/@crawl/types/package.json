@@ -3,11 +3,12 @@
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
     "scripts": {
-        "build": "tsc -p tsconfig.build.json",
-        "prepack": "yarn build"
+        "prebuild": "rimraf dist",
+        "build": "yarn prebuild && tsc -p tsconfig.build.json"
     },
     "dependencies": {
-        "mongoose": "7.2.4"
+        "mongoose": "7.2.4",
+        "rimraf": "^3.0.2"
     },
     "devDependencies": {
         "typescript": "5.0.4"

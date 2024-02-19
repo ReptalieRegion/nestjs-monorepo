@@ -1,12 +1,4 @@
 {
     "extends": "../../tsconfig.base.json",
-    "references": [
-        {
-            "path": "../../private-packages/@crawl/models"
-        },
-        {
-            "path": "../../private-packages/@crawl/types"
-        }
-    ],
     "exclude": ["**/node_modules", "dist"]
 }

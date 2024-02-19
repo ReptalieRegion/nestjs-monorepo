@@ -1,6 +1,7 @@
 {
     "name": "@private-crawl/types",
-    "main": "dist/index",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
     "scripts": {
         "build": "tsc -p tsconfig.build.json",
         "prepack": "yarn build"

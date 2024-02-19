@@ -3,8 +3,10 @@
     "version": "1.0.0",
     "description": "Mongoose schema package",
     "author": "Yun Chan Park",
-    "main": "dist/src/index",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
     "scripts": {
+        "prebuild": "rimraf dist",
         "build": "tsc -p tsconfig.build.json",
         "prepack": "yarn build"
     },
@@ -16,7 +18,8 @@
         "@private-crawl/utils": "workspace:^",
         "mongoose": "7.2.4",
         "reflect-metadata": "^0.1.13",
-        "rxjs": "^7.2.0"
+        "rxjs": "^7.2.0",
+        "rimraf": "^3.0.2"
     },
     "devDependencies": {
         "typescript": "5.0.4"

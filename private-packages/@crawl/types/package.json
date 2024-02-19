@@ -1,5 +1,8 @@
 {
     "name": "@private-crawl/types",
+    "version": "1.0.0",
+    "description": "Mongoose schema package",
+    "author": "Yun Chan Park",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
     "scripts": {

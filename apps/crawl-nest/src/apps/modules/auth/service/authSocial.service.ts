@@ -1,12 +1,12 @@
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { InjectConnection } from '@nestjs/mongoose';
+import { Social } from '@private-crawl/models';
+import { ITempUser, JoinProgressType, SocialProviderType } from '@private-crawl/types';
 import { OAuth2Client } from 'google-auth-library';
 import mongoose, { ClientSession } from 'mongoose';
 import { ImageType } from '../../../dto/image/input-image.dto';
-import { IEncryptedDataDTO, JoinProgressType, SocialProvierType } from '../../../dto/user/social/input-social.dto';
+import { IEncryptedDataDTO } from '../../../dto/user/social/input-social.dto';
 import { IRestoreRequestDTO, InputTempUserDTO } from '../../../dto/user/tempUser/input-tempUser.dto';
-import { IResponseTempUserDTO } from '../../../dto/user/tempUser/response-tempUser.dto';
-import { Social } from '../../../schemas/social.schema';
 import { CustomException } from '../../../utils/error/customException';
 import { CustomExceptionHandler } from '../../../utils/error/customException.handler';
 import { DiaryDeleterService, DiaryDeleterServiceToken } from '../../diary/service/diaryDeleter.service';
@@ -75,7 +75,7 @@ export class AuthSocialService {
     async kakaoSignIn(dto: IEncryptedDataDTO) {
         const decryptedData = this.authEncryptService.decryptCrypto(dto.encryptedData);
 
-        return this.socialSignIn(decryptedData, SocialProvierType.Kakao);
+        return this.socialSignIn(decryptedData, SocialProviderType.Kakao);
     }
 
     /**
@@ -88,7 +88,7 @@ export class AuthSocialService {
     async appleSignIn(dto: IEncryptedDataDTO) {
         const decryptedData = this.authEncryptService.decryptCrypto(dto.encryptedData);
 
-        return this.socialSignIn(decryptedData, SocialProvierType.Apple);
+        return this.socialSignIn(decryptedData, SocialProviderType.Apple);
     }
 
     /**
@@ -106,7 +106,7 @@ export class AuthSocialService {
             const ticket = await client.verifyIdToken({ idToken, audience: GOOGLE_CLIENT_ID });
             const uniqueId = ticket.getPayload()?.sub;
 
-            return this.socialSignIn(uniqueId as string, SocialProvierType.Google);
+            return this.socialSignIn(uniqueId as string, SocialProviderType.Google);
         } catch (error) {
             throw new CustomExceptionHandler(error).handleException('An error occurred while parsing the ID token.', -1611);
         }
@@ -124,7 +124,7 @@ export class AuthSocialService {
         const dto: InputTempUserDTO = {
             userId: userInfo.userId.id as string,
             imageId: userInfo.userId.imageId as string,
-            provider: userInfo.provider as SocialProvierType,
+            provider: userInfo.provider as SocialProviderType,
             uniqueId: userInfo.uniqueId as string,
             nickname: userInfo.userId.nickname as string,
             name,
@@ -140,11 +140,11 @@ export class AuthSocialService {
         let uniqueId;
 
         switch (provider) {
-            case SocialProvierType.Kakao:
-            case SocialProvierType.Apple:
+            case SocialProviderType.Kakao:
+            case SocialProviderType.Apple:
                 uniqueId = this.authEncryptService.decryptCrypto(encryptedData);
                 break;
-            case SocialProvierType.Google:
+            case SocialProviderType.Google:
                 try {
                     const { GOOGLE_CLIENT_ID } = process.env;
                     const client = new OAuth2Client(GOOGLE_CLIENT_ID);
@@ -178,7 +178,7 @@ export class AuthSocialService {
      * @param provider 제공자 타입입니다.
      * @returns - 소셜 로그인 처리 결과를 나타내는 객체를 반환합니다.
      */
-    private async socialSignIn(uniqueId: string, provider: SocialProvierType) {
+    private async socialSignIn(uniqueId: string, provider: SocialProviderType) {
         const session: ClientSession = await this.connection.startSession();
         session.startTransaction();
 
@@ -230,7 +230,7 @@ export class AuthSocialService {
      * @param session - 데이터베이스 세션.
      * @returns - 회원가입 정보를 포함하는 결과를 반환합니다.
      */
-    private async socialSignUp(uniqueId: string, provider: SocialProvierType, session: ClientSession) {
+    private async socialSignUp(uniqueId: string, provider: SocialProviderType, session: ClientSession) {
         const tempUser = await this.tempUserRepository.findOne({ uniqueId, provider }).exec();
 
         if (tempUser) {
@@ -324,7 +324,7 @@ export class AuthSocialService {
         }
     }
 
-    private async restoreRequestDetail(tempUserInfo: Partial<IResponseTempUserDTO>) {
+    private async restoreRequestDetail(tempUserInfo: Partial<ITempUser>) {
         const session: ClientSession = await this.connection.startSession();
         session.startTransaction();
 
@@ -356,7 +356,7 @@ export class AuthSocialService {
         }
     }
 
-    private async restoreSocialWithUserInfo(userInfo: Partial<IResponseTempUserDTO>, session: ClientSession) {
+    private async restoreSocialWithUserInfo(userInfo: Partial<ITempUser>, session: ClientSession) {
         const { provider, uniqueId } = userInfo;
 
         const decryptIfPresent = (value?: string) => (value ? this.authEncryptService.decryptCrypto(value) : undefined);
@@ -370,7 +370,7 @@ export class AuthSocialService {
         const social = await this.socialRepository.createSocial(
             {
                 userId: user.id as string,
-                provider: provider as SocialProvierType,
+                provider: provider as SocialProviderType,
                 uniqueId: uniqueId as string,
                 joinProgress: JoinProgressType.DONE,
             },

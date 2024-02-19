@@ -1,27 +1,45 @@
 import { MongooseModule } from '@nestjs/mongoose';
-import { DiaryCalendar, DiaryCalendarSchema } from '../../schemas/diaryCalendar.schema';
-import { DiaryEntity, DiaryEntitySchema } from '../../schemas/diaryEntity.schema';
-import { DiaryWeight, DiaryWeightSchema } from '../../schemas/diaryWeight.schema';
-import { Follow, FollowSchema } from '../../schemas/follow.schema';
-import { Image, ImageSchema } from '../../schemas/image.schema';
-import { MetaData, MetaDataSchema } from '../../schemas/metaData.schema';
-import { NotificationAgree, NotificationAgreeSchema } from '../../schemas/notificationAgree.schema';
-import { NotificationLog, NotificationLogSchema } from '../../schemas/notificationLog.schema';
-import { NotificationTemplate, NotificationTemplateSchema } from '../../schemas/notificationTemplate.schema';
-import { ReportShareContent, ReportShareContentSchema } from '../../schemas/reportShareContent.schema';
-import { ReportUserBlocking, ReportUserBlockingSchema } from '../../schemas/reportUserBlocking.schema';
-import { ShareComment, ShareCommentSchema } from '../../schemas/shareComment.schema';
-import { ShareCommentReply, ShareCommentReplySchema } from '../../schemas/shareCommentReply.schema';
-import { ShareLike, ShareLikeSchema } from '../../schemas/shareLike.schema';
-import { SharePost, SharePostSchema } from '../../schemas/sharePost.schema';
-import { Social, socialSchema } from '../../schemas/social.schema';
-import { TempUser, tempUserSchema } from '../../schemas/tempUser.schema';
-import { User, userSchema } from '../../schemas/user.schema';
+import {
+    DiaryCalendar,
+    DiaryCalendarSchema,
+    DiaryEntity,
+    DiaryEntitySchema,
+    DiaryWeight,
+    DiaryWeightSchema,
+    Follow,
+    FollowSchema,
+    Image,
+    ImageSchema,
+    MetaData,
+    MetaDataSchema,
+    NotificationAgree,
+    NotificationAgreeSchema,
+    NotificationLog,
+    NotificationLogSchema,
+    NotificationTemplate,
+    NotificationTemplateSchema,
+    ReportShareContent,
+    ReportShareContentSchema,
+    ReportUserBlocking,
+    ReportUserBlockingSchema,
+    ShareComment,
+    ShareCommentReply,
+    ShareCommentReplySchema,
+    ShareCommentSchema,
+    ShareLike,
+    ShareLikeSchema,
+    SharePost,
+    SharePostSchema,
+    Social,
+    TempUser,
+    User,
+    socialSchema,
+    tempUserSchema,
+    userSchema,
+} from '@private-crawl/models';
 
 export const CustomMongooseModule = MongooseModule.forRoot(process.env.MONGODB_URI ?? '', {
     dbName: 'crawl',
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
 });
 
 // user 관련 모듈

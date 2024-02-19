@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Inject, Param, Post, Query, UseGuards } from '@nestjs/common';
 import { InputReportShareContentDTO } from '../../dto/report/share/input-reportShareContent.dto';
-import { IUserProfileDTO } from '../../dto/user/user/response-user.dto';
+import { IUserProfileDTO } from '../../dto/user/user/user-profile.dto';
 import { ValidationPipe } from '../../utils/error/validator/validator.pipe';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { AuthUser } from '../user/user.decorator';

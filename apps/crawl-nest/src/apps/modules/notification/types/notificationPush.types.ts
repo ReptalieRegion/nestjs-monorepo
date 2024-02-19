@@ -1,3 +1,4 @@
+import { SchemaId } from '@private-crawl/types';
 import * as admin from 'firebase-admin';
 import { TemplateTitleType, TemplateType } from '../../../dto/notification/template/input-notificationTemplate.dto';
 
@@ -326,7 +327,7 @@ interface NotificationBase {
 
 interface NotificationComment extends NotificationBase {
     type: TemplateType.Comment;
-    postId: string;
+    postId: SchemaId;
     postThumbnail: string;
     userThumbnail: string;
 }
@@ -339,7 +340,7 @@ interface NotificationFollow extends NotificationBase {
 
 interface NotificationLike extends NotificationBase {
     type: TemplateType.Like;
-    postId: string;
+    postId: SchemaId;
     userThumbnail: string;
     postThumbnail: string;
 }
@@ -350,7 +351,7 @@ interface NotificationNotice extends NotificationBase {
 
 interface NotificationTag extends NotificationBase {
     type: TemplateType.Tag;
-    postId: string;
+    postId: SchemaId;
     postThumbnail: string;
     userThumbnail: string;
 }

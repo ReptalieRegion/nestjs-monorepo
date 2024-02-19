@@ -1,18 +1,22 @@
 {
     "name": "test",
-    "packageManager": "yarn@3.6.0",
+    "packageManager": "yarn@4.1.0",
     "private": true,
     "scripts": {
         "server": "yarn workspace @crawl-nest/server",
-        "dev:server": "yarn workspace @crawl-nest/server run start:dev",
-        "build:server": "yarn workspace @crawl-nest/server run build",
-        "start:server": "yarn workspace @crawl-nest/server run start",
-        "lint:server": "yarn workspace @crawl-nest/server run lint",
-        "prod:server": "yarn workspace @crawl-nest/server run start:prod",
-        "debug:server": "yarn workspace @crawl-nest/server run start:debug",
-        "test:server": "yarn workspace @crawl-nest/server run test",
+        "build": "nest build",
+        "build:server": "nest build apps/crawl-nest",
+        "start:server": "NODE_ENV=development nest start apps/crawl-nest",
+        "local:server": "NODE_ENV=local nest start apps/crawl-nest --watch",
+        "dev:server": "NODE_ENV=development nest start apps/crawl-nest --watch",
+        "debug:server": "NODE_ENV=development nest start apps/crawl-nest --debug --watch",
+        "prod:server": "NODE_ENV=production node apps/crawl-nest/dist/src/main",
         "g:typecheck": "yarn workspaces foreach -pv run typecheck",
         "lint-front": "lint-staged",
+        "models": "yarn workspace @private-crawl/models",
+        "types": "yarn workspace @private-crawl/models",
+        "utils": "yarn workspace @private-crawl/utils",
+        "build:all": "yarn models build && yarn types build && yarn utils build",
         "prepare": "husky install",
         "init:local:mongo": "docker-compose -f docker-compose-local.yml up -d",
         "init:local:network": "docker network create crawl",
@@ -20,9 +24,14 @@
     },
     "workspaces": [
         "apps/*",
-        "packages/*"
+        "packages/*",
+        "private-packages/**"
     ],
+    "dependencies": {
+        "eslint-config-next": "^13.4.2"
+    },
     "devDependencies": {
+        "@nestjs/cli": "^9.0.0",
         "@typescript-eslint/eslint-plugin": "^5.59.5",
         "@typescript-eslint/parser": "^5.59.5",
         "eslint": "^8.40.0",
@@ -34,9 +43,8 @@
         "husky": "^8.0.0",
         "lint-staged": "^13.2.2",
         "prettier": "^2.8.8",
+        "source-map-support": "^0.5.21",
+        "tslib": "^2.6.2",
         "typescript": "5.0.4"
-    },
-    "dependencies": {
-        "eslint-config-next": "^13.4.2"
     }
 }

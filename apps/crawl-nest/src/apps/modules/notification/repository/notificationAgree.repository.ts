@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import { NotificationAgree, NotificationAgreeDocument } from '@private-crawl/models';
 import { Model } from 'mongoose';
 
 import { InputNotificationAgreeDTO } from '../../../dto/notification/agree/input-notificationAgree.dto';
-import { NotificationAgreeDocument, NotificationAgree } from '../../../schemas/notificationAgree.schema';
 import { BaseRepository } from '../../base/base.repository';
 
 @Injectable()

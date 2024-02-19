@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import { Follow, FollowDocument } from '@private-crawl/models';
 import { ObjectId } from 'bson';
 import { Model } from 'mongoose';
 
 import { InputFollowDTO } from '../../../dto/user/follow/input-follow.dto';
-import { Follow, FollowDocument } from '../../../schemas/follow.schema';
 import { BaseRepository } from '../../base/base.repository';
 
 @Injectable()

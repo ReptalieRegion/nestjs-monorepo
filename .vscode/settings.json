@@ -20,5 +20,5 @@
         "dockers": "Docker",
         "stores": "Global"
     },
-    "cSpell.words": ["notifee", "reptalieregion"]
+    "cSpell.words": ["notifee", "reptalieregion", "typecheck"]
 }

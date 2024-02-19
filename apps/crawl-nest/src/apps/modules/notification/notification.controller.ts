@@ -2,7 +2,7 @@ import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Inject, Post, Put,
 import { IAgreeStatusDTO } from '../../dto/notification/agree/input-notificationAgree.dto';
 import { IMessageIdDTO, InputNotificationLogDTO } from '../../dto/notification/log/input-notificationLog.dto';
 import { InputNotificationTemplateDTO } from '../../dto/notification/template/input-notificationTemplate.dto';
-import { IUserProfileDTO } from '../../dto/user/user/response-user.dto';
+import { IUserProfileDTO } from '../../dto/user/user/user-profile.dto';
 import { ValidationPipe } from '../../utils/error/validator/validator.pipe';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { AuthUser } from '../user/user.decorator';

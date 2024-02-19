@@ -1,46 +1,51 @@
 # 🛠 Build the builder image
 FROM node:18-alpine as builder
-RUN npm install -g npm@latest
-
 WORKDIR /builder
 
 # yarn berry
-RUN corepack enable
+RUN npm install -g npm@latest && corepack enable
 RUN yarn set version stable
 
 # Copy config files and source
 COPY /apps/crawl-nest ./apps/crawl-nest/
-COPY /configs ./configs
+COPY /private-packages ./private-packages
+COPY tsconfig.base.json nest-cli.json .yarnrc.yml yarn.lock package.json ./
 COPY .yarn .yarn
-COPY .yarnrc.yml .
-COPY yarn.lock .
-COPY package.json .
 
 # Install dependencies and build
-RUN cd ./apps/crawl-nest && yarn install || (cat /tmp/*/build.log; exit 1)
+RUN yarn install || (cat /tmp/*/build.log; exit 1)
 
 # build
+RUN yarn workspace @private-crawl/models build
+RUN yarn workspace @private-crawl/types build
+RUN yarn workspace @private-crawl/utils build
 RUN yarn build:server
 
 # # 🚀 Build the runner image
 FROM node:18-alpine as runner
-RUN npm install -g npm@latest
 
 WORKDIR /runner
-
-# yarn berry
-RUN corepack enable
-RUN yarn set version stable
-
-# # Copy files in logical layer order
-COPY --from=builder /builder/.yarn .yarn
+# Copy files in logical layer order
+COPY --from=builder /builder/.yarn ./.yarn
 COPY --from=builder /builder/.pnp.cjs .
 COPY --from=builder /builder/.pnp.loader.mjs .
 COPY --from=builder /builder/yarn.lock .
 COPY --from=builder /builder/package.json .
-COPY --from=builder /builder/apps/crawl-nest/dist /runner/apps/crawl-nest/dist
-COPY --from=builder /builder/apps/crawl-nest/package.json /runner/apps/crawl-nest/
+COPY --from=builder /builder/.yarnrc.yml .
+COPY --from=builder /builder/nest-cli.json .
+COPY --from=builder /builder/apps/crawl-nest/dist ./apps/crawl-nest/dist
+COPY --from=builder /builder/apps/crawl-nest/package.json ./apps/crawl-nest/
 
-# # ⚙️ Configure the default command
-WORKDIR /runner/apps/crawl-nest
-CMD yarn start:prod
+COPY --from=builder /builder/private-packages/@crawl/models/dist ./private-packages/@crawl/models/dist
+COPY --from=builder /builder/private-packages/@crawl/models/package.json ./private-packages/@crawl/models/
+
+COPY --from=builder /builder/private-packages/@crawl/types/dist ./private-packages/@crawl/types/dist
+COPY --from=builder /builder/private-packages/@crawl/types/package.json ./private-packages/@crawl/types/
+
+COPY --from=builder /builder/private-packages/utils/dist ./private-packages/utils/dist
+COPY --from=builder /builder/private-packages/utils/package.json ./private-packages/utils/
+
+RUN yarn install
+
+# Configure the default command
+CMD yarn prod:server

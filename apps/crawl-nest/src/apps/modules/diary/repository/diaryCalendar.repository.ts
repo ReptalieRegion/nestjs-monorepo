@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import { DiaryCalendar, DiaryCalendarDocument } from '@private-crawl/models';
 import mongoose, { ClientSession, Model } from 'mongoose';
 
 import { InputDiaryCalendarDTO } from '../../../dto/diary/calendar/input-diaryCalendar.dto';
-import { DiaryCalendar, DiaryCalendarDocument } from '../../../schemas/diaryCalendar.schema';
 import { BaseRepository } from '../../base/base.repository';
 
 @Injectable()

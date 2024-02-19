@@ -1,7 +1,7 @@
 import { Body, Controller, Delete, Get, Headers, HttpCode, HttpStatus, Inject, Post, UseGuards } from '@nestjs/common';
 import { IEncryptedDataDTO, IJoinProgressDTO } from '../../dto/user/social/input-social.dto';
 import { IRestoreRequestDTO } from '../../dto/user/tempUser/input-tempUser.dto';
-import { IUserProfileDTO } from '../../dto/user/user/response-user.dto';
+import { IUserProfileDTO } from '../../dto/user/user/user-profile.dto';
 import { ValidationPipe } from '../../utils/error/validator/validator.pipe';
 import { AuthUser } from '../user/user.decorator';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';

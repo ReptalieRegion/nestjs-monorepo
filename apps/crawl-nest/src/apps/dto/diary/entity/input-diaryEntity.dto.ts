@@ -1,16 +1,6 @@
+import { DiaryEntityGenderType, DiaryEntityWeightType } from '@private-crawl/types';
 import { Type } from 'class-transformer';
 import { IsEnum, IsOptional, IsString, ValidateNested } from 'class-validator';
-
-export enum DiaryEntityGenderType {
-    Male = 'Male',
-    Female = 'Female',
-    Uncategorized = 'Uncategorized',
-}
-
-export enum DiaryEntityWeightType {
-    g = 'g',
-    kg = 'kg',
-}
 
 export class BasicVariety {
     @IsString()

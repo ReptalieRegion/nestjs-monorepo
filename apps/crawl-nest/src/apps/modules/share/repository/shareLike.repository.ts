@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import { ShareLike, ShareLikeDocument } from '@private-crawl/models';
 import { ObjectId } from 'bson';
 import mongoose, { ClientSession, Model } from 'mongoose';
 
 import { InputShareLikeDTO } from '../../../dto/share/like/input-shareLike.dto';
-import { ShareLike, ShareLikeDocument } from '../../../schemas/shareLike.schema';
 import { BaseRepository } from '../../base/base.repository';
 
 @Injectable()

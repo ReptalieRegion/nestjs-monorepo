@@ -1,7 +1,8 @@
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { InjectConnection } from '@nestjs/mongoose';
+import { JoinProgressType } from '@private-crawl/types';
 import mongoose, { ClientSession } from 'mongoose';
-import { IJoinProgressDTO, JoinProgressType } from '../../../dto/user/social/input-social.dto';
+import { IJoinProgressDTO } from '../../../dto/user/social/input-social.dto';
 import { CustomException } from '../../../utils/error/customException';
 import { disassembleHangulToGroups } from '../../../utils/hangul/disassemble';
 import { NotificationSlackService, NotificationSlackServiceToken } from '../../notification/service/notificationSlack.service';

@@ -1,3 +1,4 @@
+import { SchemaId } from '@private-crawl/types';
 import { AndroidConfig } from 'firebase-admin/lib/messaging/messaging-api';
 import { NotifeeIOS } from '../types/notificationPush.types';
 
@@ -6,7 +7,7 @@ export const DEEP_LINK_PREFIX = 'crawl://';
 export const DEEP_LINK_LIST = {
     notice: 'notice',
     sharePostUser: (nickname: string) => `users/${nickname}`,
-    sharePostDetail: (postId: string, type: 'comment' | 'like') => `posts/${postId}/detail/${type}`,
+    sharePostDetail: (postId: SchemaId, type: 'comment' | 'like') => `posts/${postId}/detail/${type}`,
 } as const;
 
 export const DEFAULT_NOTIFEE_OPTION_IOS = {

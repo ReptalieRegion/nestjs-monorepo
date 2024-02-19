@@ -1,8 +1,6 @@
 import { HttpStatus, Inject, Injectable, forwardRef } from '@nestjs/common';
+import { IShareComment, IShareCommentReply, ISharePost, SchemaId } from '@private-crawl/types';
 import { ReportShareContentType } from '../../../dto/report/share/input-reportShareContent.dto';
-import { IResponseShareCommentDTO } from '../../../dto/share/comment/response-shareCommnet.dto';
-import { IResponseShareCommentReplyDTO } from '../../../dto/share/commentReply/response-shareCommentReply.dto';
-import { IResponseSharePostDTO } from '../../../dto/share/post/response-sharePost.dto';
 import { CustomException } from '../../../utils/error/customException';
 import { CustomExceptionHandler } from '../../../utils/error/customException.handler';
 import { ImageSearcherService, ImageSearcherServiceToken } from '../../image/service/imageSearcher.service';
@@ -16,19 +14,19 @@ import { SharePostRepository } from '../repository/sharePost.repository';
 export const ShareSearcherServiceToken = 'ShareSearcherServiceToken';
 
 interface PostOption {
-    create?: { post: Partial<IResponseSharePostDTO>; imageKeys: string[] };
+    create?: { post: Partial<ISharePost>; imageKeys: string[] };
     update?: { postId: string };
     delete?: { postId: string };
 }
 
 interface CommentOption {
-    create?: { comment: Partial<IResponseShareCommentDTO> };
+    create?: { comment: Partial<IShareComment> };
     update?: { commentId: string };
     delete?: { commentId: string };
 }
 
 interface CommentReplyOption {
-    create?: { commentReply: Partial<IResponseShareCommentReplyDTO> };
+    create?: { commentReply: Partial<IShareCommentReply> };
     update?: { commentReplyId: string };
     delete?: { commentReplyId: string };
 }
@@ -524,7 +522,7 @@ export class ShareSearcherService {
      * @param postId 게시물 ID
      * @returns 좋아요 상태 여부 (존재하는 경우 true, 없는 경우 false, 알 수 없는 경우 undefined)
      */
-    async isExistsLike(userId: string, postId: string): Promise<boolean | undefined> {
+    async isExistsLike(userId: SchemaId, postId: string): Promise<boolean | undefined> {
         const like = await this.shareLikeRepository.findOne({ userId, postId }).exec();
         return like ? (like.isCanceled ? false : true) : undefined;
     }
@@ -641,7 +639,7 @@ export class ShareSearcherService {
      * @param postId 게시물 ID
      * @returns 좋아요 수를 반환합니다.
      */
-    async getLikeCount(userId: string, postId: string): Promise<number> {
+    async getLikeCount(userId: SchemaId, postId: string): Promise<number> {
         const blockedIds = await this.reportSearcherService.getUserBlockedIds(userId);
         return this.shareLikeRepository.countDocuments({ postId, userId: { $nin: blockedIds }, isCanceled: false }).exec();
     }
@@ -685,7 +683,7 @@ export class ShareSearcherService {
      * @param currentUserId 유저 ID
      * @returns 댓글 수를 반환합니다.
      */
-    async getCommentCount(postId: string, currentUserId: string): Promise<number> {
+    async getCommentCount(postId: string, currentUserId: SchemaId): Promise<number> {
         const typeIds = await this.reportSearcherService.findTypeIdList(currentUserId, ReportShareContentType.COMMENT);
         const blockedIds = await this.reportSearcherService.getUserBlockedIds(currentUserId);
 

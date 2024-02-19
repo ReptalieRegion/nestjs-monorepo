@@ -1,6 +1,6 @@
 import { ConfigModule } from '@nestjs/config';
 
-const configs = () => {
+export const configs = () => {
     const env = process.env;
     if (!env) {
         return {};
@@ -25,14 +25,24 @@ const configs = () => {
         AWS_ACCESS_KEY_ID: env.AWS_ACCESS_KEY_ID,
         AWS_SECRET_ACCESS_KEY: env.AWS_SECRET_ACCESS_KEY,
         AWS_REGION: env.AWS_REGION,
+        USER_BASE_IMAGE: env.USER_BASE_IMAGE,
         AWS_BUCKET: env.AWS_BUCKET,
         AWS_IMAGE_BASEURL: env.AWS_IMAGE_BASEURL,
-        USER_BASE_IMAGE: env.USER_BASE_IMAGE,
         REDIS_URI: env.REDIS_URI,
         GOOGLE_CLIENT_ID: env.GOOGLE_CLIENT_ID,
+        CLIENT_EMAIL: env.CLIENT_EMAIL,
+        PRIVATE_KEY: env.PRIVATE_KEY,
+        PROJECT_ID: env.PROJECT_ID,
+        SLACK_TOKEN: env.SLACK_TOKEN,
+        IS_DEPLOY: env.IS_DEPLOY,
         API_GATEWAY_URI: env.API_GATEWAY_URI,
         X_API_KEY: env.X_API_KEY,
     };
 };
 
-export const CustomConfigModule = ConfigModule.forRoot({ cache: true, isGlobal: true, load: [configs] });
+export const CustomConfigModule = ConfigModule.forRoot({
+    cache: true,
+    isGlobal: true,
+    envFilePath: `${process.cwd()}/apps/crawl-nest/.env.${process.env.NODE_ENV}`,
+    load: [configs],
+});

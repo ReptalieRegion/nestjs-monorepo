@@ -16,9 +16,7 @@ COPY .yarn .yarn
 RUN yarn install || (cat /tmp/*/build.log; exit 1)
 
 # build
-RUN yarn workspace @private-crawl/models build
-RUN yarn workspace @private-crawl/types build
-RUN yarn workspace @private-crawl/utils build
+RUN yarn build:all
 RUN yarn build:server
 
 # # 🚀 Build the runner image

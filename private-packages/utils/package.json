@@ -1,6 +1,7 @@
 {
     "name": "@private-crawl/utils",
-    "main": "dist/index",
+    "main": "dist/src/index.js",
+    "types": "dist/src/index.d.ts",
     "scripts": {
         "prebuild": "rimraf dist",
         "build": "yarn prebuild && tsc -p tsconfig.build.json"

@@ -3,8 +3,8 @@
     "version": "1.0.0",
     "description": "Mongoose schema package",
     "author": "Yun Chan Park",
-    "main": "dist/index.js",
-    "types": "dist/index.d.ts",
+    "main": "dist/src/index.js",
+    "types": "dist/src/index.d.ts",
     "scripts": {
         "prebuild": "rimraf dist",
         "build": "yarn prebuild && tsc -p tsconfig.build.json"

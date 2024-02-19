@@ -18,10 +18,6 @@ const RAW_RUNTIME_STATE =
       "reference": "workspace:apps/crawl-nest"\
     },\
     {\
-      "name": "@reptalieregion/webview-bridge",\
-      "reference": "workspace:packages/webview-bridge"\
-    },\
-    {\
       "name": "@private-crawl/models",\
       "reference": "workspace:private-packages/@crawl/models"\
     },\
@@ -41,7 +37,6 @@ const RAW_RUNTIME_STATE =
     ["@private-crawl/models", ["workspace:private-packages/@crawl/models"]],\
     ["@private-crawl/types", ["workspace:private-packages/@crawl/types"]],\
     ["@private-crawl/utils", ["workspace:private-packages/utils"]],\
-    ["@reptalieregion/webview-bridge", ["workspace:packages/webview-bridge"]],\
     ["test", ["workspace:."]]\
   ],\
   "fallbackPool": [\
@@ -3369,16 +3364,6 @@ const RAW_RUNTIME_STATE =
           "@types/redis__client"\
         ],\
         "linkType": "HARD"\
-      }]\
-    ]],\
-    ["@reptalieregion/webview-bridge", [\
-      ["workspace:packages/webview-bridge", {\
-        "packageLocation": "./packages/webview-bridge/",\
-        "packageDependencies": [\
-          ["@reptalieregion/webview-bridge", "workspace:packages/webview-bridge"],\
-          ["typescript", "patch:typescript@npm%3A5.3.3#optional!builtin<compat/typescript>::version=5.3.3&hash=e012d7"]\
-        ],\
-        "linkType": "SOFT"\
       }]\
     ]],\
     ["@rushstack/eslint-patch", [\
@@ -14081,13 +14066,6 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "../../../.yarn/berry/cache/typescript-patch-ce5481e54d-10c0.zip/node_modules/typescript/",\
         "packageDependencies": [\
           ["typescript", "patch:typescript@npm%3A5.0.4#optional!builtin<compat/typescript>::version=5.0.4&hash=b5f058"]\
-        ],\
-        "linkType": "HARD"\
-      }],\
-      ["patch:typescript@npm%3A5.3.3#optional!builtin<compat/typescript>::version=5.3.3&hash=e012d7", {\
-        "packageLocation": "../../../.yarn/berry/cache/typescript-patch-4778c7998b-10c0.zip/node_modules/typescript/",\
-        "packageDependencies": [\
-          ["typescript", "patch:typescript@npm%3A5.3.3#optional!builtin<compat/typescript>::version=5.3.3&hash=e012d7"]\
         ],\
         "linkType": "HARD"\
       }]\

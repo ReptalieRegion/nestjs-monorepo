@@ -29,6 +29,10 @@ export class AdminService {
         return this.adminModel.findOneAndUpdate({ _id: id }, { refreshToken }, { upsert: true });
     }
 
+    async findAdminById(id: string) {
+        return this.adminModel.findById(id).exec();
+    }
+
     async findOneByEmail(email: string) {
         return this.adminModel.findOne({ email }).exec();
     }

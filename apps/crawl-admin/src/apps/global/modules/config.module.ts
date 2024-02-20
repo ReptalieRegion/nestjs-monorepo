@@ -43,6 +43,6 @@ export const configs = () => {
 export const GlobalConfigModule = ConfigModule.forRoot({
     cache: true,
     isGlobal: true,
-    envFilePath: `${process.cwd()}/apps/crawl-nest/.env.${process.env.NODE_ENV}`,
+    envFilePath: `${process.cwd()}/apps/crawl-admin/.env.${process.env.NODE_ENV}`,
     load: [configs],
 });

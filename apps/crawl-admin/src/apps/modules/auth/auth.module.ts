@@ -4,12 +4,13 @@ import { AuthJwtModule } from '../../global/modules';
 import { AdminModule } from '../admin/admin.module';
 import { CryptoServiceProvider } from '../crypto/crypto.provider';
 import { AuthController } from './auth.controller';
-import { AuthService } from './auth.service';
+import { AuthServiceProvider } from './auth.provider';
 import { LocalStrategy } from './strategies/local.strategy';
 
 @Module({
     imports: [AdminModule, PassportModule, AuthJwtModule],
     controllers: [AuthController],
-    providers: [AuthService, LocalStrategy, CryptoServiceProvider],
+    providers: [LocalStrategy, CryptoServiceProvider, AuthServiceProvider],
+    exports: [AuthServiceProvider, LocalStrategy],
 })
 export class AuthModule {}

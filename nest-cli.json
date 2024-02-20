@@ -10,13 +10,22 @@
         "tsConfigPath": "apps/crawl-nest/tsconfig.build.json"
     },
     "projects": {
-        "@app/crawl-nest": {
+        "@crawl-nest/server": {
             "type": "application",
             "root": "apps/crawl-nest",
             "entryFile": "src/main",
             "sourceRoot": "apps/crawl-nest/src",
             "compilerOptions": {
                 "tsConfigPath": "apps/crawl-nest/tsconfig.build.json"
+            }
+        },
+        "@crawl-nest/admin": {
+            "type": "application",
+            "root": "apps/crawl-admin",
+            "entryFile": "src/main",
+            "sourceRoot": "apps/crawl-admin/src",
+            "compilerOptions": {
+                "tsConfigPath": "apps/crawl-admin/tsconfig.build.json"
             }
         },
         "@private-crawl/models": {
@@ -44,6 +53,15 @@
             "sourceRoot": "private-packages/utils/src",
             "compilerOptions": {
                 "tsConfigPath": "private-packages/utils/tsconfig.build.json"
+            }
+        },
+        "@private-crawl/slack": {
+            "type": "library",
+            "root": "private-packages/slack",
+            "entryFile": "index",
+            "sourceRoot": "private-packages/slack/src",
+            "compilerOptions": {
+                "tsConfigPath": "private-packages/slack/tsconfig.build.json"
             }
         }
     }

@@ -8,9 +8,10 @@ import { GlobalSlackModule } from './global/modules/slack.module';
 import { LoggerMiddleware } from './middlewares/logger.middleware';
 import { AdminModule } from './modules/admin/admin.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { UserModule } from './modules/user/user.module';
 
 @Module({
-    imports: [GlobalConfigModule, GlobalMongooseModule, GlobalSlackModule, AuthModule, AdminModule],
+    imports: [GlobalConfigModule, GlobalMongooseModule, GlobalSlackModule, AuthModule, AdminModule, UserModule],
     controllers: [AppController],
 })
 export class AppModule implements NestModule {

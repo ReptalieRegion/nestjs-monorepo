@@ -4,7 +4,7 @@ import { ROLE } from '../enums/admin.enum';
 type OTP = {
     code: string;
     createdAt: Date;
-    successAt: Date;
+    successAt: Date | undefined;
 };
 
 interface IAdmin {

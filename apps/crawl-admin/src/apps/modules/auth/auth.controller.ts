@@ -3,6 +3,7 @@ import { SlackService } from '@private-crawl/slack';
 import { ValidationPipe } from '../../global/error/validator/validator.pipe';
 import { AdminProfile } from '../../types/guards/admin.types';
 import { AuthService, AuthServiceToken } from './auth.service';
+import { OtpDTO } from './dto/otp.dto';
 import { RegisterDTO } from './dto/register.dto';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 import { ModifyCookieInterceptor } from './interceptors/modify-cookie.interceptor';
@@ -17,10 +18,17 @@ export class AuthController {
 
     @UseGuards(LocalAuthGuard)
     @HttpCode(HttpStatus.CREATED)
-    @UseInterceptors(ModifyCookieInterceptor)
-    @Post('login')
+    @Post('generate-otp')
     async login(@Req() req: { user: AdminProfile }) {
-        return this.authService.login(req.user);
+        await this.authService.generateAndSendOTP(req.user);
+        return { message: 'success' };
+    }
+
+    @HttpCode(HttpStatus.CREATED)
+    @UseInterceptors(ModifyCookieInterceptor)
+    @Post('verify-otp-and-issue-token')
+    async otp(@Body() body: OtpDTO) {
+        return this.authService.verifyOTPAndIssueToken(body);
     }
 
     @HttpCode(HttpStatus.CREATED)

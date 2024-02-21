@@ -10,6 +10,7 @@ export class CustomExceptionFilter implements ExceptionFilter {
         const response = ctx.getResponse<Response>();
         const request = ctx.getRequest<Request>();
         const res = exception instanceof CustomException ? exception : new UnCatchException();
+        console.log(exception);
 
         response.status(res.statusCode).json({
             statusCode: res.statusCode,

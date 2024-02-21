@@ -1876,6 +1876,7 @@ const RAW_RUNTIME_STATE =
           ["@nestjs/testing", "virtual:3944274fde4a00c786d447e6c90e96dbb733f3cdeb380e804eafa106cf6d47cdd27fefb7bff25f96585eeb95aac76a6a076e12d049c345e814c23436df78599d#npm:10.3.3"],\
           ["@private-crawl/models", "workspace:private-packages/@crawl/models"],\
           ["@private-crawl/types", "workspace:private-packages/@crawl/types"],\
+          ["@private-crawl/utils", "workspace:private-packages/utils"],\
           ["@types/cookie-parser", "npm:1.4.6"],\
           ["@types/express", "npm:4.17.21"],\
           ["@types/jest", "npm:29.5.0"],\

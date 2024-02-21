@@ -1268,6 +1268,7 @@ __metadata:
     "@nestjs/testing": "npm:^10.3.3"
     "@private-crawl/models": "workspace:^"
     "@private-crawl/types": "workspace:^"
+    "@private-crawl/utils": "workspace:^"
     "@types/cookie-parser": "npm:^1.4.3"
     "@types/express": "npm:^4.17.13"
     "@types/jest": "npm:29.5.0"

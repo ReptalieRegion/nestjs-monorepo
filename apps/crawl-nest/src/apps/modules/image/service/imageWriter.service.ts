@@ -1,8 +1,8 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
+import { getCurrentDate } from '@private-crawl/utils';
 import { ClientSession } from 'mongoose';
 import { ImageType } from '../../../dto/image/input-image.dto';
 import { CustomException } from '../../../utils/error/customException';
-import { getCurrentDate } from '../../../utils/time/time';
 import { ImageRepository } from '../image.repository';
 
 export const ImageWriterServiceToken = 'ImageWriterServiceToken';

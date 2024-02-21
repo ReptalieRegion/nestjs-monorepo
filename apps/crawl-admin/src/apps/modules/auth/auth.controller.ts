@@ -1,5 +1,6 @@
 import { Body, Controller, HttpCode, HttpStatus, Inject, Post, Req, UseGuards, UseInterceptors } from '@nestjs/common';
 import { SlackService } from '@private-crawl/slack';
+import { Request } from 'express';
 import { ValidationPipe } from '../../global/error/validator/validator.pipe';
 import { AdminProfile } from '../../types/guards/admin.types';
 import { AuthService, AuthServiceToken } from './auth.service';
@@ -36,5 +37,14 @@ export class AuthController {
     @Post('register')
     async register(@Body(new ValidationPipe(-8501)) body: RegisterDTO) {
         return this.authService.register(body);
+    }
+
+    @HttpCode(HttpStatus.CREATED)
+    @UseInterceptors(ModifyCookieInterceptor)
+    @Post('refresh')
+    async refreshToken(@Req() req: Request) {
+        const refreshToken = req.cookies?.['refresh_token'] ?? '';
+        const payload = await this.authService.verifyToken(refreshToken);
+        return await this.authService.refreshToken(payload.sub, refreshToken);
     }
 }

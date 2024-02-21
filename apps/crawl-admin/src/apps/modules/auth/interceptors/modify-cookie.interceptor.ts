@@ -19,13 +19,13 @@ export class ModifyCookieInterceptor implements NestInterceptor {
                     httpOnly: true,
                     sameSite: true,
                     secure: true,
-                    maxAge: 1 * 24 * 60 * 60,
+                    maxAge: 1 * 24 * 60 * 60 * 1000,
                 });
                 response.cookie('refresh_token', refreshToken, {
                     httpOnly: true,
                     sameSite: true,
                     secure: true,
-                    maxAge: 7 * 24 * 60 * 60,
+                    maxAge: 7 * 24 * 60 * 60 * 1000,
                 });
             }),
         );

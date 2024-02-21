@@ -35,7 +35,7 @@ export class AuthService {
     ) {}
 
     async verifyToken(token: string): Promise<JwtPayload> {
-        const secret = this.configService.get('JWT_ACCESS_SECRET_KEY');
+        const secret = this.configService.get('JWT_SECRET_KEY');
 
         try {
             return this.jwtService.verify(token, { secret });
@@ -110,7 +110,7 @@ export class AuthService {
             throw new CustomException('Otp Code Expired Error', HttpStatusCode.Unauthorized, AuthErrorCode.EXPIRED_OTP_CODE);
         }
 
-        const tokens = await this.issueAccessAndRefreshToken({ email: user.email, id: user.id, role: user.role });
+        const tokens = await this._issueAccessAndRefreshToken({ email: user.email, id: user.id, role: user.role });
         await this.adminService.updateLoginInfoById(user.id, {
             refreshToken: tokens.refreshToken,
             successAt: dayjs().toDate(),
@@ -145,7 +145,7 @@ export class AuthService {
                 role: ROLE.UNDETERMINED,
             });
 
-            const tokens = await this.issueAccessAndRefreshToken({
+            const tokens = await this._issueAccessAndRefreshToken({
                 email: user.email,
                 id: user.id,
                 role: user.role,
@@ -173,8 +173,25 @@ export class AuthService {
         }
     }
 
-    private async issueAccessAndRefreshToken(user: Pick<IAdmin, 'email' | 'id' | 'role'>) {
-        const secret = this.configService.get('JWT_ACCESS_SECRET_KEY');
+    async refreshToken(id: string, refreshToken: string) {
+        const user = await this.adminService.findAdminById(id);
+        const misMatchRefreshToken = !(user?.refreshToken === refreshToken);
+        if (misMatchRefreshToken) {
+            throw new CustomException(
+                'Refresh Token Mismatch Error',
+                HttpStatusCode.UnprocessableEntity,
+                AuthErrorCode.MISMATCH_REFRESH_TOKEN,
+            );
+        }
+
+        const tokens = await this._issueAccessAndRefreshToken({ email: user.email, id: user.id, role: user.role });
+        await this.adminService.updateRefreshTokenById(user.id, tokens.refreshToken);
+
+        return tokens;
+    }
+
+    private async _issueAccessAndRefreshToken(user: Pick<IAdmin, 'email' | 'id' | 'role'>) {
+        const secret = this.configService.get('JWT_SECRET_KEY');
         const accessExpiresIn = this.configService.get('JWT_ACCESS_TOKEN_TIME');
         const refreshExpiresIn = this.configService.get('JWT_REFRESH_TOKEN_TIME');
         const accessToken = await this.jwtService.signAsync(

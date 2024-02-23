@@ -40,6 +40,9 @@ COPY --from=builder /builder/private-packages/@crawl/models/package.json ./priva
 COPY --from=builder /builder/private-packages/@crawl/types/dist ./private-packages/@crawl/types/dist
 COPY --from=builder /builder/private-packages/@crawl/types/package.json ./private-packages/@crawl/types/
 
+COPY --from=builder /builder/private-packages/slack/dist ./private-packages/slack/dist
+COPY --from=builder /builder/private-packages/slack/package.json ./private-packages/slack/
+
 COPY --from=builder /builder/private-packages/utils/dist ./private-packages/utils/dist
 COPY --from=builder /builder/private-packages/utils/package.json ./private-packages/utils/
 

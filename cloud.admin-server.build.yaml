@@ -9,6 +9,17 @@ steps:
               'dockers/admin-server/Dockerfile',
               '.',
           ]
+      secretEnv:
+          [
+              'JWT_SECRET_KEY',
+              'JWT_ACCESS_TOKEN_TIME',
+              'JWT_REFRESH_TOKEN_TIME',
+              'MODE',
+              'AWS_IMAGE_BASEURL',
+              'SLACK_TOKEN',
+              'PORT',
+              'MONGODB_URI',
+          ]
     - name: 'gcr.io/cloud-builders/docker'
       args: ['push', '${_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/${_IMAGE}:$COMMIT_SHA']
     - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
@@ -23,5 +34,23 @@ steps:
               '--region',
               '${_LOCATION}',
           ]
+availableSecrets:
+    secretManager:
+        - versionName: 'projects/${_PROJECT_ID}/secrets/ADMIN_JWT_SECRET_KEY/versions/latest'
+          env: 'JWT_SECRET_KEY'
+        - versionName: 'projects/${_PROJECT_ID}/secrets/ADMIN_JWT_ACCESS_TOKEN_TIME/versions/latest'
+          env: 'JWT_ACCESS_TOKEN_TIME'
+        - versionName: 'projects/${_PROJECT_ID}/secrets/ADMIN_JWT_REFRESH_TOKEN_TIME/versions/latest'
+          env: 'JWT_REFRESH_TOKEN_TIME'
+        - versionName: 'projects/${_PROJECT_ID}/secrets/MODE_PROD/versions/latest'
+          env: 'MODE'
+        - versionName: 'projects/${_PROJECT_ID}/secrets/AWS_PROD_IMAGE_BASEURL/versions/latest'
+          env: 'AWS_IMAGE_BASEURL'
+        - versionName: 'projects/${_PROJECT_ID}/secrets/SLACK_TOKEN/versions/latest'
+          env: 'SLACK_TOKEN'
+        - versionName: 'projects/${_PROJECT_ID}/secrets/PORT/versions/latest'
+          env: 'PORT'
+        - versionName: 'projects/${_PROJECT_ID}/secrets/MONGODB_URI/versions/latest'
+          env: 'MONGODB_URI'
 images:
     - '${_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/${_IMAGE}:$COMMIT_SHA'

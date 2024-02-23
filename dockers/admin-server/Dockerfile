@@ -17,7 +17,7 @@ RUN yarn install || (cat /tmp/*/build.log; exit 1)
 
 # build
 RUN yarn build:all
-RUN yarn build:server
+RUN yarn build:admin
 
 # # 🚀 Build the runner image
 FROM node:18-alpine as runner
@@ -46,4 +46,4 @@ COPY --from=builder /builder/private-packages/utils/package.json ./private-packa
 RUN yarn install
 
 # Configure the default command
-CMD yarn prod:server
+CMD yarn prod:admin

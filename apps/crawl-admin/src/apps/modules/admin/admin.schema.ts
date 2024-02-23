@@ -33,7 +33,7 @@ export class Admin {
     @Prop({ required: true, enum: ROLE })
     role: ROLE;
 
-    @Prop({ required: true, type: SchemaTypes.Date })
+    @Prop({ type: SchemaTypes.Date })
     lastAccessedAt: Date;
 }
 

@@ -71,4 +71,8 @@ export class UserService {
             },
         ]);
     }
+
+    async findUserTotalCount() {
+        return this.userModel.countDocuments();
+    }
 }

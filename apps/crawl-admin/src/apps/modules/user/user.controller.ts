@@ -9,13 +9,20 @@ export class UserController {
 
     @UseGuards(JwtAuthGuard)
     @Get('list')
-    async getUserList(@Query('pageParam') pageParam: string, @Query('limitSize') limitSize: string) {
-        const { pageNumber, pageSize } = parsePaginationParams(pageParam ?? 0, limitSize ?? 10);
+    async getUserList(@Query('pageParam') pageParam: string, @Query('limit') limit: string) {
+        const { pageNumber, pageSize } = parsePaginationParams(pageParam ?? 0, limit ?? 10);
         const userInfos = await this.userService.findUsersInfo(pageNumber, pageSize);
+        return userInfos;
+    }
 
+    @UseGuards(JwtAuthGuard)
+    @Get('total-count')
+    async getUserTotalCount() {
+        const count = await this.userService.findUserTotalCount();
         return {
-            items: userInfos,
-            nextPage: userInfos.length < pageSize ? undefined : pageNumber + 1,
+            users: {
+                count,
+            },
         };
     }
 }

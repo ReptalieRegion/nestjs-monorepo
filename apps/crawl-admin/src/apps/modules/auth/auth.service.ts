@@ -136,24 +136,27 @@ export class AuthService {
         const salt = this.cryptoService.generateSalt();
 
         try {
-            const hashedPassword = await this.cryptoService.hashPassword(body.password, salt);
-            const user = await this.adminService.createUser({
-                email: body.email,
-                name: body.name,
-                password: hashedPassword,
-                salt,
-                role: ROLE.UNDETERMINED,
-            });
+            try {
+                const hashedPassword = await this.cryptoService.hashPassword(body.password, salt);
+                const user = await this.adminService.createUser({
+                    email: body.email,
+                    name: body.name,
+                    password: hashedPassword,
+                    salt,
+                    role: ROLE.UNDETERMINED,
+                });
 
-            const tokens = await this._issueAccessAndRefreshToken({
-                email: user.email,
-                id: user.id,
-                role: user.role,
-            });
+                const tokens = await this._issueAccessAndRefreshToken({
+                    email: user.email,
+                    id: user.id,
+                    role: user.role,
+                });
 
-            await this.adminService.updateRefreshTokenById(user.id, tokens.refreshToken);
-
-            return tokens;
+                await this.adminService.updateRefreshTokenById(user.id, tokens.refreshToken);
+                return tokens;
+            } catch (error) {
+                console.log(error);
+            }
         } catch (err) {
             if (err instanceof Error) {
                 if (err.message === 'Failed Hash Password') {

@@ -13,16 +13,14 @@ COPY /private-packages ./private-packages
 COPY tsconfig.base.json nest-cli.json .yarnrc.yml yarn.lock package.json ./
 COPY .yarn .yarn
 
-RUN echo "JWT_SECRET_KEY=${JWT_SECRET_KEY}" > ./apps/crawl-admin/env.production
-RUN echo "JWT_ACCESS_TOKEN_TIME=${JWT_ACCESS_TOKEN_TIME}" >> ./apps/crawl-admin/env.production
-RUN echo "JWT_REFRESH_TOKEN_TIME=${JWT_REFRESH_TOKEN_TIME}" >> ./apps/crawl-admin/env.production
-RUN echo "MODE=${MODE}" >> ./apps/crawl-admin/env.production
-RUN echo "AWS_IMAGE_BASEURL=${AWS_IMAGE_BASEURL}" >> ./apps/crawl-admin/env.production
-RUN echo "SLACK_TOKEN=${SLACK_TOKEN}" >> ./apps/crawl-admin/env.production
-RUN echo "PORT=${PORT}" >> ./apps/crawl-admin/env.production
-RUN echo "MONGODB_URI=${MONGODB_URI}" >> ./apps/crawl-admin/env.production
-
-RUN echo ${MODE}
+RUN echo "JWT_SECRET_KEY=${JWT_SECRET_KEY}" > ./apps/crawl-admin/.env.production
+RUN echo "JWT_ACCESS_TOKEN_TIME=${JWT_ACCESS_TOKEN_TIME}" >> ./apps/crawl-admin/.env.production
+RUN echo "JWT_REFRESH_TOKEN_TIME=${JWT_REFRESH_TOKEN_TIME}" >> ./apps/crawl-admin/.env.production
+RUN echo "MODE=${MODE}" >> ./apps/crawl-admin/.env.production
+RUN echo "AWS_IMAGE_BASEURL=${AWS_IMAGE_BASEURL}" >> ./apps/crawl-admin/.env.production
+RUN echo "SLACK_TOKEN=${SLACK_TOKEN}" >> ./apps/crawl-admin/.env.production
+RUN echo "PORT=${PORT}" >> ./apps/crawl-admin/.env.production
+RUN echo "MONGODB_URI=${MONGODB_URI}" >> ./apps/crawl-admin/.env.production
 
 # Install dependencies and build
 RUN yarn install || (cat /tmp/*/build.log; exit 1)
@@ -45,7 +43,7 @@ COPY --from=builder /builder/.yarnrc.yml .
 COPY --from=builder /builder/nest-cli.json .
 COPY --from=builder /builder/apps/crawl-admin/dist ./apps/crawl-admin/dist
 COPY --from=builder /builder/apps/crawl-admin/package.json ./apps/crawl-admin/
-COPY --from=builder /builder/apps/crawl-admin/env.production ./apps/crawl-admin/
+COPY --from=builder /builder/apps/crawl-admin/.env.production ./apps/crawl-admin/
 
 COPY --from=builder /builder/private-packages/@crawl/models/dist ./private-packages/@crawl/models/dist
 COPY --from=builder /builder/private-packages/@crawl/models/package.json ./private-packages/@crawl/models/

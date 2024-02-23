@@ -2,6 +2,14 @@
 FROM node:18-alpine as builder
 WORKDIR /builder
 
+ARG JWT_SECRET_KEY
+ARG JWT_ACCESS_TOKEN_TIME
+ARG JWT_REFRESH_TOKEN_TIME
+ARG MODE
+ARG AWS_IMAGE_BASEURL
+ARG SLACK_TOKEN
+ARG PORT
+ARG MONGODB_URI
 
 # yarn berry
 RUN npm install -g npm@latest && corepack enable

@@ -2,6 +2,19 @@
 FROM node:18-alpine as builder
 WORKDIR /builder
 
+ARG JWT_SECRET_KEY
+ARG JWT_ACCESS_TOKEN_TIME
+ARG JWT_REFRESH_TOKEN_TIME
+ARG MODE
+ARG AWS_IMAGE_BASEURL
+ARG SLACK_TOKEN
+ARG PORT
+ARG MONGODB_URI
+ARG TEST=test
+
+RUN echo ${TEST}
+RUN echo ${MODE}
+
 # yarn berry
 RUN npm install -g npm@latest && corepack enable
 RUN yarn set version stable
@@ -23,12 +36,6 @@ RUN echo "MONGODB_URI=${MONGODB_URI}" >> ./apps/crawl-admin/.env.production
 RUN echo "MODE=${MODE}" >> ./apps/crawl-admin/.env.test
 
 RUN echo "MODE=${MODE}" >> ./apps/crawl-admin/.env.test
-
-ARG TEST=test
-
-RUN echo ${TEST}
-RUN echo ${MODE}
-
 
 # Install dependencies and build
 RUN yarn install || (cat /tmp/*/build.log; exit 1)

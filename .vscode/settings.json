@@ -20,5 +20,14 @@
         "dockers": "Docker",
         "stores": "Global"
     },
-    "cSpell.words": ["diaryentities", "notifee", "reptalieregion", "shareposts", "typecheck"]
+    "cSpell.words": [
+        "cloudsdktool",
+        "diaryentities",
+        "gcloud",
+        "nestjs",
+        "notifee",
+        "reptalieregion",
+        "shareposts",
+        "typecheck"
+    ]
 }

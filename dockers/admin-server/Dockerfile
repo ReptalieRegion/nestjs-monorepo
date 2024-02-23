@@ -30,7 +30,7 @@ RUN echo "SLACK_TOKEN=${SLACK_TOKEN}" >> ./apps/crawl-admin/.env.production
 RUN echo "PORT=${PORT}" >> ./apps/crawl-admin/.env.production
 RUN echo "MONGODB_URI=${MONGODB_URI}" >> ./apps/crawl-admin/.env.production
 
-RUN cat ./apps/crawl-admin/.env.production
+RUN echo "MODE=${MODE}"
 
 # Install dependencies and build
 RUN yarn install || (cat /tmp/*/build.log; exit 1)

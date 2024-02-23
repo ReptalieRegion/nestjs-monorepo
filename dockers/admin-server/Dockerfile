@@ -21,16 +21,19 @@ ARG SLACK_TOKEN
 ARG PORT
 ARG MONGODB_URI
 
-RUN echo "JWT_SECRET_KEY=$JWT_SECRET_KEY" > ./apps/crawl-admin/.env.production
-RUN echo "JWT_ACCESS_TOKEN_TIME=$JWT_ACCESS_TOKEN_TIME" >> ./apps/crawl-admin/.env.production
-RUN echo "JWT_REFRESH_TOKEN_TIME=$JWT_REFRESH_TOKEN_TIME" >> ./apps/crawl-admin/.env.production
-RUN echo "MODE=$MODE" >> ./apps/crawl-admin/.env.production
-RUN echo "AWS_IMAGE_BASEURL=$AWS_IMAGE_BASEURL" >> ./apps/crawl-admin/.env.production
-RUN echo "SLACK_TOKEN=$SLACK_TOKEN" >> ./apps/crawl-admin/.env.production
-RUN echo "PORT=$PORT" >> ./apps/crawl-admin/.env.production
-RUN echo "MONGODB_URI=$MONGODB_URI" >> ./apps/crawl-admin/.env.production
-RUN echo "MODE=$MODE" >> ./apps/crawl-admin/.env.test
+RUN echo "JWT_SECRET_KEY=${JWT_SECRET_KEY}" > ./apps/crawl-admin/.env.production
+RUN echo "JWT_ACCESS_TOKEN_TIME=${JWT_ACCESS_TOKEN_TIME}" >> ./apps/crawl-admin/.env.production
+RUN echo "JWT_REFRESH_TOKEN_TIME=${JWT_REFRESH_TOKEN_TIME}" >> ./apps/crawl-admin/.env.production
+RUN echo "MODE=${MODE}" >> ./apps/crawl-admin/.env.production
+RUN echo "AWS_IMAGE_BASEURL=${AWS_IMAGE_BASEURL}" >> ./apps/crawl-admin/.env.production
+RUN echo "SLACK_TOKEN=${SLACK_TOKEN}" >> ./apps/crawl-admin/.env.production
+RUN echo "PORT=${PORT}" >> ./apps/crawl-admin/.env.production
+RUN echo "MONGODB_URI=${MONGODB_URI}" >> ./apps/crawl-admin/.env.production
+RUN echo "MODE=${MODE}" >> ./apps/crawl-admin/.env.test
 
+RUN echo "MODE=${MODE}" >> ./apps/crawl-admin/.env.test
+
+RUN echo "MODE=${MODE}"
 RUN cat ./apps/crawl-admin/.env.test
 
 # Install dependencies and build

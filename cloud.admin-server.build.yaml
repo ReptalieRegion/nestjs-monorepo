@@ -60,7 +60,7 @@ availableSecrets:
     secretManager:
         - versionName: projects/${_PROJECT_ID}/secrets/ADMIN_JWT_ACCESS_TOKEN_TIME/versions/latest
           env: 'JWT_ACCESS_TOKEN_TIME'
-        - versionName: projects/${_PROJECT_ID}/secrets/ADMIN_JWT_REFRESH_TOKEN_TIME /versions/latest
+        - versionName: projects/${_PROJECT_ID}/secrets/ADMIN_JWT_REFRESH_TOKEN_TIME/versions/latest
           env: 'JWT_REFRESH_TOKEN_TIME'
         - versionName: projects/${_PROJECT_ID}/secrets/MODE_PROD/versions/latest
           env: 'MODE'

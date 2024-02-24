@@ -2,6 +2,19 @@
 FROM node:18-alpine as builder
 WORKDIR /builder
 
+ARG JWT_ACCESS_TOKEN_TIME
+ARG JWT_REFRESH_TOKEN_TIME
+ARG MODE
+ARG AWS_IMAGE_BASEURL
+ARG SLACK_TOKEN
+ARG MONGODB_URI
+ARG JWT_SECRET_KEY
+ARG INTERATIONS
+ARG DKLEN
+ARG HASH
+
+RUN echo "::${MODE}::"
+
 # yarn berry
 RUN npm install -g npm@latest && corepack enable
 RUN yarn set version stable

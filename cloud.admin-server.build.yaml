@@ -58,25 +58,25 @@ steps:
           ]
 availableSecrets:
     secretManager:
-        - versionName: projects/$PROJECT_ID/secrets/ADMIN_JWT_ACCESS_TOKEN_TIME/versions/latest
+        - versionName: projects/${_PROJECT_ID}/secrets/ADMIN_JWT_ACCESS_TOKEN_TIME/versions/latest
           env: 'JWT_ACCESS_TOKEN_TIME'
-        - versionName: projects/$PROJECT_ID/secrets/ADMIN_JWT_REFRESH_TOKEN_TIME /versions/latest
+        - versionName: projects/${_PROJECT_ID}/secrets/ADMIN_JWT_REFRESH_TOKEN_TIME /versions/latest
           env: 'JWT_REFRESH_TOKEN_TIME'
-        - versionName: projects/$PROJECT_ID/secrets/MODE_PROD/versions/latest
+        - versionName: projects/${_PROJECT_ID}/secrets/MODE_PROD/versions/latest
           env: 'MODE'
-        - versionName: projects/$PROJECT_ID/secrets/AWS_PROD_IMAGE_BASEURL/versions/latest
+        - versionName: projects/${_PROJECT_ID}/secrets/AWS_PROD_IMAGE_BASEURL/versions/latest
           env: 'AWS_IMAGE_BASEURL'
-        - versionName: projects/$PROJECT_ID/secrets/SLACK_TOKEN/versions/latest
+        - versionName: projects/${_PROJECT_ID}/secrets/SLACK_TOKEN/versions/latest
           env: 'SLACK_TOKEN'
-        - versionName: projects/$PROJECT_ID/secrets/MONGODB_PROD_URI/versions/latest
+        - versionName: projects/${_PROJECT_ID}/secrets/MONGODB_PROD_URI/versions/latest
           env: 'MONGODB_URI'
-        - versionName: projects/$PROJECT_ID/secrets/ADMIN_JWT_SECRET_KEY/versions/latest
+        - versionName: projects/${_PROJECT_ID}/secrets/ADMIN_JWT_SECRET_KEY/versions/latest
           env: 'JWT_SECRET_KEY'
-        - versionName: projects/$PROJECT_ID/secrets/INTERATIONS/versions/latest
+        - versionName: projects/${_PROJECT_ID}/secrets/INTERATIONS/versions/latest
           env: 'INTERATIONS'
-        - versionName: projects/$PROJECT_ID/secrets/DKLEN/versions/latest
+        - versionName: projects/${_PROJECT_ID}/secrets/DKLEN/versions/latest
           env: 'DKLEN'
-        - versionName: projects/$PROJECT_ID/secrets/HASH/versions/latest
+        - versionName: projects/${_PROJECT_ID}/secrets/HASH/versions/latest
           env: 'HASH'
 images:
     - '${_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/${_IMAGE}:$COMMIT_SHA'

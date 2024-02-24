@@ -45,6 +45,7 @@ RUN yarn build:admin
 FROM node:18-alpine as runner
 
 WORKDIR /runner
+ENV HOST 0.0.0.0
 # Copy files in logical layer order
 COPY --from=builder /builder/.yarn ./.yarn
 COPY --from=builder /builder/.pnp.cjs .

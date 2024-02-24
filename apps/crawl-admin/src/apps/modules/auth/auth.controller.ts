@@ -1,5 +1,4 @@
 import { Body, Controller, HttpCode, HttpStatus, Inject, Post, Req, UseGuards, UseInterceptors } from '@nestjs/common';
-import { SlackService } from '@private-crawl/slack';
 import { Request } from 'express';
 import { ValidationPipe } from '../../global/error/validator/validator.pipe';
 import { AdminProfile } from '../../types/guards/admin.types';
@@ -14,7 +13,6 @@ export class AuthController {
     constructor(
         @Inject(AuthServiceToken)
         private readonly authService: AuthService,
-        private readonly slackService: SlackService,
     ) {}
 
     @UseGuards(LocalAuthGuard)

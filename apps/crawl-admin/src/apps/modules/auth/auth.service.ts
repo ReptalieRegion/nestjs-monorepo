@@ -71,7 +71,17 @@ export class AuthService {
             throw new CustomException('Not Found User', HttpStatusCode.NotFound, AdminErrorCode.NOT_FOUND_USER);
         }
 
-        const isPasswordMatch = await this.cryptoService.verifyPassword(password, user.password, user.salt);
+        const iterations = this.configService.get('INTERATIONS');
+        const keylen = this.configService.get('DKLEN');
+        const digest = this.configService.get('HASH');
+        const isPasswordMatch = await this.cryptoService.verifyPassword(
+            password,
+            user.password,
+            user.salt,
+            Number(iterations),
+            Number(keylen),
+            digest,
+        );
         if (!isPasswordMatch) {
             throw new CustomException(
                 'Password Mismatch Error',
@@ -137,7 +147,16 @@ export class AuthService {
 
         try {
             try {
-                const hashedPassword = await this.cryptoService.hashPassword(body.password, salt);
+                const iterations = this.configService.get('INTERATIONS');
+                const keylen = this.configService.get('DKLEN');
+                const digest = this.configService.get('HASH');
+                const hashedPassword = await this.cryptoService.hashPassword(
+                    body.password,
+                    salt,
+                    Number(iterations),
+                    Number(keylen),
+                    digest,
+                );
                 const user = await this.adminService.createUser({
                     email: body.email,
                     name: body.name,

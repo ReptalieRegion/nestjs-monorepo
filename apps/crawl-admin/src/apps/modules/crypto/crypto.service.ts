@@ -9,9 +9,9 @@ export class CryptoService {
         return crypto.randomBytes(16).toString('hex');
     }
 
-    async hashPassword(password: string, salt: string): Promise<string> {
+    async hashPassword(password: string, salt: string, iterations: number, keylen: number, digest: string): Promise<string> {
         return new Promise((resolve, reject) => {
-            crypto.pbkdf2(password, salt, 10000, 64, 'sha512', (err, derivedKey) => {
+            crypto.pbkdf2(password, salt, iterations, keylen, digest, (err, derivedKey) => {
                 if (err) {
                     reject('Failed Hash Password');
                 } else {
@@ -21,8 +21,15 @@ export class CryptoService {
         });
     }
 
-    async verifyPassword(password: string, hashedPassword: string, salt: string): Promise<boolean> {
-        const hash = await this.hashPassword(password, salt);
+    async verifyPassword(
+        password: string,
+        hashedPassword: string,
+        salt: string,
+        iterations: number,
+        keylen: number,
+        digest: string,
+    ): Promise<boolean> {
+        const hash = await this.hashPassword(password, salt, iterations, keylen, digest);
         return hash === hashedPassword;
     }
 }

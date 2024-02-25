@@ -1,16 +1,9 @@
-import { Module } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
+import { UserActivityLogRepository } from './userActivityLog.repository';
 
-@Module({
-    imports: [MongooseModuleUser, MongooseModuleFollow],
-    controllers: [UserController],
-    providers: [
-        UserRepository,
-        FollowRepository,
-        UserSearcherServiceProvider,
-        UserWriterServiceProvider,
-        UserUpdaterServiceProvider,
-        UserDeleterServiceProvider,
-    ],
-    exports: [UserSearcherServiceProvider, UserWriterServiceProvider, UserUpdaterServiceProvider, UserDeleterServiceProvider],
-})
-export class UserModule {}
+export const UserActivityLogServiceToken = 'UserActivityLogServiceToken';
+
+@Injectable()
+export class UserActivityLogService {
+    constructor(private readonly userActivityLogRepository: UserActivityLogRepository) {}
+}

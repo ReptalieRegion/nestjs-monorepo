@@ -16,6 +16,7 @@ import { NotificationAgreeService, NotificationAgreeServiceToken } from '../../n
 import { NotificationPushService, NotificationPushServiceToken } from '../../notification/service/notificationPush.service';
 import { NotificationSlackService, NotificationSlackServiceToken } from '../../notification/service/notificationSlack.service';
 import { ReportSearcherService, ReportSearcherServiceToken } from '../../report/service/reportSearcher.service';
+import { UserActivityLogService, UserActivityLogServiceToken } from '../../user-activity-log/userActivityLog.service';
 import { ShareCommentRepository } from '../repository/shareComment.repository';
 import { ShareCommentReplyRepository } from '../repository/shareCommentReply.repository';
 import { ShareLikeRepository } from '../repository/shareLike.repository';
@@ -56,6 +57,9 @@ export class ShareWriterService {
 
         @Inject(ReportSearcherServiceToken)
         private readonly reportSearcherService: ReportSearcherService,
+
+        @Inject(UserActivityLogServiceToken)
+        private readonly userActivityLogService: UserActivityLogService,
     ) {}
 
     /**

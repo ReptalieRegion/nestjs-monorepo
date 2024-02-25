@@ -14,6 +14,7 @@ import { NotificationAgreeService, NotificationAgreeServiceToken } from '../../n
 import { NotificationPushService, NotificationPushServiceToken } from '../../notification/service/notificationPush.service';
 import { NotificationSlackService, NotificationSlackServiceToken } from '../../notification/service/notificationSlack.service';
 import { ReportSearcherService, ReportSearcherServiceToken } from '../../report/service/reportSearcher.service';
+import { UserActivityLogService, UserActivityLogServiceToken } from '../../user-activity-log/userActivityLog.service';
 import { FollowRepository } from '../repository/follow.repository';
 import { UserRepository } from '../repository/user.repository';
 import { UserSearcherService, UserSearcherServiceToken } from './userSearcher.service';
@@ -47,6 +48,9 @@ export class UserWriterService {
 
         @Inject(ReportSearcherServiceToken)
         private readonly reportSearcherService: ReportSearcherService,
+
+        @Inject(UserActivityLogServiceToken)
+        private readonly userActivityLogService: UserActivityLogService,
     ) {}
 
     /**

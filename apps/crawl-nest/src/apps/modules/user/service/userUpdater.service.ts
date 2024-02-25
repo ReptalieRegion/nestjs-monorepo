@@ -11,6 +11,7 @@ import { CustomExceptionHandler } from '../../../utils/error/customException.han
 import { ImageDeleterService, ImageDeleterServiceToken } from '../../image/service/imageDeleter.service';
 import { ImageS3HandlerService, ImageS3HandlerServiceToken } from '../../image/service/imageS3Handler.service';
 import { ImageWriterService, ImageWriterServiceToken } from '../../image/service/imageWriter.service';
+import { UserActivityLogService, UserActivityLogServiceToken } from '../../user-activity-log/userActivityLog.service';
 import { FollowRepository } from '../repository/follow.repository';
 import { UserRepository } from '../repository/user.repository';
 import { UserSearcherService, UserSearcherServiceToken } from './userSearcher.service';
@@ -34,6 +35,9 @@ export class UserUpdaterService {
         private readonly imageWriterService: ImageWriterService,
         @Inject(ImageDeleterServiceToken)
         private readonly imageDeleterService: ImageDeleterService,
+
+        @Inject(UserActivityLogServiceToken)
+        private readonly userActivityLogService: UserActivityLogService,
     ) {}
 
     /**

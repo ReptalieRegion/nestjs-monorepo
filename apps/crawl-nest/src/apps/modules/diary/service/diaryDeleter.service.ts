@@ -6,6 +6,7 @@ import { IUserProfileDTO } from '../../../dto/user/user/user-profile.dto';
 import { CustomException } from '../../../utils/error/customException';
 import { CustomExceptionHandler } from '../../../utils/error/customException.handler';
 import { ImageDeleterService, ImageDeleterServiceToken } from '../../image/service/imageDeleter.service';
+import { UserActivityLogService, UserActivityLogServiceToken } from '../../user-activity-log/userActivityLog.service';
 import { DiaryCalendarRepository } from '../repository/diaryCalendar.repository';
 import { DiaryEntityRepository } from '../repository/diaryEntity.repository';
 import { DiaryWeightRepository } from '../repository/diaryWeight.repository';
@@ -27,6 +28,9 @@ export class DiaryDeleterService {
         private readonly imageDeleterService: ImageDeleterService,
         @Inject(DiarySearcherServiceToken)
         private readonly diarySearcherService: DiarySearcherService,
+
+        @Inject(UserActivityLogServiceToken)
+        private readonly userActivityLogService: UserActivityLogService,
     ) {}
 
     async deleteEntity(user: IUserProfileDTO, entityId: string) {

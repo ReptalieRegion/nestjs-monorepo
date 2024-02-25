@@ -10,6 +10,7 @@ import { CustomException } from '../../../utils/error/customException';
 import { CustomExceptionHandler } from '../../../utils/error/customException.handler';
 import { ImageDeleterService, ImageDeleterServiceToken } from '../../image/service/imageDeleter.service';
 import { ImageUpdaterService, ImageUpdaterServiceToken } from '../../image/service/imageUpdater.service';
+import { UserActivityLogService, UserActivityLogServiceToken } from '../../user-activity-log/userActivityLog.service';
 import { ShareCommentRepository } from '../repository/shareComment.repository';
 import { ShareCommentReplyRepository } from '../repository/shareCommentReply.repository';
 import { ShareLikeRepository } from '../repository/shareLike.repository';
@@ -35,6 +36,9 @@ export class ShareUpdaterService {
         private readonly imageDeleterService: ImageDeleterService,
         @Inject(ImageUpdaterServiceToken)
         private readonly imageUpdaterService: ImageUpdaterService,
+
+        @Inject(UserActivityLogServiceToken)
+        private readonly userActivityLogService: UserActivityLogService,
     ) {}
 
     /**

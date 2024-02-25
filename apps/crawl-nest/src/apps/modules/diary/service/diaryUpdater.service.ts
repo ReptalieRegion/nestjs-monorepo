@@ -13,6 +13,7 @@ import { ImageS3HandlerService, ImageS3HandlerServiceToken } from '../../image/s
 import { ImageSearcherService, ImageSearcherServiceToken } from '../../image/service/imageSearcher.service';
 import { ImageUpdaterService, ImageUpdaterServiceToken } from '../../image/service/imageUpdater.service';
 import { ImageWriterService, ImageWriterServiceToken } from '../../image/service/imageWriter.service';
+import { UserActivityLogService, UserActivityLogServiceToken } from '../../user-activity-log/userActivityLog.service';
 import { DiaryCalendarRepository } from '../repository/diaryCalendar.repository';
 import { DiaryEntityRepository } from '../repository/diaryEntity.repository';
 import { DiaryWeightRepository } from '../repository/diaryWeight.repository';
@@ -42,6 +43,9 @@ export class DiaryUpdaterService {
         private readonly imageSearcherService: ImageSearcherService,
         @Inject(DiarySearcherServiceToken)
         private readonly diarySearcherService: DiarySearcherService,
+
+        @Inject(UserActivityLogServiceToken)
+        private readonly userActivityLogService: UserActivityLogService,
     ) {}
 
     async updateEntity(user: IUserProfileDTO, entityId: string, dto: IUpdateEntityDTO, files?: Express.Multer.File[]) {

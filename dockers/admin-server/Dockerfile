@@ -12,6 +12,7 @@ ARG JWT_SECRET_KEY
 ARG INTERATIONS
 ARG DKLEN
 ARG HASH
+ARG PORT
 
 # yarn berry
 RUN npm install -g npm@latest && corepack enable

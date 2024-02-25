@@ -27,7 +27,7 @@ steps:
               '--build-arg',
               'HASH',
               '--build-arg',
-              'PORT',
+              'PORT=${PORT}',
               '-t',
               '${_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/${_IMAGE}:$COMMIT_SHA',
               '-f',

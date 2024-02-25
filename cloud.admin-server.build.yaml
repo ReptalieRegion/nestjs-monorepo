@@ -43,6 +43,7 @@ steps:
               'INTERATIONS',
               'DKLEN',
               'HASH',
+              'PORT',
           ]
     - name: 'gcr.io/cloud-builders/docker'
       args: ['push', '${_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/${_IMAGE}:$COMMIT_SHA']
@@ -82,5 +83,7 @@ availableSecrets:
           env: 'DKLEN'
         - versionName: projects/${_PROJECT_ID}/secrets/HASH/versions/latest
           env: 'HASH'
+        - versionName: projects/${_PROJECT_ID}/secrets/ADMIN_PORT/versions/latest
+          env: 'PORT'
 images:
     - '${_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/${_IMAGE}:$COMMIT_SHA'

@@ -6,6 +6,10 @@ enum UserActivityType {
     POST_UPDATED = 'POST_UPDATED', // 게시글 수정
     COMMENT_CREATED = 'COMMENT_CREATED', // 댓글 생성
     COMMENT_UPDATED = 'COMMENT_UPDATED', // 댓글 수정
+    REPLY_COMMENT_CREATED = 'REPLY_COMMENT_CREATED', // 대댓글 생성
+    REPLY_COMMENT_UPDATED = 'REPLY_COMMENT_UPDATED', // 대댓글 수정
+    FOLLOW_CREATED = 'FOLLOW_CREATED', // 팔로우 생성
+    FOLLOW_UPDATED = 'FOLLOW_UPDATED', // 팔로우 토글
     ENTITY_CREATED = 'ENTITY_CREATED', // 개체 생성
     ENTITY_UPDATED = 'ENTITY_UPDATED', // 개체 수정
     ENTITY_WEIGHT_CREATED = 'ENTITY_WEIGHT_CREATED', // 개체 몸무게 생성
@@ -13,6 +17,7 @@ enum UserActivityType {
     CALENDAR_CREATED = 'CALENDAR_CREATED', // 캘린더 생성
     CALENDAR_UPDATED = 'CALENDAR_UPDATED', // 캘린더 수정
     PROFILE_UPDATED = 'PROFILE_UPDATED', // 프로필 수정
+    WITHDRAWAL = 'WITHDRAWAL', // 회원탈퇴
 }
 
 export { UserActivityType };

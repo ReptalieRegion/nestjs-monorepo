@@ -9,8 +9,6 @@ async function bootstrap() {
 
     setup(app);
 
-    console.log(process.env.PORT);
-
     await app.listen(process.env.PORT || 3333);
 }
 

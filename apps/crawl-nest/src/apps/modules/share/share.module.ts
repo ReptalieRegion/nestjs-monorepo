@@ -11,6 +11,7 @@ import { ImageModule } from '../image/image.module';
 import { NotificationModule } from '../notification/notification.module';
 import { ReportModule } from '../report/report.module';
 import { UserModule } from '../user/user.module';
+import { UserActivityLogModule } from '../user-activity-log/userActivityLog.module';
 import { ShareCommentRepository } from './repository/shareComment.repository';
 import { ShareCommentReplyRepository } from './repository/shareCommentReply.repository';
 import { ShareLikeRepository } from './repository/shareLike.repository';
@@ -29,6 +30,7 @@ import {
         MongooseModuleShareComment,
         MongooseModuleShareCommentReply,
         MongooseModuleShareLike,
+        UserActivityLogModule,
         ImageModule,
         forwardRef(() => AuthModule),
         forwardRef(() => UserModule),

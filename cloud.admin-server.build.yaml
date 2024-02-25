@@ -2,7 +2,10 @@ steps:
     - name: gcr.io/cloud-builders/docker
       args:
           [
+              'buildx',
               'build',
+              '--platform',
+              'linux/amd64',
               '--build-arg',
               'JWT_ACCESS_TOKEN_TIME',
               '--build-arg',

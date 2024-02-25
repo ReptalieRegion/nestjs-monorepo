@@ -12,6 +12,7 @@ ARG JWT_SECRET_KEY
 ARG INTERATIONS
 ARG DKLEN
 ARG HASH
+ARG PORT
 
 # yarn berry
 RUN npm install -g npm@latest && corepack enable
@@ -33,6 +34,7 @@ RUN echo "JWT_SECRET_KEY=${JWT_SECRET_KEY}" >> ./apps/crawl-admin/.env.productio
 RUN echo "INTERATIONS=${INTERATIONS}" >> ./apps/crawl-admin/.env.production
 RUN echo "DKLEN=${DKLEN}" >> ./apps/crawl-admin/.env.production
 RUN echo "HASH=${HASH}" >> ./apps/crawl-admin/.env.production
+RUN echo "PORT=${PORT}" >> ./apps/crawl-admin/.env.production
 
 # Install dependencies and build
 RUN yarn install || (cat /tmp/*/build.log; exit 1)
@@ -45,8 +47,7 @@ RUN yarn build:admin
 FROM node:18-alpine as runner
 
 WORKDIR /runner
-ENV HOST 0.0.0.0
-ARG PORT
+
 # Copy files in logical layer order
 COPY --from=builder /builder/.yarn ./.yarn
 COPY --from=builder /builder/.pnp.cjs .
@@ -73,7 +74,9 @@ COPY --from=builder /builder/private-packages/utils/package.json ./private-packa
 
 RUN yarn install
 
+ARG PORT
 EXPOSE ${PORT}
-ENV PORT ${PORT}
+ENV HOST 0.0.0.0
+
 # Configure the default command
 CMD yarn prod:admin

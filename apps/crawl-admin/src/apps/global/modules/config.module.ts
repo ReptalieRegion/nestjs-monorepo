@@ -2,7 +2,6 @@ import { ConfigModule } from '@nestjs/config';
 
 export const configs = () => {
     const env = process.env;
-    console.log(env);
     if (!env) {
         return {};
     }

@@ -75,6 +75,7 @@ COPY --from=builder /builder/private-packages/utils/package.json ./private-packa
 RUN yarn install
 
 ARG PORT
+RUN echo "PORT=${PORT}"
 EXPOSE ${PORT}
 ENV PORT ${PORT}
 ENV HOSTNAME "0.0.0.0"

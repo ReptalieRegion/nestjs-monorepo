@@ -48,5 +48,8 @@ COPY --from=builder /builder/private-packages/utils/package.json ./private-packa
 
 RUN yarn install
 
+EXPOSE 3333
+ENV HOSTNAME "0.0.0.0"
+
 # Configure the default command
-CMD yarn prod:admin
+CMD  yarn prod:admin

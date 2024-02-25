@@ -2,6 +2,7 @@ import { ConfigModule } from '@nestjs/config';
 
 export const configs = () => {
     const env = process.env;
+    console.log(env);
     if (!env) {
         return {};
     }
@@ -20,9 +21,17 @@ export const configs = () => {
     };
 };
 
-export const GlobalConfigModule = ConfigModule.forRoot({
-    cache: true,
-    isGlobal: true,
-    envFilePath: `${process.cwd()}/apps/crawl-admin/.env.${process.env.NODE_ENV}`,
-    load: [configs],
-});
+export const GlobalConfigModule = ConfigModule.forRoot(
+    process.env.NODE_ENV === 'development'
+        ? {
+              cache: true,
+              isGlobal: true,
+              envFilePath: `${process.cwd()}/apps/crawl-admin/.env.${process.env.NODE_ENV}`,
+              load: [configs],
+          }
+        : {
+              cache: true,
+              isGlobal: true,
+              load: [configs],
+          },
+);

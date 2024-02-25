@@ -41,13 +41,12 @@ RUN yarn install || (cat /tmp/*/build.log; exit 1)
 
 # build
 RUN yarn build:all
-RUN yarn build:admin
+RUN yarn build:server
 
 # # 🚀 Build the runner image
 FROM node:18-alpine as runner
 
 WORKDIR /runner
-
 # Copy files in logical layer order
 COPY --from=builder /builder/.yarn ./.yarn
 COPY --from=builder /builder/.pnp.cjs .
@@ -66,19 +65,10 @@ COPY --from=builder /builder/private-packages/@crawl/models/package.json ./priva
 COPY --from=builder /builder/private-packages/@crawl/types/dist ./private-packages/@crawl/types/dist
 COPY --from=builder /builder/private-packages/@crawl/types/package.json ./private-packages/@crawl/types/
 
-COPY --from=builder /builder/private-packages/slack/dist ./private-packages/slack/dist
-COPY --from=builder /builder/private-packages/slack/package.json ./private-packages/slack/
-
 COPY --from=builder /builder/private-packages/utils/dist ./private-packages/utils/dist
 COPY --from=builder /builder/private-packages/utils/package.json ./private-packages/utils/
 
 RUN yarn install
-
-ARG PORT
-RUN echo "PORT=${PORT}"
-EXPOSE ${PORT}
-ENV PORT ${PORT}
-ENV HOSTNAME "0.0.0.0"
 
 # Configure the default command
 CMD yarn prod:admin

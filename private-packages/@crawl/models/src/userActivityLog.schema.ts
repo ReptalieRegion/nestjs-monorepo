@@ -5,7 +5,7 @@ import { Document, SchemaTypes } from 'mongoose';
 
 import { getViewFields } from './utils/getViewFields';
 
-export interface UserDocument extends UserActivityLog, Document {
+export interface UserActivityLogDocument extends UserActivityLog, Document {
     Mapper(): IUserActivityLog;
 }
 
@@ -21,12 +21,12 @@ export class UserActivityLog {
     details?: string;
 }
 
-const userSchema = SchemaFactory.createForClass(UserActivityLog);
-userSchema.index({ createdAt: 1 });
-userSchema.methods = {
+const userActivityLogSchema = SchemaFactory.createForClass(UserActivityLog);
+userActivityLogSchema.index({ createdAt: 1 });
+userActivityLogSchema.methods = {
     Mapper() {
         return getViewFields<Omit<IUserActivityLog, '_id'>>(this, ['id', 'userId', 'activityType', 'details']);
     },
 };
 
-export { userSchema };
+export { userActivityLogSchema };

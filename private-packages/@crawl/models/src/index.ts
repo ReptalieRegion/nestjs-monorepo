@@ -16,3 +16,4 @@ export * from './sharePost.schema';
 export * from './social.schema';
 export * from './tempUser.schema';
 export * from './user.schema';
+export * from './userActivityLog.schema';

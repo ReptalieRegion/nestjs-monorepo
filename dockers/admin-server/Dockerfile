@@ -46,6 +46,7 @@ FROM node:18-alpine as runner
 
 WORKDIR /runner
 ENV HOST 0.0.0.0
+ARG PORT
 # Copy files in logical layer order
 COPY --from=builder /builder/.yarn ./.yarn
 COPY --from=builder /builder/.pnp.cjs .
@@ -72,6 +73,7 @@ COPY --from=builder /builder/private-packages/utils/package.json ./private-packa
 
 RUN yarn install
 
-EXPOSE 3333
+EXPOSE ${PORT}
+ENV PORT ${PORT}
 # Configure the default command
 CMD yarn prod:admin

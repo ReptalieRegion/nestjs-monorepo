@@ -49,4 +49,4 @@ COPY --from=builder /builder/private-packages/utils/package.json ./private-packa
 RUN yarn install
 
 # Configure the default command
-CMD  yarn prod:admin
+CMD yarn prod:admin

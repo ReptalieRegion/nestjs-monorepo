@@ -1,7 +1,7 @@
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { InjectConnection } from '@nestjs/mongoose';
 import { Social } from '@private-crawl/models';
-import { ITempUser, JoinProgressType, SocialProviderType } from '@private-crawl/types';
+import { ITempUser, JoinProgressType, SocialProviderType, UserActivityType } from '@private-crawl/types';
 import { OAuth2Client } from 'google-auth-library';
 import mongoose, { ClientSession } from 'mongoose';
 import { ImageType } from '../../../dto/image/input-image.dto';
@@ -20,6 +20,7 @@ import { ShareUpdaterService, ShareUpdaterServiceToken } from '../../share/servi
 import { UserDeleterService, UserDeleterServiceToken } from '../../user/service/userDeleter.service';
 import { UserUpdaterService, UserUpdaterServiceToken } from '../../user/service/userUpdater.service';
 import { UserWriterService, UserWriterServiceToken } from '../../user/service/userWriter.service';
+import { UserActivityLogService, UserActivityLogServiceToken } from '../../user-activity-log/userActivityLog.service';
 import { SocialRepository } from '../repository/social.repository';
 import { TempUserRepository } from '../repository/tempUser.repository';
 import { AuthCommonService, AuthCommonServiceToken } from './authCommon.service';
@@ -63,6 +64,8 @@ export class AuthSocialService {
         private readonly userUpdaterService: UserUpdaterService,
         @Inject(NotificationLogServiceToken)
         private readonly notificationLogService: NotificationLogService,
+        @Inject(UserActivityLogServiceToken)
+        private readonly userActivityLogService: UserActivityLogService,
     ) {}
 
     /**
@@ -216,6 +219,7 @@ export class AuthSocialService {
         if (socialProfile.joinProgress === JoinProgressType.DONE) {
             const token = await this.authCommonService.tokenGenerationAndStorage(user.id, session);
 
+            this.userActivityLogService.createActivityLog({ userId: user.id, activityType: UserActivityType.SIGN_IN });
             return { type: 'SIGN_IN', accessToken: token.accessToken, refreshToken: token.refreshToken };
         } else {
             return { type: 'SIGN_UP', joinProgress: socialProfile.joinProgress, nickname: user.nickname, userId: user.id };

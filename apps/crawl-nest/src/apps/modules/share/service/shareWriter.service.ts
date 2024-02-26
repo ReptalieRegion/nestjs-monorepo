@@ -1,5 +1,6 @@
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { InjectConnection } from '@nestjs/mongoose';
+import { UserActivityType } from '@private-crawl/types';
 import mongoose, { ClientSession } from 'mongoose';
 import { ImageType } from '../../../dto/image/input-image.dto';
 import { TemplateType } from '../../../dto/notification/template/input-notificationTemplate.dto';
@@ -135,6 +136,8 @@ export class ShareWriterService {
                     });
             });
 
+            this.userActivityLogService.createActivityLog({ userId: user.id, activityType: UserActivityType.POST_CREATED });
+
             return { post: { ...postInfo, user } };
         } catch (error) {
             await this.imageS3HandlerService.deleteImagesFromS3(imageKeys);
@@ -225,6 +228,7 @@ export class ShareWriterService {
                 this.notificationSlackService.send(`*[푸시 알림]* 이미지 찾기 실패\n${error.message}`, '푸시알림-에러-dev');
             });
 
+        this.userActivityLogService.createActivityLog({ userId: user.id, activityType: UserActivityType.COMMENT_CREATED });
         return { post: { id: comment.postId, comment: { ...commentInfo, user } } };
     }
 
@@ -308,6 +312,10 @@ export class ShareWriterService {
                 this.notificationSlackService.send(`*[푸시 알림]* 이미지 찾기 실패\n${error.message}`, '푸시알림-에러-dev');
             });
 
+        this.userActivityLogService.createActivityLog({
+            userId: user.id,
+            activityType: UserActivityType.REPLY_COMMENT_CREATED,
+        });
         return {
             post: {
                 id: comment?.postId,

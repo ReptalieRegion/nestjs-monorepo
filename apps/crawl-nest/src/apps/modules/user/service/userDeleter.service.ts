@@ -1,4 +1,5 @@
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
+import { UserActivityType } from '@private-crawl/types';
 import { ClientSession } from 'mongoose';
 import { CustomException } from '../../../utils/error/customException';
 import { UserActivityLogService, UserActivityLogServiceToken } from '../../user-activity-log/userActivityLog.service';
@@ -31,6 +32,8 @@ export class UserDeleterService {
         if (result.deletedCount === 0) {
             throw new CustomException('Failed to delete user', HttpStatus.INTERNAL_SERVER_ERROR, -1616);
         }
+
+        this.userActivityLogService.createActivityLog({ userId: _id, activityType: UserActivityType.WITHDRAWAL });
     }
 
     async withdrawalFollowInfo(userId: string, session: ClientSession) {

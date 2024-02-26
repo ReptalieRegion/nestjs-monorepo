@@ -1,7 +1,7 @@
 enum UserActivityType {
     ACCESS = 'ACCESS', // 접속
-    LOGIN = 'LOGIN', // 로그인
-    LOGOUT = 'LOGOUT', // 로그아웃
+    SIGN_IN = 'SIGN_IN', // 로그인
+    SIGN_OUT = 'SIGN_OUT', // 로그아웃
     POST_CREATED = 'POST_CREATED', // 게시글 생성
     POST_UPDATED = 'POST_UPDATED', // 게시글 수정
     POST_DELETED = 'POST_DELETED', // 게시글 삭제
@@ -13,7 +13,6 @@ enum UserActivityType {
     REPLY_COMMENT_DELETED = 'REPLY_COMMENT_DELETED', // 대댓글 삭제
     FOLLOW_CREATED = 'FOLLOW_CREATED', // 팔로우 생성
     FOLLOW_UPDATED = 'FOLLOW_UPDATED', // 팔로우 토글
-    FOLLOW_DELETED = 'FOLLOW_DELETED', // 팔로우 삭제
     ENTITY_CREATED = 'ENTITY_CREATED', // 개체 생성
     ENTITY_UPDATED = 'ENTITY_UPDATED', // 개체 수정
     ENTITY_DELETED = 'ENTITY_DELETED', // 개체 삭제

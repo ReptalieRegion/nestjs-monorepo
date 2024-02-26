@@ -1,5 +1,6 @@
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { InjectConnection } from '@nestjs/mongoose';
+import { SchemaId, UserActivityType } from '@private-crawl/types';
 import mongoose, { ClientSession } from 'mongoose';
 import { IUpdateCalendarDTO } from '../../../dto/diary/calendar/input-diaryCalendar.dto';
 import { IUpdateEntityDTO } from '../../../dto/diary/entity/input-diaryEntity.dto';
@@ -75,6 +76,10 @@ export class DiaryUpdaterService {
                 throw new CustomException('Failed to update diary entity.', HttpStatus.INTERNAL_SERVER_ERROR, -3604);
             }
 
+            this.userActivityLogService.createActivityLog({
+                userId: user.id,
+                activityType: UserActivityType.ENTITY_UPDATED,
+            });
             await session.commitTransaction();
 
             return { message: 'Success' };
@@ -97,6 +102,17 @@ export class DiaryUpdaterService {
                 throw new CustomException('Failed to update diary weight.', HttpStatus.INTERNAL_SERVER_ERROR, -3605);
             }
 
+            this.diaryEntityRepository
+                .findById(entityId)
+                .exec()
+                .then((entity) => {
+                    if (entity) {
+                        this.userActivityLogService.createActivityLog({
+                            userId: entity.userId as unknown as SchemaId,
+                            activityType: UserActivityType.ENTITY_WEIGHT_UPDATED,
+                        });
+                    }
+                });
             return { message: 'Success' };
         } catch (error) {
             throw new CustomExceptionHandler(error).handleException('Invalid ObjectId for diary entity Id.', -3507);
@@ -112,6 +128,18 @@ export class DiaryUpdaterService {
             if (result.modifiedCount === 0) {
                 throw new CustomException('Failed to update diary calendar.', HttpStatus.INTERNAL_SERVER_ERROR, -3606);
             }
+
+            this.diaryCalendarRepository
+                .findById(calendarId)
+                .exec()
+                .then((calendar) => {
+                    if (calendar) {
+                        this.userActivityLogService.createActivityLog({
+                            userId: calendar.userId as unknown as SchemaId,
+                            activityType: UserActivityType.CALENDAR_UPDATED,
+                        });
+                    }
+                });
 
             return { message: 'Success' };
         } catch (error) {

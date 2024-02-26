@@ -1,12 +1,13 @@
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { InjectConnection } from '@nestjs/mongoose';
-import { JoinProgressType } from '@private-crawl/types';
+import { JoinProgressType, UserActivityType } from '@private-crawl/types';
 import mongoose, { ClientSession } from 'mongoose';
 import { IJoinProgressDTO } from '../../../dto/user/social/input-social.dto';
 import { CustomException } from '../../../utils/error/customException';
 import { disassembleHangulToGroups } from '../../../utils/hangul/disassemble';
 import { NotificationSlackService, NotificationSlackServiceToken } from '../../notification/service/notificationSlack.service';
 import { UserUpdaterService, UserUpdaterServiceToken } from '../../user/service/userUpdater.service';
+import { UserActivityLogService, UserActivityLogServiceToken } from '../../user-activity-log/userActivityLog.service';
 import { SocialRepository } from '../repository/social.repository';
 import { AuthEncryptService, AuthEncryptServiceToken } from './authEncrypt.service';
 import { AuthTokenService, AuthTokenServiceToken } from './authToken.service';
@@ -29,6 +30,9 @@ export class AuthCommonService {
         private readonly userUpdaterService: UserUpdaterService,
         @Inject(NotificationSlackServiceToken)
         private readonly slackService: NotificationSlackService,
+
+        @Inject(UserActivityLogServiceToken)
+        private readonly userActivityLogService: UserActivityLogService,
     ) {}
 
     /**
@@ -121,6 +125,8 @@ export class AuthCommonService {
         if (result.modifiedCount === 0) {
             throw new CustomException('Failed to delete the refresh token and salt.', HttpStatus.INTERNAL_SERVER_ERROR, -1612);
         }
+
+        this.userActivityLogService.createActivityLog({ userId, activityType: UserActivityType.SIGN_OUT });
 
         return { message: 'Success' };
     }

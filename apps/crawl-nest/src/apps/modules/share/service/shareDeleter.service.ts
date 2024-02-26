@@ -1,5 +1,6 @@
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { InjectConnection } from '@nestjs/mongoose';
+import { UserActivityType } from '@private-crawl/types';
 import mongoose, { ClientSession } from 'mongoose';
 import { ImageType } from '../../../dto/image/input-image.dto';
 import { CustomException } from '../../../utils/error/customException';
@@ -79,6 +80,7 @@ export class ShareDeleterService {
                     .exec();
             }
 
+            this.userActivityLogService.createActivityLog({ userId, activityType: UserActivityType.POST_DELETED });
             await session.commitTransaction();
             return this.shareSearcherService.getPostInfo({ delete: { postId } });
         } catch (error) {
@@ -121,6 +123,7 @@ export class ShareDeleterService {
                 }
             }
 
+            this.userActivityLogService.createActivityLog({ userId, activityType: UserActivityType.COMMENT_DELETED });
             await session.commitTransaction();
             return this.shareSearcherService.getCommentInfo({ delete: { commentId } });
         } catch (error) {
@@ -147,11 +150,12 @@ export class ShareDeleterService {
             if (result.modifiedCount === 0) {
                 throw new CustomException('Failed to delete share comment reply.', HttpStatus.INTERNAL_SERVER_ERROR, -2611);
             }
+
+            this.userActivityLogService.createActivityLog({ userId, activityType: UserActivityType.REPLY_COMMENT_DELETED });
+            return this.shareSearcherService.getCommentReplyInfo({ delete: { commentReplyId } });
         } catch (error) {
             throw new CustomExceptionHandler(error).handleException('Invalid ObjectId for share comment reply Id.', -2506);
         }
-
-        return this.shareSearcherService.getCommentReplyInfo({ delete: { commentReplyId } });
     }
 
     /**

@@ -1,5 +1,6 @@
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { InjectConnection } from '@nestjs/mongoose';
+import { UserActivityType } from '@private-crawl/types';
 import { getCurrentDate } from '@private-crawl/utils';
 import mongoose, { ClientSession } from 'mongoose';
 import { ImageType } from '../../../dto/image/input-image.dto';
@@ -109,6 +110,7 @@ export class UserUpdaterService {
             await this.userRepository
                 .findByIdAndUpdate(userId, { $set: { deviceInfo, lastAccessAt: getCurrentDate() } }, { upsert: true })
                 .exec();
+            this.userActivityLogService.createActivityLog({ userId, activityType: UserActivityType.ACCESS });
             return { message: 'Success' };
         } catch (_error) {
             throw new CustomException('Failed to update user deviceInfo', HttpStatus.INTERNAL_SERVER_ERROR, -1621);
@@ -137,6 +139,8 @@ export class UserUpdaterService {
             throw new CustomException('Failed to update follow status.', HttpStatus.INTERNAL_SERVER_ERROR, -1603);
         }
 
+        this.userActivityLogService.createActivityLog({ userId: follower, activityType: UserActivityType.FOLLOW_UPDATED });
+
         return { user: { nickname: followStatus?.followerNickname } };
     }
 
@@ -159,6 +163,7 @@ export class UserUpdaterService {
             const [image] = await this.imageWriterService.createImage(user.id, imageKeys, ImageType.Profile, session);
             await this.updateImageId(user.id, image.id as string, session);
 
+            this.userActivityLogService.createActivityLog({ userId: user.id, activityType: UserActivityType.PROFILE_UPDATED });
             await session.commitTransaction();
 
             return { profile: { src: `${process.env.AWS_IMAGE_BASEURL}${image.imageKey}` } };

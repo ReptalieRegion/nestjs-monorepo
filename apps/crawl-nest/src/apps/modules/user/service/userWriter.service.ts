@@ -166,7 +166,10 @@ export class UserWriterService {
                     this.notificationSlackService.send(`*[푸시 알림]* 이미지 찾기 실패\n${error.message}`, '푸시알림-에러-dev');
                 });
 
-            this.userActivityLogService.createActivityLog({ userId: follower, activityType: UserActivityType.FOLLOW_CREATED });
+            this.userActivityLogService.createActivityLog({
+                userId: following.id,
+                activityType: UserActivityType.FOLLOW_CREATED,
+            });
             return { user: { nickname: follow.followerNickname } };
         } catch (error) {
             throw new CustomExceptionHandler(error).handleException('following and follower should be unique values.', -1602);

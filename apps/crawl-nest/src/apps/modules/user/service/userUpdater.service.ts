@@ -139,7 +139,7 @@ export class UserUpdaterService {
             throw new CustomException('Failed to update follow status.', HttpStatus.INTERNAL_SERVER_ERROR, -1603);
         }
 
-        this.userActivityLogService.createActivityLog({ userId: follower, activityType: UserActivityType.FOLLOW_UPDATED });
+        this.userActivityLogService.createActivityLog({ userId: following, activityType: UserActivityType.FOLLOW_UPDATED });
 
         return { user: { nickname: followStatus?.followerNickname } };
     }

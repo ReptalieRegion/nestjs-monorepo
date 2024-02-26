@@ -133,7 +133,7 @@ export class ShareDeleterService {
                 .then((comment) => {
                     this.userActivityLogService.createActivityLog({
                         userId,
-                        activityType: UserActivityType.REPLY_COMMENT_DELETED,
+                        activityType: UserActivityType.COMMENT_DELETED,
                         details: JSON.stringify({
                             post: { id: comment?.postId },
                             comment: { id: comment?.id },

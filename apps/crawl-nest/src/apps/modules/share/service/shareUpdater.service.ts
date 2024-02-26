@@ -122,7 +122,7 @@ export class ShareUpdaterService {
                         activityType: UserActivityType.COMMENT_UPDATED,
                         details: JSON.stringify({
                             post: { id: comment?.postId },
-                            commentReply: { id: comment?.id, content: dto.contents },
+                            comment: { id: comment?.id, content: dto.contents },
                         }),
                     });
                 });

@@ -11,7 +11,7 @@ export interface UserActivityLogDocument extends UserActivityLog, Document {
 
 @Schema({ versionKey: false, timestamps: { createdAt: true } })
 export class UserActivityLog {
-    @Prop({ index: true, unique: true, type: SchemaTypes.String })
+    @Prop({ index: true, type: SchemaTypes.String })
     userId: SchemaId;
 
     @Prop({ index: true, required: true, enum: UserActivityType })

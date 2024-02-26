@@ -33,8 +33,10 @@ import {
     Social,
     TempUser,
     User,
+    UserActivityLog,
     socialSchema,
     tempUserSchema,
+    userActivityLogSchema,
     userSchema,
 } from '@private-crawl/models';
 
@@ -50,6 +52,10 @@ export const MongooseModuleFollow = MongooseModule.forFeature([{ name: Follow.na
 export const MongooseModuleSocial = MongooseModule.forFeature([{ name: Social.name, schema: socialSchema }]);
 
 export const MongooseModuleTempUser = MongooseModule.forFeature([{ name: TempUser.name, schema: tempUserSchema }]);
+
+export const MongooseModuleUserActivityLog = MongooseModule.forFeature([
+    { name: UserActivityLog.name, schema: userActivityLogSchema },
+]);
 
 // share 관련 모듈
 export const MongooseModuleSharePost = MongooseModule.forFeature([{ name: SharePost.name, schema: SharePostSchema }]);

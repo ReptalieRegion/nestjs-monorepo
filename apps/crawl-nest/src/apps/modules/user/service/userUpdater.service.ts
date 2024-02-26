@@ -1,5 +1,6 @@
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { InjectConnection } from '@nestjs/mongoose';
+import { UserActivityType } from '@private-crawl/types';
 import { getCurrentDate } from '@private-crawl/utils';
 import mongoose, { ClientSession } from 'mongoose';
 import { ImageType } from '../../../dto/image/input-image.dto';
@@ -11,6 +12,7 @@ import { CustomExceptionHandler } from '../../../utils/error/customException.han
 import { ImageDeleterService, ImageDeleterServiceToken } from '../../image/service/imageDeleter.service';
 import { ImageS3HandlerService, ImageS3HandlerServiceToken } from '../../image/service/imageS3Handler.service';
 import { ImageWriterService, ImageWriterServiceToken } from '../../image/service/imageWriter.service';
+import { UserActivityLogService, UserActivityLogServiceToken } from '../../user-activity-log/userActivityLog.service';
 import { FollowRepository } from '../repository/follow.repository';
 import { UserRepository } from '../repository/user.repository';
 import { UserSearcherService, UserSearcherServiceToken } from './userSearcher.service';
@@ -34,6 +36,9 @@ export class UserUpdaterService {
         private readonly imageWriterService: ImageWriterService,
         @Inject(ImageDeleterServiceToken)
         private readonly imageDeleterService: ImageDeleterService,
+
+        @Inject(UserActivityLogServiceToken)
+        private readonly userActivityLogService: UserActivityLogService,
     ) {}
 
     /**
@@ -105,6 +110,7 @@ export class UserUpdaterService {
             await this.userRepository
                 .findByIdAndUpdate(userId, { $set: { deviceInfo, lastAccessAt: getCurrentDate() } }, { upsert: true })
                 .exec();
+            this.userActivityLogService.createActivityLog({ userId, activityType: UserActivityType.ACCESS });
             return { message: 'Success' };
         } catch (_error) {
             throw new CustomException('Failed to update user deviceInfo', HttpStatus.INTERNAL_SERVER_ERROR, -1621);
@@ -133,6 +139,19 @@ export class UserUpdaterService {
             throw new CustomException('Failed to update follow status.', HttpStatus.INTERNAL_SERVER_ERROR, -1603);
         }
 
+        this.userActivityLogService.createActivityLog({
+            userId: following,
+            activityType: UserActivityType.FOLLOW_UPDATED,
+            details: JSON.stringify({
+                following: {
+                    id: following,
+                },
+                follower: {
+                    id: follower,
+                },
+            }),
+        });
+
         return { user: { nickname: followStatus?.followerNickname } };
     }
 
@@ -155,6 +174,7 @@ export class UserUpdaterService {
             const [image] = await this.imageWriterService.createImage(user.id, imageKeys, ImageType.Profile, session);
             await this.updateImageId(user.id, image.id as string, session);
 
+            this.userActivityLogService.createActivityLog({ userId: user.id, activityType: UserActivityType.PROFILE_UPDATED });
             await session.commitTransaction();
 
             return { profile: { src: `${process.env.AWS_IMAGE_BASEURL}${image.imageKey}` } };

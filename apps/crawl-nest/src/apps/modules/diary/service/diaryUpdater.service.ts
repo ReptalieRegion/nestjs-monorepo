@@ -1,5 +1,6 @@
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { InjectConnection } from '@nestjs/mongoose';
+import { SchemaId, UserActivityType } from '@private-crawl/types';
 import mongoose, { ClientSession } from 'mongoose';
 import { IUpdateCalendarDTO } from '../../../dto/diary/calendar/input-diaryCalendar.dto';
 import { IUpdateEntityDTO } from '../../../dto/diary/entity/input-diaryEntity.dto';
@@ -13,6 +14,7 @@ import { ImageS3HandlerService, ImageS3HandlerServiceToken } from '../../image/s
 import { ImageSearcherService, ImageSearcherServiceToken } from '../../image/service/imageSearcher.service';
 import { ImageUpdaterService, ImageUpdaterServiceToken } from '../../image/service/imageUpdater.service';
 import { ImageWriterService, ImageWriterServiceToken } from '../../image/service/imageWriter.service';
+import { UserActivityLogService, UserActivityLogServiceToken } from '../../user-activity-log/userActivityLog.service';
 import { DiaryCalendarRepository } from '../repository/diaryCalendar.repository';
 import { DiaryEntityRepository } from '../repository/diaryEntity.repository';
 import { DiaryWeightRepository } from '../repository/diaryWeight.repository';
@@ -42,6 +44,9 @@ export class DiaryUpdaterService {
         private readonly imageSearcherService: ImageSearcherService,
         @Inject(DiarySearcherServiceToken)
         private readonly diarySearcherService: DiarySearcherService,
+
+        @Inject(UserActivityLogServiceToken)
+        private readonly userActivityLogService: UserActivityLogService,
     ) {}
 
     async updateEntity(user: IUserProfileDTO, entityId: string, dto: IUpdateEntityDTO, files?: Express.Multer.File[]) {
@@ -71,6 +76,10 @@ export class DiaryUpdaterService {
                 throw new CustomException('Failed to update diary entity.', HttpStatus.INTERNAL_SERVER_ERROR, -3604);
             }
 
+            this.userActivityLogService.createActivityLog({
+                userId: user.id,
+                activityType: UserActivityType.ENTITY_UPDATED,
+            });
             await session.commitTransaction();
 
             return { message: 'Success' };
@@ -93,6 +102,17 @@ export class DiaryUpdaterService {
                 throw new CustomException('Failed to update diary weight.', HttpStatus.INTERNAL_SERVER_ERROR, -3605);
             }
 
+            this.diaryEntityRepository
+                .findById(entityId)
+                .exec()
+                .then((entity) => {
+                    if (entity) {
+                        this.userActivityLogService.createActivityLog({
+                            userId: entity.userId as unknown as SchemaId,
+                            activityType: UserActivityType.ENTITY_WEIGHT_UPDATED,
+                        });
+                    }
+                });
             return { message: 'Success' };
         } catch (error) {
             throw new CustomExceptionHandler(error).handleException('Invalid ObjectId for diary entity Id.', -3507);
@@ -108,6 +128,18 @@ export class DiaryUpdaterService {
             if (result.modifiedCount === 0) {
                 throw new CustomException('Failed to update diary calendar.', HttpStatus.INTERNAL_SERVER_ERROR, -3606);
             }
+
+            this.diaryCalendarRepository
+                .findById(calendarId)
+                .exec()
+                .then((calendar) => {
+                    if (calendar) {
+                        this.userActivityLogService.createActivityLog({
+                            userId: calendar.userId as unknown as SchemaId,
+                            activityType: UserActivityType.CALENDAR_UPDATED,
+                        });
+                    }
+                });
 
             return { message: 'Success' };
         } catch (error) {

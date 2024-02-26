@@ -7,6 +7,7 @@ import { NotificationModule } from '../notification/notification.module';
 import { ReportModule } from '../report/report.module';
 import { ShareModule } from '../share/share.module';
 import { UserModule } from '../user/user.module';
+import { UserActivityLogModule } from '../user-activity-log/userActivityLog.module';
 import { AuthController } from './auth.controller';
 import {
     AuthCommonServiceProvider,
@@ -25,6 +26,7 @@ import { TempUserRepository } from './repository/tempUser.repository';
         PassportModule,
         ImageModule,
         NotificationModule,
+        UserActivityLogModule,
         forwardRef(() => UserModule),
         forwardRef(() => ShareModule),
         forwardRef(() => DiaryModule),

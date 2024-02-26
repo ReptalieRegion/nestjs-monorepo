@@ -24,6 +24,7 @@
         "cloudsdktool",
         "diaryentities",
         "gcloud",
+        "kakao",
         "nestjs",
         "notifee",
         "reptalieregion",

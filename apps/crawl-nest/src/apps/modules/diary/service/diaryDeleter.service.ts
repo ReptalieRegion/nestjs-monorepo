@@ -1,11 +1,14 @@
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { InjectConnection } from '@nestjs/mongoose';
+import { SchemaId, UserActivityType } from '@private-crawl/types';
 import mongoose, { ClientSession } from 'mongoose';
 import { ImageType } from '../../../dto/image/input-image.dto';
 import { IUserProfileDTO } from '../../../dto/user/user/user-profile.dto';
 import { CustomException } from '../../../utils/error/customException';
 import { CustomExceptionHandler } from '../../../utils/error/customException.handler';
 import { ImageDeleterService, ImageDeleterServiceToken } from '../../image/service/imageDeleter.service';
+import { NotificationSlackService, NotificationSlackServiceToken } from '../../notification/service/notificationSlack.service';
+import { UserActivityLogService, UserActivityLogServiceToken } from '../../user-activity-log/userActivityLog.service';
 import { DiaryCalendarRepository } from '../repository/diaryCalendar.repository';
 import { DiaryEntityRepository } from '../repository/diaryEntity.repository';
 import { DiaryWeightRepository } from '../repository/diaryWeight.repository';
@@ -27,6 +30,12 @@ export class DiaryDeleterService {
         private readonly imageDeleterService: ImageDeleterService,
         @Inject(DiarySearcherServiceToken)
         private readonly diarySearcherService: DiarySearcherService,
+
+        @Inject(UserActivityLogServiceToken)
+        private readonly userActivityLogService: UserActivityLogService,
+
+        @Inject(NotificationSlackServiceToken)
+        private readonly notificationSlackService: NotificationSlackService,
     ) {}
 
     async deleteEntity(user: IUserProfileDTO, entityId: string) {
@@ -52,6 +61,11 @@ export class DiaryDeleterService {
                     .exec(),
             ]);
 
+            this.userActivityLogService.createActivityLog({
+                userId: user.id,
+                activityType: UserActivityType.ENTITY_DELETED,
+            });
+
             await session.commitTransaction();
 
             return { message: 'Success' };
@@ -73,6 +87,29 @@ export class DiaryDeleterService {
                 throw new CustomException('Failed to delete diary entity weight.', HttpStatus.INTERNAL_SERVER_ERROR, -3609);
             }
 
+            this.diaryWeightRepository
+                .findById(weightId)
+                .exec()
+                .then(async (calendar) => {
+                    if (!calendar) {
+                        throw new Error('Not Fount Calendar');
+                    }
+
+                    const entity = await this.diaryEntityRepository.findById(calendar.entityId);
+
+                    if (!entity) {
+                        throw new Error('Not Fount Entity');
+                    }
+
+                    this.userActivityLogService.createActivityLog({
+                        userId: entity.userId as unknown as SchemaId,
+                        activityType: UserActivityType.ENTITY_WEIGHT_DELETED,
+                    });
+                })
+                .catch(() => {
+                    this.notificationSlackService.send('[Entity Weight Delete] 로그 남기기 실패');
+                });
+
             return { message: 'Success' };
         } catch (error) {
             throw new CustomExceptionHandler(error).handleException('Invalid ObjectId for diary weightId.', -3509);
@@ -88,6 +125,22 @@ export class DiaryDeleterService {
             if (result.modifiedCount === 0) {
                 throw new CustomException('Failed to delete diary entity calendar.', HttpStatus.INTERNAL_SERVER_ERROR, -3610);
             }
+
+            this.diaryCalendarRepository
+                .findById(calendarId)
+                .exec()
+                .then((calendar) => {
+                    if (!calendar) {
+                        throw new Error('Not Fount Calendar');
+                    }
+                    this.userActivityLogService.createActivityLog({
+                        userId: calendar.userId as unknown as SchemaId,
+                        activityType: UserActivityType.CALENDAR_DELETED,
+                    });
+                })
+                .catch(() => {
+                    this.notificationSlackService.send('[Calendar Delete] 로그 남기기 실패');
+                });
 
             return { message: 'Success' };
         } catch (error) {

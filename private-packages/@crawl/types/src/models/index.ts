@@ -16,3 +16,4 @@ export * from './sharePost';
 export * from './social';
 export * from './tempUser';
 export * from './user';
+export * from './userActivityLog';

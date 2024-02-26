@@ -4,6 +4,7 @@ import { AuthModule } from '../auth/auth.module';
 import { ImageModule } from '../image/image.module';
 import { NotificationModule } from '../notification/notification.module';
 import { UserModule } from '../user/user.module';
+import { UserActivityLogModule } from '../user-activity-log/userActivityLog.module';
 import { DiaryController } from './diary.controller';
 import {
     DiaryDeleterServiceProvider,
@@ -21,6 +22,7 @@ import { DiaryWeightRepository } from './repository/diaryWeight.repository';
         MongooseModuleDiaryWeight,
         MongooseModuleDiaryCalendar,
         ImageModule,
+        UserActivityLogModule,
         forwardRef(() => AuthModule),
         forwardRef(() => UserModule),
         forwardRef(() => NotificationModule),

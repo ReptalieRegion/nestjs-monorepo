@@ -1,5 +1,5 @@
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
-import { ITempUser } from '@private-crawl/types';
+import { ITempUser, UserActivityType } from '@private-crawl/types';
 import mongoose, { ClientSession } from 'mongoose';
 import { ImageType } from '../../../dto/image/input-image.dto';
 import { TemplateType } from '../../../dto/notification/template/input-notificationTemplate.dto';
@@ -14,6 +14,7 @@ import { NotificationAgreeService, NotificationAgreeServiceToken } from '../../n
 import { NotificationPushService, NotificationPushServiceToken } from '../../notification/service/notificationPush.service';
 import { NotificationSlackService, NotificationSlackServiceToken } from '../../notification/service/notificationSlack.service';
 import { ReportSearcherService, ReportSearcherServiceToken } from '../../report/service/reportSearcher.service';
+import { UserActivityLogService, UserActivityLogServiceToken } from '../../user-activity-log/userActivityLog.service';
 import { FollowRepository } from '../repository/follow.repository';
 import { UserRepository } from '../repository/user.repository';
 import { UserSearcherService, UserSearcherServiceToken } from './userSearcher.service';
@@ -47,6 +48,9 @@ export class UserWriterService {
 
         @Inject(ReportSearcherServiceToken)
         private readonly reportSearcherService: ReportSearcherService,
+
+        @Inject(UserActivityLogServiceToken)
+        private readonly userActivityLogService: UserActivityLogService,
     ) {}
 
     /**
@@ -161,6 +165,19 @@ export class UserWriterService {
                 .catch((error) => {
                     this.notificationSlackService.send(`*[푸시 알림]* 이미지 찾기 실패\n${error.message}`, '푸시알림-에러-dev');
                 });
+
+            this.userActivityLogService.createActivityLog({
+                userId: following.id,
+                activityType: UserActivityType.FOLLOW_CREATED,
+                details: JSON.stringify({
+                    following: {
+                        id: following.id,
+                    },
+                    follower: {
+                        id: follower,
+                    },
+                }),
+            });
 
             return { user: { nickname: follow.followerNickname } };
         } catch (error) {

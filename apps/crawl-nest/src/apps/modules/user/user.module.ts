@@ -6,6 +6,7 @@ import { ImageModule } from '../image/image.module';
 import { NotificationModule } from '../notification/notification.module';
 import { ReportModule } from '../report/report.module';
 import { ShareModule } from '../share/share.module';
+import { UserActivityLogModule } from '../user-activity-log/userActivityLog.module';
 import { FollowRepository } from './repository/follow.repository';
 import { UserRepository } from './repository/user.repository';
 import { UserController } from './user.controller';
@@ -20,6 +21,7 @@ import {
     imports: [
         MongooseModuleUser,
         MongooseModuleFollow,
+        UserActivityLogModule,
         ImageModule,
         forwardRef(() => ShareModule),
         forwardRef(() => AuthModule),

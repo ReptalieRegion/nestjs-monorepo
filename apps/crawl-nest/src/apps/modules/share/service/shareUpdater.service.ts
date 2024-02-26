@@ -1,5 +1,6 @@
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { InjectConnection } from '@nestjs/mongoose';
+import { UserActivityType } from '@private-crawl/types';
 import mongoose, { ClientSession } from 'mongoose';
 import { ImageType } from '../../../dto/image/input-image.dto';
 import { InputShareCommentDTO } from '../../../dto/share/comment/input-shareComment.dto';
@@ -10,6 +11,7 @@ import { CustomException } from '../../../utils/error/customException';
 import { CustomExceptionHandler } from '../../../utils/error/customException.handler';
 import { ImageDeleterService, ImageDeleterServiceToken } from '../../image/service/imageDeleter.service';
 import { ImageUpdaterService, ImageUpdaterServiceToken } from '../../image/service/imageUpdater.service';
+import { UserActivityLogService, UserActivityLogServiceToken } from '../../user-activity-log/userActivityLog.service';
 import { ShareCommentRepository } from '../repository/shareComment.repository';
 import { ShareCommentReplyRepository } from '../repository/shareCommentReply.repository';
 import { ShareLikeRepository } from '../repository/shareLike.repository';
@@ -35,6 +37,9 @@ export class ShareUpdaterService {
         private readonly imageDeleterService: ImageDeleterService,
         @Inject(ImageUpdaterServiceToken)
         private readonly imageUpdaterService: ImageUpdaterService,
+
+        @Inject(UserActivityLogServiceToken)
+        private readonly userActivityLogService: UserActivityLogService,
     ) {}
 
     /**
@@ -69,6 +74,15 @@ export class ShareUpdaterService {
                 await this.imageDeleterService.deleteImageByImageKeys(deletefiles, postId, session);
             }
 
+            this.userActivityLogService.createActivityLog({
+                userId: user.id,
+                activityType: UserActivityType.POST_UPDATED,
+                details: JSON.stringify({
+                    post: {
+                        id: postId,
+                    },
+                }),
+            });
             await session.commitTransaction();
 
             const postInfo = await this.shareSearcherService.getPostInfo({ update: { postId } });
@@ -98,12 +112,25 @@ export class ShareUpdaterService {
             if (result.modifiedCount === 0) {
                 throw new CustomException('Failed to update share comment.', HttpStatus.INTERNAL_SERVER_ERROR, -2606);
             }
+
+            this.shareCommentRepository
+                .findById(commentId)
+                .exec()
+                .then((comment) => {
+                    this.userActivityLogService.createActivityLog({
+                        userId: user.id,
+                        activityType: UserActivityType.COMMENT_UPDATED,
+                        details: JSON.stringify({
+                            post: { id: comment?.postId },
+                            comment: { id: comment?.id, content: dto.contents },
+                        }),
+                    });
+                });
+            const commentInfo = await this.shareSearcherService.getCommentInfo({ update: { commentId } });
+            return { post: { ...commentInfo, user: { nickname: user.nickname } } };
         } catch (error) {
             throw new CustomExceptionHandler(error).handleException('Invalid ObjectId for share comment Id.', -2505);
         }
-
-        const commentInfo = await this.shareSearcherService.getCommentInfo({ update: { commentId } });
-        return { post: { ...commentInfo, user: { nickname: user.nickname } } };
     }
 
     /**
@@ -123,12 +150,25 @@ export class ShareUpdaterService {
             if (result.modifiedCount === 0) {
                 throw new CustomException('Failed to update share comment reply.', HttpStatus.INTERNAL_SERVER_ERROR, -2607);
             }
+
+            this.shareCommentReplyRepository
+                .findById(commentReplyId)
+                .exec()
+                .then((commentReply) => {
+                    this.userActivityLogService.createActivityLog({
+                        userId,
+                        activityType: UserActivityType.REPLY_COMMENT_UPDATED,
+                        details: JSON.stringify({
+                            comment: { id: commentReply?.commentId },
+                            commentReply: { id: commentReply?.id, content: dto.contents },
+                        }),
+                    });
+                });
+            const commentReplyInfo = await this.shareSearcherService.getCommentReplyInfo({ update: { commentReplyId } });
+            return { comment: { ...commentReplyInfo } };
         } catch (error) {
             throw new CustomExceptionHandler(error).handleException('Invalid ObjectId for share comment reply Id.', -2506);
         }
-
-        const commentReplyInfo = await this.shareSearcherService.getCommentReplyInfo({ update: { commentReplyId } });
-        return { comment: { ...commentReplyInfo } };
     }
 
     /**

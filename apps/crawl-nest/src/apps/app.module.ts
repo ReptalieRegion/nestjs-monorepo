@@ -9,6 +9,7 @@ import { NotificationModule } from './modules/notification/notification.module';
 import { ReportModule } from './modules/report/report.module';
 import { ShareModule } from './modules/share/share.module';
 import { UserModule } from './modules/user/user.module';
+import { UserActivityLogModule } from './modules/user-activity-log/userActivityLog.module';
 import { CustomConfigModule } from './utils/customModules/config';
 import { CustomMongooseModule } from './utils/customModules/mongoose';
 
@@ -21,6 +22,7 @@ import { CustomMongooseModule } from './utils/customModules/mongoose';
         DiaryModule,
         ReportModule,
         MetaDataModule,
+        UserActivityLogModule,
         CustomConfigModule,
         CustomMongooseModule,
     ],

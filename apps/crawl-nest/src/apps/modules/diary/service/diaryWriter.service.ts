@@ -1,5 +1,6 @@
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { InjectConnection } from '@nestjs/mongoose';
+import { UserActivityType } from '@private-crawl/types';
 import mongoose, { ClientSession } from 'mongoose';
 import { InputDiaryCalendarDTO } from '../../../dto/diary/calendar/input-diaryCalendar.dto';
 import { InputDiaryEntityDTO } from '../../../dto/diary/entity/input-diaryEntity.dto';
@@ -11,6 +12,7 @@ import { CustomExceptionHandler } from '../../../utils/error/customException.han
 import { ImageS3HandlerService, ImageS3HandlerServiceToken } from '../../image/service/imageS3Handler.service';
 import { ImageWriterService, ImageWriterServiceToken } from '../../image/service/imageWriter.service';
 import { NotificationSlackService, NotificationSlackServiceToken } from '../../notification/service/notificationSlack.service';
+import { UserActivityLogService, UserActivityLogServiceToken } from '../../user-activity-log/userActivityLog.service';
 import { DiaryCalendarRepository } from '../repository/diaryCalendar.repository';
 import { DiaryEntityRepository } from '../repository/diaryEntity.repository';
 import { DiaryWeightRepository } from '../repository/diaryWeight.repository';
@@ -37,6 +39,9 @@ export class DiaryWriterService {
         private readonly diaryUpdaterService: DiaryUpdaterService,
         @Inject(NotificationSlackServiceToken)
         private readonly notificationSlackService: NotificationSlackService,
+
+        @Inject(UserActivityLogServiceToken)
+        private readonly userActivityLogService: UserActivityLogService,
     ) {}
 
     /**
@@ -71,6 +76,7 @@ export class DiaryWriterService {
             const [image] = await this.imageWriterService.createImage(entity.id as string, imageKeys, ImageType.Diary, session);
             await this.diaryUpdaterService.updateImageId(entity.id as string, image.id as string, session);
 
+            this.userActivityLogService.createActivityLog({ userId: user.id, activityType: UserActivityType.ENTITY_CREATED });
             await session.commitTransaction();
 
             return entity;
@@ -106,6 +112,10 @@ export class DiaryWriterService {
                 throw new CustomException('diaryId and date should be unique values.', HttpStatus.EXPECTATION_FAILED, -3401);
             }
 
+            this.userActivityLogService.createActivityLog({
+                userId: user.id,
+                activityType: UserActivityType.ENTITY_WEIGHT_CREATED,
+            });
             return { message: 'Success' };
         } catch (error) {
             throw new CustomExceptionHandler(error).handleException('Invalid ObjectId for diary entity Id.', -3507);
@@ -127,6 +137,10 @@ export class DiaryWriterService {
             throw new CustomException('Failed to save diary calendar.', HttpStatus.INTERNAL_SERVER_ERROR, -3603);
         }
 
+        this.userActivityLogService.createActivityLog({
+            userId: user.id,
+            activityType: UserActivityType.CALENDAR_CREATED,
+        });
         return { message: 'Success' };
     }
 }

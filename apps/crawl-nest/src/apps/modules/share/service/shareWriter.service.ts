@@ -139,7 +139,7 @@ export class ShareWriterService {
             this.userActivityLogService.createActivityLog({
                 userId: user.id,
                 activityType: UserActivityType.POST_CREATED,
-                details: JSON.stringify({ post: { id: post.id } }),
+                details: JSON.stringify({ post: { id: post.id, contents: post.contents } }),
             });
 
             return { post: { ...postInfo, user } };
@@ -235,7 +235,7 @@ export class ShareWriterService {
         this.userActivityLogService.createActivityLog({
             userId: user.id,
             activityType: UserActivityType.COMMENT_CREATED,
-            details: JSON.stringify({ comment: { id: comment.id } }),
+            details: JSON.stringify({ comment: { id: comment.id, contents: comment.contents } }),
         });
         return { post: { id: comment.postId, comment: { ...commentInfo, user } } };
     }
@@ -323,7 +323,7 @@ export class ShareWriterService {
         this.userActivityLogService.createActivityLog({
             userId: user.id,
             activityType: UserActivityType.REPLY_COMMENT_CREATED,
-            details: JSON.stringify({ commentReply: { id: commentReply.id } }),
+            details: JSON.stringify({ commentReply: { id: commentReply.id, contents: commentReply.contents } }),
         });
         return {
             post: {

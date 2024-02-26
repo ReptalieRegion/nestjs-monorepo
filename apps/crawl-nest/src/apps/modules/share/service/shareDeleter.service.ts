@@ -80,7 +80,11 @@ export class ShareDeleterService {
                     .exec();
             }
 
-            this.userActivityLogService.createActivityLog({ userId, activityType: UserActivityType.POST_DELETED });
+            this.userActivityLogService.createActivityLog({
+                userId,
+                activityType: UserActivityType.POST_DELETED,
+                details: JSON.stringify({ post: { id: postId } }),
+            });
             await session.commitTransaction();
             return this.shareSearcherService.getPostInfo({ delete: { postId } });
         } catch (error) {
@@ -123,6 +127,20 @@ export class ShareDeleterService {
                 }
             }
 
+            this.shareCommentRepository
+                .findById(commentId)
+                .exec()
+                .then((comment) => {
+                    this.userActivityLogService.createActivityLog({
+                        userId,
+                        activityType: UserActivityType.REPLY_COMMENT_DELETED,
+                        details: JSON.stringify({
+                            post: { id: comment?.postId },
+                            comment: { id: comment?.id },
+                        }),
+                    });
+                });
+
             this.userActivityLogService.createActivityLog({ userId, activityType: UserActivityType.COMMENT_DELETED });
             await session.commitTransaction();
             return this.shareSearcherService.getCommentInfo({ delete: { commentId } });
@@ -151,7 +169,19 @@ export class ShareDeleterService {
                 throw new CustomException('Failed to delete share comment reply.', HttpStatus.INTERNAL_SERVER_ERROR, -2611);
             }
 
-            this.userActivityLogService.createActivityLog({ userId, activityType: UserActivityType.REPLY_COMMENT_DELETED });
+            this.shareCommentReplyRepository
+                .findById(commentReplyId)
+                .exec()
+                .then((commentReply) => {
+                    this.userActivityLogService.createActivityLog({
+                        userId,
+                        activityType: UserActivityType.REPLY_COMMENT_DELETED,
+                        details: JSON.stringify({
+                            comment: { id: commentReply?.commentId },
+                            commentReply: { id: commentReply?.id },
+                        }),
+                    });
+                });
             return this.shareSearcherService.getCommentReplyInfo({ delete: { commentReplyId } });
         } catch (error) {
             throw new CustomExceptionHandler(error).handleException('Invalid ObjectId for share comment reply Id.', -2506);

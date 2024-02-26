@@ -136,7 +136,11 @@ export class ShareWriterService {
                     });
             });
 
-            this.userActivityLogService.createActivityLog({ userId: user.id, activityType: UserActivityType.POST_CREATED });
+            this.userActivityLogService.createActivityLog({
+                userId: user.id,
+                activityType: UserActivityType.POST_CREATED,
+                details: JSON.stringify({ post: { id: post.id } }),
+            });
 
             return { post: { ...postInfo, user } };
         } catch (error) {
@@ -228,7 +232,11 @@ export class ShareWriterService {
                 this.notificationSlackService.send(`*[푸시 알림]* 이미지 찾기 실패\n${error.message}`, '푸시알림-에러-dev');
             });
 
-        this.userActivityLogService.createActivityLog({ userId: user.id, activityType: UserActivityType.COMMENT_CREATED });
+        this.userActivityLogService.createActivityLog({
+            userId: user.id,
+            activityType: UserActivityType.COMMENT_CREATED,
+            details: JSON.stringify({ comment: { id: comment.id } }),
+        });
         return { post: { id: comment.postId, comment: { ...commentInfo, user } } };
     }
 
@@ -315,6 +323,7 @@ export class ShareWriterService {
         this.userActivityLogService.createActivityLog({
             userId: user.id,
             activityType: UserActivityType.REPLY_COMMENT_CREATED,
+            details: JSON.stringify({ commentReply: { id: commentReply.id } }),
         });
         return {
             post: {

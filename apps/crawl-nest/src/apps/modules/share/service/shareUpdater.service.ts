@@ -74,7 +74,15 @@ export class ShareUpdaterService {
                 await this.imageDeleterService.deleteImageByImageKeys(deletefiles, postId, session);
             }
 
-            this.userActivityLogService.createActivityLog({ userId: user.id, activityType: UserActivityType.POST_UPDATED });
+            this.userActivityLogService.createActivityLog({
+                userId: user.id,
+                activityType: UserActivityType.POST_UPDATED,
+                details: JSON.stringify({
+                    post: {
+                        id: postId,
+                    },
+                }),
+            });
             await session.commitTransaction();
 
             const postInfo = await this.shareSearcherService.getPostInfo({ update: { postId } });
@@ -105,7 +113,19 @@ export class ShareUpdaterService {
                 throw new CustomException('Failed to update share comment.', HttpStatus.INTERNAL_SERVER_ERROR, -2606);
             }
 
-            this.userActivityLogService.createActivityLog({ userId: user.id, activityType: UserActivityType.COMMENT_UPDATED });
+            this.shareCommentRepository
+                .findById(commentId)
+                .exec()
+                .then((comment) => {
+                    this.userActivityLogService.createActivityLog({
+                        userId: user.id,
+                        activityType: UserActivityType.COMMENT_UPDATED,
+                        details: JSON.stringify({
+                            post: { id: comment?.postId },
+                            commentReply: { id: comment?.id, content: dto.contents },
+                        }),
+                    });
+                });
             const commentInfo = await this.shareSearcherService.getCommentInfo({ update: { commentId } });
             return { post: { ...commentInfo, user: { nickname: user.nickname } } };
         } catch (error) {
@@ -131,7 +151,19 @@ export class ShareUpdaterService {
                 throw new CustomException('Failed to update share comment reply.', HttpStatus.INTERNAL_SERVER_ERROR, -2607);
             }
 
-            this.userActivityLogService.createActivityLog({ userId, activityType: UserActivityType.REPLY_COMMENT_UPDATED });
+            this.shareCommentReplyRepository
+                .findById(commentReplyId)
+                .exec()
+                .then((commentReply) => {
+                    this.userActivityLogService.createActivityLog({
+                        userId,
+                        activityType: UserActivityType.REPLY_COMMENT_UPDATED,
+                        details: JSON.stringify({
+                            comment: { id: commentReply?.commentId },
+                            commentReply: { id: commentReply?.id, content: dto.contents },
+                        }),
+                    });
+                });
             const commentReplyInfo = await this.shareSearcherService.getCommentReplyInfo({ update: { commentReplyId } });
             return { comment: { ...commentReplyInfo } };
         } catch (error) {

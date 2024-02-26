@@ -152,6 +152,19 @@ export class UserWriterService {
                         );
                     }
 
+                    this.userActivityLogService.createActivityLog({
+                        userId: following.id,
+                        activityType: UserActivityType.FOLLOW_CREATED,
+                        details: JSON.stringify({
+                            following: {
+                                id: follow.id,
+                            },
+                            follower: {
+                                id: follower,
+                            },
+                        }),
+                    });
+
                     await this.notificationPushService.sendMessage(followerInfo?.fcmToken, {
                         type: TemplateType.Follow,
                         userId: follower,
@@ -166,10 +179,6 @@ export class UserWriterService {
                     this.notificationSlackService.send(`*[푸시 알림]* 이미지 찾기 실패\n${error.message}`, '푸시알림-에러-dev');
                 });
 
-            this.userActivityLogService.createActivityLog({
-                userId: following.id,
-                activityType: UserActivityType.FOLLOW_CREATED,
-            });
             return { user: { nickname: follow.followerNickname } };
         } catch (error) {
             throw new CustomExceptionHandler(error).handleException('following and follower should be unique values.', -1602);

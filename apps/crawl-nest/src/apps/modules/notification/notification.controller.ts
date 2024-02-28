@@ -9,6 +9,7 @@ import { AuthUser } from '../user/user.decorator';
 import { NotificationAgreeService, NotificationAgreeServiceToken } from './service/notificationAgree.service';
 import { NotificationLogService, NotificationLogServiceToken } from './service/notificationLog.service';
 import { NotificationPushService, NotificationPushServiceToken } from './service/notificationPush.service';
+import { NotificationSlackService, NotificationSlackServiceToken } from './service/notificationSlack.service';
 import { NotificationTemplateService, NotificationTemplateServiceToken } from './service/notificationTemplate.service';
 import { NotificationPushParams } from './types/notificationPush.types';
 
@@ -23,6 +24,8 @@ export class NotificationController {
         private readonly notificationLogService: NotificationLogService,
         @Inject(NotificationAgreeServiceToken)
         private readonly notificationAgreeService: NotificationAgreeService,
+        @Inject(NotificationSlackServiceToken)
+        private readonly notificationSlackService: NotificationSlackService,
     ) {}
 
     @Post('push/send')
@@ -33,6 +36,11 @@ export class NotificationController {
     @Post('push/sendMulticast')
     async sendMulticast(@Body() body: { tokens: string[] | undefined; pushParams: NotificationPushParams }) {
         this.notificationPushService.sendMulticastMessage(body.tokens, body.pushParams);
+    }
+
+    @Post('slack/send')
+    async sendSlack(@Body() body: { text: string }) {
+        this.notificationSlackService.send(body.text);
     }
 
     /**

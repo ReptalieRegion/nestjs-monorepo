@@ -27,3 +27,5 @@ steps:
           ]
 images:
     - '${_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/${_IMAGE}:$COMMIT_SHA'
+options:
+    logging: NONE

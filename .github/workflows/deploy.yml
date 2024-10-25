@@ -35,12 +35,12 @@ jobs:
 
             - name: Build Docker image
               run: |
-                  docker build -t nestjs-app-repo:${{ env.IMAGE_TAG }} -f dockers/nest-js-server/Dockerfile .
+                  docker build -t nestjs-app-repo:latest -f dockers/nest-js-server/Dockerfile .
 
             - name: Tag Docker image
               run: |
-                  docker tag nestjs-app-repo:${{ env.IMAGE_TAG }} ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.ap-northeast-2.amazonaws.com/nestjs-app-repo:${{ env.IMAGE_TAG }}
+                  docker tag nestjs-app-repo:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.ap-northeast-2.amazonaws.com/nestjs-app-repo:latest
 
             - name: Push Docker image to ECR
               run: |
-                  docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.ap-northeast-2.amazonaws.com/nestjs-app-repo:${{ env.IMAGE_TAG }}
+                  docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.ap-northeast-2.amazonaws.com/nestjs-app-repo:latest

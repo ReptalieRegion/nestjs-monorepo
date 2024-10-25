@@ -19,7 +19,7 @@ RUN yarn install || (cat /tmp/*/build.log; exit 1)
 RUN yarn build:all
 RUN yarn build:server
 
-# # 🚀 Build the runner image
+# 🚀 Build the runner image
 FROM node:18-alpine as runner
 
 WORKDIR /runner
@@ -44,6 +44,9 @@ COPY --from=builder /builder/private-packages/utils/dist ./private-packages/util
 COPY --from=builder /builder/private-packages/utils/package.json ./private-packages/utils/
 
 RUN yarn install
+
+# .env.production 파일 복사
+COPY apps/crawl-nest/.env.production /runner/apps/crawl-nest/.env.production
 
 # Configure the default command
 CMD yarn prod:server

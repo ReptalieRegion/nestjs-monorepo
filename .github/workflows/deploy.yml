@@ -15,7 +15,7 @@ jobs:
 
             - name: Create .env.production file
               run: |
-                  cat <<EOF > .env.production
+                  cat <<EOF > apps/crawl-nest/.env.production
                   ${{ secrets.ENV_PRODUCTION }}
                   EOF
 

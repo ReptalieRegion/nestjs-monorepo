@@ -15,7 +15,9 @@ jobs:
 
             - name: Create .env.production file
               run: |
-                  cat <<EOF > .env.production ${{ secrets.ENV_PRODUCTION }} EOF
+                  cat <<EOF > .env.production
+                  ${{ secrets.ENV_PRODUCTION }}
+                  EOF
 
             - name: Configure AWS credentials
               uses: aws-actions/configure-aws-credentials@v4

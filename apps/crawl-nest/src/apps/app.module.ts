@@ -1,6 +1,7 @@
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import mongoose from 'mongoose';
 
+import { AppController } from './app.controller';
 import { LoggerMiddleware } from './middlwares/logger.middleware';
 import { AuthModule } from './modules/auth/auth.module';
 import { DiaryModule } from './modules/diary/diary.module';
@@ -26,7 +27,7 @@ import { CustomMongooseModule } from './utils/customModules/mongoose';
         CustomConfigModule,
         CustomMongooseModule,
     ],
-    controllers: [],
+    controllers: [AppController],
     providers: [],
 })
 export class AppModule implements NestModule {

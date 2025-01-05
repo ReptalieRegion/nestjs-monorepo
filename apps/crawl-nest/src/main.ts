@@ -9,7 +9,7 @@ async function bootstrap() {
 
     setup(app);
 
-    await app.listen(process.env.PORT || 3000);
+    await app.listen(process.env.PORT || 8443);
 }
 
 bootstrap();

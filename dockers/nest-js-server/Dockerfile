@@ -6,7 +6,6 @@ RUN apk add --no-cache bash git python3 make g++ libc6-compat
 WORKDIR /builder
 
 # yarn berry
-RUN sudo npm install -g npm@latest
 RUN corepack enable
 RUN yarn set version stable
 

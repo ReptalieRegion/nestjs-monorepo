@@ -1,9 +1,13 @@
 # 🛠 Build the builder image
 FROM node:18-alpine as builder
+
+# 필요한 빌드 도구 설치
+RUN apk add --no-cache bash git python3 make g++ libc6-compat
 WORKDIR /builder
 
 # yarn berry
-RUN npm install -g npm@latest && corepack enable
+RUN npm install -g npm@latest
+RUN corepack enable
 RUN yarn set version stable
 
 # Copy config files and source

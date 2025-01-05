@@ -4,6 +4,12 @@ on:
     push:
         branches:
             - main
+    workflow_dispatch:
+        inputs:
+            name:
+                description: 'server deploy'
+                required: true
+                default: 'default'
 
 jobs:
     build-and-deploy:
@@ -61,10 +67,10 @@ jobs:
                       docker pull ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.ap-northeast-2.amazonaws.com/nestjs-app-repo:latest
 
                       # 기존 컨테이너 중지 및 삭제
-                      if [ "$(docker ps -aq -f name=my-app)" ]; then
-                          docker stop my-app
-                          docker rm my-app
+                      if [ "$(docker ps -aq -f name=crawl-server)" ]; then
+                          docker stop crawl-server
+                          docker rm crawl-server
                       fi
 
                       # 새로운 컨테이너 실행 (포트 8443 사용)
-                      docker run -d --name my-app -p 8443:8443 ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.ap-northeast-2.amazonaws.com/nestjs-app-repo:latest
+                      docker run -d --name crawl-server -p 8443:8443 ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.ap-northeast-2.amazonaws.com/nestjs-app-repo:latest

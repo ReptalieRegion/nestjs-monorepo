@@ -1,4 +1,4 @@
-name: Deploy to EC2 with Auto Scaling
+name: Deploy to Server via SSH
 
 on:
     push:
@@ -44,3 +44,27 @@ jobs:
             - name: Push Docker image to ECR
               run: |
                   docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.ap-northeast-2.amazonaws.com/nestjs-app-repo:latest
+
+            - name: Deploy to Mini PC via SSH
+              uses: appleboy/ssh-action@v1.2.0
+              with:
+                  host: ${{ secrets.MINI_PC_HOST }}
+                  username: ${{ secrets.MINI_PC_USER }}
+                  key: ${{ secrets.MINI_PC_SSH_KEY }}
+                  port: ${{ secrets.MINI_PC_SSH_PORT }}
+                  passphrase: ${{ secrets.MINI_PC_PASSPHRASE }}
+                  script: |
+                      # ECR 로그인
+                      aws ecr get-login-password --region ap-northeast-2 | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.ap-northeast-2.amazonaws.com
+
+                      # 최신 이미지 Pull
+                      docker pull ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.ap-northeast-2.amazonaws.com/nestjs-app-repo:latest
+
+                      # 기존 컨테이너 중지 및 삭제
+                      if [ "$(docker ps -aq -f name=my-app)" ]; then
+                          docker stop my-app
+                          docker rm my-app
+                      fi
+
+                      # 새로운 컨테이너 실행 (포트 8443 사용)
+                      docker run -d --name my-app -p 8443:8443 ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.ap-northeast-2.amazonaws.com/nestjs-app-repo:latest
